@@ -569,11 +569,11 @@ CENTERS.forEach((startY, i)=>{
 /* =========================================================
    TAP HANDLING
 ========================================================= */
-stationsGroup.addEventListener("click", (e)=>{
-  const g = e.target.closest(".station");
-  if(!g || state.busy) return;
-  const index = Number(g.dataset.index);
-  if(index !== state.currentStep) return;
+world.addEventListener("click", (e)=>{
+  if(state.busy) return;
+  const g = stationsGroup.querySelector(`.station[data-index="${state.currentStep}"]`);
+  if(!g) return;
+  const index = state.currentStep;
 
   const step = STEPS[index];
   g.classList.remove("tapped"); void g.offsetWidth; g.classList.add("tapped");
