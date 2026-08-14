@@ -1,3190 +1,1016 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-
-<title>GEI Ultimate Edition 2.2 | YALLTOO</title>
-
-<meta name="description"
-content="GEI Ultimate Edition 2.2. Interactive hydraulic learning experience from Mountain to Ocean.">
-
+<title>GEI Ultimate Edition 2.3 | YALLTOO</title>
+<meta name="description" content="GEI Ultimate Edition 2.3. Tap your way from Mountain to Ocean in this hydraulic learning game.">
 <style>
 
 :root{
+  --cyan:#00e5ff;
+  --indigo:#4d3dff;
+  --magenta:#ff00c8;
+  --pink:#ff6ec7;
+  --gold:#ffd400;
+  --black:#04050c;
 
---cyan:#2fd2ff;
---indigo:#3d3dea;
---magenta:#f310ba;
---pink:#ff9df2;
---black:#06070d;
-
---glass:
-rgba(255,255,255,.08);
-
---glassBorder:
-rgba(255,255,255,.12);
-
---panel:
-rgba(7,10,18,.82);
-
---text:
-#ffffff;
-
---success:
-#4dffb5;
-
---warning:
-#ffd84d;
-
---danger:
-#ff5e7a;
-
---radius:22px;
-
+  --glass: rgba(255,255,255,.08);
+  --glassBorder: rgba(255,255,255,.14);
+  --panel: rgba(6,8,16,.86);
+  --text:#ffffff;
+  --success:#39ffb0;
+  --warning:#ffd84d;
+  --danger:#ff3d6b;
+  --radius:22px;
 }
 
-/* =========================
-RESET
-========================= */
+*{margin:0;padding:0;box-sizing:border-box;}
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
+html,body{
+  height:100%;
+  overflow:hidden;
+  font-family:Inter,system-ui,sans-serif;
+  background:radial-gradient(circle at 50% 0%,#1c1454,#04050c 70%);
+  color:white;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body{
-
-height:100%;
-overflow:hidden;
-
-font-family:
-
-Inter,
-system-ui,
-sans-serif;
-
-background:
-
-radial-gradient(
-circle at top,
-#162445,
-#06070d
-);
-
-color:white;
-
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
 }
 
-/* =========================
-BACKGROUND FX
-========================= */
-
-.bg{
-
-position:fixed;
-inset:0;
-
-overflow:hidden;
-
-pointer-events:none;
-
-}
+.bg{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
 
 .bgGlow{
-
-position:absolute;
-
-width:700px;
-height:700px;
-
-border-radius:50%;
-
-background:
-
-radial-gradient(
-circle,
-rgba(47,210,255,.12),
-transparent 70%
-);
-
-animation:
-floatGlow 25s linear infinite;
-
+  position:absolute;
+  width:clamp(300px,80vw,700px);
+  height:clamp(300px,80vw,700px);
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(0,229,255,.18), transparent 70%);
+  animation:floatGlow 22s ease-in-out infinite;
 }
-
 .bgGlow:nth-child(2){
-
-right:-200px;
-bottom:-100px;
-
-animation-duration:35s;
-
+  right:-200px; bottom:-100px;
+  background:radial-gradient(circle, rgba(255,0,200,.16), transparent 70%);
+  animation-duration:30s;
 }
-
 @keyframes floatGlow{
-
-0%{
-transform:translateY(0px);
+  0%,100%{ transform:translateY(0px); }
+  50%{ transform:translateY(-60px); }
 }
-
-50%{
-transform:translateY(-70px);
-}
-
-100%{
-transform:translateY(0px);
-}
-
-}
-
-/* =========================
-APP
-========================= */
 
 .app{
-
-position:relative;
-
-width:100%;
-max-width:540px;
-
-height:100dvh;
-
-margin:auto;
-
-display:flex;
-flex-direction:column;
-
-padding:
-
-env(safe-area-inset-top)
-12px
-env(safe-area-inset-bottom);
-
-z-index:5;
-
+  position:relative;
+  width:100%;
+  max-width:540px;
+  height:100dvh;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
+  z-index:5;
 }
 
-/* =========================
-HUD
-========================= */
-
+/* ============ HUD ============ */
 .hud{
-
-background:
-var(--panel);
-
-backdrop-filter:
-blur(20px);
-
-border:
-1px solid var(--glassBorder);
-
-border-radius:
-var(--radius);
-
-padding:14px;
-
-margin-bottom:10px;
-
+  background:var(--panel);
+  backdrop-filter:blur(20px);
+  border:1px solid var(--glassBorder);
+  border-radius:var(--radius);
+  padding:clamp(10px,3vw,14px);
+  margin-bottom:8px;
+  flex-shrink:0;
 }
+
+.hudTop{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
 
 .logo{
-
-font-size:1.2rem;
-font-weight:900;
-
-background:
-
-linear-gradient(
-90deg,
-var(--cyan),
-var(--pink),
-var(--magenta)
-);
-
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-
+  font-size:clamp(.95rem,4vw,1.15rem);
+  font-weight:900;
+  letter-spacing:.2px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink),var(--gold));
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:hueSlide 6s linear infinite;
 }
+@keyframes hueSlide{ to{ background-position:200% center; } }
 
-.topRow{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-margin-top:8px;
-
+.iconBtn{
+  width:38px; height:38px;
+  border-radius:12px;
+  border:1px solid var(--glassBorder);
+  background:rgba(255,255,255,.08);
+  color:white;
+  font-size:1rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
 }
+.iconBtn:active{ transform:scale(.92); }
 
-.weatherBadge{
+.hudRight{ display:flex; gap:6px; }
 
-padding:6px 12px;
-
-border-radius:999px;
-
-background:
-
-rgba(255,255,255,.08);
-
-font-size:.8rem;
-
-}
-
-/* =========================
-STATS
-========================= */
-
-.stats{
-
-display:grid;
-
-grid-template-columns:
-repeat(4,1fr);
-
-gap:8px;
-
-margin-top:12px;
-
-}
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:10px; }
 
 .stat{
-
-background:
-
-rgba(255,255,255,.06);
-
-padding:8px;
-
-border-radius:14px;
-
-text-align:center;
-
-font-size:.75rem;
-
+  background:rgba(255,255,255,.06);
+  padding:6px 4px;
+  border-radius:14px;
+  text-align:center;
+  font-size:.68rem;
+  color:rgba(255,255,255,.75);
 }
+.stat strong{ display:block; font-size:.95rem; margin-top:2px; color:#fff; }
 
-.stat strong{
-
-display:block;
-
-font-size:.95rem;
-
-margin-top:3px;
-
-}
-
-/* =========================
-XP BAR
-========================= */
+.comboWrap{ display:flex; align-items:center; gap:8px; margin-top:8px; }
 
 .xpWrap{
-
-margin-top:12px;
-
-height:12px;
-
-background:
-
-rgba(255,255,255,.08);
-
-border-radius:999px;
-
-overflow:hidden;
-
+  flex:1;
+  height:11px;
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  overflow:hidden;
 }
-
 .xpFill{
-
-width:0%;
-
-height:100%;
-
-background:
-
-linear-gradient(
-90deg,
-var(--cyan),
-var(--magenta)
-);
-
-box-shadow:
-
-0 0 15px rgba(47,210,255,.8);
-
-transition:
-width .4s ease;
-
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,var(--cyan),var(--magenta),var(--gold));
+  background-size:200% auto;
+  box-shadow:0 0 14px rgba(0,229,255,.9);
+  transition:width .35s ease;
 }
 
-/* =========================
-WORLD
-========================= */
+.comboBadge{
+  font-size:.72rem;
+  font-weight:900;
+  padding:5px 10px;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--magenta),var(--gold));
+  opacity:0;
+  transform:scale(.8);
+  transition:opacity .2s, transform .2s;
+  white-space:nowrap;
+}
+.comboBadge.show{ opacity:1; transform:scale(1); }
 
+/* ============ WORLD (pure tap zone, no text on it) ============ */
 .world{
-
-position:relative;
-
-flex:1;
-
-overflow:hidden;
-
-border-radius:
-24px;
-
-background:
-
-linear-gradient(
-180deg,
-#dff8ff,
-#b9e9ff
-);
-
-border:
-1px solid rgba(255,255,255,.15);
-
-box-shadow:
-
-0 0 30px rgba(47,210,255,.15);
-
+  position:relative;
+  flex:1;
+  overflow:hidden;
+  border-radius:24px;
+  background:linear-gradient(180deg,#0d2a55,#062043 55%,#03142e);
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 0 40px rgba(0,229,255,.2), inset 0 0 60px rgba(0,0,0,.3);
+  touch-action:manipulation;
 }
 
-/* =========================
-LAYERS
-========================= */
+.layer{ position:absolute; inset:0; pointer-events:none; }
+#cloudLayer{ z-index:2; }
+#mistLayer{ z-index:3; }
+#particleLayer{ z-index:9; }
+#foamLayer{ z-index:7; }
+#fishLayer{ z-index:8; }
+#boatLayer{ z-index:8; }
 
-.layer{
+svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
-position:absolute;
-inset:0;
-
-pointer-events:none;
-
+.hotspot{ cursor:pointer; }
+.hotspot .glowRing{ opacity:0; transition:opacity .2s; }
+.hotspot:hover .glowRing{ opacity:.5; }
+.hotspot.tapped{ animation:tapPop .28s ease; }
+@keyframes tapPop{
+  0%{ transform:scale(1); }
+  40%{ transform:scale(1.12); }
+  100%{ transform:scale(1); }
 }
 
-#cloudLayer{
+/* ============ FLOATING LABEL TOAST (never sits over the tap zone) ============ */
+.labelToast{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translate(-50%,-14px);
+  padding:8px 16px;
+  border-radius:999px;
+  background:rgba(6,8,16,.88);
+  border:1px solid var(--glassBorder);
+  font-weight:800;
+  font-size:.85rem;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s, transform .25s;
+  z-index:40;
+  box-shadow:0 0 20px rgba(0,229,255,.25);
+}
+.labelToast.show{ opacity:1; transform:translate(-50%,0); }
 
-z-index:2;
-
+.floatXP{
+  position:absolute;
+  font-weight:900;
+  font-size:1rem;
+  color:var(--gold);
+  text-shadow:0 0 8px rgba(255,212,0,.8);
+  pointer-events:none;
+  z-index:41;
+  animation:floatUp 1s ease-out forwards;
+}
+@keyframes floatUp{
+  0%{ opacity:1; transform:translateY(0) scale(1); }
+  100%{ opacity:0; transform:translateY(-60px) scale(1.2); }
 }
 
-#mistLayer{
-
-z-index:3;
-
-}
-
-#foamLayer{
-
-z-index:7;
-
-}
-
-#fishLayer{
-
-z-index:8;
-
-}
-
-#boatLayer{
-
-z-index:8;
-
-}
-
-/* =========================
-SVG
-========================= */
-
-svg{
-
-width:100%;
-height:100%;
-
-display:block;
-
-position:relative;
-
-z-index:5;
-
-}
-
-/* =========================
-ACADEMY BUTTONS
-========================= */
-
-.bottomBar{
-
-display:flex;
-gap:8px;
-
-margin-top:10px;
-
-}
+/* ============ ACTION BAR ============ */
+.bottomBar{ display:flex; gap:8px; margin-top:8px; flex-shrink:0; }
 
 .actionBtn{
-
-flex:1;
-
-border:none;
-
-padding:14px;
-
-border-radius:16px;
-
-font-weight:800;
-
-cursor:pointer;
-
-color:white;
-
-background:
-
-linear-gradient(
-135deg,
-var(--indigo),
-var(--magenta)
-);
-
+  flex:1;
+  border:none;
+  padding:clamp(10px,3vw,14px);
+  border-radius:16px;
+  font-weight:800;
+  font-size:clamp(.72rem,3vw,.9rem);
+  cursor:pointer;
+  color:white;
+  background:linear-gradient(135deg,var(--indigo),var(--magenta));
+  box-shadow:0 4px 18px rgba(255,0,200,.25);
 }
+.actionBtn:active{ transform:scale(.96); }
 
-.actionBtn:active{
-
-transform:scale(.97);
-
-}
-
-/* =========================
-MUSEUM PANEL
-========================= */
-
+/* ============ PANELS ============ */
 .sidePanel{
-
-position:absolute;
-
-top:0;
-right:-100%;
-
-width:85%;
-height:100%;
-
-background:
-
-rgba(7,10,18,.95);
-
-backdrop-filter:
-blur(20px);
-
-z-index:90;
-
-padding:20px;
-
-transition:.45s;
-
-overflow:auto;
-
+  position:absolute; top:0; right:-100%;
+  width:85%; height:100%;
+  background:rgba(6,8,16,.96);
+  backdrop-filter:blur(20px);
+  z-index:90; padding:20px;
+  transition:.4s;
+  overflow:auto;
 }
-
-.sidePanel.open{
-
-right:0;
-
-}
-
-.panelTitle{
-
-font-size:1.3rem;
-font-weight:900;
-
-margin-bottom:20px;
-
-}
-
+.sidePanel.open{ right:0; }
+.panelTitle{ font-size:1.25rem; font-weight:900; margin-bottom:18px; }
 .achievement{
-
-padding:12px;
-
-margin-bottom:10px;
-
-border-radius:14px;
-
-background:
-
-rgba(255,255,255,.06);
-
+  padding:12px; margin-bottom:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.06);
+  transition:.3s;
 }
-
-/* =========================
-ACADEMY PANEL
-========================= */
 
 .lessonPanel{
-
-position:absolute;
-
-left:10px;
-right:10px;
-bottom:10px;
-
-background:white;
-
-color:#111;
-
-padding:18px;
-
-border-radius:20px;
-
-z-index:80;
-
-transform:
-translateY(140%);
-
-transition:.45s;
-
-max-height:70%;
-
-overflow:auto;
-
+  position:absolute; left:8px; right:8px; bottom:8px;
+  background:linear-gradient(160deg,#ffffff,#f2f4ff);
+  color:#111;
+  padding:18px;
+  border-radius:20px;
+  z-index:80;
+  transform:translateY(140%);
+  transition:.4s;
+  max-height:65%;
+  overflow:auto;
+  box-shadow:0 -10px 40px rgba(0,0,0,.4);
 }
-
-.lessonPanel.show{
-
-transform:
-translateY(0);
-
+.lessonPanel.show{ transform:translateY(0); }
+.lessonTitle{ font-size:1.1rem; font-weight:900; color:var(--indigo); margin-bottom:8px; }
+.closeLesson{
+  float:right; border:none; background:rgba(0,0,0,.08);
+  width:28px; height:28px; border-radius:8px; font-weight:900; cursor:pointer;
 }
-
-.lessonTitle{
-
-font-size:1.2rem;
-font-weight:900;
-
-color:
-var(--indigo);
-
-margin-bottom:10px;
-
-}
-
-/* =========================
-WEATHER FX
-========================= */
 
 .rainDrop{
-
-position:absolute;
-
-width:2px;
-height:16px;
-
-background:
-rgba(255,255,255,.7);
-
-animation:
-rainFall linear forwards;
-
+  position:absolute; width:2px; height:16px;
+  background:rgba(0,229,255,.6);
+  animation:rainFall linear forwards;
 }
-
 @keyframes rainFall{
-
-from{
-
-transform:
-translateY(-30px);
-
+  from{ transform:translateY(-30px); }
+  to{ transform:translateY(900px); }
 }
 
-to{
-
-transform:
-translateY(900px);
-
-}
-
-}
-
-/* =========================
-SHAKE
-========================= */
-
-.shake{
-
-animation:
-shake .4s;
-
-}
-
+.shake{ animation:shake .4s; }
 @keyframes shake{
-
-0%{transform:translateX(0);}
-20%{transform:translateX(-4px);}
-40%{transform:translateX(4px);}
-60%{transform:translateX(-3px);}
-80%{transform:translateX(3px);}
-100%{transform:translateX(0);}
-
+  0%{transform:translateX(0);}
+  20%{transform:translateX(-4px);}
+  40%{transform:translateX(4px);}
+  60%{transform:translateX(-3px);}
+  80%{transform:translateX(3px);}
+  100%{transform:translateX(0);}
 }
 
-/* =========================
-MOBILE
-========================= */
+.flash{ animation:flashPop .35s ease; }
+@keyframes flashPop{
+  0%{ box-shadow:inset 0 0 0 0 rgba(255,212,0,0); }
+  40%{ box-shadow:inset 0 0 80px 10px rgba(255,212,0,.5); }
+  100%{ box-shadow:inset 0 0 0 0 rgba(255,212,0,0); }
+}
+
+.foam{
+  position:absolute;
+  width:8px; height:8px;
+  border-radius:50%;
+  background:rgba(255,255,255,.85);
+  animation:foamPop 2s ease-out forwards;
+}
+@keyframes foamPop{
+  0%{ opacity:.9; transform:scale(1) translateY(0); }
+  100%{ opacity:0; transform:scale(.3) translateY(-14px); }
+}
 
 @media(max-width:480px){
-
-.stats{
-
-grid-template-columns:
-repeat(2,1fr);
-
+  .stats{ grid-template-columns:repeat(4,1fr); }
 }
 
+/* fullscreen mode tweaks */
+.app:fullscreen, .app:-webkit-full-screen{
+  max-width:100%;
+  background:#04050c;
 }
-
 </style>
-
 </head>
-
 <body>
 
 <div class="bg">
-
-<div class="bgGlow"></div>
-<div class="bgGlow"></div>
-
+  <div class="bgGlow"></div>
+  <div class="bgGlow"></div>
 </div>
 
-<div class="app">
+<div class="app" id="appRoot">
 
-<!-- HUD -->
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hudTop">
+      <div class="logo">GEI Ultimate</div>
+      <div class="hudRight">
+        <button class="iconBtn" id="fullscreenBtn" title="Fullscreen" aria-label="Toggle fullscreen">⛶</button>
+        <button class="iconBtn" id="museumBtn" title="Achievements" aria-label="Achievements">🏆</button>
+      </div>
+    </div>
 
-<div class="hud">
+    <div class="stats">
+      <div class="stat">XP<strong id="xpText">0</strong></div>
+      <div class="stat">Level<strong id="levelText">1</strong></div>
+      <div class="stat">Days<strong id="dayText">0/6</strong></div>
+      <div class="stat">Flow<strong id="flowText">0%</strong></div>
+    </div>
 
-<div class="logo">
+    <div class="comboWrap">
+      <div class="xpWrap"><div class="xpFill" id="xpFill"></div></div>
+      <div class="comboBadge" id="comboBadge">x1</div>
+    </div>
+  </div>
 
-GEI Ultimate Edition 2.2
+  <!-- WORLD: tap zone stays clean, no words on top -->
+  <div class="world" id="world">
+
+    <div class="layer" id="cloudLayer"></div>
+    <div class="layer" id="mistLayer"></div>
+    <div class="layer" id="foamLayer"></div>
+    <div class="layer" id="fishLayer"></div>
+    <div class="layer" id="boatLayer"></div>
+    <div class="layer" id="particleLayer"></div>
+
+    <div class="labelToast" id="labelToast"></div>
+
+    <svg id="worldSVG" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid meet">
+
+      <defs>
+        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1c1454"/>
+          <stop offset="45%" stop-color="#3d1f8f"/>
+          <stop offset="75%" stop-color="#0d5ba8"/>
+          <stop offset="100%" stop-color="#00b7c4"/>
+        </linearGradient>
+
+        <linearGradient id="mountainGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#8fa3ff"/>
+          <stop offset="100%" stop-color="#4d3dff"/>
+        </linearGradient>
+
+        <linearGradient id="waterFillGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#7cf9ff"/>
+          <stop offset="100%" stop-color="#00b7ff"/>
+        </linearGradient>
+
+        <linearGradient id="damGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffe08a"/>
+          <stop offset="100%" stop-color="#ff9d3d"/>
+        </linearGradient>
+
+        <linearGradient id="wheelGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ff6ec7"/>
+          <stop offset="100%" stop-color="#ff00c8"/>
+        </linearGradient>
+
+        <linearGradient id="millGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ffd400"/>
+          <stop offset="100%" stop-color="#ff9d3d"/>
+        </linearGradient>
+
+        <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00e5ff">
+            <animate attributeName="offset" values="-1;1" dur="1.6s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="50%" stop-color="#ffffff">
+            <animate attributeName="offset" values="0;2" dur="1.6s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="100%" stop-color="#00e5ff">
+            <animate attributeName="offset" values="1;3" dur="1.6s" repeatCount="indefinite"/>
+          </stop>
+        </linearGradient>
+
+        <filter id="waterGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <filter id="neonGlow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- SKY -->
+      <rect x="0" y="0" width="400" height="800" fill="url(#skyGradient)"/>
+
+      <!-- MOUNTAIN -->
+      <g class="hotspot" data-day="1" data-name="Mountain" data-icon="🏔">
+        <circle class="glowRing" cx="200" cy="140" r="95" fill="none" stroke="var(--cyan)" stroke-width="3" filter="url(#neonGlow)"/>
+        <path d="M30 170 L90 70 L150 160 L220 50 L310 180 L380 120 L400 220 L0 220 Z" fill="url(#mountainGradient)"/>
+        <path d="M80 85 L100 60 L120 90 Z" fill="#ffffff"/>
+        <path d="M205 70 L225 45 L245 75 Z" fill="#ffffff"/>
+        <text x="200" y="205" text-anchor="middle" font-size="30">🏔</text>
+      </g>
+
+      <!-- RESERVOIR -->
+      <g class="hotspot" data-day="3" data-name="Reservoir" data-icon="🌊">
+        <circle class="glowRing" cx="200" cy="280" r="95" fill="none" stroke="var(--cyan)" stroke-width="3" filter="url(#neonGlow)"/>
+        <ellipse cx="200" cy="280" rx="120" ry="50" fill="url(#waterFillGradient)"/>
+        <text x="200" y="290" text-anchor="middle" font-size="26">🌊</text>
+      </g>
+
+      <!-- DAM -->
+      <g class="hotspot" data-day="2" data-name="Dam" data-icon="🏗">
+        <rect class="glowRing" x="105" y="335" width="190" height="78" rx="14" fill="none" stroke="var(--gold)" stroke-width="3" filter="url(#neonGlow)"/>
+        <rect x="120" y="350" width="160" height="48" rx="8" fill="url(#damGradient)"/>
+        <rect x="184" y="350" width="32" height="48" fill="#b45f1c" id="gateVisual"/>
+        <text x="200" y="382" text-anchor="middle" font-size="22">🏗</text>
+      </g>
+
+      <!-- MILLPOND -->
+      <g class="hotspot" data-day="3" data-name="Millpond" data-icon="🌊">
+        <ellipse class="glowRing" cx="200" cy="450" rx="100" ry="45" fill="none" stroke="var(--cyan)" stroke-width="3" filter="url(#neonGlow)"/>
+        <ellipse cx="200" cy="450" rx="90" ry="35" fill="url(#waterFillGradient)"/>
+        <text x="200" y="460" text-anchor="middle" font-size="22">🌊</text>
+      </g>
+
+      <!-- SLUICE -->
+      <g class="hotspot" data-day="4" data-name="Sluice" data-icon="🚪">
+        <rect class="glowRing" x="130" y="495" width="140" height="68" rx="12" fill="none" stroke="var(--magenta)" stroke-width="3" filter="url(#neonGlow)"/>
+        <rect x="145" y="510" width="110" height="38" rx="6" fill="#c471ff"/>
+        <text x="200" y="536" text-anchor="middle" font-size="20">🚪</text>
+      </g>
+
+      <!-- RIVER -->
+      <path id="riverPath" d="M200 130 L200 240 L200 325 L200 420 L200 500 L200 600 L200 700"
+        fill="none" stroke="url(#flowGradient)" stroke-width="18" stroke-linecap="round" filter="url(#waterGlow)"/>
+
+      <!-- WATERWHEEL -->
+      <g class="hotspot" data-day="5" data-name="Waterwheel" data-icon="⚙">
+        <circle class="glowRing" cx="200" cy="610" r="65" fill="none" stroke="var(--magenta)" stroke-width="3" filter="url(#neonGlow)"/>
+        <g id="wheelGroup">
+          <circle cx="200" cy="610" r="48" fill="url(#wheelGradient)" stroke="#ffffff" stroke-width="3"/>
+          <line x1="200" y1="562" x2="200" y2="658" stroke="#ffffff" stroke-width="5"/>
+          <line x1="152" y1="610" x2="248" y2="610" stroke="#ffffff" stroke-width="5"/>
+          <line x1="166" y1="576" x2="234" y2="644" stroke="#ffffff" stroke-width="4"/>
+          <line x1="234" y1="576" x2="166" y2="644" stroke="#ffffff" stroke-width="4"/>
+          <circle cx="200" cy="610" r="10" fill="#ffffff"/>
+        </g>
+        <text x="200" y="695" text-anchor="middle" font-size="20">⚙</text>
+      </g>
+
+      <!-- MILL -->
+      <g class="hotspot" data-day="6" data-name="Mill" data-icon="🏭">
+        <rect class="glowRing" x="118" y="640" width="164" height="135" rx="14" fill="none" stroke="var(--gold)" stroke-width="3" filter="url(#neonGlow)"/>
+        <rect x="130" y="705" width="140" height="60" fill="url(#millGradient)"/>
+        <polygon points="120,705 200,650 280,705" fill="#ff6ec7"/>
+        <text x="200" y="750" text-anchor="middle" font-size="20">🏭</text>
+      </g>
+
+      <!-- OCEAN -->
+      <g class="hotspot" data-day="0" data-name="Ocean" data-icon="🌊">
+        <path id="oceanWave" d="M0 760 Q50 740 100 760 Q150 780 200 760 Q250 740 300 760 Q350 780 400 760 L400 800 L0 800 Z" fill="#00e5ff"/>
+        <text x="200" y="792" text-anchor="middle" font-size="20">🌊</text>
+      </g>
+
+    </svg>
+
+    <!-- ACHIEVEMENT MUSEUM -->
+    <div class="sidePanel" id="museumPanel">
+      <div class="panelTitle">🏆 Achievement Museum</div>
+      <div class="achievement" data-key="day1">🌄 Gravity Discovered</div>
+      <div class="achievement" data-key="day2">🏗 Heaven Constructed</div>
+      <div class="achievement" data-key="day3">🌎 Earth Gathered</div>
+      <div class="achievement" data-key="day4">🚪 Flow Regulated</div>
+      <div class="achievement" data-key="day5">⚙ Great Whales Activated</div>
+      <div class="achievement" data-key="day6">🏭 Beast System Online</div>
+      <div class="achievement" data-key="ocean">🌊 Ocean Reached</div>
+      <div class="achievement" data-key="flood">🌩 Flood Master</div>
+    </div>
+
+    <!-- ACADEMY / LESSON PANEL -->
+    <div class="lessonPanel" id="lessonPanel">
+      <button class="closeLesson" id="closeLessonBtn">✕</button>
+      <div class="lessonTitle" id="lessonTitle">GEI Academy</div>
+      <div id="lessonContent">Tap a glowing location to begin your GEI journey.</div>
+    </div>
+
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="bottomBar">
+    <button class="actionBtn" id="academyBtn">🎓 Academy</button>
+    <button class="actionBtn" id="gateBtn">🚪 Gate</button>
+  </div>
 
 </div>
-
-<div class="topRow">
-
-<div id="rankLabel">
-
-Level 1 Explorer
-
-</div>
-
-<div
-class="weatherBadge"
-id="weatherBadge">
-
-☀ Sunny
-
-</div>
-
-</div>
-
-<div class="stats">
-
-<div class="stat">
-XP
-<strong id="xpText">0</strong>
-</div>
-
-<div class="stat">
-Level
-<strong id="levelText">1</strong>
-</div>
-
-<div class="stat">
-Days
-<strong id="dayText">0/6</strong>
-</div>
-
-<div class="stat">
-Flow
-<strong id="flowText">0%</strong>
-</div>
-
-</div>
-
-<div class="xpWrap">
-
-<div
-class="xpFill"
-id="xpFill">
-
-</div>
-
-</div>
-
-</div>
-
-<!-- WORLD -->
-
-<div
-class="world"
-id="world">
-
-<div
-class="layer"
-id="cloudLayer"></div>
-
-<div
-class="layer"
-id="mistLayer"></div>
-
-<div
-class="layer"
-id="foamLayer"></div>
-
-<div
-class="layer"
-id="fishLayer"></div>
-
-<div
-class="layer"
-id="boatLayer"></div>
-
-
-<!-- SVG WORLD -->
-
-<svg
-id="worldSVG"
-viewBox="0 0 400 800"
-preserveAspectRatio="xMidYMid meet">
-
-<!-- =====================
-DEFINITIONS
-===================== -->
-
-<defs>
-
-<!-- FLOWING WATER -->
-
-<linearGradient
-id="flowGradient"
-x1="0%"
-y1="0%"
-x2="100%"
-y2="0%">
-
-<stop
-offset="0%"
-stop-color="#2fd2ff">
-
-<animate
-attributeName="offset"
-values="-1;1"
-dur="2s"
-repeatCount="indefinite"/>
-
-</stop>
-
-<stop
-offset="50%"
-stop-color="#ffffff">
-
-<animate
-attributeName="offset"
-values="0;2"
-dur="2s"
-repeatCount="indefinite"/>
-
-</stop>
-
-<stop
-offset="100%"
-stop-color="#2fd2ff">
-
-<animate
-attributeName="offset"
-values="1;3"
-dur="2s"
-repeatCount="indefinite"/>
-
-</stop>
-
-</linearGradient>
-
-<filter id="waterGlow">
-
-<feGaussianBlur
-stdDeviation="3"
-result="blur"/>
-
-<feMerge>
-
-<feMergeNode in="blur"/>
-<feMergeNode in="SourceGraphic"/>
-
-</feMerge>
-
-</filter>
-
-</defs>
-
-<!-- =====================
-SKY
-===================== -->
-
-<rect
-x="0"
-y="0"
-width="400"
-height="800"
-fill="url(#skyGradient)"/>
-
-<!-- =====================
-MOUNTAIN
-===================== -->
-
-<g
-class="hotspot"
-data-day="1">
-
-<path
-
-d="
-M30 170
-L90 70
-L150 160
-L220 50
-L310 180
-L380 120
-L400 220
-L0 220
-Z"
-
-fill="#71839f"/>
-
-<path
-
-d="
-M80 85
-L100 60
-L120 90
-Z"
-
-fill="#ffffff"/>
-
-<path
-
-d="
-M205 70
-L225 45
-L245 75
-Z"
-
-fill="#ffffff"/>
-
-<text
-
-x="200"
-y="210"
-
-text-anchor="middle"
-
-font-size="14"
-font-weight="900"
-
-fill="#fff">
-
-🏔 MOUNTAIN
-
-</text>
-
-</g>
-
-<!-- =====================
-RESERVOIR
-===================== -->
-
-<g
-class="hotspot"
-data-day="3">
-
-<ellipse
-
-cx="200"
-cy="280"
-
-rx="120"
-ry="50"
-
-fill="#69e6ff"/>
-
-<text
-
-x="200"
-y="285"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900">
-
-🌊 RESERVOIR
-
-</text>
-
-</g>
-
-<!-- =====================
-DAM
-===================== -->
-
-<g
-class="hotspot"
-data-day="2">
-
-<rect
-
-x="120"
-y="350"
-
-width="160"
-height="48"
-
-rx="8"
-
-fill="#bcc9d7"/>
-
-<rect
-
-x="184"
-y="350"
-
-width="32"
-height="48"
-
-fill="#7d8da1"
-
-id="gateVisual"/>
-
-<text
-
-x="200"
-y="380"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900">
-
-🏗 DAM
-
-</text>
-
-</g>
-
-<!-- =====================
-MILLPOND
-===================== -->
-
-<g
-class="hotspot"
-data-day="3">
-
-<ellipse
-
-cx="200"
-cy="450"
-
-rx="90"
-ry="35"
-
-fill="#8eeeff"/>
-
-<text
-
-x="200"
-y="455"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900">
-
-🌊 MILLPOND
-
-</text>
-
-</g>
-
-<!-- =====================
-SLUICE
-===================== -->
-
-<g
-class="hotspot"
-data-day="4">
-
-<rect
-
-x="145"
-y="510"
-
-width="110"
-height="38"
-
-rx="6"
-
-fill="#8697ad"/>
-
-<text
-
-x="200"
-y="535"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900">
-
-🚪 SLUICE
-
-</text>
-
-</g>
-
-<!-- =====================
-FLOWING RIVER
-===================== -->
-
-<path
-
-id="riverPath"
-
-d="
-M200 130
-
-L200 240
-
-L200 325
-
-L200 420
-
-L200 500
-
-L200 600
-
-L200 700
-"
-
-fill="none"
-
-stroke="url(#flowGradient)"
-
-stroke-width="18"
-
-stroke-linecap="round"
-
-filter="url(#waterGlow)"/>
-
-<!-- =====================
-WATERWHEEL
-===================== -->
-
-<g
-class="hotspot"
-data-day="5">
-
-<g id="wheelGroup">
-
-<circle
-
-cx="200"
-cy="610"
-
-r="48"
-
-fill="#c99963"
-
-stroke="#69461d"
-
-stroke-width="5"/>
-
-<line
-x1="200"
-y1="562"
-x2="200"
-y2="658"
-
-stroke="#69461d"
-stroke-width="5"/>
-
-<line
-x1="152"
-y1="610"
-x2="248"
-y2="610"
-
-stroke="#69461d"
-stroke-width="5"/>
-
-<line
-x1="166"
-y1="576"
-x2="234"
-y2="644"
-
-stroke="#69461d"
-stroke-width="4"/>
-
-<line
-x1="234"
-y1="576"
-x2="166"
-y2="644"
-
-stroke="#69461d"
-stroke-width="4"/>
-
-</g>
-
-<text
-
-x="200"
-y="685"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900">
-
-⚙ WATERWHEEL
-
-</text>
-
-</g>
-
-<!-- =====================
-MILL
-===================== -->
-
-<g
-class="hotspot"
-data-day="6">
-
-<rect
-
-x="130"
-y="705"
-
-width="140"
-height="60"
-
-fill="#ba8757"/>
-
-<polygon
-
-points="
-120,705
-200,650
-280,705
-"
-
-fill="#704724"/>
-
-<text
-
-x="200"
-y="745"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900">
-
-🏭 MILL
-
-</text>
-
-</g>
-
-<!-- =====================
-OCEAN
-===================== -->
-
-<g
-class="hotspot"
-data-day="0">
-
-<path
-
-id="oceanWave"
-
-d="
-M0 760
-
-Q50 740 100 760
-Q150 780 200 760
-Q250 740 300 760
-Q350 780 400 760
-
-L400 800
-L0 800
-Z"
-
-fill="#1ba8f0"/>
-
-<text
-
-x="200"
-y="790"
-
-text-anchor="middle"
-
-font-size="13"
-font-weight="900"
-
-fill="#fff">
-
-🌊 OCEAN
-
-</text>
-
-</g>
-
-</svg>
-
-<!-- ACHIEVEMENT MUSEUM -->
-
-<div
-class="sidePanel"
-id="museumPanel">
-
-<div class="panelTitle">
-
-🏆 Achievement Museum
-
-</div>
-
-<div class="achievement">
-🌄 Gravity Discovered
-</div>
-
-<div class="achievement">
-🏗 Heaven Constructed
-</div>
-
-<div class="achievement">
-🌎 Earth Gathered
-</div>
-
-<div class="achievement">
-🚪 Flow Regulated
-</div>
-
-<div class="achievement">
-⚙ Great Whales Activated
-</div>
-
-<div class="achievement">
-🏭 Beast System Online
-</div>
-
-<div class="achievement">
-🌊 Ocean Reached
-</div>
-
-<div class="achievement">
-🌩 Flood Master
-</div>
-
-</div>
-
-<!-- ACADEMY PANEL -->
-
-<div
-class="lessonPanel"
-id="lessonPanel">
-
-<div
-class="lessonTitle"
-id="lessonTitle">
-
-GEI Academy
-
-</div>
-
-<div id="lessonContent">
-
-Tap a station to begin
-your GEI journey.
-
-</div>
-
-</div>
-
-<!-- CONTROLS -->
-
-<div class="bottomBar">
-
-<button
-class="actionBtn"
-id="museumBtn">
-
-🏆 Museum
-
-</button>
-
-<button
-class="actionBtn"
-id="academyBtn">
-
-🎓 Academy
-
-</button>
-
-<button
-class="actionBtn"
-id="gateBtn">
-
-🚪 Gate
-
-</button>
-
-</div>
-
 
 <script>
 
-/* ===================================
-GEI CORE ENGINE
-=================================== */
-
+/* ===================== GEI CORE ENGINE ===================== */
 const GEI = {
-
-xp:0,
-level:1,
-
-reservoirLevel:100,
-
-pressure:1,
-
-flowRate:0,
-
-gatePosition:0,
-
-wheelSpeed:0,
-
-wheelAngle:0,
-
-oceanLevel:0,
-
-weather:"sunny",
-
-flood:false,
-
-daysFound:new Set()
-
+  xp:0,
+  level:1,
+  reservoirLevel:100,
+  pressure:1,
+  flowRate:0,
+  gatePosition:0,
+  wheelSpeed:0,
+  wheelAngle:0,
+  weather:"sunny",
+  flood:false,
+  daysFound:new Set(),
+  combo:1,
+  comboTimer:null
 };
 
-/* ===================================
-UI REFERENCES
-=================================== */
+const world = document.getElementById("world");
+const appRoot = document.getElementById("appRoot");
+const museumPanel = document.getElementById("museumPanel");
+const lessonPanel = document.getElementById("lessonPanel");
+const lessonTitle = document.getElementById("lessonTitle");
+const lessonContent = document.getElementById("lessonContent");
+const xpText = document.getElementById("xpText");
+const levelText = document.getElementById("levelText");
+const xpFill = document.getElementById("xpFill");
+const flowText = document.getElementById("flowText");
+const dayText = document.getElementById("dayText");
+const wheelGroup = document.getElementById("wheelGroup");
+const gateVisual = document.getElementById("gateVisual");
+const labelToast = document.getElementById("labelToast");
+const comboBadge = document.getElementById("comboBadge");
+const particleLayer = document.getElementById("particleLayer");
+const foamLayer = document.getElementById("foamLayer");
 
-const world =
-document.getElementById(
-"world"
-);
-
-const museumPanel =
-document.getElementById(
-"museumPanel"
-);
-
-const lessonPanel =
-document.getElementById(
-"lessonPanel"
-);
-
-const lessonTitle =
-document.getElementById(
-"lessonTitle"
-);
-
-const lessonContent =
-document.getElementById(
-"lessonContent"
-);
-
-const xpText =
-document.getElementById(
-"xpText"
-);
-
-const levelText =
-document.getElementById(
-"levelText"
-);
-
-const xpFill =
-document.getElementById(
-"xpFill"
-);
-
-const weatherBadge =
-document.getElementById(
-"weatherBadge"
-);
-
-const flowText =
-document.getElementById(
-"flowText"
-);
-
-const dayText =
-document.getElementById(
-"dayText"
-);
-
-const wheelGroup =
-document.getElementById(
-"wheelGroup"
-);
-
-const gateVisual =
-document.getElementById(
-"gateVisual"
-);
-
-/* ===================================
-ACADEMY DATA
-=================================== */
-
+/* ===================== LESSON DATA ===================== */
 const LESSONS = {
-
-1:{
-title:"Day 1 — Separation",
-text:
-"GEI teaches that released water represents movement and separation. Stored potential becomes active flow."
-},
-
-2:{
-title:"Day 2 — Containment",
-text:
-"The dam represents containment. Water can now be managed, directed, and regulated."
-},
-
-3:{
-title:"Day 3 — Storage",
-text:
-"Reservoirs and millponds store energy. Collected water becomes a resource."
-},
-
-4:{
-title:"Day 4 — Regulation",
-text:
-"Sluice gates regulate movement and control downstream pressure."
-},
-
-5:{
-title:"Day 5 — Mechanical Conversion",
-text:
-"The waterwheel converts moving water into useful mechanical work."
-},
-
-6:{
-title:"Day 6 — Complete System",
-text:
-"The entire hydraulic chain operates together as one integrated system."
-}
-
+  1:{ title:"Day 1 — Separation", text:"Released water represents movement and separation. Stored potential becomes active flow." },
+  2:{ title:"Day 2 — Containment", text:"The dam represents containment. Water can now be managed, directed, and regulated." },
+  3:{ title:"Day 3 — Storage", text:"Reservoirs and millponds store energy. Collected water becomes a resource." },
+  4:{ title:"Day 4 — Regulation", text:"Sluice gates regulate movement and control downstream pressure." },
+  5:{ title:"Day 5 — Mechanical Conversion", text:"The waterwheel converts moving water into useful mechanical work." },
+  6:{ title:"Day 6 — Complete System", text:"The entire hydraulic chain operates together as one integrated system." }
 };
 
-/* ===================================
-XP SYSTEM
-=================================== */
-
-function awardXP(amount){
-
-GEI.xp += amount;
-
-const nextLevel =
-GEI.level * 100;
-
-if(GEI.xp >= nextLevel){
-
-GEI.level++;
-
-playLevelUp();
-
-}
-
-updateXP();
-
-}
-
+/* ===================== XP + COMBO ===================== */
 function updateXP(){
-
-xpText.textContent =
-GEI.xp;
-
-levelText.textContent =
-GEI.level;
-
-const currentLevelXP =
-GEI.level * 100;
-
-xpFill.style.width =
-Math.min(
-100,
-(GEI.xp/currentLevelXP)*100
-) + "%";
-
+  xpText.textContent = GEI.xp;
+  levelText.textContent = GEI.level;
+  const currentLevelXP = GEI.level * 100;
+  xpFill.style.width = Math.min(100, (GEI.xp/currentLevelXP)*100) + "%";
 }
 
-/* ===================================
-ACHIEVEMENT PANEL
-=================================== */
-
-document
-.getElementById("museumBtn")
-.addEventListener(
-"click",
-()=>{
-
-museumPanel.classList.toggle(
-"open"
-);
-
-}
-);
-
-/* ===================================
-ACADEMY PANEL
-=================================== */
-
-document
-.getElementById("academyBtn")
-.addEventListener(
-"click",
-()=>{
-
-lessonPanel.classList.toggle(
-"show"
-);
-
-}
-);
-
-/* ===================================
-DAY DISCOVERY
-=================================== */
-
-document
-.querySelectorAll(".hotspot")
-.forEach(node=>{
-
-node.addEventListener(
-"click",
-()=>{
-
-const day =
-Number(
-node.dataset.day
-);
-
-if(day > 0){
-
-if(
-!GEI.daysFound.has(day)
-){
-
-GEI.daysFound.add(day);
-
-awardXP(50);
-
-dayText.textContent =
-GEI.daysFound.size +
-"/6";
-
+function bumpCombo(){
+  GEI.combo = Math.min(GEI.combo + 1, 9);
+  comboBadge.textContent = "x" + GEI.combo;
+  comboBadge.classList.add("show");
+  clearTimeout(GEI.comboTimer);
+  GEI.comboTimer = setTimeout(()=>{
+    GEI.combo = 1;
+    comboBadge.classList.remove("show");
+  }, 1600);
 }
 
-lessonTitle.textContent =
-LESSONS[day].title;
-
-lessonContent.textContent =
-LESSONS[day].text;
-
-lessonPanel.classList.add(
-"show"
-);
-
-playDiscovery();
-
+function awardXP(amount, x, y){
+  const total = Math.round(amount * GEI.combo);
+  GEI.xp += total;
+  const nextLevel = GEI.level * 100;
+  if(GEI.xp >= nextLevel){
+    GEI.level++;
+    playLevelUp();
+    flashScreen();
+  }
+  updateXP();
+  if(typeof x === "number") spawnFloatXP(total, x, y);
 }
 
+function spawnFloatXP(amount, x, y){
+  const el = document.createElement("div");
+  el.className = "floatXP";
+  el.textContent = "+" + amount;
+  el.style.left = x + "px";
+  el.style.top = y + "px";
+  particleLayer.appendChild(el);
+  setTimeout(()=>el.remove(), 1000);
 }
-);
 
+function flashScreen(){
+  world.classList.add("flash");
+  setTimeout(()=>world.classList.remove("flash"), 350);
+}
+
+/* ===================== FULLSCREEN ===================== */
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+function isFullscreen(){
+  return document.fullscreenElement || document.webkitFullscreenElement;
+}
+function toggleFullscreen(){
+  if(!isFullscreen()){
+    const req = appRoot.requestFullscreen || appRoot.webkitRequestFullscreen;
+    if(req) req.call(appRoot);
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if(exit) exit.call(document);
+  }
+}
+fullscreenBtn.addEventListener("click", toggleFullscreen);
+document.addEventListener("fullscreenchange", ()=>{
+  fullscreenBtn.textContent = isFullscreen() ? "⤢" : "⛶";
+});
+document.addEventListener("webkitfullscreenchange", ()=>{
+  fullscreenBtn.textContent = isFullscreen() ? "⤢" : "⛶";
 });
 
-/* ===================================
-CLOUD SYSTEM
-=================================== */
+/* ===================== PANELS ===================== */
+document.getElementById("museumBtn").addEventListener("click", ()=>{
+  museumPanel.classList.toggle("open");
+});
+document.getElementById("academyBtn").addEventListener("click", ()=>{
+  lessonPanel.classList.toggle("show");
+});
+document.getElementById("closeLessonBtn").addEventListener("click", ()=>{
+  lessonPanel.classList.remove("show");
+});
 
-const cloudLayer =
-document.getElementById(
-"cloudLayer"
-);
+/* ===================== LABEL TOAST (floats above world, never blocks taps) ===================== */
+let toastTimer;
+function showLabelToast(icon, name){
+  labelToast.textContent = icon + "  " + name;
+  labelToast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> labelToast.classList.remove("show"), 1100);
+}
 
+/* ===================== TAP HANDLING ===================== */
+document.querySelectorAll(".hotspot").forEach(node=>{
+  node.addEventListener("click", (e)=>{
+    const day = Number(node.dataset.day);
+    const name = node.dataset.name;
+    const icon = node.dataset.icon;
+
+    node.classList.remove("tapped");
+    void node.offsetWidth;
+    node.classList.add("tapped");
+
+    const rect = world.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+
+    bumpCombo();
+    awardXP(20, px, py);
+    spawnFoam(px, py);
+    playDiscovery();
+    showLabelToast(icon, name);
+
+    if(day > 0 && !GEI.daysFound.has(day)){
+      GEI.daysFound.add(day);
+      awardXP(50, px, py - 22);
+      dayText.textContent = GEI.daysFound.size + "/6";
+      unlockAchievement("day" + day);
+    }
+  });
+
+  node.addEventListener("dblclick", ()=>{
+    const day = Number(node.dataset.day);
+    if(day > 0){
+      lessonTitle.textContent = LESSONS[day].title;
+      lessonContent.textContent = LESSONS[day].text;
+      lessonPanel.classList.add("show");
+    }
+  });
+});
+
+/* ===================== CLOUD / MIST / FISH / BOAT AMBIENCE ===================== */
+const cloudLayer = document.getElementById("cloudLayer");
 function spawnCloud(){
-
-const cloud =
-document.createElement("div");
-
-cloud.innerHTML = "☁";
-
-cloud.style.position =
-"absolute";
-
-cloud.style.left =
-"-50px";
-
-cloud.style.top =
-Math.random()*250 + "px";
-
-cloud.style.fontSize =
-(30 + Math.random()*25)
-+ "px";
-
-cloud.style.opacity =
-".5";
-
-cloud.style.animation =
-"cloudMove 45s linear forwards";
-
-cloudLayer.appendChild(
-cloud
-);
-
-setTimeout(()=>{
-
-cloud.remove();
-
-},45000);
-
+  const cloud = document.createElement("div");
+  cloud.innerHTML = "☁";
+  cloud.style.position = "absolute";
+  cloud.style.left = "-50px";
+  cloud.style.top = Math.random()*250 + "px";
+  cloud.style.fontSize = (30 + Math.random()*25) + "px";
+  cloud.style.opacity = ".45";
+  cloud.style.filter = "drop-shadow(0 0 6px rgba(255,255,255,.4))";
+  cloud.style.animation = "cloudMove 40s linear forwards";
+  cloudLayer.appendChild(cloud);
+  setTimeout(()=>cloud.remove(), 40000);
 }
+setInterval(spawnCloud, 5500);
 
-setInterval(
-spawnCloud,
-5000
-);
-
-/* ===================================
-MIST SYSTEM
-=================================== */
-
-const mistLayer =
-document.getElementById(
-"mistLayer"
-);
-
+const mistLayer = document.getElementById("mistLayer");
 function spawnMist(){
-
-const mist =
-document.createElement("div");
-
-mist.style.position =
-"absolute";
-
-mist.style.width =
-"120px";
-
-mist.style.height =
-"60px";
-
-mist.style.borderRadius =
-"50%";
-
-mist.style.background =
-"rgba(255,255,255,.18)";
-
-mist.style.filter =
-"blur(20px)";
-
-mist.style.left =
-Math.random()*300+"px";
-
-mist.style.bottom =
-Math.random()*250+"px";
-
-mist.style.opacity =
-".4";
-
-mist.style.animation =
-"mistFloat 12s linear forwards";
-
-mistLayer.appendChild(
-mist
-);
-
-setTimeout(()=>{
-
-mist.remove();
-
-},12000);
-
+  const mist = document.createElement("div");
+  mist.style.position = "absolute";
+  mist.style.width = "120px";
+  mist.style.height = "60px";
+  mist.style.borderRadius = "50%";
+  mist.style.background = "rgba(0,229,255,.15)";
+  mist.style.filter = "blur(20px)";
+  mist.style.left = Math.random()*300+"px";
+  mist.style.bottom = Math.random()*250+"px";
+  mist.style.animation = "mistFloat 12s linear forwards";
+  mistLayer.appendChild(mist);
+  setTimeout(()=>mist.remove(), 12000);
 }
+setInterval(spawnMist, 2800);
 
-setInterval(
-spawnMist,
-2500
-);
-
-/* ===================================
-FISH SYSTEM
-=================================== */
-
-const fishLayer =
-document.getElementById(
-"fishLayer"
-);
-
-const fishTypes =
-
-["🐟","🐠","🐡"];
-
+const fishLayer = document.getElementById("fishLayer");
+const fishTypes = ["🐟","🐠","🐡"];
 function spawnFish(){
-
-const fish =
-document.createElement("div");
-
-fish.innerHTML =
-
-fishTypes[
-Math.floor(
-Math.random()*
-fishTypes.length
-)
-];
-
-fish.style.position =
-"absolute";
-
-fish.style.left =
-"-40px";
-
-fish.style.top =
-(250 +
-Math.random()*450)
-+"px";
-
-fish.style.fontSize =
-"24px";
-
-fish.style.animation =
-"fishSwim 18s linear forwards";
-
-fishLayer.appendChild(
-fish
-);
-
-setTimeout(()=>{
-
-fish.remove();
-
-},18000);
-
+  const fish = document.createElement("div");
+  fish.innerHTML = fishTypes[Math.floor(Math.random()*fishTypes.length)];
+  fish.style.position = "absolute";
+  fish.style.left = "-40px";
+  fish.style.top = (250 + Math.random()*450)+"px";
+  fish.style.fontSize = "22px";
+  fish.style.filter = "drop-shadow(0 0 4px rgba(0,229,255,.6))";
+  fish.style.animation = "fishSwim 16s linear forwards";
+  fishLayer.appendChild(fish);
+  setTimeout(()=>fish.remove(), 16000);
 }
+setInterval(spawnFish, 4200);
 
-setInterval(
-spawnFish,
-4000
-);
-
-/* ===================================
-BOAT SYSTEM
-=================================== */
-
-const boatLayer =
-document.getElementById(
-"boatLayer"
-);
-
-const boats =
-
-["⛵","🛶","🚣"];
-
+const boatLayer = document.getElementById("boatLayer");
+const boats = ["⛵","🛶","🚣"];
 function spawnBoat(){
-
-const boat =
-document.createElement("div");
-
-boat.innerHTML =
-
-boats[
-Math.floor(
-Math.random()*
-boats.length
-)
-];
-
-boat.style.position =
-"absolute";
-
-boat.style.left =
-"-60px";
-
-boat.style.bottom =
-"20px";
-
-boat.style.fontSize =
-"28px";
-
-boat.style.animation =
-"boatMove 30s linear forwards";
-
-boatLayer.appendChild(
-boat
-);
-
-setTimeout(()=>{
-
-boat.remove();
-
-},30000);
-
+  const boat = document.createElement("div");
+  boat.innerHTML = boats[Math.floor(Math.random()*boats.length)];
+  boat.style.position = "absolute";
+  boat.style.left = "-60px";
+  boat.style.bottom = "20px";
+  boat.style.fontSize = "26px";
+  boat.style.animation = "boatMove 28s linear forwards";
+  boatLayer.appendChild(boat);
+  setTimeout(()=>boat.remove(), 28000);
 }
-
-setInterval(
-spawnBoat,
-14000
-);
-
-/* ===================================
-FOAM SYSTEM
-=================================== */
-
-const foamLayer =
-document.getElementById(
-"foamLayer"
-);
+setInterval(spawnBoat, 15000);
 
 function spawnFoam(x,y){
-
-for(let i=0;i<5;i++){
-
-const foam =
-document.createElement("div");
-
-foam.className =
-"foam";
-
-foam.style.left =
-x + Math.random()*30 + "px";
-
-foam.style.top =
-y + Math.random()*20 + "px";
-
-foamLayer.appendChild(
-foam);
-
-setTimeout(()=>{
-
-foam.remove();
-
-},2000);
-
+  for(let i=0;i<6;i++){
+    const foam = document.createElement("div");
+    foam.className = "foam";
+    foam.style.left = (x + (Math.random()-.5)*40) + "px";
+    foam.style.top = (y + (Math.random()-.5)*30) + "px";
+    foam.style.background = i % 2 === 0 ? "var(--cyan)" : "var(--gold)";
+    foamLayer.appendChild(foam);
+    setTimeout(()=>foam.remove(), 2000);
+  }
 }
 
-}
-
-setInterval(()=>{
-
-spawnFoam(
-180,
-520
-);
-
-},1200);
-
-/* ===================================
-WEATHER ENGINE
-=================================== */
-
-const weatherStates = [
-
-"sunny",
-"cloudy",
-"misty",
-"storm"
-
-];
-
+/* ===================== WEATHER ===================== */
 function changeWeather(){
-
-const state =
-
-weatherStates[
-Math.floor(
-Math.random()*
-weatherStates.length
-)
-];
-
-GEI.weather = state;
-
-if(state==="sunny"){
-
-weatherBadge.innerHTML =
-"☀ Sunny";
-
+  const states = ["sunny","cloudy","misty","storm"];
+  const state = states[Math.floor(Math.random()*states.length)];
+  GEI.weather = state;
+  if(state === "storm") startRain();
 }
-
-if(state==="cloudy"){
-
-weatherBadge.innerHTML =
-"☁ Cloudy";
-
-}
-
-if(state==="misty"){
-
-weatherBadge.innerHTML =
-"🌫 Misty";
-
-}
-
-if(state==="storm"){
-
-weatherBadge.innerHTML =
-"⛈ Storm";
-
-startRain();
-
-}
-
-}
-
-setInterval(
-changeWeather,
-45000
-);
-
-/* ===================================
-RAIN
-=================================== */
+setInterval(changeWeather, 45000);
 
 function startRain(){
-
-for(let i=0;i<50;i++){
-
-const drop =
-document.createElement("div");
-
-drop.className =
-"rainDrop";
-
-drop.style.left =
-Math.random()*100+"%";
-
-drop.style.animationDuration =
-(.7 + Math.random())
-+"s";
-
-world.appendChild(drop);
-
-setTimeout(()=>{
-
-drop.remove();
-
-},1800);
-
+  for(let i=0;i<50;i++){
+    const drop = document.createElement("div");
+    drop.className = "rainDrop";
+    drop.style.left = Math.random()*100+"%";
+    drop.style.animationDuration = (.7 + Math.random())+"s";
+    world.appendChild(drop);
+    setTimeout(()=>drop.remove(), 1800);
+  }
 }
 
-}
-
-/* ===================================
-FLOOD MODE
-=================================== */
-
+/* ===================== FLOOD MODE ===================== */
 function startFlood(){
-
-if(GEI.flood) return;
-
-GEI.flood = true;
-
-shakeWorld();
-
-awardXP(250);
-
-weatherBadge.innerHTML =
-"🌊 FLOOD";
-
-setTimeout(()=>{
-
-GEI.flood = false;
-
-changeWeather();
-
-},12000);
-
+  if(GEI.flood) return;
+  GEI.flood = true;
+  shakeWorld();
+  awardXP(250);
+  unlockAchievement("flood");
+  setTimeout(()=>{ GEI.flood = false; }, 12000);
 }
-
-setInterval(()=>{
-
-if(Math.random() < .005){
-
-startFlood();
-
-}
-
-},3000);
-
-/* ===================================
-SCREEN SHAKE
-=================================== */
+setInterval(()=>{ if(Math.random() < .005) startFlood(); }, 3000);
 
 function shakeWorld(){
-
-world.classList.add(
-"shake"
-);
-
-setTimeout(()=>{
-
-world.classList.remove(
-"shake"
-);
-
-},400);
-
+  world.classList.add("shake");
+  setTimeout(()=>world.classList.remove("shake"), 400);
 }
 
-/* ===================================
-AUDIO ENGINE
-=================================== */
-
+/* ===================== AUDIO ===================== */
 let audioCtx;
-
 function getAudio(){
-
-if(!audioCtx){
-
-audioCtx =
-
-new (
-window.AudioContext ||
-window.webkitAudioContext
-)();
-
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
 }
-
-return audioCtx;
-
-}
-
 function playTone(freq,time){
-
-const ctx =
-getAudio();
-
-const osc =
-ctx.createOscillator();
-
-const gain =
-ctx.createGain();
-
-osc.frequency.value =
-freq;
-
-gain.gain.value =
-0.03;
-
-osc.connect(gain);
-
-gain.connect(
-ctx.destination
-);
-
-osc.start();
-
-gain.gain.exponentialRampToValueAtTime(
-
-0.0001,
-
-ctx.currentTime + time
-
-);
-
-osc.stop(
-ctx.currentTime + time
-);
-
+  const ctx = getAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.frequency.value = freq;
+  gain.gain.value = 0.035;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + time);
+  osc.stop(ctx.currentTime + time);
 }
+function playDiscovery(){ playTone(320 + Math.random()*220, 0.2); }
+function playLevelUp(){ playTone(650,.18); setTimeout(()=>playTone(950,.28),110); }
+function playGate(){ playTone(260,.12); }
+function playWheel(){ playTone(420,.08); }
 
-function playDiscovery(){
-
-playTone(
-300 + Math.random()*200,
-0.25
-);
-
-}
-
-function playLevelUp(){
-
-playTone(600,.2);
-
-setTimeout(()=>{
-
-playTone(900,.3);
-
-},120);
-
-}
-
-/* ===================================
-ANIMATION HELPERS
-=================================== */
-
-const style =
-document.createElement("style");
-
+/* ===================== ANIMATION KEYFRAMES ===================== */
+const style = document.createElement("style");
 style.innerHTML = `
-
-@keyframes cloudMove{
-
-from{
-transform:
-translateX(0);
-}
-
-to{
-transform:
-translateX(650px);
-}
-
-}
-
-@keyframes mistFloat{
-
-from{
-transform:
-translateY(0);
-}
-
-to{
-transform:
-translateY(-100px);
-opacity:0;
-}
-
-}
-
-@keyframes fishSwim{
-
-from{
-transform:
-translateX(0);
-}
-
-to{
-transform:
-translateX(650px);
-}
-
-}
-
-@keyframes boatMove{
-
-from{
-transform:
-translateX(0);
-}
-
-to{
-transform:
-translateX(700px);
-}
-
-}
-
+@keyframes cloudMove{ from{transform:translateX(0);} to{transform:translateX(650px);} }
+@keyframes mistFloat{ from{transform:translateY(0);opacity:.4;} to{transform:translateY(-100px);opacity:0;} }
+@keyframes fishSwim{ from{transform:translateX(0);} to{transform:translateX(650px);} }
+@keyframes boatMove{ from{transform:translateX(0);} to{transform:translateX(700px);} }
 `;
+document.head.appendChild(style);
 
-document.head.appendChild(
-style
-);
-
-
-/* ===================================
-ACHIEVEMENT SYSTEM
-=================================== */
-
-const ACHIEVEMENTS = {
-
-day1:false,
-day2:false,
-day3:false,
-day4:false,
-day5:false,
-day6:false,
-ocean:false,
-flood:false
-
-};
+/* ===================== ACHIEVEMENTS ===================== */
+const ACHIEVEMENTS = { day1:false, day2:false, day3:false, day4:false, day5:false, day6:false, ocean:false, flood:false };
 
 function unlockAchievement(key){
-
-if(ACHIEVEMENTS[key]) return;
-
-ACHIEVEMENTS[key] = true;
-
-awardXP(100);
-
-shakeWorld();
-
-playLevelUp();
-
+  if(ACHIEVEMENTS[key]) return;
+  ACHIEVEMENTS[key] = true;
+  awardXP(100);
+  shakeWorld();
+  playLevelUp();
+  updateMuseum();
 }
 
-/* ===================================
-GATE CONTROL
-=================================== */
-
-document
-.getElementById("gateBtn")
-.addEventListener(
-"click",
-()=>{
-
-GEI.gatePosition =
-GEI.gatePosition
-? 0
-: 1;
-
-if(GEI.gatePosition){
-
-playTone(350,.15);
-
-}else{
-
-playTone(200,.15);
-
-}
-
-}
-);
-
-/* ===================================
-RESERVOIR PHYSICS
-=================================== */
-
-function updateReservoir(){
-
-GEI.pressure =
-GEI.reservoirLevel * .01;
-
-GEI.flowRate =
-
-GEI.pressure *
-GEI.gatePosition;
-
-if(GEI.flood){
-
-GEI.flowRate *= 3;
-
-}
-
-GEI.reservoirLevel -=
-
-GEI.flowRate * .02;
-
-GEI.reservoirLevel =
-
-Math.max(
-0,
-GEI.reservoirLevel
-);
-
-flowText.textContent =
-
-Math.round(
-GEI.flowRate * 100
-) + "%";
-
-}
-
-/* ===================================
-WATERWHEEL PHYSICS
-=================================== */
-
-function updateWheel(){
-
-GEI.wheelSpeed +=
-
-GEI.flowRate * .18;
-
-GEI.wheelSpeed *= .985;
-
-GEI.wheelAngle +=
-
-GEI.wheelSpeed;
-
-wheelGroup.setAttribute(
-
-"transform",
-
-`rotate(
-${GEI.wheelAngle}
-200
-610
-)`
-
-);
-
-}
-
-/* ===================================
-SLUICE VISUAL
-=================================== */
-
-function updateGateVisual(){
-
-if(!gateVisual) return;
-
-gateVisual.setAttribute(
-
-"x",
-
-GEI.gatePosition
-? 225
-: 184
-
-);
-
-}
-
-/* ===================================
-FLOWING WATER
-=================================== */
-
-let flowDash = 0;
-
-const riverPath =
-document.getElementById(
-"riverPath"
-);
-
-function updateRiver(){
-
-if(!riverPath) return;
-
-flowDash -=
-
-2 + GEI.flowRate * 8;
-
-riverPath.style.strokeDasharray =
-"25 12";
-
-riverPath.style.strokeDashoffset =
-flowDash;
-
-}
-
-/* ===================================
-OCEAN MOTION
-=================================== */
-
-const oceanWave =
-document.getElementById(
-"oceanWave"
-);
-
-let waveTime = 0;
-
-function updateOcean(){
-
-if(!oceanWave) return;
-
-waveTime +=
-
-0.03 +
-GEI.flowRate * .03;
-
-const a =
-760 +
-Math.sin(
-waveTime
-)*8;
-
-const b =
-760 +
-Math.cos(
-waveTime
-)*8;
-
-const c =
-760 +
-Math.sin(
-waveTime+1
-)*8;
-
-const d =
-760 +
-Math.cos(
-waveTime+2
-)*8;
-
-oceanWave.setAttribute(
-
-"d",
-
-`
-M0 ${a}
-
-Q50 ${b}
-100 ${a}
-
-Q150 ${c}
-200 ${b}
-
-Q250 ${a}
-300 ${d}
-
-Q350 ${b}
-400 ${a}
-
-L400 800
-L0 800
-Z
-`
-
-);
-
-}
-
-/* ===================================
-DAY ACHIEVEMENTS
-=================================== */
-
-function processDays(){
-
-if(
-GEI.daysFound.has(1)
-){
-
-unlockAchievement(
-"day1"
-);
-
-}
-
-if(
-GEI.daysFound.has(2)
-){
-
-unlockAchievement(
-"day2"
-);
-
-}
-
-if(
-GEI.daysFound.has(3)
-){
-
-unlockAchievement(
-"day3"
-);
-
-}
-
-if(
-GEI.daysFound.has(4)
-){
-
-unlockAchievement(
-"day4"
-);
-
-}
-
-if(
-GEI.daysFound.has(5)
-){
-
-unlockAchievement(
-"day5"
-);
-
-}
-
-if(
-GEI.daysFound.has(6)
-){
-
-unlockAchievement(
-"day6"
-);
-
-}
-
-}
-
-/* ===================================
-OCEAN COMPLETION
-=================================== */
-
-function checkOceanCompletion(){
-
-if(
-GEI.daysFound.size === 6 &&
-!ACHIEVEMENTS.ocean
-){
-
-unlockAchievement(
-"ocean"
-);
-
-lessonTitle.textContent =
-
-"Journey Complete";
-
-lessonContent.innerHTML =
-
-`
-You traveled from
-Mountain → Reservoir →
-Dam → Millpond →
-Sluice → Waterwheel →
-Mill → Ocean.
-
-+500 XP Bonus
-`;
-
-awardXP(500);
-
-lessonPanel.classList.add(
-"show"
-);
-
-}
-
-}
-
-/* ===================================
-FLOOD ACHIEVEMENT
-=================================== */
-
-function processFloodAchievement(){
-
-if(
-GEI.flood &&
-!ACHIEVEMENTS.flood
-){
-
-unlockAchievement(
-"flood"
-);
-
-}
-
-}
-
-/* ===================================
-GEI QUIZ SYSTEM
-=================================== */
-
-const QUIZZES = {
-
-1:{
-q:"What begins movement?",
-a:"Released Water"
-},
-
-2:{
-q:"What contains water?",
-a:"Dam"
-},
-
-3:{
-q:"What stores water?",
-a:"Reservoir"
-},
-
-4:{
-q:"What regulates flow?",
-a:"Sluice"
-},
-
-5:{
-q:"What converts energy?",
-a:"Waterwheel"
-},
-
-6:{
-q:"What integrates everything?",
-a:"Hydraulic System"
-}
-
-};
-
-function launchQuiz(day){
-
-const quiz =
-QUIZZES[day];
-
-if(!quiz) return;
-
-lessonTitle.textContent =
-quiz.q;
-
-lessonContent.innerHTML =
-
-`
-<button
-onclick="rewardQuiz(${day})"
-style="
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-font-weight:800;
-cursor:pointer;
-">
-
-Reveal Answer
-
-</button>
-`;
-
-}
-
-window.rewardQuiz =
-function(day){
-
-lessonTitle.textContent =
-QUIZZES[day].q;
-
-lessonContent.innerHTML =
-
-`
-<strong>
-${QUIZZES[day].a}
-</strong>
-
-<br><br>
-
-+50 XP Awarded
-`;
-
-awardXP(50);
-
-playDiscovery();
-
-};
-
-/* ===================================
-ENHANCE LESSON CLICK
-=================================== */
-
-document
-.querySelectorAll(".hotspot")
-.forEach(node=>{
-
-node.addEventListener(
-"dblclick",
-()=>{
-
-const day =
-Number(
-node.dataset.day
-);
-
-if(day>0){
-
-launchQuiz(day);
-
-}
-
-}
-);
-
+/* ===================== GATE CONTROL ===================== */
+document.getElementById("gateBtn").addEventListener("click", ()=>{
+  GEI.gatePosition = GEI.gatePosition ? 0 : 1;
+  playGate();
 });
 
-/* ===================================
-MAIN PHYSICS LOOP
-=================================== */
-
-function physicsLoop(){
-
-updateReservoir();
-
-updateWheel();
-
-updateGateVisual();
-
-updateRiver();
-
-updateOcean();
-
-processDays();
-
-processFloodAchievement();
-
-checkOceanCompletion();
-
-requestAnimationFrame(
-physicsLoop
-);
-
+/* ===================== PHYSICS ===================== */
+function updateReservoir(){
+  GEI.pressure = GEI.reservoirLevel * .01;
+  GEI.flowRate = GEI.pressure * GEI.gatePosition;
+  if(GEI.flood) GEI.flowRate *= 3;
+  GEI.reservoirLevel = Math.max(0, GEI.reservoirLevel - GEI.flowRate * .02);
+  flowText.textContent = Math.round(GEI.flowRate * 100) + "%";
 }
 
+function updateWheel(){
+  GEI.wheelSpeed += GEI.flowRate * .18;
+  GEI.wheelSpeed *= .985;
+  GEI.wheelAngle += GEI.wheelSpeed;
+  wheelGroup.setAttribute("transform", `rotate(${GEI.wheelAngle} 200 610)`);
+}
+
+function updateGateVisual(){
+  if(!gateVisual) return;
+  gateVisual.setAttribute("x", GEI.gatePosition ? 225 : 184);
+}
+
+let flowDash = 0;
+const riverPath = document.getElementById("riverPath");
+function updateRiver(){
+  if(!riverPath) return;
+  flowDash -= 2 + GEI.flowRate * 8;
+  riverPath.style.strokeDasharray = "25 12";
+  riverPath.style.strokeDashoffset = flowDash;
+}
+
+const oceanWave = document.getElementById("oceanWave");
+let waveTime = 0;
+function updateOcean(){
+  if(!oceanWave) return;
+  waveTime += 0.03 + GEI.flowRate * .03;
+  const a = 760 + Math.sin(waveTime)*8;
+  const b = 760 + Math.cos(waveTime)*8;
+  const c = 760 + Math.sin(waveTime+1)*8;
+  const d = 760 + Math.cos(waveTime+2)*8;
+  oceanWave.setAttribute("d", `M0 ${a} Q50 ${b} 100 ${a} Q150 ${c} 200 ${b} Q250 ${a} 300 ${d} Q350 ${b} 400 ${a} L400 800 L0 800 Z`);
+}
+
+function checkOceanCompletion(){
+  if(GEI.daysFound.size === 6 && !ACHIEVEMENTS.ocean){
+    unlockAchievement("ocean");
+    lessonTitle.textContent = "Journey Complete";
+    lessonContent.innerHTML = "You traveled from Mountain → Reservoir → Dam → Millpond → Sluice → Waterwheel → Mill → Ocean.<br><br>+500 XP Bonus";
+    awardXP(500);
+    lessonPanel.classList.add("show");
+  }
+}
+
+setInterval(()=>{ if(GEI.wheelSpeed > .5) playWheel(); }, 3000);
+
+/* ===================== MUSEUM DISPLAY ===================== */
+function updateMuseum(){
+  document.querySelectorAll(".achievement").forEach(item=>{
+    const key = item.dataset.key;
+    if(ACHIEVEMENTS[key]){
+      item.style.border = "2px solid var(--cyan)";
+      item.style.boxShadow = "0 0 15px rgba(0,229,255,.6)";
+      item.style.opacity = "1";
+    } else {
+      item.style.opacity = ".4";
+    }
+  });
+}
+
+/* ===================== MAIN LOOP ===================== */
+function physicsLoop(){
+  updateReservoir();
+  updateWheel();
+  updateGateVisual();
+  updateRiver();
+  updateOcean();
+  checkOceanCompletion();
+  requestAnimationFrame(physicsLoop);
+}
 physicsLoop();
 
-
-/* ===================================
-SAVE SYSTEM
-=================================== */
-
+/* ===================== SAVE / LOAD ===================== */
 function saveGame(){
-
-const saveData = {
-
-xp:GEI.xp,
-
-level:GEI.level,
-
-reservoirLevel:
-GEI.reservoirLevel,
-
-gatePosition:
-GEI.gatePosition,
-
-weather:
-GEI.weather,
-
-daysFound:
-[...GEI.daysFound],
-
-achievements:
-ACHIEVEMENTS
-
-};
-
-localStorage.setItem(
-
-"GEI_ULTIMATE_22",
-
-JSON.stringify(saveData)
-
-);
-
+  const saveData = {
+    xp:GEI.xp, level:GEI.level, reservoirLevel:GEI.reservoirLevel,
+    gatePosition:GEI.gatePosition, daysFound:[...GEI.daysFound], achievements:ACHIEVEMENTS
+  };
+  try{ localStorage.setItem("GEI_ULTIMATE_23", JSON.stringify(saveData)); }catch(e){}
 }
-
-/* ===================================
-LOAD SYSTEM
-=================================== */
-
 function loadGame(){
-
-const save =
-
-localStorage.getItem(
-"GEI_ULTIMATE_22"
-);
-
-if(!save) return;
-
-try{
-
-const data =
-JSON.parse(save);
-
-GEI.xp =
-data.xp ?? 0;
-
-GEI.level =
-data.level ?? 1;
-
-GEI.reservoirLevel =
-data.reservoirLevel ?? 100;
-
-GEI.gatePosition =
-data.gatePosition ?? 0;
-
-GEI.weather =
-data.weather ?? "sunny";
-
-if(
-Array.isArray(
-data.daysFound
-)
-){
-
-data.daysFound.forEach(
-d=>GEI.daysFound.add(d)
-);
-
+  let save;
+  try{ save = localStorage.getItem("GEI_ULTIMATE_23"); }catch(e){ save = null; }
+  if(!save) return;
+  try{
+    const data = JSON.parse(save);
+    GEI.xp = data.xp ?? 0;
+    GEI.level = data.level ?? 1;
+    GEI.reservoirLevel = data.reservoirLevel ?? 100;
+    GEI.gatePosition = data.gatePosition ?? 0;
+    if(Array.isArray(data.daysFound)) data.daysFound.forEach(d=>GEI.daysFound.add(d));
+    if(data.achievements) Object.assign(ACHIEVEMENTS, data.achievements);
+    updateXP();
+    dayText.textContent = GEI.daysFound.size + "/6";
+  }catch(err){}
 }
+setInterval(saveGame, 10000);
 
-if(
-data.achievements
-){
-
-Object.assign(
-
-ACHIEVEMENTS,
-
-data.achievements
-
-);
-
-}
-
-updateXP();
-
-dayText.textContent =
-
-GEI.daysFound.size +
-"/6";
-
-}catch(err){
-
-console.log(err);
-
-}
-
-}
-
-/* ===================================
-AUTO SAVE
-=================================== */
-
-setInterval(
-saveGame,
-10000
-);
-
-/* ===================================
-MUSEUM UPDATE
-=================================== */
-
-function updateMuseum(){
-
-const items =
-
-document.querySelectorAll(
-".achievement"
-);
-
-const states = [
-
-ACHIEVEMENTS.day1,
-ACHIEVEMENTS.day2,
-ACHIEVEMENTS.day3,
-ACHIEVEMENTS.day4,
-ACHIEVEMENTS.day5,
-ACHIEVEMENTS.day6,
-ACHIEVEMENTS.ocean,
-ACHIEVEMENTS.flood
-
-];
-
-items.forEach(
-(item,index)=>{
-
-if(states[index]){
-
-item.style.border =
-"2px solid #2fd2ff";
-
-item.style.boxShadow =
-"0 0 15px rgba(47,210,255,.6)";
-
-}else{
-
-item.style.opacity =
-".4";
-
-}
-
-}
-);
-
-}
-
-/* ===================================
-SPLASH ENGINE
-=================================== */
-
-function randomSplash(){
-
-const x =
-170 + Math.random()*60;
-
-const y =
-500 + Math.random()*80;
-
-spawnFoam(
-x,
-y
-);
-
-if(
-Math.random() > .5
-){
-
-playSplash();
-
-}
-
-}
-
-setInterval(
-
-randomSplash,
-
-2500
-
-);
-
-/* ===================================
-AUDIO PACK
-=================================== */
-
-function playSplash(){
-
-playTone(
-
-180 +
-Math.random()*120,
-
-0.18
-
-);
-
-}
-
-function playGate(){
-
-playTone(
-250,
-0.12
-);
-
-}
-
-function playWheel(){
-
-playTone(
-420,
-0.08
-);
-
-}
-
-function playWave(){
-
-playTone(
-140,
-0.25
-);
-
-}
-
-/* ===================================
-WHEEL AUDIO
-=================================== */
-
-setInterval(()=>{
-
-if(
-GEI.wheelSpeed > .5
-){
-
-playWheel();
-
-}
-
-},3000);
-
-/* ===================================
-OCEAN AUDIO
-=================================== */
-
-setInterval(()=>{
-
-if(
-GEI.flowRate > .2
-){
-
-playWave();
-
-}
-
-},5000);
-
-/* ===================================
-GATE AUDIO
-=================================== */
-
-document
-.getElementById(
-"gateBtn"
-)
-.addEventListener(
-"click",
-playGate
-);
-
-/* ===================================
-STARTUP MESSAGE
-=================================== */
-
+/* ===================== STARTUP ===================== */
 function startupSequence(){
-
-lessonTitle.textContent =
-
-"Welcome to GEI Ultimate Edition 2.2";
-
-lessonContent.innerHTML =
-
-`
-Begin your journey:
-
-🏔 Mountain
-
-🌊 Reservoir
-
-🏗 Dam
-
-🚪 Sluice
-
-⚙ Waterwheel
-
-🏭 Mill
-
-🌊 Ocean
-
-<br><br>
-
-Tap locations to learn.
-
-Double tap for quizzes.
-
-Earn XP.
-
-Unlock achievements.
-
-Explore all 6 Days.
-`;
-
-lessonPanel.classList.add(
-"show"
-);
-
-setTimeout(()=>{
-
-lessonPanel.classList.remove(
-"show"
-);
-
-},10000);
-
+  lessonTitle.textContent = "Welcome to GEI Ultimate";
+  lessonContent.innerHTML = "Tap the glowing locations to earn XP.<br>Double-tap for a mini lesson.<br>Chain taps fast to build your combo.<br>Open the Gate to get the river flowing.<br><br>🏔 → 🌊 → 🏗 → 🌊 → 🚪 → ⚙ → 🏭 → 🌊";
+  lessonPanel.classList.add("show");
+  setTimeout(()=> lessonPanel.classList.remove("show"), 6000);
 }
 
-/* ===================================
-PERFORMANCE CLEANUP
-=================================== */
-
-setInterval(()=>{
-
-const fishCount =
-
-document.querySelectorAll(
-"#fishLayer div"
-).length;
-
-if(fishCount > 12){
-
-const firstFish =
-
-document.querySelector(
-"#fishLayer div"
-);
-
-if(firstFish){
-
-firstFish.remove();
-
+/* ===================== HOSTINGER / IFRAME HEIGHT REPORTING ===================== */
+function reportHeight(){
+  try{
+    const height = document.documentElement.scrollHeight;
+    window.parent.postMessage({ type:"resize", height }, "*");
+  }catch(e){}
 }
-
+if(window.ResizeObserver){
+  new ResizeObserver(reportHeight).observe(document.body);
 }
+window.addEventListener("load", reportHeight);
 
-const boatCount =
-
-document.querySelectorAll(
-"#boatLayer div"
-).length;
-
-if(boatCount > 5){
-
-const firstBoat =
-
-document.querySelector(
-"#boatLayer div"
-);
-
-if(firstBoat){
-
-firstBoat.remove();
-
-}
-
-}
-
-},5000);
-
-/* ===================================
-MASTER UPDATE LOOP
-=================================== */
-
-function masterLoop(){
-
-updateMuseum();
-
-requestAnimationFrame(
-masterLoop
-);
-
-}
-
-/* ===================================
-INITIALIZATION
-=================================== */
-
+/* ===================== INIT ===================== */
 loadGame();
-
 updateXP();
-
 updateMuseum();
-
 startupSequence();
-
-masterLoop();
-
 changeWeather();
 
-console.log(
-
-"GEI Ultimate Edition 2.2 Loaded"
-
-);
-
 </script>
-
-</div>
 
 </body>
 </html>
