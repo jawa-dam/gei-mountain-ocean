@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Infinite Nite Lite | YALLTOO</title>
-<meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new tribe name reveal itself every loop.">
+<title>The Nite Lite | YALLTOO</title>
+<meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
 <style>
 
 :root{
@@ -18,6 +18,7 @@
   --yt-cyan:#2fd2ff;
 
   --gold:#ffd76a;
+  --danger:#ff5e7a;
   --panel:rgba(4,12,24,.88);
   --glassBorder:rgba(255,255,255,.14);
   --radius:22px;
@@ -92,6 +93,7 @@ html,body{
   cursor:pointer;
 }
 .iconBtn:active{ transform:scale(.92); }
+.iconBtn.danger{ border-color:rgba(255,94,122,.45); background:rgba(255,94,122,.14); }
 
 .progressRow{ display:flex; align-items:center; gap:6px; margin-top:10px; }
 .dot{ flex:1; height:8px; border-radius:999px; background:rgba(255,255,255,.1); overflow:hidden; }
@@ -119,9 +121,6 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .station.locked .body{ opacity:.3; filter:grayscale(.75) brightness(.65); }
 .station.locked{ cursor:default; }
 .station.active .body{ opacity:1; }
-.station .ring{ opacity:0; transition:opacity .3s; }
-.station.active .ring{ opacity:.55; animation:ringPulse 1.6s ease-in-out infinite; }
-@keyframes ringPulse{ 0%,100%{ opacity:.35; transform:scale(1);} 50%{ opacity:.75; transform:scale(1.05);} }
 .station.done .body{ opacity:1; filter:none; }
 .station.done .checkmark{ opacity:1; }
 .checkmark{ opacity:0; transition:opacity .3s; }
@@ -130,6 +129,19 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes tapPop{ 0%{transform:scale(1);} 45%{transform:scale(1.08);} 100%{transform:scale(1);} }
 .station .nameLabel{ opacity:0; transform:translateY(4px); transition:opacity .3s, transform .3s; }
 .station.showName .nameLabel{ opacity:1; transform:translateY(0); }
+
+/* ============ WATERY RINGS (replaces bounce/pulse) ============ */
+.ringOuter, .ringInner{
+  opacity:0; transition:opacity .35s;
+  fill:none; stroke:var(--water-bright);
+  transform-box:fill-box; transform-origin:center;
+}
+.station.active .ringOuter, .station.active .ringInner{ opacity:.55; }
+.ringOuter{ stroke-width:2.4; stroke-dasharray:9 7; animation:ringFlowFwd 2.4s linear infinite, ringWobble 3.6s ease-in-out infinite; }
+.ringInner{ stroke-width:2; stroke-dasharray:6 10; animation:ringFlowRev 3s linear infinite, ringWobble 4.2s ease-in-out infinite reverse; }
+@keyframes ringFlowFwd{ to{ stroke-dashoffset:-64; } }
+@keyframes ringFlowRev{ to{ stroke-dashoffset:64; } }
+@keyframes ringWobble{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.035); } }
 
 /* ============ LIFE ANIMATIONS INSIDE ILLUSTRATIONS ============ */
 .sparkle{ animation:twinkle 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
@@ -177,7 +189,6 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   filter:url(#waterGlow);
   transition:stroke-dashoffset 1s ease;
 }
-.segFlow.flowing{ animation:none; }
 
 /* ============ OCEAN ============ */
 #oceanGroup .oceanFill{ transition:opacity .6s; opacity:.6; }
@@ -198,6 +209,17 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 }
 .labelToast.show{ opacity:1; transform:translate(-50%,0); }
 
+/* ============ RIPPLE WAVE ON TAP ============ */
+.rippleWave{
+  position:absolute; width:22px; height:22px;
+  border:3px solid rgba(234,252,255,.85);
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(1);
+  opacity:1; pointer-events:none;
+  animation:rippleExpand .85s ease-out forwards;
+}
+@keyframes rippleExpand{ to{ transform:translate(-50%,-50%) scale(6.5); opacity:0; border-width:1px; } }
+
 /* ============ TRIBE REVEAL CARD ============ */
 .tribeCard{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -215,10 +237,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .tribeCard.show .tribeInner{ transform:scale(1); }
 .tribeEyebrow{ font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.65); font-weight:700; }
 .tribeName{
-  font-size:clamp(1.5rem,7vw,2.1rem); font-weight:900; margin:8px 0 6px;
+  font-size:clamp(1.5rem,7vw,2.1rem); font-weight:900; margin:8px 0 4px;
   background:linear-gradient(90deg,var(--yt-cyan),var(--gold),var(--yt-pink));
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
 }
+.tribeCategory{ font-size:.72rem; font-weight:800; color:var(--yt-pink); margin-bottom:8px; text-transform:uppercase; letter-spacing:.08em; }
 .tribeSub{ font-size:.78rem; color:rgba(255,255,255,.75); }
 
 /* ============ TRIBES PANEL ============ */
@@ -228,9 +251,10 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   z-index:90; padding:20px; transition:.4s; overflow:auto;
 }
 .sidePanel.open{ right:0; }
-.panelTitle{ font-size:1.15rem; font-weight:900; margin-bottom:16px; }
+.panelTitle{ font-size:1.15rem; font-weight:900; margin-bottom:14px; }
+.panelGroup{ font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--yt-cyan); margin:14px 0 8px; }
 .tribeItem{
-  padding:11px 14px; margin-bottom:8px; border-radius:12px;
+  padding:10px 14px; margin-bottom:7px; border-radius:12px;
   background:rgba(255,255,255,.06); font-weight:700; font-size:.85rem;
   border-left:3px solid var(--yt-cyan);
 }
@@ -243,11 +267,58 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   100%{ box-shadow:inset 0 0 0 0 rgba(47,210,255,0); }
 }
 
+.bigShake{ animation:bigShake 1s ease; }
+@keyframes bigShake{
+  0%{transform:translate(0,0);} 10%{transform:translate(-6px,3px);} 20%{transform:translate(6px,-4px);}
+  30%{transform:translate(-8px,2px);} 40%{transform:translate(7px,-3px);} 50%{transform:translate(-5px,4px);}
+  60%{transform:translate(6px,-2px);} 70%{transform:translate(-6px,3px);} 80%{transform:translate(4px,-2px);}
+  90%{transform:translate(-3px,1px);} 100%{transform:translate(0,0);}
+}
+
 .foam{
   position:absolute; width:7px; height:7px; border-radius:50%; background:var(--foam);
   animation:foamPop 1.6s ease-out forwards;
 }
 @keyframes foamPop{ 0%{ opacity:.9; transform:scale(1) translateY(0);} 100%{ opacity:0; transform:scale(.3) translateY(-16px);} }
+
+/* ============ DAM BREAK / FLOOD ============ */
+.floodOverlay{
+  position:absolute; left:0; right:0; bottom:0; height:0%;
+  background:linear-gradient(180deg, rgba(47,210,255,.88), rgba(3,12,28,.97) 70%);
+  z-index:110; pointer-events:none;
+  transition:height 2.6s cubic-bezier(.65,0,.85,0);
+}
+.floodOverlay.rising{ height:100%; }
+.floodOverlay::before{
+  content:""; position:absolute; top:-14px; left:0; right:0; height:24px;
+  background:
+    radial-gradient(circle at 10% 50%, transparent 8px, rgba(47,210,255,.88) 9px) 0 0/40px 24px repeat-x,
+    radial-gradient(circle at 30% 50%, transparent 8px, rgba(47,210,255,.88) 9px) 0 0/40px 24px repeat-x;
+  animation:waveEdge 1.4s linear infinite;
+}
+@keyframes waveEdge{ to{ background-position:40px 0, 40px 0; } }
+
+.gameOverCard{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(2,4,10,.55);
+  opacity:0; pointer-events:none; transition:opacity .4s; z-index:120;
+}
+.gameOverCard.show{ opacity:1; pointer-events:auto; }
+.gameOverInner{
+  background:linear-gradient(160deg, rgba(255,94,122,.22), rgba(108,116,232,.2));
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:24px; padding:28px 24px; text-align:center; max-width:86%;
+  transform:scale(.85); transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 0 40px rgba(255,94,122,.35);
+}
+.gameOverCard.show .gameOverInner{ transform:scale(1); }
+.gameOverTitle{ font-size:clamp(1.2rem,6vw,1.6rem); font-weight:900; margin:6px 0 8px; color:var(--danger); }
+.gameOverSub{ font-size:.82rem; color:rgba(255,255,255,.8); margin-bottom:18px; line-height:1.5; }
+.rebuildBtn{
+  border:none; padding:12px 22px; border-radius:14px; font-weight:800; cursor:pointer;
+  color:#fff; background:linear-gradient(135deg,var(--yt-indigo),var(--yt-cyan));
+}
+.rebuildBtn:active{ transform:scale(.96); }
 
 .app:fullscreen, .app:-webkit-full-screen{ max-width:100%; background:#03060f; }
 
@@ -261,14 +332,15 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
   <div class="hud">
     <div class="hudTop">
-      <div class="logo">Nite Infinite Lite</div>
+      <div class="logo">The Nite Lite</div>
       <div class="hudRight">
         <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
+        <button class="iconBtn danger" id="damBreakBtn" title="Break the dam" aria-label="Break the dam">💥</button>
         <button class="iconBtn" id="tribesBtn" aria-label="Tribes discovered">📜</button>
       </div>
     </div>
     <div class="progressRow" id="progressRow"></div>
-    <div class="loopBadge">Loop <strong id="loopCount">0</strong> — tap the glowing station</div>
+    <div class="loopBadge">Loop <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
   </div>
 
   <div class="world" id="world">
@@ -309,10 +381,6 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
           <feGaussianBlur stdDeviation="3" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <filter id="neonGlow" x="-70%" y="-70%" width="240%" height="240%">
-          <feGaussianBlur stdDeviation="7" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
       </defs>
 
       <rect x="0" y="0" width="400" height="800" fill="url(#skyGradient)"/>
@@ -325,17 +393,29 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       </g>
     </svg>
 
+    <div class="floodOverlay" id="floodOverlay"></div>
+
     <div class="tribeCard" id="tribeCard">
       <div class="tribeInner">
         <div class="tribeEyebrow">A People Revealed</div>
         <div class="tribeName" id="tribeName">—</div>
+        <div class="tribeCategory" id="tribeCategory">Tribal</div>
         <div class="tribeSub">The system flowed complete. Tap anywhere to flow again.</div>
       </div>
     </div>
 
+    <div class="gameOverCard" id="gameOverCard">
+      <div class="gameOverInner">
+        <div style="font-size:2.4rem;">💥</div>
+        <div class="gameOverTitle">The Dam Has Broken</div>
+        <div class="gameOverSub">The system has failed and flooded.<br>Rebuild it from the Mountain up.</div>
+        <button class="rebuildBtn" id="rebuildBtn">Rebuild System</button>
+      </div>
+    </div>
+
     <div class="sidePanel" id="tribesPanel">
-      <div class="panelTitle">📜 Tribes Discovered</div>
-      <div id="tribesList"><div class="emptyNote">Complete a full loop — Mountain to Ocean — to reveal your first tribe name.</div></div>
+      <div class="panelTitle">📜 -ites Discovered</div>
+      <div id="tribesList"><div class="emptyNote">Complete a full loop — Mountain to Ocean — to reveal your first name.</div></div>
     </div>
   </div>
 
@@ -344,28 +424,32 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 <script>
 
 /* =========================================================
-   CONFIGURE THE 6 STEPS — edit labels/names/meanings here
-   Tap sequence per step: 1) highlight  2) reveal name  3) complete + flow
+   CONFIGURE THE 6 STEPS
 ========================================================= */
 const STEPS = [
-  { id:"mountain", label:"Mountain",    name:"God",        meaning:"Water is lite" },
-  { id:"dam",      label:"Dam",         name:"Firmament",  meaning:"Water is divided" },
-  { id:"millpond", label:"Millpond",    name:"Seas",       meaning:"Water is gathered" },
-  { id:"sluice",   label:"Sluice Gate", name:"Lights",     meaning:"Water is regulated" },
-  { id:"wheel",    label:"Waterwheel",  name:"Creatures",  meaning:"Water is moved" },
-  { id:"mill",     label:"Mill",        name:"Man",        meaning:"Water performs work" }
+  { id:"mountain", label:"Mountain",    name:"God",       meaning:"The mountain releases its water" },
+  { id:"dam",      label:"Dam",         name:"Firmament", meaning:"The dam releases its water" },
+  { id:"millpond", label:"Millpond",    name:"Seas",      meaning:"The dry land stores its water" },
+  { id:"sluice",   label:"Sluice Gate", name:"Lights",    meaning:"The sluice gates release their water" },
+  { id:"wheel",    label:"Waterwheel",  name:"Creatures", meaning:"The waterwheel releases its water" },
+  { id:"mill",     label:"Mill",        name:"Man",       meaning:"The mill grows stronger with every cycle" }
 ];
 
-const TRIBES = [
-  "Adamites","Levites","Israelites","Jacobites","Hivites","Jebusites","Hittites",
-  "Amorites","Canaanites","Perizzites","Girgashites","Moabites","Ammonites",
-  "Edomites","Ishmaelites","Midianites","Kenites","Amalekites","Reubenites",
-  "Simeonites","Gadites","Asherites","Ephraimites","Manassites","Danites",
-  "Benjamites","Zebulunites","Rechabites"
-];
+/* =========================================================
+   -ITES ROSTER — grouped by category
+========================================================= */
+const TRIBE_GROUPS = {
+  "Tribal -ites": ["Israelites","Levites","Benjamites","Ephraimites","Manassites","Reubenites","Gadites","Asherites","Simeonites","Zebulunites","Issacharites","Naphtalites"],
+  "Nation -ites": ["Amorites","Hittites","Hivites","Jebusites","Canaanites","Girgashites","Perizzites","Ammonites","Moabites","Edomites","Midianites"],
+  "Place-based -ites": ["Gileadites","Shilonites","Arkites","Hamathites","Arvadites","Zemarites"]
+};
+const ALL_TRIBES = Object.entries(TRIBE_GROUPS).flatMap(([category, names])=>
+  names.map(name=>({ name, category }))
+);
 
 const CENTERS = [120, 245, 360, 470, 580, 690];
 const OCEAN_Y = 770;
+const MILL_INDEX = 5;
 
 /* =========================================================
    HAND-DRAWN STATION ILLUSTRATIONS (local coords, centered on 0,0)
@@ -448,24 +532,53 @@ const ILLUSTRATIONS = {
     </g>
     <circle class="splash s1" cx="-22" cy="38" r="2.2" fill="#eafcff"/>
     <circle class="splash s2" cx="14" cy="42" r="2" fill="#eafcff"/>
-  `,
-
-  mill: `
-    <rect x="-40" y="0" width="80" height="42" fill="url(#millWood)" stroke="#4a2e18" stroke-width="2"/>
-    <polygon points="-46,0 0,-32 46,0" fill="#7a3b2e"/>
-    <rect x="-9" y="18" width="18" height="24" fill="#3a2416"/>
-    <rect class="lightFlicker" x="-31" y="10" width="10" height="10" fill="#ffe9a8"/>
-    <rect class="lightFlicker" x="21" y="10" width="10" height="10" fill="#ffe9a8"/>
-    <rect x="20" y="-24" width="8" height="16" fill="#5a5a5a"/>
-    <circle class="smokePuff p1" cx="24" cy="-30" r="4.2" fill="rgba(255,255,255,.55)"/>
-    <circle class="smokePuff p2" cx="24" cy="-30" r="4.2" fill="rgba(255,255,255,.55)"/>
   `
 };
 
 /* =========================================================
+   MILL GROWTH STAGES — small mill grows toward a mega plant
+========================================================= */
+const MILL_BASE = `
+  <rect x="-40" y="0" width="80" height="42" fill="url(#millWood)" stroke="#4a2e18" stroke-width="2"/>
+  <polygon points="-46,0 0,-32 46,0" fill="#7a3b2e"/>
+  <rect x="-9" y="18" width="18" height="24" fill="#3a2416"/>
+  <rect class="lightFlicker" x="-31" y="10" width="10" height="10" fill="#ffe9a8"/>
+  <rect class="lightFlicker" x="21" y="10" width="10" height="10" fill="#ffe9a8"/>
+  <rect x="20" y="-24" width="8" height="16" fill="#5a5a5a"/>
+  <circle class="smokePuff p1" cx="24" cy="-30" r="4.2" fill="rgba(255,255,255,.55)"/>
+  <circle class="smokePuff p2" cx="24" cy="-30" r="4.2" fill="rgba(255,255,255,.55)"/>
+`;
+const MILL_ADDITIONS = [
+  "", // stage 0 = base only
+  `<rect x="-64" y="14" width="24" height="28" fill="#9a6a3e" stroke="#4a2e18" stroke-width="1.5"/>
+   <rect x="-58" y="-6" width="6" height="14" fill="#5a5a5a"/>
+   <circle class="smokePuff p1" cx="-55" cy="-10" r="3" fill="rgba(255,255,255,.5)"/>`,
+  `<circle cx="46" cy="26" r="12" fill="#b7c3cf" stroke="#5a6578" stroke-width="1.5"/>
+   <rect x="40" y="-2" width="12" height="14" fill="#5a5a5a"/>`,
+  `<line x1="-40" y1="16" x2="40" y2="16" stroke="#5a5a5a" stroke-width="3"/>
+   <rect class="lightFlicker" x="-52" y="24" width="8" height="8" fill="#ffe9a8"/>`,
+  `<rect x="-78" y="10" width="150" height="34" fill="#6b7684" stroke="#3a4450" stroke-width="2" opacity=".9"/>
+   <rect x="60" y="-32" width="10" height="42" fill="#4a4a4a"/>
+   <circle class="smokePuff p1" cx="65" cy="-36" r="5" fill="rgba(255,255,255,.6)"/>
+   <circle class="smokePuff p2" cx="65" cy="-36" r="5" fill="rgba(255,255,255,.6)"/>`
+];
+function millMarkup(stage){
+  const s = Math.max(0, Math.min(stage, MILL_ADDITIONS.length - 1));
+  let out = MILL_BASE;
+  for(let i=0;i<=s;i++) out += MILL_ADDITIONS[i];
+  return out;
+}
+function millScale(stage){
+  return 1 + Math.min(stage, MILL_ADDITIONS.length - 1) * 0.09;
+}
+
+/* =========================================================
    STATE
 ========================================================= */
-const state = { currentStep:0, tapCount:0, loop:0, tribesFound:[], busy:false };
+const state = {
+  currentStep:0, tapCount:0, loop:0, tribesFound:[],
+  busy:false, gameOver:false, millStage:0
+};
 
 const NS = "http://www.w3.org/2000/svg";
 const stationsGroup = document.getElementById("stationsGroup");
@@ -478,8 +591,11 @@ const oceanGroup = document.getElementById("oceanGroup");
 const oceanFill = document.getElementById("oceanFill");
 const tribeCard = document.getElementById("tribeCard");
 const tribeName = document.getElementById("tribeName");
+const tribeCategory = document.getElementById("tribeCategory");
 const tribesList = document.getElementById("tribesList");
 const particleLayer = document.getElementById("particleLayer");
+const floodOverlay = document.getElementById("floodOverlay");
+const gameOverCard = document.getElementById("gameOverCard");
 
 /* =========================================================
    PROGRESS DOTS
@@ -508,27 +624,30 @@ function stationGraphic(step, index){
   g.setAttribute("class", "station locked");
   g.dataset.index = index;
 
-  const ring = document.createElementNS(NS, "circle");
-  ring.setAttribute("class", "ring");
-  ring.setAttribute("cx", 200); ring.setAttribute("cy", cy); ring.setAttribute("r", 68);
-  ring.setAttribute("fill", "none");
-  ring.setAttribute("stroke", "var(--water-bright)");
-  ring.setAttribute("stroke-width", 3);
-  ring.setAttribute("filter", "url(#neonGlow)");
-  g.appendChild(ring);
+  const ringOuter = document.createElementNS(NS, "circle");
+  ringOuter.setAttribute("class", "ringOuter");
+  ringOuter.setAttribute("cx", 200); ringOuter.setAttribute("cy", cy); ringOuter.setAttribute("r", 68);
+  g.appendChild(ringOuter);
+
+  const ringInner = document.createElementNS(NS, "circle");
+  ringInner.setAttribute("class", "ringInner");
+  ringInner.setAttribute("cx", 200); ringInner.setAttribute("cy", cy); ringInner.setAttribute("r", 60);
+  g.appendChild(ringInner);
 
   const body = document.createElementNS(NS, "g");
   body.setAttribute("class", "body");
+  const illustration = step.id === "mill" ? millMarkup(state.millStage) : ILLUSTRATIONS[step.id];
+  const scale = step.id === "mill" ? millScale(state.millStage) : 1;
   body.innerHTML =
     `<circle cx="200" cy="${cy}" r="60" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.2)" stroke-width="1"/>
-     <g transform="translate(200,${cy})">${ILLUSTRATIONS[step.id]}</g>`;
+     <g class="illoWrap" transform="translate(200,${cy}) scale(${scale})">${illustration}</g>`;
   g.appendChild(body);
 
   const check = document.createElementNS(NS, "text");
   check.setAttribute("class", "checkmark");
   check.setAttribute("x", 252); check.setAttribute("y", cy - 44);
-  check.setAttribute("font-size", 22);
-  check.textContent = "✅";
+  check.setAttribute("font-size", 20);
+  check.textContent = "💧";
   g.appendChild(check);
 
   const nameLabel = document.createElementNS(NS, "text");
@@ -545,6 +664,14 @@ function stationGraphic(step, index){
 }
 
 STEPS.forEach((step, i)=> stationsGroup.appendChild(stationGraphic(step, i)));
+
+function renderMillStage(){
+  const g = stationsGroup.querySelector(`.station[data-index="${MILL_INDEX}"]`);
+  if(!g) return;
+  const wrap = g.querySelector(".illoWrap");
+  wrap.innerHTML = millMarkup(state.millStage);
+  wrap.setAttribute("transform", `translate(200,${CENTERS[MILL_INDEX]}) scale(${millScale(state.millStage)})`);
+}
 
 const segEnds = [...CENTERS.slice(1), OCEAN_Y];
 const segments = [];
@@ -567,32 +694,43 @@ CENTERS.forEach((startY, i)=>{
 });
 
 /* =========================================================
-   TAP HANDLING
+   TAP HANDLING — tap anywhere in the world while a step is active
 ========================================================= */
 world.addEventListener("click", (e)=>{
-  if(state.busy) return;
+  if(state.busy || state.gameOver) return;
+  if(e.target.closest(".sidePanel, .tribeCard, .gameOverCard, .hud")) return;
+
   const g = stationsGroup.querySelector(`.station[data-index="${state.currentStep}"]`);
   if(!g) return;
   const index = state.currentStep;
-
   const step = STEPS[index];
+
   g.classList.remove("tapped"); void g.offsetWidth; g.classList.add("tapped");
 
+  const worldRect = world.getBoundingClientRect();
+  const tapX = e.clientX - worldRect.left;
+  const tapY = e.clientY - worldRect.top;
+
   state.tapCount++;
+  spawnRippleAt(tapX, tapY);
+  spawnFoamAt(tapX, tapY, state.tapCount === 3);
+  playWaterTap(state.tapCount);
 
   if(state.tapCount === 1){
     g.classList.add("highlight");
-    playTapSound();
-    spawnFoamAt(g);
   } else if(state.tapCount === 2){
     g.classList.add("showName");
-    playRevealSound();
     showToast(step.name);
   } else if(state.tapCount === 3){
     g.classList.remove("active","highlight");
     g.classList.add("done");
-    playCompleteSound();
     showToast(step.meaning);
+
+    if(index === MILL_INDEX){
+      state.millStage++;
+      renderMillStage();
+    }
+
     flowSegment(index);
   }
 
@@ -644,7 +782,8 @@ function completeLoop(){
   state.tribesFound.push(tribe);
   renderTribesList();
 
-  tribeName.textContent = tribe;
+  tribeName.textContent = tribe.name;
+  tribeCategory.textContent = tribe.category;
   tribeCard.classList.add("show");
   playLoopCompleteSound();
 
@@ -657,22 +796,40 @@ function completeLoop(){
   setTimeout(()=>{ if(tribeCard.classList.contains("show")) dismiss(); }, 3200);
 }
 
-let lastTribe = null;
+let lastTribeName = null;
 function pickTribe(){
   let t;
-  do{ t = TRIBES[Math.floor(Math.random()*TRIBES.length)]; } while(t === lastTribe && TRIBES.length > 1);
-  lastTribe = t;
+  do{ t = ALL_TRIBES[Math.floor(Math.random()*ALL_TRIBES.length)]; } while(t.name === lastTribeName && ALL_TRIBES.length > 1);
+  lastTribeName = t.name;
   return t;
 }
 
 function renderTribesList(){
   tribesList.innerHTML = "";
-  const unique = [...new Set(state.tribesFound)];
-  unique.slice().reverse().forEach(t=>{
-    const item = document.createElement("div");
-    item.className = "tribeItem";
-    item.textContent = t;
-    tribesList.appendChild(item);
+  const seen = new Set();
+  const unique = state.tribesFound.filter(t=>{
+    if(seen.has(t.name)) return false;
+    seen.add(t.name); return true;
+  }).reverse();
+
+  if(unique.length === 0){
+    tribesList.innerHTML = `<div class="emptyNote">Complete a full loop — Mountain to Ocean — to reveal your first name.</div>`;
+    return;
+  }
+
+  Object.keys(TRIBE_GROUPS).forEach(category=>{
+    const items = unique.filter(t=>t.category === category);
+    if(items.length === 0) return;
+    const header = document.createElement("div");
+    header.className = "panelGroup";
+    header.textContent = category;
+    tribesList.appendChild(header);
+    items.forEach(t=>{
+      const item = document.createElement("div");
+      item.className = "tribeItem";
+      item.textContent = t.name;
+      tribesList.appendChild(item);
+    });
   });
 }
 
@@ -696,6 +853,41 @@ function resetSystem(){
 }
 
 /* =========================================================
+   DAM BREAK / FLOOD / GAME OVER
+========================================================= */
+document.getElementById("damBreakBtn").addEventListener("click", triggerDamBreak);
+document.getElementById("rebuildBtn").addEventListener("click", rebuildSystem);
+
+function triggerDamBreak(){
+  if(state.gameOver) return;
+  state.gameOver = true;
+  state.busy = true;
+  playDamBreakSound();
+  world.classList.add("bigShake");
+  setTimeout(()=>world.classList.remove("bigShake"), 1000);
+  floodOverlay.classList.add("rising");
+  setTimeout(()=>{
+    gameOverCard.classList.add("show");
+  }, 2600);
+}
+
+function rebuildSystem(){
+  gameOverCard.classList.remove("show");
+  floodOverlay.style.transition = "none";
+  floodOverlay.classList.remove("rising");
+  void floodOverlay.offsetWidth;
+  floodOverlay.style.transition = "";
+
+  state.gameOver = false;
+  state.busy = false;
+  state.millStage = 0;
+  state.loop = 0;
+  loopCountEl.textContent = 0;
+  renderMillStage();
+  resetSystem();
+}
+
+/* =========================================================
    TOAST
 ========================================================= */
 let toastTimer;
@@ -706,16 +898,27 @@ function showToast(text){
   toastTimer = setTimeout(()=> labelToast.classList.remove("show"), 1300);
 }
 
-function spawnFoamAt(stationEl){
-  const rect = stationEl.getBoundingClientRect();
-  const worldRect = world.getBoundingClientRect();
-  const x = rect.left - worldRect.left + rect.width/2;
-  const y = rect.top - worldRect.top + rect.height/2;
-  for(let i=0;i<6;i++){
+/* =========================================================
+   RIPPLE + SPLASH EFFECTS (every single tap)
+========================================================= */
+function spawnRippleAt(x, y){
+  const ripple = document.createElement("div");
+  ripple.className = "rippleWave";
+  ripple.style.left = x + "px";
+  ripple.style.top = y + "px";
+  particleLayer.appendChild(ripple);
+  setTimeout(()=>ripple.remove(), 900);
+}
+
+function spawnFoamAt(x, y, big){
+  const count = big ? 10 : 6;
+  for(let i=0;i<count;i++){
     const foam = document.createElement("div");
     foam.className = "foam";
-    foam.style.left = (x + (Math.random()-.5)*50) + "px";
-    foam.style.top = (y + (Math.random()-.5)*40) + "px";
+    const spread = big ? 70 : 45;
+    foam.style.left = (x + (Math.random()-.5)*spread) + "px";
+    foam.style.top = (y + (Math.random()-.5)*(spread*.75)) + "px";
+    if(big){ foam.style.width = "10px"; foam.style.height = "10px"; }
     particleLayer.appendChild(foam);
     setTimeout(()=>foam.remove(), 1600);
   }
@@ -827,13 +1030,20 @@ function playWaterNoise(duration, startFreq, endFreq, peakGain){
   src.start();
   src.stop(ctx.currentTime + duration);
 }
-function playTapSound(){ playTone(520 + Math.random()*80, 0.12, "sine"); }
-function playRevealSound(){ playTone(760, 0.14, "triangle"); setTimeout(()=>playTone(980,0.18,"triangle"), 90); }
-function playCompleteSound(){ playTone(420,0.1,"sine"); setTimeout(()=>playTone(640,0.22,"sine"), 90); }
-function playFlowSound(){ playWaterNoise(0.9, 250, 1200, 0.12); }
+
+function playWaterTap(tapCount){
+  playWaterNoise(0.16, 480, 900, 0.08);
+  const freqs = [660, 840, 520];
+  playTone(freqs[(tapCount-1) % freqs.length], 0.1, "sine");
+}
+function playFlowSound(){ playWaterNoise(0.9, 250, 1200, 0.13); }
 function playOceanSound(){ playWaterNoise(1.4, 150, 500, 0.18); }
 function playLoopCompleteSound(){
   [523,659,784,1046].forEach((f,i)=> setTimeout(()=>playTone(f,0.35,"triangle"), i*110));
+}
+function playDamBreakSound(){
+  playTone(90, 0.6, "sawtooth");
+  setTimeout(()=>playWaterNoise(2.2, 400, 60, 0.28), 150);
 }
 
 /* =========================================================
@@ -850,7 +1060,7 @@ window.addEventListener("load", reportHeight);
 ========================================================= */
 activateStation(0);
 updateProgressDots();
-showToast("Tap the Mountain to begin the flow");
+showToast("Tap anywhere to begin the flow");
 
 </script>
 
