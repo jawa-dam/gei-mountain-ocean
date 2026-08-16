@@ -32,7 +32,7 @@ html,body{
   height:100%;
   overflow:hidden;
   font-family:Inter,system-ui,sans-serif;
-  background:radial-gradient(circle at 50% 0%,#132a5c,#030a16 75%);
+  background:radial-gradient(circle at 50% 0%,#1b3f8f,#050f2b 75%);
   color:#fff;
   -webkit-tap-highlight-color:transparent;
 }
@@ -105,6 +105,38 @@ html,body{
 .certLabel{ font-size:.66rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:#fff; }
 .certName{ font-size:.6rem; color:var(--gold); font-weight:800; margin-top:3px; position:relative; }
 
+/* Day badge = which day of creation. Theme badge = what was made. Both pop in as a matched pair. */
+.certBadge.dayBadge{
+  background:linear-gradient(135deg, var(--juicy-navy) 0%, #14336e 35%, var(--juicy-blue) 100%);
+  border-color:rgba(234,252,255,.55);
+  box-shadow:0 0 16px rgba(41,198,255,.55), 0 0 30px rgba(41,198,255,.25), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.certBadge.dayBadge .certName{ color:var(--foam); }
+.certBadge.themeBadge{
+  background:linear-gradient(135deg, var(--juicy-navy) 0%, #5a2e8f 35%, var(--juicy-magenta) 100%);
+  border-color:rgba(255,215,106,.6);
+  box-shadow:0 0 16px rgba(255,46,196,.5), 0 0 30px rgba(255,215,106,.2), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.certBadge.themeBadge .certName{ color:var(--gold); }
+
+/* Bonus-win pop: brief golden ring burst + scale bounce, used the moment a badge locks into place */
+.certBadge.bonusPop{ animation:bonusRing 1.1s ease-out; }
+@keyframes bonusRing{
+  0%{ box-shadow:0 0 0 0 rgba(255,215,106,.9), inset 0 1px 0 rgba(255,255,255,.5); }
+  35%{ box-shadow:0 0 0 14px rgba(255,215,106,0), inset 0 1px 0 rgba(255,255,255,.5); }
+  100%{ box-shadow:0 0 16px rgba(255,46,196,.5), inset 0 1px 0 rgba(255,255,255,.5); }
+}
+
+.badgeSparkle{
+  position:absolute; pointer-events:none; font-size:1rem;
+  animation:badgeSparkleFly .9s ease-out forwards;
+  z-index:60;
+}
+@keyframes badgeSparkleFly{
+  0%{ opacity:1; transform:translate(0,0) scale(.6) rotate(0deg); }
+  100%{ opacity:0; transform:translate(var(--sx,20px),var(--sy,-30px)) scale(1.1) rotate(180deg); }
+}
+
 /* ============ APP ============ */
 .app{
   position:relative;
@@ -167,9 +199,9 @@ html,body{
 .world{
   position:relative; flex:1; overflow:hidden;
   border-radius:24px;
-  background:linear-gradient(180deg,var(--water-deep),#02060f 60%);
-  border:1.5px solid rgba(255,255,255,.2);
-  box-shadow:0 0 40px rgba(41,198,255,.2), 0 0 60px rgba(255,46,196,.14), inset 0 0 60px rgba(0,0,0,.4);
+  background:linear-gradient(180deg,#12296b,var(--water-deep) 45%,#02060f 85%);
+  border:1.5px solid rgba(255,255,255,.24);
+  box-shadow:0 0 40px rgba(41,198,255,.28), 0 0 70px rgba(255,46,196,.16), inset 0 0 60px rgba(0,0,0,.4);
   touch-action:manipulation;
 }
 .layer{ position:absolute; inset:0; pointer-events:none; }
@@ -432,9 +464,9 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <svg id="worldSVG" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#132a5c"/>
+            <stop offset="0%" stop-color="#1b3f8f"/>
             <stop offset="55%" stop-color="#0b4d7a"/>
-            <stop offset="100%" stop-color="#04121f"/>
+            <stop offset="100%" stop-color="#03101f"/>
           </linearGradient>
           <linearGradient id="flowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stop-color="#29c6ff"/>
@@ -530,6 +562,16 @@ const TRIBE_GROUPS = {
 const ALL_TRIBES = Object.entries(TRIBE_GROUPS).flatMap(([category, names])=>
   names.map(name=>({ name, category }))
 );
+
+/* Day-of-creation pairing: left rail = "Day N", right rail = what was made — only the
+   first four stations (Mountain/Dam/Millpond/Sluice) map onto the Genesis days shown
+   in the reference certificate. */
+const DAY_LABELS = [
+  { left:"Day 1", right:"Light" },
+  { left:"Day 2", right:"Firmament" },
+  { left:"Day 3", right:"Seas" },
+  { left:"Day 4", right:"2 Lights" }
+];
 
 const CENTERS = [120, 245, 360, 470, 580, 690];
 const OCEAN_Y = 770;
@@ -782,17 +824,53 @@ CENTERS.forEach((startY, i)=>{
 /* =========================================================
    CERTIFICATE RAILS
 ========================================================= */
+function makeBadge(rail, variantClass, icon, label, name){
+  const badge = document.createElement("div");
+  badge.className = `certBadge ${variantClass}`;
+  badge.innerHTML =
+    `<div class="certTop"><span class="certIcon">${icon}</span><span class="certLabel">${label}</span></div>
+     <div class="certName">${name}</div>`;
+  rail.appendChild(badge);
+  requestAnimationFrame(()=>{
+    badge.classList.add("show");
+    setTimeout(()=>{
+      badge.classList.add("bonusPop");
+      spawnBadgeSparkles(badge);
+    }, 260);
+  });
+  return badge;
+}
+
+function spawnBadgeSparkles(badge){
+  const glyphs = ["✨","💫","⭐"];
+  for(let i=0;i<5;i++){
+    const s = document.createElement("span");
+    s.className = "badgeSparkle";
+    s.textContent = glyphs[i % glyphs.length];
+    s.style.left = (10 + Math.random()*70) + "%";
+    s.style.top = (10 + Math.random()*40) + "%";
+    s.style.setProperty("--sx", ((Math.random()-.5)*60)+"px");
+    s.style.setProperty("--sy", (-30 - Math.random()*30)+"px");
+    badge.appendChild(s);
+    setTimeout(()=>s.remove(), 950);
+  }
+}
+
 function spawnCertificate(index){
   const step = STEPS[index];
-  const rail = index % 2 === 0 ? railLeft : railRight;
-  const badge = document.createElement("div");
-  badge.className = "certBadge";
-  badge.innerHTML =
-    `<div class="certTop"><span class="certIcon">💧</span><span class="certLabel">${step.label}</span></div>
-     <div class="certName">${step.name}</div>`;
-  rail.appendChild(badge);
-  requestAnimationFrame(()=> badge.classList.add("show"));
-  playCertificateSound();
+  const dayInfo = DAY_LABELS[index];
+
+  if(dayInfo){
+    // Paired reveal: "Day N" lands on the left, what-was-made lands on the right —
+    // exactly like winning a bonus, both locking into place at once.
+    makeBadge(railLeft, "dayBadge", "📅", "Day", dayInfo.left.replace(/^Day\s*/,""));
+    makeBadge(railRight, "themeBadge", "✨", step.label, dayInfo.right);
+    playBonusUnlockSound();
+  } else {
+    const rail = index % 2 === 0 ? railLeft : railRight;
+    makeBadge(rail, "themeBadge", "💧", step.label, step.name);
+    playCertificateSound();
+  }
 }
 
 function clearCertificates(){
@@ -1153,6 +1231,11 @@ function playLoopCompleteSound(){
 }
 function playCertificateSound(){
   [700,900,1200].forEach((f,i)=> setTimeout(()=>playTone(f,0.16,"square"), i*70));
+}
+function playBonusUnlockSound(){
+  // a little rising sparkle arpeggio + shimmer, like landing a bonus
+  [660,880,1046,1318].forEach((f,i)=> setTimeout(()=>playTone(f,0.22,"triangle"), i*65));
+  setTimeout(()=>playWaterNoise(0.5, 1400, 2200, 0.05), 60);
 }
 function playDamBreakSound(){
   playTone(90, 0.6, "sawtooth");
