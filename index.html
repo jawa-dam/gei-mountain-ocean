@@ -137,6 +137,47 @@ html,body{
   100%{ opacity:0; transform:translate(var(--sx,20px),var(--sy,-30px)) scale(1.1) rotate(180deg); }
 }
 
+.mobileBadgeDock{
+  display:none;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:8px;
+  flex-shrink:0;
+}
+@media(max-width:999px){ .mobileBadgeDock{ display:flex; } }
+.mobileBadgeRow{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:2px 2px 6px;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+.mobileBadgeRow::-webkit-scrollbar{ height:5px; }
+.mobileBadgeRow::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.25); border-radius:999px; }
+.mobileChip{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:5px;
+  padding:7px 12px;
+  border-radius:999px;
+  font-size:.7rem; font-weight:800; white-space:nowrap;
+  border:1.5px solid rgba(255,255,255,.4);
+  opacity:0; transform:scale(.7) translateY(6px);
+  transition:opacity .4s cubic-bezier(.34,1.56,.64,1), transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.mobileChip.show{ opacity:1; transform:scale(1) translateY(0); }
+.mobileChip.dayChip{
+  background:linear-gradient(135deg, var(--juicy-navy), var(--juicy-blue));
+  box-shadow:0 0 10px rgba(41,198,255,.5);
+}
+.mobileChip.themeChip{
+  background:linear-gradient(135deg, var(--juicy-navy), var(--juicy-magenta));
+  box-shadow:0 0 10px rgba(255,46,196,.45);
+}
+.mobileChip .chipName{ color:var(--gold); }
+.mobileChip.dayChip .chipName{ color:var(--foam); }
+.mobileChip.bonusPop{ animation:bonusRing 1.1s ease-out; }
+
 /* ============ APP ============ */
 .app{
   position:relative;
@@ -455,6 +496,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <div class="loopBadge">Loop <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
     </div>
 
+    <div class="mobileBadgeDock" id="mobileBadgeDock">
+      <div class="mobileBadgeRow" id="mobileDayRow"></div>
+      <div class="mobileBadgeRow" id="mobileThemeRow"></div>
+    </div>
+
     <div class="world" id="world">
       <div class="layer" id="mistLayer"></div>
       <div class="layer" id="particleLayer"></div>
@@ -724,6 +770,8 @@ const floodOverlay = document.getElementById("floodOverlay");
 const gameOverCard = document.getElementById("gameOverCard");
 const railLeft = document.getElementById("railLeft");
 const railRight = document.getElementById("railRight");
+const mobileDayRow = document.getElementById("mobileDayRow");
+const mobileThemeRow = document.getElementById("mobileThemeRow");
 
 /* =========================================================
    PROGRESS DOTS
@@ -856,6 +904,19 @@ function spawnBadgeSparkles(badge){
   }
 }
 
+function makeMobileChip(row, variantClass, icon, label, name){
+  const chip = document.createElement("div");
+  chip.className = `mobileChip ${variantClass}`;
+  chip.innerHTML = `<span>${icon}</span><span>${label}:</span><span class="chipName">${name}</span>`;
+  row.appendChild(chip);
+  requestAnimationFrame(()=>{
+    chip.classList.add("show");
+    chip.scrollIntoView({ behavior:"smooth", inline:"end", block:"nearest" });
+    setTimeout(()=> chip.classList.add("bonusPop"), 260);
+  });
+  return chip;
+}
+
 function spawnCertificate(index){
   const step = STEPS[index];
   const dayInfo = DAY_LABELS[index];
@@ -863,12 +924,16 @@ function spawnCertificate(index){
   if(dayInfo){
     // Paired reveal: "Day N" lands on the left, what-was-made lands on the right —
     // exactly like winning a bonus, both locking into place at once.
-    makeBadge(railLeft, "dayBadge", "📅", "Day", dayInfo.left.replace(/^Day\s*/,""));
+    const dayShort = dayInfo.left.replace(/^Day\s*/,"");
+    makeBadge(railLeft, "dayBadge", "📅", "Day", dayShort);
     makeBadge(railRight, "themeBadge", "✨", step.label, dayInfo.right);
+    makeMobileChip(mobileDayRow, "dayChip", "📅", "Day", dayShort);
+    makeMobileChip(mobileThemeRow, "themeChip", "✨", step.label, dayInfo.right);
     playBonusUnlockSound();
   } else {
     const rail = index % 2 === 0 ? railLeft : railRight;
     makeBadge(rail, "themeBadge", "💧", step.label, step.name);
+    makeMobileChip(mobileThemeRow, "themeChip", "💧", step.label, step.name);
     playCertificateSound();
   }
 }
@@ -876,6 +941,8 @@ function spawnCertificate(index){
 function clearCertificates(){
   railLeft.innerHTML = "";
   railRight.innerHTML = "";
+  mobileDayRow.innerHTML = "";
+  mobileThemeRow.innerHTML = "";
 }
 
 /* =========================================================
