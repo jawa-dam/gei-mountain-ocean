@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>The Nite Lite | YALLTOO</title>
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
+<script>
+(function(){
+  var ids = ["aurora","clay","canopy","heaven","neon","ember","abyss"];
+  var last = null;
+  try { last = sessionStorage.getItem("ytNiteSkin"); } catch (e) {}
+  var pick;
+  do { pick = ids[Math.floor(Math.random() * ids.length)]; } while (pick === last && ids.length > 1);
+  try { sessionStorage.setItem("ytNiteSkin", pick); } catch (e) {}
+  document.documentElement.className = "skin-" + pick;
+  document.documentElement.setAttribute("data-skin", pick);
+})();
+</script>
 <style>
 
 :root{
@@ -12,7 +24,6 @@
   --water-bright:#2fd2ff;
   --foam:#eafcff;
 
-  /* juicy chrome palette, pulled from the yallToo "Punc" button */
   --juicy-navy:#0b1739;
   --juicy-blue:#29c6ff;
   --juicy-violet:#7a5cff;
@@ -24,6 +35,442 @@
   --panel:rgba(6,11,28,.9);
   --glassBorder:rgba(255,255,255,.16);
   --radius:22px;
+
+  --page-bg-a:#1b3f8f;
+  --page-bg-b:#050f2b;
+  --sky-0:#1b3f8f;
+  --sky-1:#0b4d7a;
+  --sky-2:#03101f;
+  --world-top:#12296b;
+  --world-bot:#02060f;
+  --glow-a:rgba(41,198,255,.18);
+  --glow-b:rgba(255,46,196,.14);
+  --flow-0:#29c6ff;
+  --flow-1:#eafcff;
+  --flow-2:#7a5cff;
+  --mtn-front-0:#8fa3d9;
+  --mtn-front-1:#5b6ca8;
+  --mtn-back:#5b6ca8;
+  --snow:#eaf6ff;
+  --tree:#204a34;
+  --water-accent:#29c6ff;
+  --dam-0:#d7dfe8;
+  --dam-1:#9aa8bb;
+  --dam-stroke:#6d7c92;
+  --dam-line:rgba(60,75,95,.35);
+  --pond-0:#7cf9ff;
+  --pond-1:#0f8fc7;
+  --reed:#2f8f5a;
+  --sluice:#8697ad;
+  --sluice-stroke:#5a6578;
+  --wood-0:#b97a4a;
+  --wood-1:#7a4a2a;
+  --wood-mid:#8a5a2b;
+  --wood-spoke:#6b4423;
+  --wood-dark:#5a3a1e;
+  --mill-roof:#7a3b2e;
+  --mill-door:#3a2416;
+  --mill-light:#ffe9a8;
+  --mill-metal:#5a5a5a;
+  --mill-add:#9a6a3e;
+  --mill-tank:#b7c3cf;
+  --mill-factory:#6b7684;
+  --mill-factory-stroke:#3a4450;
+  --ocean:#29c6ff;
+  --mist:rgba(41,198,255,.12);
+  --seg-track:rgba(41,198,255,.32);
+  --flood-0:rgba(41,198,255,.88);
+  --flood-1:rgba(3,12,28,.97);
+  --flash:rgba(41,198,255,.45);
+  --fs-bg:#03060f;
+  --deco-shadow:rgba(41,198,255,.6);
+}
+
+/* ===== SKIN: Aurora (original Nite Lite) ===== */
+html.skin-aurora{ color-scheme: dark; }
+
+/* ===== SKIN: Red Clay — terracotta harvest night ===== */
+html.skin-clay{
+  --water-deep:#2a1208;
+  --water-bright:#ffb067;
+  --foam:#fff3e0;
+  --juicy-navy:#2a140c;
+  --juicy-blue:#e07a3d;
+  --juicy-violet:#c45c26;
+  --juicy-magenta:#9a3412;
+  --juicy-pink:#f2cc8f;
+  --gold:#ffd76a;
+  --danger:#ff6b5a;
+  --panel:rgba(28,12,6,.92);
+  --radius:16px;
+  --page-bg-a:#6b2a12;
+  --page-bg-b:#1a0c06;
+  --sky-0:#c45c26;
+  --sky-1:#7a2e12;
+  --sky-2:#1c0c08;
+  --world-top:#5a2814;
+  --world-bot:#120806;
+  --glow-a:rgba(224,122,61,.24);
+  --glow-b:rgba(242,204,143,.16);
+  --flow-0:#e07a3d;
+  --flow-1:#fff3e0;
+  --flow-2:#c45c26;
+  --mtn-front-0:#d4a373;
+  --mtn-front-1:#8b5a32;
+  --mtn-back:#6b4423;
+  --snow:#fff6e8;
+  --tree:#3d4a1c;
+  --water-accent:#ffb067;
+  --dam-0:#e8d5c4;
+  --dam-1:#b08968;
+  --dam-stroke:#7a5c43;
+  --dam-line:rgba(90,50,20,.35);
+  --pond-0:#ffd6a5;
+  --pond-1:#c45c26;
+  --reed:#606c38;
+  --sluice:#c4a484;
+  --sluice-stroke:#7a5c43;
+  --wood-0:#c47a3a;
+  --wood-1:#7a3e18;
+  --wood-mid:#a35c22;
+  --wood-spoke:#6b3a14;
+  --wood-dark:#4a240e;
+  --mill-roof:#8a2e12;
+  --mill-door:#3a1c0c;
+  --mill-light:#ffe9a8;
+  --mill-metal:#6b5344;
+  --mill-add:#b07a48;
+  --mill-tank:#d4c4b0;
+  --mill-factory:#8a6a50;
+  --mill-factory-stroke:#4a3020;
+  --ocean:#e07a3d;
+  --mist:rgba(224,122,61,.14);
+  --seg-track:rgba(224,122,61,.38);
+  --flood-0:rgba(224,122,61,.9);
+  --flood-1:rgba(28,8,4,.97);
+  --flash:rgba(224,122,61,.45);
+  --fs-bg:#120806;
+  --deco-shadow:rgba(224,122,61,.65);
+}
+
+/* ===== SKIN: Canopy — moss, creek, fireflies ===== */
+html.skin-canopy{
+  --water-deep:#042016;
+  --water-bright:#5eead4;
+  --foam:#ecfdf5;
+  --juicy-navy:#052e16;
+  --juicy-blue:#34d399;
+  --juicy-violet:#65a30d;
+  --juicy-magenta:#a3e635;
+  --juicy-pink:#bbf7d0;
+  --gold:#fde68a;
+  --danger:#fb7185;
+  --panel:rgba(4,22,14,.92);
+  --radius:24px;
+  --page-bg-a:#14532d;
+  --page-bg-b:#022c16;
+  --sky-0:#166534;
+  --sky-1:#064e3b;
+  --sky-2:#022c22;
+  --world-top:#14532d;
+  --world-bot:#01140c;
+  --glow-a:rgba(52,211,153,.22);
+  --glow-b:rgba(163,230,53,.16);
+  --flow-0:#34d399;
+  --flow-1:#ecfdf5;
+  --flow-2:#a3e635;
+  --mtn-front-0:#86efac;
+  --mtn-front-1:#3f6b4a;
+  --mtn-back:#2f4a38;
+  --snow:#f0fdf4;
+  --tree:#14532d;
+  --water-accent:#5eead4;
+  --dam-0:#c8ddd0;
+  --dam-1:#7a9a86;
+  --dam-stroke:#4a6b58;
+  --dam-line:rgba(30,60,40,.35);
+  --pond-0:#99f6e4;
+  --pond-1:#0f766e;
+  --reed:#166534;
+  --sluice:#7a9a86;
+  --sluice-stroke:#3f5a4a;
+  --wood-0:#a67c52;
+  --wood-1:#5c3d24;
+  --wood-mid:#8a5a32;
+  --wood-spoke:#5c3d24;
+  --wood-dark:#3a2416;
+  --mill-roof:#3f6212;
+  --mill-door:#1c1917;
+  --mill-light:#fef08a;
+  --mill-metal:#4a5a50;
+  --mill-add:#6b8f4a;
+  --mill-tank:#a7c4b0;
+  --mill-factory:#4a6b58;
+  --mill-factory-stroke:#24382e;
+  --ocean:#2dd4bf;
+  --mist:rgba(52,211,153,.14);
+  --seg-track:rgba(52,211,153,.35);
+  --flood-0:rgba(45,212,191,.88);
+  --flood-1:rgba(2,20,14,.97);
+  --flash:rgba(52,211,153,.45);
+  --fs-bg:#01140c;
+  --deco-shadow:rgba(52,211,153,.6);
+}
+
+/* ===== SKIN: Heaven — golden hour, ivory light ===== */
+html.skin-heaven{
+  --water-deep:#1c1910;
+  --water-bright:#f5d76e;
+  --foam:#fffbeb;
+  --juicy-navy:#1c1917;
+  --juicy-blue:#fbbf24;
+  --juicy-violet:#d4a017;
+  --juicy-magenta:#fde68a;
+  --juicy-pink:#fef3c7;
+  --gold:#ffe08a;
+  --danger:#f87171;
+  --panel:rgba(28,22,12,.92);
+  --radius:26px;
+  --page-bg-a:#4a3f24;
+  --page-bg-b:#12100a;
+  --sky-0:#6b5a30;
+  --sky-1:#3a3018;
+  --sky-2:#12100a;
+  --world-top:#3f3620;
+  --world-bot:#0c0a06;
+  --glow-a:rgba(251,191,36,.22);
+  --glow-b:rgba(253,230,138,.18);
+  --flow-0:#fbbf24;
+  --flow-1:#fffbeb;
+  --flow-2:#d4a017;
+  --mtn-front-0:#e8d5a3;
+  --mtn-front-1:#8a7340;
+  --mtn-back:#6b5a30;
+  --snow:#fffbeb;
+  --tree:#3f4a20;
+  --water-accent:#f5d76e;
+  --dam-0:#efe6d4;
+  --dam-1:#c4b494;
+  --dam-stroke:#8a7a58;
+  --dam-line:rgba(90,70,30,.35);
+  --pond-0:#fde68a;
+  --pond-1:#b45309;
+  --reed:#a16207;
+  --sluice:#c4b494;
+  --sluice-stroke:#8a7a58;
+  --wood-0:#d4a017;
+  --wood-1:#7a4e10;
+  --wood-mid:#b45309;
+  --wood-spoke:#7a4e10;
+  --wood-dark:#4a2e0c;
+  --mill-roof:#92400e;
+  --mill-door:#1c1917;
+  --mill-light:#fef9c3;
+  --mill-metal:#78716c;
+  --mill-add:#c4a056;
+  --mill-tank:#e7e5e4;
+  --mill-factory:#a8a29e;
+  --mill-factory-stroke:#57534e;
+  --ocean:#f5d76e;
+  --mist:rgba(251,191,36,.14);
+  --seg-track:rgba(251,191,36,.38);
+  --flood-0:rgba(245,215,110,.9);
+  --flood-1:rgba(20,16,8,.97);
+  --flash:rgba(251,191,36,.45);
+  --fs-bg:#0c0a06;
+  --deco-shadow:rgba(251,191,36,.65);
+}
+
+/* ===== SKIN: Neon Grid — arcade magenta / lime ===== */
+html.skin-neon{
+  --water-deep:#05050a;
+  --water-bright:#c8ff00;
+  --foam:#f5f5ff;
+  --juicy-navy:#0a0a12;
+  --juicy-blue:#ff2d95;
+  --juicy-violet:#7a5cff;
+  --juicy-magenta:#c8ff00;
+  --juicy-pink:#ff6bb5;
+  --gold:#c8ff00;
+  --danger:#ff2d95;
+  --panel:rgba(8,8,16,.94);
+  --radius:10px;
+  --page-bg-a:#1a0520;
+  --page-bg-b:#050508;
+  --sky-0:#1a0030;
+  --sky-1:#0a0018;
+  --sky-2:#000000;
+  --world-top:#140020;
+  --world-bot:#000000;
+  --glow-a:rgba(255,45,149,.28);
+  --glow-b:rgba(200,255,0,.18);
+  --flow-0:#ff2d95;
+  --flow-1:#c8ff00;
+  --flow-2:#7a5cff;
+  --mtn-front-0:#c084fc;
+  --mtn-front-1:#3b0764;
+  --mtn-back:#2e1065;
+  --snow:#f5f5ff;
+  --tree:#14532d;
+  --water-accent:#c8ff00;
+  --dam-0:#2a2a38;
+  --dam-1:#161622;
+  --dam-stroke:#c8ff00;
+  --dam-line:rgba(200,255,0,.28);
+  --pond-0:#c8ff00;
+  --pond-1:#7a5cff;
+  --reed:#22c55e;
+  --sluice:#2a2a38;
+  --sluice-stroke:#ff2d95;
+  --wood-0:#ff2d95;
+  --wood-1:#7a5cff;
+  --wood-mid:#ff2d95;
+  --wood-spoke:#7a5cff;
+  --wood-dark:#1a0520;
+  --mill-roof:#ff2d95;
+  --mill-door:#050508;
+  --mill-light:#c8ff00;
+  --mill-metal:#3f3f46;
+  --mill-add:#7a5cff;
+  --mill-tank:#27272a;
+  --mill-factory:#18181b;
+  --mill-factory-stroke:#c8ff00;
+  --ocean:#ff2d95;
+  --mist:rgba(200,255,0,.1);
+  --seg-track:rgba(200,255,0,.4);
+  --flood-0:rgba(255,45,149,.88);
+  --flood-1:rgba(5,5,10,.97);
+  --flash:rgba(200,255,0,.4);
+  --fs-bg:#000000;
+  --deco-shadow:rgba(200,255,0,.7);
+}
+
+/* ===== SKIN: Ember Dam — volcanic lava night ===== */
+html.skin-ember{
+  --water-deep:#1a0804;
+  --water-bright:#ff7a18;
+  --foam:#ffe8d6;
+  --juicy-navy:#1a0a06;
+  --juicy-blue:#ff6a00;
+  --juicy-violet:#ff2a2a;
+  --juicy-magenta:#ff7a18;
+  --juicy-pink:#ffb347;
+  --gold:#ffd76a;
+  --danger:#ff3b30;
+  --panel:rgba(22,8,4,.93);
+  --radius:14px;
+  --page-bg-a:#4a1408;
+  --page-bg-b:#0a0402;
+  --sky-0:#5a1a08;
+  --sky-1:#2a0c06;
+  --sky-2:#0a0402;
+  --world-top:#3a1208;
+  --world-bot:#080201;
+  --glow-a:rgba(255,106,0,.26);
+  --glow-b:rgba(255,42,42,.18);
+  --flow-0:#ff6a00;
+  --flow-1:#ffe8d6;
+  --flow-2:#ff2a2a;
+  --mtn-front-0:#8a4a32;
+  --mtn-front-1:#3a1c14;
+  --mtn-back:#2a1410;
+  --snow:#ffe8d6;
+  --tree:#1c2a10;
+  --water-accent:#ff7a18;
+  --dam-0:#6b5344;
+  --dam-1:#3a2a22;
+  --dam-stroke:#1c1410;
+  --dam-line:rgba(255,106,0,.25);
+  --pond-0:#ffb347;
+  --pond-1:#9a1a00;
+  --reed:#3f6212;
+  --sluice:#4a3028;
+  --sluice-stroke:#1c1410;
+  --wood-0:#9a3412;
+  --wood-1:#4a1808;
+  --wood-mid:#7a2e0e;
+  --wood-spoke:#4a1808;
+  --wood-dark:#2a0c06;
+  --mill-roof:#7f1d1d;
+  --mill-door:#1c0a06;
+  --mill-light:#ffd76a;
+  --mill-metal:#44403c;
+  --mill-add:#9a3412;
+  --mill-tank:#78716c;
+  --mill-factory:#292524;
+  --mill-factory-stroke:#ff6a00;
+  --ocean:#ff6a00;
+  --mist:rgba(255,106,0,.14);
+  --seg-track:rgba(255,106,0,.4);
+  --flood-0:rgba(255,106,0,.9);
+  --flood-1:rgba(10,4,2,.97);
+  --flash:rgba(255,106,0,.5);
+  --fs-bg:#080201;
+  --deco-shadow:rgba(255,106,0,.7);
+}
+
+/* ===== SKIN: Abyss — bioluminescent deep ===== */
+html.skin-abyss{
+  --water-deep:#010814;
+  --water-bright:#00ffc8;
+  --foam:#e6ffff;
+  --juicy-navy:#020617;
+  --juicy-blue:#22d3ee;
+  --juicy-violet:#6366f1;
+  --juicy-magenta:#00ffc8;
+  --juicy-pink:#67e8f9;
+  --gold:#67e8f9;
+  --danger:#fb7185;
+  --panel:rgba(2,6,23,.94);
+  --radius:20px;
+  --page-bg-a:#0b1a3a;
+  --page-bg-b:#01040d;
+  --sky-0:#0c1a3a;
+  --sky-1:#061018;
+  --sky-2:#01040d;
+  --world-top:#0b1a3a;
+  --world-bot:#000208;
+  --glow-a:rgba(0,255,200,.2);
+  --glow-b:rgba(99,102,241,.18);
+  --flow-0:#22d3ee;
+  --flow-1:#e6ffff;
+  --flow-2:#00ffc8;
+  --mtn-front-0:#1e3a5f;
+  --mtn-front-1:#0b1a33;
+  --mtn-back:#0a1628;
+  --snow:#e6ffff;
+  --tree:#064e3b;
+  --water-accent:#00ffc8;
+  --dam-0:#1e3a5f;
+  --dam-1:#0f2744;
+  --dam-stroke:#22d3ee;
+  --dam-line:rgba(0,255,200,.28);
+  --pond-0:#67e8f9;
+  --pond-1:#0e7490;
+  --reed:#115e59;
+  --sluice:#1e3a5f;
+  --sluice-stroke:#22d3ee;
+  --wood-0:#164e63;
+  --wood-1:#083344;
+  --wood-mid:#0e7490;
+  --wood-spoke:#083344;
+  --wood-dark:#042f2e;
+  --mill-roof:#1e3a8a;
+  --mill-door:#020617;
+  --mill-light:#a5f3fc;
+  --mill-metal:#334155;
+  --mill-add:#164e63;
+  --mill-tank:#1e3a5f;
+  --mill-factory:#0f172a;
+  --mill-factory-stroke:#00ffc8;
+  --ocean:#00ffc8;
+  --mist:rgba(0,255,200,.12);
+  --seg-track:rgba(0,255,200,.35);
+  --flood-0:rgba(0,255,200,.85);
+  --flood-1:rgba(1,4,13,.97);
+  --flash:rgba(0,255,200,.4);
+  --fs-bg:#000208;
+  --deco-shadow:rgba(0,255,200,.7);
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -32,7 +479,7 @@ html,body{
   height:100%;
   overflow:hidden;
   font-family:Inter,system-ui,sans-serif;
-  background:radial-gradient(circle at 50% 0%,#1b3f8f,#050f2b 75%);
+  background:radial-gradient(circle at 50% 0%,var(--page-bg-a),var(--page-bg-b) 75%);
   color:#fff;
   -webkit-tap-highlight-color:transparent;
 }
@@ -45,18 +492,52 @@ html,body{
 .bgGlow{
   position:absolute; width:clamp(280px,80vw,640px); height:clamp(280px,80vw,640px);
   border-radius:50%;
-  background:radial-gradient(circle, rgba(41,198,255,.18), transparent 70%);
+  background:radial-gradient(circle, var(--glow-a), transparent 70%);
   animation:floatGlow 24s ease-in-out infinite;
 }
 .bgGlow:nth-child(2){
   right:-180px; bottom:-100px;
-  background:radial-gradient(circle, rgba(255,46,196,.14), transparent 70%);
+  background:radial-gradient(circle, var(--glow-b), transparent 70%);
   animation-duration:32s;
 }
 @keyframes floatGlow{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-50px);} }
 
+html.skin-heaven .bg{
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,.75), transparent),
+    radial-gradient(1px 1px at 28% 42%, rgba(255,215,106,.8), transparent),
+    radial-gradient(1.5px 1.5px at 63% 14%, rgba(255,255,255,.7), transparent),
+    radial-gradient(1px 1px at 81% 36%, rgba(255,215,106,.7), transparent),
+    radial-gradient(1px 1px at 44% 8%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1.5px 1.5px at 90% 70%, rgba(255,255,255,.5), transparent);
+}
+html.skin-neon .bg::after{
+  content:"";
+  position:absolute; inset:0;
+  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.18) 3px);
+  opacity:.45;
+}
+html.skin-neon .world{
+  box-shadow:0 0 40px rgba(255,45,149,.4), 0 0 70px rgba(200,255,0,.16), inset 0 0 60px rgba(0,0,0,.5);
+}
+html.skin-ember .world{
+  box-shadow:0 0 40px rgba(255,106,0,.4), 0 0 70px rgba(255,42,42,.2), inset 0 0 60px rgba(0,0,0,.45);
+}
+html.skin-abyss .world{
+  box-shadow:0 0 50px rgba(0,255,200,.28), 0 0 80px rgba(99,102,241,.18), inset 0 0 70px rgba(0,0,0,.5);
+}
+html.skin-canopy .world{
+  box-shadow:0 0 40px rgba(52,211,153,.3), 0 0 70px rgba(163,230,53,.14), inset 0 0 60px rgba(0,0,0,.4);
+}
+html.skin-clay .world{
+  box-shadow:0 0 40px rgba(224,122,61,.32), 0 0 70px rgba(154,52,18,.18), inset 0 0 60px rgba(0,0,0,.4);
+}
+html.skin-heaven .world{
+  box-shadow:0 0 40px rgba(251,191,36,.32), 0 0 70px rgba(253,230,138,.16), inset 0 0 60px rgba(0,0,0,.35);
+}
+
 .dropletDeco{
-  position:absolute; font-size:1.6rem; opacity:.35; filter:drop-shadow(0 0 8px rgba(41,198,255,.6));
+  position:absolute; font-size:1.6rem; opacity:.35; filter:drop-shadow(0 0 8px var(--deco-shadow));
   animation:dropletBob 6s ease-in-out infinite;
 }
 @keyframes dropletBob{ 0%,100%{ transform:translateY(0) rotate(0deg);} 50%{ transform:translateY(-14px) rotate(6deg);} }
@@ -85,9 +566,9 @@ html,body{
   width:100%;
   padding:12px 14px;
   border-radius:16px;
-  background:linear-gradient(135deg, var(--juicy-navy) 0%, #14336e 30%, var(--juicy-violet) 68%, var(--juicy-magenta) 100%);
+  background:linear-gradient(135deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 70%, var(--juicy-violet)) 30%, var(--juicy-violet) 68%, var(--juicy-magenta) 100%);
   border:1.5px solid rgba(255,255,255,.4);
-  box-shadow:0 0 16px rgba(122,92,255,.5), 0 0 26px rgba(255,46,196,.25), inset 0 1px 0 rgba(255,255,255,.45);
+  box-shadow:0 0 16px color-mix(in srgb, var(--juicy-violet) 50%, transparent), 0 0 26px color-mix(in srgb, var(--juicy-magenta) 25%, transparent), inset 0 1px 0 rgba(255,255,255,.45);
   overflow:hidden;
   opacity:0;
   transform:translateX(-30px) scale(.85);
@@ -101,30 +582,28 @@ html,body{
   pointer-events:none;
 }
 .certTop{ display:flex; align-items:center; gap:6px; position:relative; }
-.certIcon{ font-size:1.05rem; filter:drop-shadow(0 0 4px rgba(41,198,255,.8)); }
+.certIcon{ font-size:1.05rem; filter:drop-shadow(0 0 4px color-mix(in srgb, var(--juicy-blue) 80%, transparent)); }
 .certLabel{ font-size:.66rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:#fff; }
 .certName{ font-size:.6rem; color:var(--gold); font-weight:800; margin-top:3px; position:relative; }
 
-/* Day badge = which day of creation. Theme badge = what was made. Both pop in as a matched pair. */
 .certBadge.dayBadge{
-  background:linear-gradient(135deg, var(--juicy-navy) 0%, #14336e 35%, var(--juicy-blue) 100%);
-  border-color:rgba(234,252,255,.55);
-  box-shadow:0 0 16px rgba(41,198,255,.55), 0 0 30px rgba(41,198,255,.25), inset 0 1px 0 rgba(255,255,255,.5);
+  background:linear-gradient(135deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 65%, var(--juicy-blue)) 35%, var(--juicy-blue) 100%);
+  border-color:color-mix(in srgb, var(--foam) 55%, transparent);
+  box-shadow:0 0 16px color-mix(in srgb, var(--juicy-blue) 55%, transparent), 0 0 30px color-mix(in srgb, var(--juicy-blue) 25%, transparent), inset 0 1px 0 rgba(255,255,255,.5);
 }
 .certBadge.dayBadge .certName{ color:var(--foam); }
 .certBadge.themeBadge{
-  background:linear-gradient(135deg, var(--juicy-navy) 0%, #5a2e8f 35%, var(--juicy-magenta) 100%);
-  border-color:rgba(255,215,106,.6);
-  box-shadow:0 0 16px rgba(255,46,196,.5), 0 0 30px rgba(255,215,106,.2), inset 0 1px 0 rgba(255,255,255,.5);
+  background:linear-gradient(135deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 55%, var(--juicy-magenta)) 35%, var(--juicy-magenta) 100%);
+  border-color:color-mix(in srgb, var(--gold) 60%, transparent);
+  box-shadow:0 0 16px color-mix(in srgb, var(--juicy-magenta) 50%, transparent), 0 0 30px color-mix(in srgb, var(--gold) 20%, transparent), inset 0 1px 0 rgba(255,255,255,.5);
 }
 .certBadge.themeBadge .certName{ color:var(--gold); }
 
-/* Bonus-win pop: brief golden ring burst + scale bounce, used the moment a badge locks into place */
 .certBadge.bonusPop{ animation:bonusRing 1.1s ease-out; }
 @keyframes bonusRing{
-  0%{ box-shadow:0 0 0 0 rgba(255,215,106,.9), inset 0 1px 0 rgba(255,255,255,.5); }
-  35%{ box-shadow:0 0 0 14px rgba(255,215,106,0), inset 0 1px 0 rgba(255,255,255,.5); }
-  100%{ box-shadow:0 0 16px rgba(255,46,196,.5), inset 0 1px 0 rgba(255,255,255,.5); }
+  0%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--gold) 90%, transparent), inset 0 1px 0 rgba(255,255,255,.5); }
+  35%{ box-shadow:0 0 0 14px transparent, inset 0 1px 0 rgba(255,255,255,.5); }
+  100%{ box-shadow:0 0 16px color-mix(in srgb, var(--juicy-magenta) 50%, transparent), inset 0 1px 0 rgba(255,255,255,.5); }
 }
 
 .badgeSparkle{
@@ -168,11 +647,11 @@ html,body{
 .mobileChip.show{ opacity:1; transform:scale(1) translateY(0); }
 .mobileChip.dayChip{
   background:linear-gradient(135deg, var(--juicy-navy), var(--juicy-blue));
-  box-shadow:0 0 10px rgba(41,198,255,.5);
+  box-shadow:0 0 10px color-mix(in srgb, var(--juicy-blue) 50%, transparent);
 }
 .mobileChip.themeChip{
   background:linear-gradient(135deg, var(--juicy-navy), var(--juicy-magenta));
-  box-shadow:0 0 10px rgba(255,46,196,.45);
+  box-shadow:0 0 10px color-mix(in srgb, var(--juicy-magenta) 45%, transparent);
 }
 .mobileChip .chipName{ color:var(--gold); }
 .mobileChip.dayChip .chipName{ color:var(--foam); }
@@ -198,7 +677,7 @@ html,body{
   margin-bottom:8px;
   flex-shrink:0;
   overflow:hidden;
-  box-shadow:0 0 22px rgba(122,92,255,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow:0 0 22px color-mix(in srgb, var(--juicy-violet) 22%, transparent), inset 0 1px 0 rgba(255,255,255,.12);
 }
 .hud::before{
   content:""; position:absolute; top:0; left:0; right:0; height:4px;
@@ -213,7 +692,7 @@ html,body{
   background-size:200% auto;
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
   animation:hueSlide 7s linear infinite;
-  filter:drop-shadow(0 0 10px rgba(122,92,255,.4));
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--juicy-violet) 40%, transparent));
 }
 @keyframes hueSlide{ to{ background-position:200% center; } }
 
@@ -225,10 +704,10 @@ html,body{
   color:#fff; font-size:.95rem;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer;
-  box-shadow:0 0 10px rgba(41,198,255,.55), inset 0 1px 0 rgba(255,255,255,.55);
+  box-shadow:0 0 10px color-mix(in srgb, var(--juicy-blue) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.55);
 }
 .iconBtn:active{ transform:scale(.92); }
-.iconBtn.danger{ background:linear-gradient(135deg, #ff5e7a, var(--juicy-magenta) 60%, #a30044); box-shadow:0 0 10px rgba(255,94,122,.6), inset 0 1px 0 rgba(255,255,255,.5); }
+.iconBtn.danger{ background:linear-gradient(135deg, var(--danger), var(--juicy-magenta) 60%, color-mix(in srgb, var(--juicy-magenta) 40%, #000)); box-shadow:0 0 10px color-mix(in srgb, var(--danger) 60%, transparent), inset 0 1px 0 rgba(255,255,255,.5); }
 
 .progressRow{ display:flex; align-items:center; gap:6px; margin-top:10px; }
 .dot{ flex:1; height:8px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; }
@@ -240,9 +719,9 @@ html,body{
 .world{
   position:relative; flex:1; overflow:hidden;
   border-radius:24px;
-  background:linear-gradient(180deg,#12296b,var(--water-deep) 45%,#02060f 85%);
+  background:linear-gradient(180deg,var(--world-top),var(--water-deep) 45%,var(--world-bot) 85%);
   border:1.5px solid rgba(255,255,255,.24);
-  box-shadow:0 0 40px rgba(41,198,255,.28), 0 0 70px rgba(255,46,196,.16), inset 0 0 60px rgba(0,0,0,.4);
+  box-shadow:0 0 40px color-mix(in srgb, var(--juicy-blue) 28%, transparent), 0 0 70px color-mix(in srgb, var(--juicy-magenta) 16%, transparent), inset 0 0 60px rgba(0,0,0,.4);
   touch-action:manipulation;
 }
 .layer{ position:absolute; inset:0; pointer-events:none; }
@@ -309,7 +788,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
 /* ============ SEGMENTS ============ */
 .segTrack{
-  stroke:rgba(41,198,255,.32); stroke-width:9; stroke-linecap:round; fill:none;
+  stroke:var(--seg-track); stroke-width:9; stroke-linecap:round; fill:none;
   stroke-dasharray:5 13; animation:trackFlow 1.1s linear infinite;
 }
 @keyframes trackFlow{ to{ stroke-dashoffset:-36; } }
@@ -329,12 +808,12 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .labelToast{
   position:absolute; top:10px; left:50%; transform:translate(-50%,-14px);
   padding:8px 16px; border-radius:999px;
-  background:linear-gradient(135deg, rgba(11,23,57,.92), rgba(122,92,255,.35));
+  background:linear-gradient(135deg, color-mix(in srgb, var(--juicy-navy) 92%, transparent), color-mix(in srgb, var(--juicy-violet) 35%, transparent));
   border:1px solid rgba(255,255,255,.3);
   font-weight:800; font-size:.82rem;
   white-space:nowrap; opacity:0; pointer-events:none;
   transition:opacity .25s, transform .25s;
-  z-index:40; box-shadow:0 0 20px rgba(41,198,255,.3);
+  z-index:40; box-shadow:0 0 20px color-mix(in srgb, var(--juicy-blue) 30%, transparent);
   max-width:88%; text-align:center;
 }
 .labelToast.show{ opacity:1; transform:translate(-50%,0); }
@@ -342,7 +821,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 /* ============ RIPPLE ============ */
 .rippleWave{
   position:absolute; width:22px; height:22px;
-  border:3px solid rgba(234,252,255,.85);
+  border:3px solid color-mix(in srgb, var(--foam) 85%, transparent);
   border-radius:50%;
   transform:translate(-50%,-50%) scale(1);
   opacity:1; pointer-events:none;
@@ -359,11 +838,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .tribeCard.show{ opacity:1; pointer-events:auto; }
 .tribeInner{
   position:relative;
-  background:linear-gradient(160deg, var(--juicy-navy) 0%, #14336e 30%, var(--juicy-violet) 70%, var(--juicy-magenta) 100%);
+  background:linear-gradient(160deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 70%, var(--juicy-violet)) 30%, var(--juicy-violet) 70%, var(--juicy-magenta) 100%);
   border:1.5px solid rgba(255,255,255,.35);
   border-radius:24px; padding:26px 22px; text-align:center; max-width:84%;
   transform:scale(.85); transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 0 44px rgba(255,46,196,.35), inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow:0 0 44px color-mix(in srgb, var(--juicy-magenta) 35%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
   overflow:hidden;
 }
 .tribeInner::before{
@@ -376,7 +855,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .tribeName{
   font-size:clamp(1.5rem,7vw,2.1rem); font-weight:900; margin:8px 0 4px; position:relative;
   color:#fff;
-  text-shadow:0 2px 0 rgba(0,0,0,.25), 0 0 18px rgba(41,198,255,.7);
+  text-shadow:0 2px 0 rgba(0,0,0,.25), 0 0 18px color-mix(in srgb, var(--juicy-blue) 70%, transparent);
 }
 .tribeCategory{ font-size:.72rem; font-weight:800; color:var(--gold); margin-bottom:8px; text-transform:uppercase; letter-spacing:.08em; position:relative; }
 .tribeSub{ font-size:.78rem; color:rgba(255,255,255,.85); position:relative; }
@@ -384,7 +863,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 /* ============ TRIBES PANEL ============ */
 .sidePanel{
   position:absolute; top:0; right:-100%; width:82%; height:100%;
-  background:rgba(5,9,24,.97); backdrop-filter:blur(20px);
+  background:color-mix(in srgb, var(--juicy-navy) 97%, #000); backdrop-filter:blur(20px);
   z-index:90; padding:20px; transition:.4s; overflow:auto;
   border-left:1.5px solid rgba(255,255,255,.15);
 }
@@ -400,9 +879,9 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
 .flash{ animation:flashPop .4s ease; }
 @keyframes flashPop{
-  0%{ box-shadow:inset 0 0 0 0 rgba(41,198,255,0); }
-  40%{ box-shadow:inset 0 0 90px 12px rgba(41,198,255,.45); }
-  100%{ box-shadow:inset 0 0 0 0 rgba(41,198,255,0); }
+  0%{ box-shadow:inset 0 0 0 0 transparent; }
+  40%{ box-shadow:inset 0 0 90px 12px var(--flash); }
+  100%{ box-shadow:inset 0 0 0 0 transparent; }
 }
 
 .bigShake{ animation:bigShake 1s ease; }
@@ -422,7 +901,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 /* ============ DAM BREAK / FLOOD ============ */
 .floodOverlay{
   position:absolute; left:0; right:0; bottom:0; height:0%;
-  background:linear-gradient(180deg, rgba(41,198,255,.88), rgba(3,12,28,.97) 70%);
+  background:linear-gradient(180deg, var(--flood-0), var(--flood-1) 70%);
   z-index:110; pointer-events:none;
   transition:height 2.6s cubic-bezier(.65,0,.85,0);
 }
@@ -430,8 +909,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .floodOverlay::before{
   content:""; position:absolute; top:-14px; left:0; right:0; height:24px;
   background:
-    radial-gradient(circle at 10% 50%, transparent 8px, rgba(41,198,255,.88) 9px) 0 0/40px 24px repeat-x,
-    radial-gradient(circle at 30% 50%, transparent 8px, rgba(41,198,255,.88) 9px) 0 0/40px 24px repeat-x;
+    radial-gradient(circle at 10% 50%, transparent 8px, var(--flood-0) 9px) 0 0/40px 24px repeat-x,
+    radial-gradient(circle at 30% 50%, transparent 8px, var(--flood-0) 9px) 0 0/40px 24px repeat-x;
   animation:waveEdge 1.4s linear infinite;
 }
 @keyframes waveEdge{ to{ background-position:40px 0, 40px 0; } }
@@ -443,24 +922,24 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 }
 .gameOverCard.show{ opacity:1; pointer-events:auto; }
 .gameOverInner{
-  background:linear-gradient(160deg, #a30044 0%, var(--juicy-magenta) 40%, var(--juicy-violet) 100%);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--danger) 70%, #000) 0%, var(--juicy-magenta) 40%, var(--juicy-violet) 100%);
   border:1.5px solid rgba(255,255,255,.32);
   border-radius:24px; padding:28px 24px; text-align:center; max-width:86%;
   transform:scale(.85); transition:transform .4s cubic-bezier(.34,1.56,.64,1);
-  box-shadow:0 0 44px rgba(255,94,122,.4);
+  box-shadow:0 0 44px color-mix(in srgb, var(--danger) 40%, transparent);
 }
 .gameOverCard.show .gameOverInner{ transform:scale(1); }
-.gameOverTitle{ font-size:clamp(1.2rem,6vw,1.6rem); font-weight:900; margin:6px 0 8px; color:#fff; text-shadow:0 0 14px rgba(255,94,122,.8); }
+.gameOverTitle{ font-size:clamp(1.2rem,6vw,1.6rem); font-weight:900; margin:6px 0 8px; color:#fff; text-shadow:0 0 14px color-mix(in srgb, var(--danger) 80%, transparent); }
 .gameOverSub{ font-size:.82rem; color:rgba(255,255,255,.85); margin-bottom:18px; line-height:1.5; }
 .rebuildBtn{
   position:relative;
   border:1.5px solid rgba(255,255,255,.5); padding:12px 22px; border-radius:14px; font-weight:800; cursor:pointer;
   color:#fff; background:linear-gradient(135deg,var(--juicy-blue),var(--juicy-violet));
-  box-shadow:0 0 14px rgba(41,198,255,.5), inset 0 1px 0 rgba(255,255,255,.5);
+  box-shadow:0 0 14px color-mix(in srgb, var(--juicy-blue) 50%, transparent), inset 0 1px 0 rgba(255,255,255,.5);
 }
 .rebuildBtn:active{ transform:scale(.96); }
 
-.app:fullscreen, .app:-webkit-full-screen{ max-width:100%; background:#03060f; }
+.app:fullscreen, .app:-webkit-full-screen{ max-width:100%; background:var(--fs-bg); }
 
 </style>
 </head>
@@ -485,7 +964,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
     <div class="hud">
       <div class="hudTop">
-        <div class="logo">The Nite Lite</div>
+        <div class="logo" id="gameLogo">The Nite Lite</div>
         <div class="hudRight">
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
           <button class="iconBtn danger" id="damBreakBtn" title="Break the dam" aria-label="Break the dam">💥</button>
@@ -510,30 +989,30 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <svg id="worldSVG" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1b3f8f"/>
-            <stop offset="55%" stop-color="#0b4d7a"/>
-            <stop offset="100%" stop-color="#03101f"/>
+            <stop offset="0%" stop-color="var(--sky-0)"/>
+            <stop offset="55%" stop-color="var(--sky-1)"/>
+            <stop offset="100%" stop-color="var(--sky-2)"/>
           </linearGradient>
           <linearGradient id="flowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#29c6ff"/>
-            <stop offset="50%" stop-color="#eafcff"/>
-            <stop offset="100%" stop-color="#7a5cff"/>
+            <stop offset="0%" stop-color="var(--flow-0)"/>
+            <stop offset="50%" stop-color="var(--flow-1)"/>
+            <stop offset="100%" stop-color="var(--flow-2)"/>
           </linearGradient>
           <linearGradient id="mountainFrontGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#8fa3d9"/>
-            <stop offset="100%" stop-color="#5b6ca8"/>
+            <stop offset="0%" stop-color="var(--mtn-front-0)"/>
+            <stop offset="100%" stop-color="var(--mtn-front-1)"/>
           </linearGradient>
           <linearGradient id="damConcrete" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#d7dfe8"/>
-            <stop offset="100%" stop-color="#9aa8bb"/>
+            <stop offset="0%" stop-color="var(--dam-0)"/>
+            <stop offset="100%" stop-color="var(--dam-1)"/>
           </linearGradient>
           <linearGradient id="pondGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#7cf9ff"/>
-            <stop offset="100%" stop-color="#0f8fc7"/>
+            <stop offset="0%" stop-color="var(--pond-0)"/>
+            <stop offset="100%" stop-color="var(--pond-1)"/>
           </linearGradient>
           <linearGradient id="millWood" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#b97a4a"/>
-            <stop offset="100%" stop-color="#7a4a2a"/>
+            <stop offset="0%" stop-color="var(--wood-0)"/>
+            <stop offset="100%" stop-color="var(--wood-1)"/>
           </linearGradient>
           <filter id="waterGlow" x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur stdDeviation="3" result="blur"/>
@@ -547,7 +1026,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <g id="stationsGroup"></g>
 
         <g id="oceanGroup">
-          <path class="oceanFill" id="oceanFill" d="M0 770 Q50 750 100 770 Q150 790 200 770 Q250 750 300 770 Q350 790 400 770 L400 800 L0 800 Z" fill="#29c6ff"/>
+          <path class="oceanFill" id="oceanFill" d="M0 770 Q50 750 100 770 Q150 790 200 770 Q250 750 300 770 Q350 790 400 770 L400 800 L0 800 Z" fill="var(--ocean)"/>
         </g>
       </svg>
 
@@ -566,7 +1045,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="gameOverInner">
           <div style="font-size:2.4rem;">🏗️</div>
           <div class="gameOverTitle">The Dam Has Broken</div>
-          <div class="gameOverSub">The system has failed and flooded.<br>Rebuild it from the Mountain up.</div>
+          <div class="gameOverSub">The system has failed and flooded.
+Rebuild it from the Mountain up.</div>
           <button class="rebuildBtn" id="rebuildBtn">Rebuild System</button>
         </div>
       </div>
@@ -609,9 +1089,6 @@ const ALL_TRIBES = Object.entries(TRIBE_GROUPS).flatMap(([category, names])=>
   names.map(name=>({ name, category }))
 );
 
-/* Day-of-creation pairing: left rail = "Day N", right rail = what was made — only the
-   first four stations (Mountain/Dam/Millpond/Sluice) map onto the Genesis days shown
-   in the reference certificate. */
 const DAY_LABELS = [
   { left:"Day 1", right:"Light" },
   { left:"Day 2", right:"Firmament" },
@@ -623,29 +1100,44 @@ const CENTERS = [120, 245, 360, 470, 580, 690];
 const OCEAN_Y = 770;
 const MILL_INDEX = 5;
 
+const SKIN_META = {
+  aurora: { name:"Aurora Nite", deco:"💧" },
+  clay:   { name:"Red Clay",    deco:"🌾" },
+  canopy: { name:"Canopy",      deco:"🍃" },
+  heaven: { name:"Heaven",      deco:"✨" },
+  neon:   { name:"Neon Grid",   deco:"⚡" },
+  ember:  { name:"Ember Dam",   deco:"🔥" },
+  abyss:  { name:"Abyss",       deco:"🌊" }
+};
+const activeSkinId = document.documentElement.getAttribute("data-skin") || "aurora";
+const activeSkin = SKIN_META[activeSkinId] || SKIN_META.aurora;
+document.querySelectorAll(".dropletDeco").forEach(el => { el.textContent = activeSkin.deco; });
+const gameLogo = document.getElementById("gameLogo");
+if (gameLogo) gameLogo.title = "Skin: " + activeSkin.name;
+
 /* =========================================================
    HAND-DRAWN STATION ILLUSTRATIONS
 ========================================================= */
 const ILLUSTRATIONS = {
 
   mountain: `
-    <path d="M-52,42 L-16,-46 L8,-10 L34,-42 L58,42 Z" fill="#5b6ca8"/>
-    <path d="M-16,-46 L-27,-24 L-5,-24 Z" fill="#eaf6ff"/>
-    <path d="M34,-42 L23,-22 L45,-22 Z" fill="#eaf6ff"/>
+    <path d="M-52,42 L-16,-46 L8,-10 L34,-42 L58,42 Z" fill="var(--mtn-back)"/>
+    <path d="M-16,-46 L-27,-24 L-5,-24 Z" fill="var(--snow)"/>
+    <path d="M34,-42 L23,-22 L45,-22 Z" fill="var(--snow)"/>
     <path d="M-46,44 L0,-38 L46,44 Z" fill="url(#mountainFrontGrad)"/>
-    <path d="M-11,-28 L0,-38 L11,-28 L5,-16 L-5,-16 Z" fill="#ffffff"/>
-    <circle class="sparkle" cx="0" cy="-32" r="2.2" fill="#fff"/>
-    <g fill="#204a34">
+    <path d="M-11,-28 L0,-38 L11,-28 L5,-16 L-5,-16 Z" fill="var(--snow)"/>
+    <circle class="sparkle" cx="0" cy="-32" r="2.2" fill="var(--foam)"/>
+    <g fill="var(--tree)">
       <path d="M-36,44 L-31,26 L-26,44 Z"/>
       <path d="M-31,44 L-26,20 L-21,44 Z"/>
       <path d="M28,44 L33,28 L38,44 Z"/>
     </g>
-    <path class="spring" d="M3,18 C6,26 -1,32 2,44" stroke="#29c6ff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path class="spring" d="M3,18 C6,26 -1,32 2,44" stroke="var(--water-accent)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
   `,
 
   dam: `
-    <rect x="-50" y="-8" width="100" height="48" rx="4" fill="url(#damConcrete)" stroke="#6d7c92" stroke-width="2"/>
-    <g stroke="rgba(60,75,95,.35)" stroke-width="1.4">
+    <rect x="-50" y="-8" width="100" height="48" rx="4" fill="url(#damConcrete)" stroke="var(--dam-stroke)" stroke-width="2"/>
+    <g stroke="var(--dam-line)" stroke-width="1.4">
       <line x1="-50" y1="8" x2="50" y2="8"/>
       <line x1="-50" y1="24" x2="50" y2="24"/>
       <line x1="-25" y1="-8" x2="-25" y2="8"/>
@@ -656,54 +1148,54 @@ const ILLUSTRATIONS = {
       <line x1="-30" y1="24" x2="-30" y2="40"/>
       <line x1="6" y1="24" x2="6" y2="40"/>
     </g>
-    <path class="spillway" d="M-6,-8 L-6,44" stroke="#29c6ff" stroke-width="9" stroke-linecap="round" opacity=".9"/>
-    <circle class="drop d1" cx="-6" cy="10" r="2.4" fill="#eafcff"/>
-    <circle class="drop d2" cx="-6" cy="18" r="2.2" fill="#eafcff"/>
-    <circle class="drop d3" cx="-6" cy="26" r="2" fill="#eafcff"/>
-    <ellipse cx="0" cy="45" rx="56" ry="9" fill="#29c6ff" opacity=".45"/>
+    <path class="spillway" d="M-6,-8 L-6,44" stroke="var(--water-accent)" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+    <circle class="drop d1" cx="-6" cy="10" r="2.4" fill="var(--foam)"/>
+    <circle class="drop d2" cx="-6" cy="18" r="2.2" fill="var(--foam)"/>
+    <circle class="drop d3" cx="-6" cy="26" r="2" fill="var(--foam)"/>
+    <ellipse cx="0" cy="45" rx="56" ry="9" fill="var(--water-accent)" opacity=".45"/>
   `,
 
   millpond: `
     <ellipse cx="0" cy="8" rx="58" ry="30" fill="url(#pondGrad)"/>
-    <ellipse class="ripple r1" cx="-14" cy="4" rx="10" ry="4" fill="none" stroke="#eafcff" stroke-width="1.6"/>
-    <ellipse class="ripple r2" cx="16" cy="14" rx="8" ry="3.2" fill="none" stroke="#eafcff" stroke-width="1.6"/>
-    <ellipse cx="-22" cy="18" rx="10" ry="4" fill="#2f8f5a"/>
-    <ellipse cx="22" cy="-2" rx="8" ry="3.2" fill="#2f8f5a"/>
-    <path d="M-40,-6 L40,10" stroke="#eafcff" stroke-width="1.5" opacity=".35"/>
+    <ellipse class="ripple r1" cx="-14" cy="4" rx="10" ry="4" fill="none" stroke="var(--foam)" stroke-width="1.6"/>
+    <ellipse class="ripple r2" cx="16" cy="14" rx="8" ry="3.2" fill="none" stroke="var(--foam)" stroke-width="1.6"/>
+    <ellipse cx="-22" cy="18" rx="10" ry="4" fill="var(--reed)"/>
+    <ellipse cx="22" cy="-2" rx="8" ry="3.2" fill="var(--reed)"/>
+    <path d="M-40,-6 L40,10" stroke="var(--foam)" stroke-width="1.5" opacity=".35"/>
   `,
 
   sluice: `
-    <rect x="-45" y="-22" width="90" height="52" rx="5" fill="#8697ad" stroke="#5a6578" stroke-width="2"/>
-    <g stroke="#5a6578" stroke-width="2.4">
+    <rect x="-45" y="-22" width="90" height="52" rx="5" fill="var(--sluice)" stroke="var(--sluice-stroke)" stroke-width="2"/>
+    <g stroke="var(--sluice-stroke)" stroke-width="2.4">
       <line x1="-27" y1="-22" x2="-27" y2="30"/>
       <line x1="-9" y1="-22" x2="-9" y2="30"/>
       <line x1="9" y1="-22" x2="9" y2="30"/>
       <line x1="27" y1="-22" x2="27" y2="30"/>
     </g>
-    <path class="jet" d="M-18,10 C-18,20 -18,30 -18,42" stroke="#29c6ff" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <path class="jet" d="M0,10 C0,20 0,30 0,42" stroke="#29c6ff" stroke-width="5" fill="none" stroke-linecap="round"/>
-    <path class="jet" d="M18,10 C18,20 18,30 18,42" stroke="#29c6ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path class="jet" d="M-18,10 C-18,20 -18,30 -18,42" stroke="var(--water-accent)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path class="jet" d="M0,10 C0,20 0,30 0,42" stroke="var(--water-accent)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path class="jet" d="M18,10 C18,20 18,30 18,42" stroke="var(--water-accent)" stroke-width="4" fill="none" stroke-linecap="round"/>
   `,
 
   wheel: `
     <g class="wheelSpin">
-      <circle cx="0" cy="0" r="42" fill="none" stroke="#8a5a2b" stroke-width="6"/>
-      <g stroke="#6b4423" stroke-width="5">
+      <circle cx="0" cy="0" r="42" fill="none" stroke="var(--wood-mid)" stroke-width="6"/>
+      <g stroke="var(--wood-spoke)" stroke-width="5">
         <line x1="0" y1="-42" x2="0" y2="42"/>
         <line x1="-42" y1="0" x2="42" y2="0"/>
         <line x1="-30" y1="-30" x2="30" y2="30"/>
         <line x1="30" y1="-30" x2="-30" y2="30"/>
       </g>
-      <g fill="#8a5a2b">
+      <g fill="var(--wood-mid)">
         <rect x="-6" y="-48" width="12" height="14" rx="2"/>
         <rect x="-6" y="34" width="12" height="14" rx="2"/>
         <rect x="-48" y="-6" width="14" height="12" rx="2"/>
         <rect x="34" y="-6" width="14" height="12" rx="2"/>
       </g>
-      <circle cx="0" cy="0" r="9" fill="#5a3a1e"/>
+      <circle cx="0" cy="0" r="9" fill="var(--wood-dark)"/>
     </g>
-    <circle class="splash s1" cx="-22" cy="38" r="2.2" fill="#eafcff"/>
-    <circle class="splash s2" cx="14" cy="42" r="2" fill="#eafcff"/>
+    <circle class="splash s1" cx="-22" cy="38" r="2.2" fill="var(--foam)"/>
+    <circle class="splash s2" cx="14" cy="42" r="2" fill="var(--foam)"/>
   `
 };
 
@@ -711,26 +1203,26 @@ const ILLUSTRATIONS = {
    MILL GROWTH STAGES
 ========================================================= */
 const MILL_BASE = `
-  <rect x="-40" y="0" width="80" height="42" fill="url(#millWood)" stroke="#4a2e18" stroke-width="2"/>
-  <polygon points="-46,0 0,-32 46,0" fill="#7a3b2e"/>
-  <rect x="-9" y="18" width="18" height="24" fill="#3a2416"/>
-  <rect class="lightFlicker" x="-31" y="10" width="10" height="10" fill="#ffe9a8"/>
-  <rect class="lightFlicker" x="21" y="10" width="10" height="10" fill="#ffe9a8"/>
-  <rect x="20" y="-24" width="8" height="16" fill="#5a5a5a"/>
+  <rect x="-40" y="0" width="80" height="42" fill="url(#millWood)" stroke="var(--wood-1)" stroke-width="2"/>
+  <polygon points="-46,0 0,-32 46,0" fill="var(--mill-roof)"/>
+  <rect x="-9" y="18" width="18" height="24" fill="var(--mill-door)"/>
+  <rect class="lightFlicker" x="-31" y="10" width="10" height="10" fill="var(--mill-light)"/>
+  <rect class="lightFlicker" x="21" y="10" width="10" height="10" fill="var(--mill-light)"/>
+  <rect x="20" y="-24" width="8" height="16" fill="var(--mill-metal)"/>
   <circle class="smokePuff p1" cx="24" cy="-30" r="4.2" fill="rgba(255,255,255,.55)"/>
   <circle class="smokePuff p2" cx="24" cy="-30" r="4.2" fill="rgba(255,255,255,.55)"/>
 `;
 const MILL_ADDITIONS = [
   "",
-  `<rect x="-64" y="14" width="24" height="28" fill="#9a6a3e" stroke="#4a2e18" stroke-width="1.5"/>
-   <rect x="-58" y="-6" width="6" height="14" fill="#5a5a5a"/>
+  `<rect x="-64" y="14" width="24" height="28" fill="var(--mill-add)" stroke="var(--wood-1)" stroke-width="1.5"/>
+   <rect x="-58" y="-6" width="6" height="14" fill="var(--mill-metal)"/>
    <circle class="smokePuff p1" cx="-55" cy="-10" r="3" fill="rgba(255,255,255,.5)"/>`,
-  `<circle cx="46" cy="26" r="12" fill="#b7c3cf" stroke="#5a6578" stroke-width="1.5"/>
-   <rect x="40" y="-2" width="12" height="14" fill="#5a5a5a"/>`,
-  `<line x1="-40" y1="16" x2="40" y2="16" stroke="#5a5a5a" stroke-width="3"/>
-   <rect class="lightFlicker" x="-52" y="24" width="8" height="8" fill="#ffe9a8"/>`,
-  `<rect x="-78" y="10" width="150" height="34" fill="#6b7684" stroke="#3a4450" stroke-width="2" opacity=".9"/>
-   <rect x="60" y="-32" width="10" height="42" fill="#4a4a4a"/>
+  `<circle cx="46" cy="26" r="12" fill="var(--mill-tank)" stroke="var(--sluice-stroke)" stroke-width="1.5"/>
+   <rect x="40" y="-2" width="12" height="14" fill="var(--mill-metal)"/>`,
+  `<line x1="-40" y1="16" x2="40" y2="16" stroke="var(--mill-metal)" stroke-width="3"/>
+   <rect class="lightFlicker" x="-52" y="24" width="8" height="8" fill="var(--mill-light)"/>`,
+  `<rect x="-78" y="10" width="150" height="34" fill="var(--mill-factory)" stroke="var(--mill-factory-stroke)" stroke-width="2" opacity=".9"/>
+   <rect x="60" y="-32" width="10" height="42" fill="var(--mill-metal)"/>
    <circle class="smokePuff p1" cx="65" cy="-36" r="5" fill="rgba(255,255,255,.6)"/>
    <circle class="smokePuff p2" cx="65" cy="-36" r="5" fill="rgba(255,255,255,.6)"/>`
 ];
@@ -832,7 +1324,7 @@ function stationGraphic(step, index){
   nameLabel.setAttribute("text-anchor", "middle");
   nameLabel.setAttribute("font-size", 15);
   nameLabel.setAttribute("font-weight", "800");
-  nameLabel.setAttribute("fill", "#ffd76a");
+  nameLabel.setAttribute("fill", "var(--gold)");
   nameLabel.textContent = step.name;
   g.appendChild(nameLabel);
 
@@ -922,8 +1414,6 @@ function spawnCertificate(index){
   const dayInfo = DAY_LABELS[index];
 
   if(dayInfo){
-    // Paired reveal: "Day N" lands on the left, what-was-made lands on the right —
-    // exactly like winning a bonus, both locking into place at once.
     const dayShort = dayInfo.left.replace(/^Day\s*/,"");
     makeBadge(railLeft, "dayBadge", "📅", "Day", dayShort);
     makeBadge(railRight, "themeBadge", "✨", step.label, dayInfo.right);
@@ -1215,7 +1705,8 @@ function spawnMist(){
   mist.style.position = "absolute";
   mist.style.width = "110px"; mist.style.height = "55px";
   mist.style.borderRadius = "50%";
-  mist.style.background = "rgba(41,198,255,.12)";
+  const mistColor = getComputedStyle(document.documentElement).getPropertyValue("--mist").trim() || "rgba(41,198,255,.12)";
+  mist.style.background = mistColor;
   mist.style.filter = "blur(18px)";
   mist.style.left = Math.random()*300+"px";
   mist.style.bottom = Math.random()*250+"px";
@@ -1300,7 +1791,6 @@ function playCertificateSound(){
   [700,900,1200].forEach((f,i)=> setTimeout(()=>playTone(f,0.16,"square"), i*70));
 }
 function playBonusUnlockSound(){
-  // a little rising sparkle arpeggio + shimmer, like landing a bonus
   [660,880,1046,1318].forEach((f,i)=> setTimeout(()=>playTone(f,0.22,"triangle"), i*65));
   setTimeout(()=>playWaterNoise(0.5, 1400, 2200, 0.05), 60);
 }
