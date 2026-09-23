@@ -941,6 +941,174 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
 .app:fullscreen, .app:-webkit-full-screen{ max-width:100%; background:var(--fs-bg); }
 
+/* =====================================================================
+   v2 — ECONOMY HUD + DAY TIMER
+===================================================================== */
+@media (max-width:380px){ .iconBtn{ width:34px; height:34px; font-size:.85rem; } .hudRight{ gap:4px; } }
+.econRow{ display:flex; align-items:stretch; gap:10px; margin-top:10px; }
+.econInfo{ flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:3px; }
+.econLevel{ font-size:.8rem; font-weight:900; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.econStation{ color:var(--gold); }
+.econOz{ font-size:1rem; font-weight:900; color:var(--foam); font-variant-numeric:tabular-nums; }
+.econOz strong{ color:var(--gold); }
+.econReward{ font-size:.76rem; font-weight:700; color:rgba(255,255,255,.82); }
+.econReward strong{ color:var(--gold); }
+.timerBox{
+  flex:0 0 auto; min-width:88px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:6px 10px; border-radius:16px;
+  background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.22);
+  transition:background .2s, border-color .2s;
+}
+.timerNum{ font-size:1.75rem; font-weight:900; line-height:1; font-variant-numeric:tabular-nums; }
+.timerUnit{ font-size:.66rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.75); margin-top:4px; white-space:nowrap; }
+.timerBox.idle .timerNum{ opacity:.55; }
+.timerBox.urgent{ border-color:var(--danger); background:color-mix(in srgb, var(--danger) 24%, transparent); animation:timerUrgent .5s ease-in-out infinite alternate; }
+.timerBox.urgent .timerNum{ color:#fff; text-shadow:0 0 12px var(--danger); }
+.timerBox.expired .timerNum{ color:var(--danger); }
+@keyframes timerUrgent{ from{ transform:scale(1); } to{ transform:scale(1.07); } }
+.timerBar{ height:6px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; margin-top:8px; }
+.timerBar i{ display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--juicy-blue),var(--foam)); transition:width .1s linear; }
+.timerBar.urgent i{ background:var(--danger); }
+
+/* ============ v2: DAILY REWARD POP ============ */
+.dayReward{
+  position:absolute; left:50%; top:42%; z-index:45; pointer-events:none;
+  transform:translate(-50%,-50%) scale(.7); opacity:0;
+  min-width:220px; max-width:88%; text-align:center; padding:16px 22px; border-radius:22px;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--juicy-navy) 94%, transparent), color-mix(in srgb, var(--juicy-blue) 45%, var(--juicy-navy)));
+  border:1.5px solid rgba(255,255,255,.4);
+  box-shadow:0 0 34px color-mix(in srgb, var(--water-bright) 50%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
+  transition:opacity .25s, transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.dayReward.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+.drTitle{ font-size:.9rem; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+.drPlus{ font-size:2rem; font-weight:900; color:var(--gold); margin:4px 0 2px; text-shadow:0 0 16px color-mix(in srgb, var(--gold) 60%, transparent); }
+.drConv{ font-size:.86rem; font-weight:800; color:var(--foam); text-transform:uppercase; }
+.drArrow{ opacity:.7; margin:0 8px; }
+
+/* ============ v2: TIME'S UP (reuses game-over card look) ============ */
+.timeUpCard{ z-index:115; }
+
+/* ============ v2: PANELS ============ */
+.panelClose{
+  position:sticky; top:0; float:right; margin:-6px -6px 0 8px;
+  width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.08); color:#fff; font-size:1rem; cursor:pointer; z-index:2;
+}
+.walletLine{ font-size:.9rem; font-weight:800; margin-bottom:10px; }
+.walletLine strong{ color:var(--gold); }
+.nowPlaying{ font-size:.8rem; font-weight:700; color:var(--foam); margin-bottom:10px; min-height:1em; }
+.songRow{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:7px; border-radius:12px;
+  background:rgba(255,255,255,.06); border-left:3px solid var(--juicy-blue);
+}
+.songRow.locked{ border-left-color:rgba(255,255,255,.2); }
+.songRow.locked .songMeta{ opacity:.6; }
+.songRow.playing{ background:color-mix(in srgb, var(--juicy-blue) 22%, transparent); }
+.songMeta{ flex:1; min-width:0; }
+.songTitle{ font-size:.86rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.songArtist{ font-size:.74rem; color:rgba(255,255,255,.7); }
+.songNum{ font-size:.74rem; font-weight:800; color:rgba(255,255,255,.55); width:1.6em; text-align:right; font-variant-numeric:tabular-nums; }
+.playBtn, .storeBtn{
+  flex:0 0 auto; border:1.5px solid rgba(255,255,255,.45); border-radius:999px; padding:7px 12px;
+  font-size:.76rem; font-weight:900; color:#fff; cursor:pointer;
+  background:linear-gradient(135deg,var(--juicy-blue),var(--juicy-violet));
+}
+.playBtn:disabled, .storeBtn:disabled{ opacity:.45; cursor:not-allowed; }
+.lockTag{ flex:0 0 auto; text-align:right; font-size:.72rem; font-weight:800; color:rgba(255,255,255,.7); line-height:1.3; }
+.packCard{
+  position:relative; padding:12px 14px; margin-bottom:9px; border-radius:14px;
+  background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.18);
+  display:flex; align-items:center; gap:10px;
+}
+.packCard.best{ border-color:var(--gold); box-shadow:0 0 16px color-mix(in srgb, var(--gold) 30%, transparent); }
+.packInfo{ flex:1; }
+.packName{ font-size:.9rem; font-weight:900; }
+.packDetail{ font-size:.76rem; color:rgba(255,255,255,.78); margin-top:2px; }
+.packBadge{ display:inline-block; font-size:.66rem; font-weight:900; color:var(--juicy-navy); background:var(--gold); border-radius:999px; padding:2px 8px; margin-left:6px; vertical-align:middle; }
+.redeemBox{ padding:12px 14px; border-radius:14px; background:rgba(255,255,255,.06); margin-bottom:6px; }
+.redeemBox .storeBtn{ margin-top:8px; width:100%; padding:10px; }
+.storeMsg{ font-size:.76rem; color:rgba(255,255,255,.75); margin-top:6px; min-height:1em; }
+
+/* ============ v2: LEVEL COMPLETION CARD ============ */
+.levelCard{
+  position:absolute; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+  padding:calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px);
+  background:rgba(2,6,14,.8); backdrop-filter:blur(8px);
+  opacity:0; pointer-events:none; transition:opacity .45s;
+}
+.levelCard.show{ opacity:1; pointer-events:auto; }
+.levelCard.show.flashIn{ animation:lcFlash .6s ease-out; }
+@keyframes lcFlash{ 0%{ background:color-mix(in srgb, var(--water-bright) 55%, transparent); } 100%{ background:rgba(2,6,14,.8); } }
+.levelInner{
+  position:relative; width:100%; max-width:430px; max-height:100%; overflow:auto;
+  text-align:center; padding:20px 18px 18px; border-radius:28px;
+  background:linear-gradient(165deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 60%, var(--juicy-violet)) 48%, color-mix(in srgb, var(--juicy-violet) 70%, var(--juicy-magenta)) 100%);
+  border:1.5px solid rgba(255,255,255,.42);
+  box-shadow:0 0 60px color-mix(in srgb, var(--water-bright) 45%, transparent), 0 0 110px color-mix(in srgb, var(--juicy-magenta) 25%, transparent), inset 0 1px 0 rgba(255,255,255,.45);
+  transform:scale(.82) translateY(24px); transition:transform .6s cubic-bezier(.34,1.56,.64,1);
+}
+.levelCard.show .levelInner{ transform:none; }
+.lcEyebrow{ font-size:.76rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--foam); opacity:.85; }
+.lcLevel{ font-size:clamp(1.5rem,7.5vw,2.15rem); font-weight:900; margin-top:4px; text-shadow:0 2px 0 rgba(0,0,0,.25), 0 0 20px color-mix(in srgb, var(--juicy-blue) 70%, transparent); }
+.lcStage{ position:relative; height:150px; max-width:300px; margin:8px auto 2px; }
+.lcGlow{ position:absolute; inset:-6px 10%; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--water-bright) 55%, transparent), transparent 66%); animation:lcGlowPulse 2.2s ease-in-out infinite; }
+@keyframes lcGlowPulse{ 0%,100%{ opacity:.55; transform:scale(.95); } 50%{ opacity:1; transform:scale(1.06); } }
+.lcBackdrop{ position:absolute; inset:0; width:100%; height:100%; z-index:1; }
+.lcChar{
+  position:absolute; left:50%; bottom:0; z-index:2; font-size:4.4rem; line-height:1;
+  filter:drop-shadow(0 0 18px var(--water-bright));
+  animation:charEnter .8s cubic-bezier(.34,1.56,.64,1) .25s both, charBob 2.4s ease-in-out 1.1s infinite;
+}
+.lcCharImg{ display:block; height:140px; width:auto; max-width:min(62vw,230px); object-fit:contain; }
+@media (max-width:380px){ .lcCharImg{ height:124px; } }
+.lcCharFallback{ display:block; font-size:1rem; font-weight:900; padding:10px 14px; border-radius:14px; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.35); white-space:nowrap; }
+.charGrid{ display:flex; flex-direction:column; gap:8px; }
+.charCard{ display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.18); }
+.charCard.active{ border-color:var(--gold); box-shadow:0 0 14px color-mix(in srgb, var(--gold) 30%, transparent); }
+.charThumb{ flex:0 0 72px; height:72px; display:flex; align-items:center; justify-content:center; border-radius:12px; background:rgba(0,0,0,.25); overflow:hidden; }
+.charThumbImg{ width:100%; height:100%; object-fit:contain; display:block; }
+.charCard.locked .charThumbImg{ filter:grayscale(.6) brightness(.8); }
+.charThumbFallback{ font-size:.66rem; font-weight:800; text-align:center; padding:4px; line-height:1.2; }
+.charInfo{ flex:1; min-width:0; }
+.charInfo .storeBtn{ margin-top:6px; }
+@keyframes charEnter{ from{ transform:translateX(-50%) translateY(70px) scale(.3); opacity:0; } to{ transform:translateX(-50%) translateY(0) scale(1); opacity:1; } }
+@keyframes charBob{ 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-9px); } }
+.lcCharName{ font-size:.76rem; font-weight:800; color:rgba(255,255,255,.8); margin-top:2px; }
+.lcCongrats{ font-size:1.15rem; font-weight:900; text-transform:uppercase; letter-spacing:.06em; margin-top:8px; }
+.lcOz{ font-size:clamp(1.3rem,6vw,1.7rem); font-weight:900; color:var(--gold); margin:2px 0 10px; }
+.lcOzNum{ display:inline-block; font-size:1.45em; animation:ozPulse 1.3s ease-in-out infinite; text-shadow:0 0 18px color-mix(in srgb, var(--gold) 70%, transparent); }
+@keyframes ozPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.12); } }
+.lcChain{ display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:4px 2px; margin-bottom:12px; }
+.lcChip{ font-size:.74rem; font-weight:800; padding:4px 9px; border-radius:999px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.22); }
+.lcChip.ocean{ background:color-mix(in srgb, var(--ocean) 35%, transparent); }
+.lcArrow{ font-size:.74rem; opacity:.6; }
+.lcSong{ padding:12px; border-radius:16px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.18); margin-bottom:12px; }
+.lcSongLabel{ font-size:.74rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+.lcSongTitle{ font-size:1.1rem; font-weight:900; margin-top:4px; }
+.lcSongArtist{ font-size:.8rem; color:rgba(255,255,255,.78); }
+.lcSong.unlocked{ border-color:var(--gold); box-shadow:0 0 22px color-mix(in srgb, var(--gold) 35%, transparent); animation:tapPop .5s ease; }
+.lcBtn{
+  width:100%; padding:15px 18px; border-radius:16px; cursor:pointer;
+  font-size:1rem; font-weight:900; letter-spacing:.04em; color:var(--juicy-navy);
+  border:1.5px solid rgba(255,255,255,.7);
+  background:linear-gradient(135deg, var(--gold), color-mix(in srgb, var(--gold) 55%, #fff));
+  box-shadow:0 0 22px color-mix(in srgb, var(--gold) 50%, transparent), inset 0 1px 0 rgba(255,255,255,.7);
+}
+.lcBtn:active{ transform:scale(.97); }
+.lcBtn:disabled{ opacity:.55; cursor:default; }
+.lcNote{ font-size:.78rem; color:rgba(255,255,255,.8); margin-top:10px; min-height:1em; }
+.lcBurst{ position:absolute; left:50%; top:38%; width:0; height:0; pointer-events:none; z-index:3; }
+.burstDrop{
+  position:absolute; left:0; top:0; width:10px; height:10px; border-radius:50%;
+  background:var(--foam); box-shadow:0 0 12px var(--water-bright);
+  animation:burstFly 1.3s cubic-bezier(.15,.8,.3,1) forwards;
+}
+@keyframes burstFly{
+  0%{ transform:translate(-50%,-50%) scale(1.1); opacity:1; }
+  100%{ transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(.3); opacity:0; }
+}
+
 </style>
 </head>
 <body>
@@ -969,10 +1137,24 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
           <button class="iconBtn danger" id="damBreakBtn" title="Break the Firmament" aria-label="Break the Firmament">💥</button>
           <button class="iconBtn" id="tribesBtn" aria-label="Tribes discovered">🚢</button>
+          <button class="iconBtn" id="radioBtn" aria-label="Radio — unlocked songs">🎵</button>
+          <button class="iconBtn" id="storeBtn" aria-label="FL OZ store">🛒</button>
         </div>
       </div>
+      <div class="econRow">
+        <div class="econInfo">
+          <div class="econLevel"><span id="hudLevel">Level 1</span> · <span id="hudDay">Day 1 / 6</span> · <span class="econStation" id="hudStation">Mountain</span></div>
+          <div class="econOz" id="hudOz">💧 <strong>0</strong> / 666 FL OZ</div>
+          <div class="econReward" id="hudReward">Day 1 reward: 3.28266 Liters = <strong>+111 FL OZ</strong></div>
+        </div>
+        <div class="timerBox idle" id="timerBox" role="timer" aria-live="off">
+          <div class="timerNum" id="timerNum">10.0</div>
+          <div class="timerUnit" id="timerUnit">Tap to start</div>
+        </div>
+      </div>
+      <div class="timerBar" id="timerBar"><i id="timerFill"></i></div>
       <div class="progressRow" id="progressRow"></div>
-      <div class="loopBadge">Loop <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
+      <div class="loopBadge">Loops completed: <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
     </div>
 
     <div class="mobileBadgeDock" id="mobileBadgeDock">
@@ -1052,8 +1234,72 @@ Rebuild it from the Mountain up.</div>
       </div>
 
       <div class="sidePanel" id="tribesPanel">
+        <button class="panelClose" data-close-panel aria-label="Close">✕</button>
         <div class="panelTitle">💦 -ites Discovered</div>
         <div id="tribesList"><div class="emptyNote">Complete a full loop — Mountain to Ocean — to reveal your first name.</div></div>
+      </div>
+
+      <!-- v2: daily reward pop (non-interactive) -->
+      <div class="dayReward" id="dayReward" aria-live="polite">
+        <div class="drTitle" id="drTitle">💧 Day 1 complete</div>
+        <div class="drPlus">+111 FL OZ</div>
+        <div class="drConv"><span id="drAmount">3.28266 Liters</span><span class="drArrow">→</span>111 FL OZ</div>
+      </div>
+
+      <!-- v2: timer failure -->
+      <div class="gameOverCard timeUpCard" id="timeUpCard" role="alertdialog" aria-labelledby="timeUpTitle">
+        <div class="gameOverInner">
+          <div style="font-size:2.4rem;">⚠️</div>
+          <div class="gameOverTitle" id="timeUpTitle">Time's Up</div>
+          <div class="gameOverSub">The water escaped before the step was completed.<br><span id="timeUpDetail"></span></div>
+          <button class="rebuildBtn" id="retryDayBtn">Try Day Again</button>
+        </div>
+      </div>
+
+      <!-- v2: radio (reads unlock state; locked songs have no playable source) -->
+      <div class="sidePanel" id="radioPanel">
+        <button class="panelClose" data-close-panel aria-label="Close">✕</button>
+        <div class="panelTitle">🎵 Y'all Too Radio</div>
+        <div class="walletLine" id="radioWallet"></div>
+        <div class="nowPlaying" id="nowPlaying"></div>
+        <div id="songList"></div>
+      </div>
+
+      <!-- v2: store (economy hooks; no payment processing here) -->
+      <div class="sidePanel" id="storePanel">
+        <button class="panelClose" data-close-panel aria-label="Close">✕</button>
+        <div class="panelTitle">🛒 FL OZ Store</div>
+        <div class="walletLine" id="storeWallet"></div>
+        <div class="panelGroup">Redeem</div>
+        <div id="storeRedeem"></div>
+        <div class="panelGroup">Get FL OZ</div>
+        <div id="storePacks"></div>
+        <div class="panelGroup">Skins</div>
+        <div class="emptyNote">Premium skins will cost 666 FL OZ each. The 7 built-in skins stay free.</div>
+        <div class="panelGroup">Characters</div>
+        <div class="charGrid" id="storeCharacters"></div>
+        <div class="storeMsg" id="charMsg"></div>
+      </div>
+    </div>
+
+    <!-- v2: LEVEL COMPLETION -->
+    <div class="levelCard" id="levelCard" role="dialog" aria-modal="true" aria-labelledby="lcLevel">
+      <div class="lcBurst" id="lcBurst"></div>
+      <div class="levelInner" id="levelInner">
+        <div class="lcEyebrow">💧 Hydraulic cycle complete</div>
+        <div class="lcLevel" id="lcLevel">LEVEL 1 COMPLETE</div>
+        <div class="lcStage">
+          <div class="lcGlow"></div>
+          <svg class="lcBackdrop" id="lcBackdrop" viewBox="-120 -62 240 120" aria-hidden="true"></svg>
+          <div class="lcChar" id="lcChar"></div>
+        </div>
+        <div class="lcCharName" id="lcCharName"></div>
+        <div class="lcCongrats">Congratulations!</div>
+        <div class="lcOz"><span class="lcOzNum">666</span> FL OZ EARNED</div>
+        <div class="lcChain" id="lcChain"></div>
+        <div class="lcSong" id="lcSong"></div>
+        <button class="lcBtn" id="lcBtn">REDEEM 666 FL OZ</button>
+        <div class="lcNote" id="lcNote"></div>
       </div>
     </div>
 
@@ -1069,12 +1315,110 @@ Rebuild it from the Mountain up.</div>
    CONFIGURE THE 6 STEPS
 ========================================================= */
 const STEPS = [
-  { id:"mountain", label:"Mountain",    name:"Tributaries",       meaning:"The mountain releases its water" },
-  { id:"dam",      label:"Dam",         name:"Dam", meaning:"The Firmament divided water" },
-  { id:"millpond", label:"Millpond",    name:"Millpond",      meaning:"The reservoir stores water" },
-  { id:"sluice",   label:"Sluice Gate", name:"Sluice-gates",    meaning:"The channels release their water" },
-  { id:"wheel",    label:"Waterwheel",  name:"Waterwheel", meaning:"The water rotate star gears" },
-  { id:"mill",     label:"Mill",        name:"Factory",       meaning:"The plant grows stronger with every drop" }
+  { id:"mountain", label:"Mountain",    name:"Tributaries" },
+  { id:"dam",      label:"Dam",         name:"Dam" },
+  { id:"millpond", label:"Millpond",    name:"Millpond" },
+  { id:"sluice",   label:"Sluice Gate", name:"Sluice-gates" },
+  { id:"wheel",    label:"Waterwheel",  name:"Waterwheel" },
+  { id:"mill",     label:"Mill",        name:"Factory" }
+];
+
+/* =========================================================
+   v2 — FL OZ ECONOMY (integer FL OZ is authoritative;
+   the unit conversions below are presentation only)
+========================================================= */
+const DAY_REWARD_FL_OZ   = 111;
+const DAYS_PER_LEVEL     = 6;
+const LEVEL_REWARD_FL_OZ = DAY_REWARD_FL_OZ * DAYS_PER_LEVEL; // 666
+const UNLOCK_COST_FL_OZ  = 666;                               // any song, skin or character
+const DAY_TIME_LIMIT_MS  = 10000;
+const DAY_WARNING_MS     = 3000;
+const SAVE_KEY           = "yalltooDamGame.v2";
+const SAVE_VERSION       = 2;
+
+/* One entry per hydraulic day. `stepId` ties the day to the existing STEPS/station IDs. */
+const DAM_DAYS = [
+  { day:1, step:0, stepId:"mountain", title:"Day 1", station:"Mountain",    reward:111, displayAmount:"3.28266 Liters",       meaning:"The mountain releases its water" },
+  { day:2, step:1, stepId:"dam",      title:"Day 2", station:"Dam",         reward:111, displayAmount:"3.46875 Quarts",       meaning:"The Firmament divides the water" },
+  { day:3, step:2, stepId:"millpond", title:"Day 3", station:"Millpond",    reward:111, displayAmount:"13.875 Cups",          meaning:"The reservoir stores the water" },
+  { day:4, step:3, stepId:"sluice",   title:"Day 4", station:"Sluice Gate", reward:111, displayAmount:"6.9375 Pints",         meaning:"The channel releases the water" },
+  { day:5, step:4, stepId:"wheel",    title:"Day 5", station:"Waterwheel",  reward:111, displayAmount:"0.867188 Gallons",     meaning:"The water drives the wheel" },
+  { day:6, step:5, stepId:"mill",     title:"Day 6", station:"Mill",        reward:111, displayAmount:"3,282.66 Milliliters", meaning:"The system completes the hydraulic cycle" }
+];
+
+/* Canonical song list — the ONLY copy. Order = unlock order. Song 1 starts unlocked.
+   Append new songs to the end; ids must stay stable once published (saves reference them). */
+const SONG_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
+const SONGS = [
+  { id:"masters-build",            title:"The Master's Build",                 file:"the_maker_s_blueprint-pQPS2KhHLu40bkMw.mp3" },
+  { id:"scooped-from-red-clay",    title:"Scooped From Red Clay",              file:"scooped_from_red_clay-cp5MYH0Sn0PTPcl4.mp3" },
+  { id:"adam-the-dam-remix",       title:"Adam the Dam (Remix)",               file:"adam_the_dam-2-40oMmbqZQpFB6AXR.mp3" },
+  { id:"red-clay-schematics",      title:"Red Clay Schematics",                file:"red_clay_schematics-4cizONYTebzvCu8s.mp3" },
+  { id:"rich-red-clay",            title:"Rich Red Clay",                      file:"rich_red_clay-hOrQng2IaF9xegoy.mp3" },
+  { id:"heavens-heavy-wall",       title:"Heaven's Heavy Wall",                file:"heaven_s_heavy_wall-rej0aEWKHvqZUHMI.mp3" },
+  { id:"the-mighty-design",        title:"The Mighty Design",                  file:"the_mighty_design-5IpqSpR8yDBNMT1h.mp3" },
+  { id:"dam-components",           title:"Dam Components",                     file:"dam_component-YRC46yLMxZvvLBiN.mp3" },
+  { id:"heaven-built",             title:"Heaven Built",                       file:"heaven_built-11ywTE4EpE0TP85E.mp3" },
+  { id:"divide-the-tide",          title:"Divide the Tide",                    file:"divide_the_tide-1ZT1DJb3dA5PeI64.mp3" },
+  { id:"adam-the-dam",             title:"Adam the Dam",                       file:"adam_the_dam-rEp4qpBtaVYxzO3s.mp3" },
+  { id:"adam-the-dam-original",    title:"Adam the Dam (Original Version)",    file:"adam_the_dam-1-0u5vbFyekCuGOoFG.mp3" },
+  { id:"claim-the-water-line",     title:"Claim the Water Line",               file:"claim_the_water_line-Zc2mFNYfkoYWO9vr.mp3" },
+  { id:"adam-the-dam-v3",          title:"Adam the Dam (Version 3)",           file:"adam_the_dam-3-1W4Avd8LbfLfiNPA.mp3" },
+  { id:"adam-the-dam-v4",          title:"Adam the Dam (Version 4)",           file:"adam_the_dam-4-cbzzomHtsQMygpT8.mp3" },
+  { id:"adam-the-dam-v5",          title:"Adam the Dam (Version 5)",           file:"adam_the_dam-5-xZJ522flPAejr5gY.mp3" },
+  { id:"the-sinking-rail",         title:"The Sinking Rail",                   file:"the_sinking_rail-tU4YW5vORErih6EE.mp3" },
+  { id:"the-damming-of-adam",      title:"The Damming of Adam",                file:"the_damming_of_adam-31l59oHxbScaXOGo.mp3" },
+  { id:"reservoir-divide",         title:"Reservoir Divide",                   file:"reservoir_divide-XhHetuumzth5TAHe.mp3" },
+  { id:"split-the-sky",            title:"Split the Sky",                      file:"split_the_sky-4TrLc2cMTePBMvh4.mp3" },
+  /* UNVERIFIED: the supplied URL used folder "YZ9jgZ46Bljs5wOZR" (extra "Z"). Normalized to the
+     folder every other track uses. Confirm this track plays before relying on it. */
+  { id:"lock-the-gate",            title:"Lock the Gate",                      file:"lock_the_gate-oT9zJzmfpolvKuoV.mp3" },
+  { id:"reservoir-high",           title:"Reservoir High",                     file:"reservoir_high-e7T4xQqV7i9TnkCC.mp3" },
+  { id:"reservoir-high-v1",        title:"Reservoir High (Version 1)",         file:"reservoir_high-1-uPRvKCA5AupRS52v.mp3" },
+  { id:"reservoir-high-v2",        title:"Reservoir High (Version 2)",         file:"reservoir_high-2-hj5XLbLtO91pFmrB.mp3" },
+  { id:"heaven-divide",            title:"Heaven Divide",                      file:"heaven_divide-apeGks6EjEnEgkGx.mp3" },
+  { id:"heaven-divide-v1",         title:"Heaven Divide (Version 1)",          file:"heaven_divide-1-UekvCaauzWJNSTk6.mp3" },
+  { id:"heaven-divide-v2",         title:"Heaven Divide (Version 2)",          file:"heaven_divide-2-KxtzyDh8natZ7uGD.mp3" },
+  { id:"hold-the-flow",            title:"Hold the Flow",                      file:"hold_the_flow-87tD9qHzvczkszYq.mp3" },
+  { id:"earth-aligned",            title:"Earth Aligned",                      file:"earth_aligned-eLeQHKnqY7F5jYtF.mp3" },
+  { id:"still-raisin-cane",        title:"Still Raisin' Cane",                 file:"still_raisin_cane-ASXFAucnNNkof9AV.mp3" },
+  { id:"divide-the-deep",          title:"Divide the Deep",                    file:"divide_the_deep-IXVQCct7oKD9gJ86.mp3" },
+  { id:"the-face-of-the-deep",     title:"The Face of the Deep",               file:"the_face_of_the_deep-N6sWD6GfpwCGqh5N.mp3" },
+  { id:"the-face-of-the-deep-v1",  title:"The Face of the Deep (Version 1)",   file:"the_face_of_the_deep-1-8z6KKEPV3RFQ5Z2A.mp3" },
+  { id:"the-finest-fella",         title:"The Finest Fella",                   file:"the_finest_fella-mLZDhkIyJT3rLLzI.mp3" },
+  { id:"the-adam-component",       title:"The Adam Component",                 file:"the_adam_component-0ncw0TU5WcU8hxLa.mp3" },
+  { id:"the-timber-frame",         title:"The Timber Frame",                   file:"the_timber_frame-fsJnbCT2l8zHEGZs.mp3" },
+  { id:"natures-hydraulic-law",    title:"Nature's Hydraulic Law",             file:"nature_s_hydraulic_law-rHm0eT4hBWs93wfb.mp3" },
+  { id:"semantic-clay",            title:"Semantic Clay",                      file:"semantic_clay-xVfpWRFar6RgjOaz.mp3" }
+].map(s => ({ ...s, artist:"Y'all Too", src: SONG_BASE + s.file }));
+
+/* Canonical character catalog — the ONLY copy. First entry is the free default.
+   Ids are stable once published (saves reference them). */
+const CHARACTER_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
+const DEFAULT_CHARACTER_ID = "wilbert-dam-guide";
+const CHARACTERS = [
+  { id:"wilbert-dam-guide",       name:"Wilbert the DAM Guide",   file:"wilbert-the-dam-guide-Jv8ovjc6i8PutsiP.png",   cost:0, isDefault:true },
+  { id:"yall-too-beaver",         name:"Y'all Too Beaver",        file:"yall-too-beaver-rhhiVplt1GMykxV8.png",         cost:666 },
+  { id:"operator-fireman",        name:"Operator Fireman",        file:"operator-fireman-3hTPsSNuSI8dOo3K.png",        cost:666 },
+  { id:"operator-moses",          name:"Operator Moses",          file:"operator-moses-NaoYxXNs8PIe8VAq.png",          cost:666 },
+  { id:"operator-valentine",      name:"Operator Valentine",      file:"operator-valentine-qL9S3qnHVqfuQlf7.png",      cost:666 },
+  { id:"operator-sam",            name:"Operator Sam",            file:"operator-sam-JpZqlSoHFxPr8UA8.png",            cost:666 },
+  { id:"operator-jack-o-lantern", name:"Operator Jack-O-Lantern", file:"operator-jack-o-lantern-ttAhh3czPzwGoHfW.png", cost:666 },
+  { id:"operator-santa-claus",    name:"Operator Santa Claus",    file:"operator-santa-claus-eyMjBlQqWCVDRsc2.png",    cost:666 },
+  { id:"operator-woman",          name:"Operator Woman",          file:"operator-woman-SBXOdIurIocbRsrx.png",          cost:666 },
+  { id:"operator-man",            name:"Operator Man",            file:"operator-man-iOjCPh1RTtpl4t40.png",            cost:666 }
+].map(c => ({ ...c, img: CHARACTER_BASE + c.file }));
+/* Premium skins for the future. The 7 built-in skins stay free and random, as before. */
+const PREMIUM_SKINS = [];
+
+/* Every unlockable costs UNLOCK_COST_FL_OZ unless an item sets its own `cost`. */
+const UNLOCK_CATALOG = { songs: SONGS, skins: PREMIUM_SKINS, characters: CHARACTERS };
+const UNLOCK_STATE_KEY = { songs:"unlockedSongs", skins:"unlockedSkins", characters:"unlockedCharacters" };
+
+/* Purchase packs — data + hooks only. No payment processing lives in this file. */
+const STORE_PACKS = [
+  { id:"single", label:"Single",   priceLabel:"$3", priceUsd:3, flOz:666,  unlocks:1 },
+  { id:"six",    label:"Six-Pack", priceLabel:"$6", priceUsd:6, flOz:3996, unlocks:6, badge:"BEST OFFER!" }
 ];
 
 /* =========================================================
@@ -1240,9 +1584,116 @@ function millScale(stage){
    STATE
 ========================================================= */
 const state = {
-  currentStep:0, tapCount:0, loop:0, tribesFound:[],
-  busy:false, gameOver:false, millStage:0
+  currentStep:0, tapCount:0, tribesFound:[],
+  busy:false, gameOver:false, millStage:0,
+  /* v2 */
+  level:1,
+  levelFlOz:0,            // FL OZ earned inside the current level (0..666, multiples of 111)
+  totalFlOz:0,            // wallet
+  completedLevels:0,      // shown as "Loops completed" (replaces the old `loop` counter)
+  unlockedSongs:[SONGS[0].id],
+  unlockedSkins:[],
+  unlockedCharacters:[DEFAULT_CHARACTER_ID],
+  activeCharacter:DEFAULT_CHARACTER_ID,
+  processedReceipts:[],   // payment receipts already credited (prevents double credit)
+  lastTribe:null,
+  phase:"ready"           // ready | playing | timeout | levelComplete | redeemed  (not persisted)
 };
+
+/* =========================================================
+   v2 — PERSISTENCE (localStorage, namespaced, corruption-safe)
+   Only SAVE_KEY (and SAVE_KEY + ".corrupt" as a backup) are ever written.
+========================================================= */
+const memoryStore = {};
+let storageAvailable = true;
+function storageGet(key){
+  try { return window.localStorage.getItem(key); }
+  catch(e){ storageAvailable = false; return Object.prototype.hasOwnProperty.call(memoryStore, key) ? memoryStore[key] : null; }
+}
+function storageSet(key, value){
+  try { window.localStorage.setItem(key, value); return true; }
+  catch(e){ storageAvailable = false; memoryStore[key] = value; return false; }
+}
+function toInt(v, min, max, fallback){
+  const n = Number(v);
+  if(!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, Math.floor(n)));
+}
+function sanitizeIds(list, catalog){
+  if(!Array.isArray(list)) return [];
+  const known = new Set(catalog.map(i=>i.id));
+  return [...new Set(list.filter(id => typeof id === "string" && known.has(id)))];
+}
+function daysDoneThisLevel(){ return Math.min(DAYS_PER_LEVEL, Math.floor(state.levelFlOz / DAY_REWARD_FL_OZ)); }
+
+function saveGame(){
+  const data = {
+    version: SAVE_VERSION,
+    savedAt: Date.now(),
+    level: state.level,
+    currentStep: Math.min(daysDoneThisLevel(), DAYS_PER_LEVEL - 1),
+    levelFlOz: state.levelFlOz,
+    totalFlOz: state.totalFlOz,
+    completedLevels: state.completedLevels,
+    loopCount: state.completedLevels,
+    unlockedSongs: state.unlockedSongs,
+    unlockedSkins: state.unlockedSkins,
+    unlockedCharacters: state.unlockedCharacters,
+    activeCharacter: state.activeCharacter,
+    processedReceipts: state.processedReceipts.slice(-200),
+    tribesFound: state.tribesFound.slice(-300).map(t=>t.name),
+    lastTribe: state.lastTribe ? state.lastTribe.name : null,
+    millStage: state.millStage
+  };
+  storageSet(SAVE_KEY, JSON.stringify(data));
+  broadcastUnlocks();
+}
+
+function loadGame(){
+  const raw = storageGet(SAVE_KEY);
+  if(!raw) return false;
+  let d;
+  try { d = JSON.parse(raw); } catch(e){ d = null; }
+  if(!d || typeof d !== "object" || Array.isArray(d)){
+    try { console.warn("[Nite Lite] Save data was unreadable — starting fresh (backup kept)."); } catch(e){}
+    storageSet(SAVE_KEY + ".corrupt", raw);
+    return false;
+  }
+  const tribeByName = name => ALL_TRIBES.find(t=>t.name === name) || null;
+  state.level           = toInt(d.level, 1, 1e6, 1);
+  // Completed days are derived from levelFlOz so the step and the currency can never disagree.
+  const days            = toInt(d.levelFlOz, 0, LEVEL_REWARD_FL_OZ, 0) / DAY_REWARD_FL_OZ | 0;
+  state.levelFlOz       = days * DAY_REWARD_FL_OZ;
+  state.currentStep     = Math.min(days, DAYS_PER_LEVEL - 1);
+  state.totalFlOz       = toInt(d.totalFlOz, 0, 1e9, 0);
+  state.completedLevels = toInt(d.completedLevels ?? d.loopCount, 0, 1e6, 0);
+  state.millStage       = toInt(d.millStage, 0, 1e6, 0);
+  state.unlockedSongs   = sanitizeIds(d.unlockedSongs, SONGS);
+  if(!state.unlockedSongs.includes(SONGS[0].id)) state.unlockedSongs.unshift(SONGS[0].id);
+  state.unlockedSkins   = sanitizeIds(d.unlockedSkins, PREMIUM_SKINS);
+  state.unlockedCharacters = sanitizeIds(d.unlockedCharacters, CHARACTERS);   // drops legacy "droplet"
+  if(!state.unlockedCharacters.includes(DEFAULT_CHARACTER_ID)) state.unlockedCharacters.unshift(DEFAULT_CHARACTER_ID);
+  state.activeCharacter = (typeof d.activeCharacter === "string" && state.unlockedCharacters.includes(d.activeCharacter))
+    ? d.activeCharacter : DEFAULT_CHARACTER_ID;
+  state.processedReceipts = Array.isArray(d.processedReceipts) ? d.processedReceipts.filter(r=>typeof r === "string") : [];
+  state.tribesFound     = Array.isArray(d.tribesFound) ? d.tribesFound.map(tribeByName).filter(Boolean) : [];
+  state.lastTribe       = tribeByName(d.lastTribe);
+  return true;
+}
+
+/* Lets the homepage radio (or any parent page) mirror unlock state without its own song list. */
+function broadcastUnlocks(){
+  try{
+    window.parent.postMessage({
+      type:"yalltoo:dam-state",
+      saveKey: SAVE_KEY,
+      level: state.level,
+      totalFlOz: state.totalFlOz,
+      unlockedSongIds: state.unlockedSongs.slice(),
+      songs: SONGS.map(s => ({ id:s.id, title:s.title, artist:s.artist, unlocked: state.unlockedSongs.includes(s.id), src: state.unlockedSongs.includes(s.id) ? s.src : null }))
+    }, "*");
+  }catch(e){}
+}
 
 const NS = "http://www.w3.org/2000/svg";
 const stationsGroup = document.getElementById("stationsGroup");
@@ -1264,6 +1715,17 @@ const railLeft = document.getElementById("railLeft");
 const railRight = document.getElementById("railRight");
 const mobileDayRow = document.getElementById("mobileDayRow");
 const mobileThemeRow = document.getElementById("mobileThemeRow");
+/* v2 */
+const $ = id => document.getElementById(id);
+const hudLevel = $("hudLevel"), hudDay = $("hudDay"), hudStation = $("hudStation"), hudOz = $("hudOz"), hudReward = $("hudReward");
+const timerBox = $("timerBox"), timerNum = $("timerNum"), timerUnit = $("timerUnit"), timerBar = $("timerBar"), timerFill = $("timerFill");
+const dayRewardEl = $("dayReward"), drTitle = $("drTitle"), drAmount = $("drAmount");
+const timeUpCard = $("timeUpCard"), timeUpDetail = $("timeUpDetail");
+const levelCard = $("levelCard"), levelInner = $("levelInner"), lcLevel = $("lcLevel"), lcBackdrop = $("lcBackdrop");
+const lcChar = $("lcChar"), lcCharName = $("lcCharName"), lcChain = $("lcChain"), lcSong = $("lcSong"), lcBtn = $("lcBtn"), lcNote = $("lcNote"), lcBurst = $("lcBurst");
+const PANELS = { tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel") };
+const fmt = n => Number(n).toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
 /* =========================================================
    PROGRESS DOTS
@@ -1409,7 +1871,7 @@ function makeMobileChip(row, variantClass, icon, label, name){
   return chip;
 }
 
-function spawnCertificate(index){
+function spawnCertificate(index, opts = {}){
   const step = STEPS[index];
   const dayInfo = DAY_LABELS[index];
 
@@ -1419,12 +1881,12 @@ function spawnCertificate(index){
     makeBadge(railRight, "themeBadge", "✨", step.label, dayInfo.right);
     makeMobileChip(mobileDayRow, "dayChip", "📅", "Day", dayShort);
     makeMobileChip(mobileThemeRow, "themeChip", "✨", step.label, dayInfo.right);
-    playBonusUnlockSound();
+    if(!opts.silent) playBonusUnlockSound();
   } else {
     const rail = index % 2 === 0 ? railLeft : railRight;
     makeBadge(rail, "themeBadge", "💧", step.label, step.name);
     makeMobileChip(mobileThemeRow, "themeChip", "💧", step.label, step.name);
-    playCertificateSound();
+    if(!opts.silent) playCertificateSound();
   }
 }
 
@@ -1439,8 +1901,13 @@ function clearCertificates(){
    TAP HANDLING — tap anywhere in the world while a step is active
 ========================================================= */
 world.addEventListener("click", (e)=>{
+  // composedPath() is fixed at dispatch time, so it still sees the panel even if a panel button
+  // re-rendered itself (and detached e.target) before the click bubbled up to the world.
+  if(e.composedPath().some(n => n instanceof Element && n.matches(".sidePanel, .tribeCard, .gameOverCard, .hud"))) return;
+  if(anyPanelOpen()){ closePanels(); return; }          // tapping the board closes an open panel
   if(state.busy || state.gameOver) return;
-  if(e.target.closest(".sidePanel, .tribeCard, .gameOverCard, .hud")) return;
+  if(state.phase === "ready"){ beginDay(state.currentStep); return; }  // first tap starts the clock
+  if(state.phase !== "playing") return;
 
   const g = stationsGroup.querySelector(`.station[data-index="${state.currentStep}"]`);
   if(!g) return;
@@ -1464,9 +1931,10 @@ world.addEventListener("click", (e)=>{
     g.classList.add("showName");
     showToast(step.name);
   } else if(state.tapCount === 3){
+    stopDayTimer();                                   // success cancels the clock first
     g.classList.remove("active","highlight");
     g.classList.add("done");
-    showToast(step.meaning);
+    showToast(DAM_DAYS[index].meaning);
     spawnCertificate(index);
 
     if(index === MILL_INDEX){
@@ -1474,6 +1942,7 @@ world.addEventListener("click", (e)=>{
       renderMillStage();
     }
 
+    awardDay(index);
     flowSegment(index);
   }
 
@@ -1494,12 +1963,11 @@ function flowSegment(index){
   playFlowSound();
 
   setTimeout(()=>{
+    if(state.gameOver) return;                        // dam broke mid-flow: rebuild owns the reset
     state.busy = false;
     state.tapCount = 0;
     if(index < STEPS.length - 1){
-      state.currentStep = index + 1;
-      activateStation(state.currentStep);
-      updateProgressDots();
+      beginDay(index + 1);
     } else {
       reachOcean();
     }
@@ -1507,38 +1975,443 @@ function flowSegment(index){
 }
 
 /* =========================================================
+   v2 — DAYS, REWARDS, TIMER
+========================================================= */
+/* Starts (or restarts) the day at `index` with a fresh 10-second clock. */
+function beginDay(index){
+  if(state.gameOver) return;
+  state.currentStep = index;
+  state.tapCount = 0;
+  state.phase = "playing";
+  activateStation(index);
+  updateProgressDots();
+  renderHud();
+  resetDayTimer();
+  if(isTimerBlocked()) timerPaused = true;           // a panel is open / tab hidden: hold at 10.0
+  else startDayTimer();
+}
+
+/* Exactly-once award: a day pays only if the level ledger says it hasn't been paid yet. */
+function awardDay(index){
+  if(state.levelFlOz !== index * DAY_REWARD_FL_OZ) return false;
+  state.levelFlOz += DAY_REWARD_FL_OZ;
+  state.totalFlOz += DAY_REWARD_FL_OZ;
+  if(index === DAYS_PER_LEVEL - 1){
+    // Level is banked in the same save as the final 111, so a refresh can't lose or repeat it.
+    state.completedLevels++;
+    const tribe = pickTribe();
+    state.tribesFound.push(tribe);
+    state.lastTribe = tribe;
+    renderTribesList();
+    state.phase = "levelComplete";
+  }
+  saveGame();
+  renderHud();
+  showDayReward(index);
+  setTimeout(playDayRewardSound, 220);
+  return true;
+}
+
+let dayRewardTimer;
+function showDayReward(index){
+  const d = DAM_DAYS[index];
+  drTitle.textContent = `💧 ${d.title} complete`;
+  drAmount.textContent = d.displayAmount;
+  dayRewardEl.classList.add("show");
+  clearTimeout(dayRewardTimer);
+  dayRewardTimer = setTimeout(()=> dayRewardEl.classList.remove("show"), 1500);
+}
+
+let dayTimerId = null;
+let dayTimerStartedAt = 0;
+let dayTimerBudgetMs = DAY_TIME_LIMIT_MS;
+let dayTimerRemainingMs = DAY_TIME_LIMIT_MS;
+let timerPaused = false;
+let lastWarnSecond = null;
+
+function currentRemainingMs(){
+  if(dayTimerId === null) return dayTimerRemainingMs;
+  return Math.max(0, dayTimerBudgetMs - (performance.now() - dayTimerStartedAt));
+}
+function startDayTimer(budgetMs = DAY_TIME_LIMIT_MS){
+  stopDayTimer();                                    // never more than one interval alive
+  timerPaused = false;
+  dayTimerBudgetMs = budgetMs;
+  dayTimerRemainingMs = budgetMs;
+  dayTimerStartedAt = performance.now();
+  dayTimerId = setInterval(tickDayTimer, 100);
+  renderTimer();
+}
+function stopDayTimer(){
+  if(dayTimerId !== null){
+    dayTimerRemainingMs = currentRemainingMs();
+    clearInterval(dayTimerId);
+    dayTimerId = null;
+  }
+}
+function resetDayTimer(){
+  stopDayTimer();
+  timerPaused = false;
+  lastWarnSecond = null;
+  dayTimerRemainingMs = DAY_TIME_LIMIT_MS;
+  renderTimer();
+}
+function pauseDayTimer(){
+  if(dayTimerId === null) return;
+  stopDayTimer();
+  timerPaused = true;
+  renderTimer();
+}
+function resumeDayTimer(){
+  if(!timerPaused || state.phase !== "playing" || state.busy || state.gameOver) return;
+  startDayTimer(dayTimerRemainingMs);
+}
+function isTimerBlocked(){ return anyPanelOpen() || document.hidden; }
+function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayTimer(); }
+
+function tickDayTimer(){
+  const rem = currentRemainingMs();
+  dayTimerRemainingMs = rem;
+  if(rem > 0 && rem <= DAY_WARNING_MS){
+    const sec = Math.ceil(rem / 1000);
+    if(sec !== lastWarnSecond){ lastWarnSecond = sec; playTimerWarningSound(sec); }
+  }
+  renderTimer();
+  if(rem <= 0) handleDayTimeout();
+}
+
+function renderTimer(){
+  const rem = currentRemainingMs();
+  const running = dayTimerId !== null;
+  const phase = state.phase;
+  let unit = "Seconds";
+  if(phase === "ready") unit = "Tap to start";
+  else if(phase === "timeout") unit = "Time's up";
+  else if(phase === "levelComplete" || phase === "redeemed") unit = "Cycle done";
+  else if(timerPaused) unit = "Paused";
+  timerNum.textContent = (Math.ceil(rem / 100) / 10).toFixed(1);
+  timerUnit.textContent = unit;
+  const urgent = running && rem <= DAY_WARNING_MS;
+  timerBox.classList.toggle("urgent", urgent);
+  timerBar.classList.toggle("urgent", urgent);
+  timerBox.classList.toggle("idle", phase === "ready" || timerPaused);
+  timerBox.classList.toggle("expired", phase === "timeout");
+  timerFill.style.width = (rem / DAY_TIME_LIMIT_MS * 100) + "%";
+}
+
+function handleDayTimeout(){
+  if(state.phase !== "playing") return;
+  stopDayTimer();
+  dayTimerRemainingMs = 0;
+  state.phase = "timeout";
+  // Reset only the current day's taps. No FL OZ is awarded or removed; earlier days stay done.
+  const g = stationsGroup.querySelector(`.station[data-index="${state.currentStep}"]`);
+  if(g) g.classList.remove("highlight","showName","tapped");
+  state.tapCount = 0;
+  updateProgressDots();
+  renderTimer();
+  const d = DAM_DAYS[state.currentStep];
+  timeUpDetail.textContent = `${d.title} (${d.station}) — you keep your ${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ.`;
+  timeUpCard.classList.add("show");
+  playTimeoutSound();
+}
+
+function retryDay(){
+  if(state.phase !== "timeout") return;
+  timeUpCard.classList.remove("show");
+  beginDay(state.currentStep);
+}
+$("retryDayBtn").addEventListener("click", retryDay);
+
+document.addEventListener("visibilitychange", syncTimerPause);
+
+/* =========================================================
+   v2 — HUD
+========================================================= */
+function renderHud(){
+  const d = DAM_DAYS[Math.min(state.currentStep, DAYS_PER_LEVEL - 1)];
+  hudLevel.textContent = `Level ${fmt(state.level)}`;
+  hudDay.textContent = `Day ${d.day} / ${DAYS_PER_LEVEL}`;
+  hudStation.textContent = d.station;
+  hudOz.innerHTML = `💧 <strong>${fmt(state.levelFlOz)}</strong> / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ`;
+  hudReward.innerHTML = `${d.title} reward: ${esc(d.displayAmount)} = <strong>+${DAY_REWARD_FL_OZ} FL OZ</strong>`;
+  loopCountEl.textContent = fmt(state.completedLevels);
+  renderTimer();
+}
+
+/* =========================================================
    OCEAN + LOOP COMPLETE
 ========================================================= */
 function reachOcean(){
+  if(state.gameOver) return;
   oceanGroup.classList.add("reached");
   playOceanSound();
   world.classList.add("flash");
   setTimeout(()=>world.classList.remove("flash"), 400);
-  setTimeout(()=> completeLoop(), 900);
+  setTimeout(()=> showLevelComplete(), 900);
 }
 
-function completeLoop(){
-  state.loop++;
-  loopCountEl.textContent = state.loop;
+/* =========================================================
+   v2 — LEVEL COMPLETION → REDEEM → CONTINUE
+   (replaces the old completeLoop → tribe card → resetSystem path)
+========================================================= */
+let levelCardMode = "redeem";   // redeem | continue
+let redeemInFlight = false;
 
-  const tribe = pickTribe();
-  state.tribesFound.push(tribe);
-  renderTribesList();
+function getActiveCharacter(){
+  return CHARACTERS.find(x => x.id === state.activeCharacter && isUnlocked("characters", x.id))
+      || CHARACTERS.find(x => x.id === DEFAULT_CHARACTER_ID);
+}
+function safeWarn(msg){ try { console.warn("[Nite Lite] " + msg); } catch(e){} }
+function characterImage(c, className){
+  const img = document.createElement("img");
+  img.className = className;
+  img.alt = c.name;
+  img.decoding = "async";
+  img.dataset.charName = c.name;
+  img.addEventListener("error", onCharacterImageError, { once:true });
+  img.src = c.img;
+  return img;
+}
+/* A missing PNG never breaks anything: the image is swapped for the character's name. */
+function onCharacterImageError(e){
+  const img = e.currentTarget;
+  safeWarn("Character image failed to load: " + img.src);
+  const label = document.createElement("span");
+  label.className = img.className === "lcCharImg" ? "lcCharFallback" : "charThumbFallback";
+  label.textContent = img.dataset.charName || "Character";
+  if(img.parentNode) img.parentNode.replaceChild(label, img);
+}
+function preloadCharacter(c){
+  try { const im = new Image(); im.decoding = "async"; im.src = c.img; } catch(e){}
+}
 
+function renderCharacter(){
+  const c = getActiveCharacter();
+  lcChar.innerHTML = "";
+  lcChar.appendChild(characterImage(c, "lcCharImg"));
+  lcCharName.textContent = c.name;
+  // Restart the entrance animation each time the card opens.
+  lcChar.style.animation = "none"; void lcChar.offsetWidth; lcChar.style.animation = "";
+}
+
+/* Only an owned character can become active. */
+function setActiveCharacter(id){
+  if(!CHARACTERS.some(c => c.id === id) || !isUnlocked("characters", id)) return false;
+  state.activeCharacter = id;
+  saveGame();
+  renderStore();
+  preloadCharacter(getActiveCharacter());
+  return true;
+}
+
+function renderLevelBackdrop(){
+  // The finished dam and the grown mill behind the character, using the existing illustrations.
+  lcBackdrop.innerHTML =
+    `<g transform="translate(-62,6) scale(.72)">${ILLUSTRATIONS.dam}</g>
+     <g transform="translate(64,4) scale(${(.62 * millScale(state.millStage)).toFixed(3)})">${millMarkup(state.millStage)}</g>
+     <path d="M-120 52 Q-60 44 0 52 T120 52 L120 58 L-120 58 Z" fill="var(--ocean)" opacity=".85"/>`;
+}
+
+function renderChain(){
+  const names = DAM_DAYS.map(d=>d.station);
+  lcChain.innerHTML = names.map(n=>`<span class="lcChip">${esc(n)}</span>`).join('<span class="lcArrow">→</span>')
+    + '<span class="lcArrow">→</span><span class="lcChip ocean">🌊 Ocean</span>';
+}
+
+function showLevelComplete(opts = {}){
+  stopDayTimer();
+  state.phase = "levelComplete";
+  state.busy = false;
+  levelCardMode = "redeem";
+  redeemInFlight = false;
+
+  lcLevel.textContent = `LEVEL ${fmt(state.level)} COMPLETE`;
+  renderCharacter();
+  renderLevelBackdrop();
+  renderChain();
+
+  const next = nextLockedItem("songs");
+  lcSong.classList.remove("unlocked");
+  if(next){
+    lcSong.innerHTML = `<div class="lcSongLabel">Song ready to redeem</div>
+      <div class="lcSongTitle">“${esc(next.title)}”</div><div class="lcSongArtist">${esc(next.artist)}</div>`;
+    lcBtn.textContent = `REDEEM ${fmt(UNLOCK_COST_FL_OZ)} FL OZ`;
+  } else {
+    lcSong.innerHTML = `<div class="lcSongLabel">🎶 Music collection complete</div>
+      <div class="lcSongArtist">Every song is unlocked. Your ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ stays in your wallet for skins and characters.</div>`;
+    lcBtn.textContent = `BANK ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ & CONTINUE`;
+  }
+  lcBtn.disabled = false;
+  lcNote.innerHTML = `Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  renderHud();
+
+  levelCard.classList.add("show");
+  levelCard.classList.remove("flashIn"); void levelCard.offsetWidth; levelCard.classList.add("flashIn");
+  levelInner.scrollTop = 0;
+  if(!opts.quiet){
+    spawnLevelBurst(28);
+    playLevelFanfare();
+  }
+  setTimeout(()=>{ try{ lcBtn.focus({ preventScroll:true }); }catch(e){} }, 400);
+}
+
+lcBtn.addEventListener("click", ()=>{
+  if(levelCardMode === "redeem") redeemLevelReward();
+  else continueToNextLevel();
+});
+
+/* The one place a level reward is converted into a song. Runs at most once per level. */
+function redeemLevelReward(){
+  if(redeemInFlight || state.phase !== "levelComplete") return;
+  redeemInFlight = true;
+  lcBtn.disabled = true;
+
+  const next = nextLockedItem("songs");
+  if(next){
+    const res = purchaseItem("songs", next.id, { save:false });   // 1. balance check  3. subtract  4. unlock
+    if(!res.ok){
+      lcNote.textContent = res.message;
+      redeemInFlight = false;
+      lcBtn.disabled = false;
+      return;
+    }
+  }
+  advanceLevel();                                                  // level++, fresh Day 1
+  saveGame();                                                      // 5. persist (one atomic write)
+  renderRadio(); renderStore();                                    // 6. update radio
+
+  const upcoming = state.level;
+  if(next){
+    lcSong.classList.add("unlocked");                              // 7–8. announce the song
+    lcSong.innerHTML = `<div class="lcSongLabel">🎵 Song unlocked!</div>
+      <div class="lcSongTitle">“${esc(next.title)}”</div><div class="lcSongArtist">${esc(next.artist)} — now playable on the radio</div>`;
+    playSongUnlockSound();
+    spawnLevelBurst(16);
+  } else {
+    lcSong.innerHTML = `<div class="lcSongLabel">💧 ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ banked</div>
+      <div class="lcSongArtist">Save it for skins and characters.</div>`;
+  }
+  lcNote.innerHTML = `Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  levelCardMode = "continue";                                      // 9. continue button
+  lcBtn.textContent = `CONTINUE TO LEVEL ${fmt(upcoming)}`;
+  // Short delay so a double-click on Redeem can't skip straight past the unlock screen.
+  setTimeout(()=>{ lcBtn.disabled = false; redeemInFlight = false; }, 700);
+}
+
+function advanceLevel(){
+  state.level++;
+  state.levelFlOz = 0;
+  state.currentStep = 0;
+  state.tapCount = 0;
+  state.phase = "redeemed";
+}
+
+function continueToNextLevel(){
+  if(state.phase !== "redeemed" || redeemInFlight) return;
+  levelCard.classList.remove("show");
+  clearCertificates();
+  resetSystem();
+  showTribeReveal(state.lastTribe, ()=> beginDay(0));
+}
+
+/* The original -ite reveal, kept as a secondary reward shown after the level is redeemed. */
+function showTribeReveal(tribe, onDone){
+  if(!tribe){ onDone(); return; }
   tribeName.textContent = tribe.name;
   tribeCategory.textContent = tribe.category;
   tribeCard.classList.add("show");
   playLoopCompleteSound();
-
+  let done = false;
   const dismiss = ()=>{
+    if(done) return;
+    done = true;
     tribeCard.classList.remove("show");
     tribeCard.removeEventListener("click", dismiss);
-    clearCertificates();
-    resetSystem();
+    onDone();
   };
   tribeCard.addEventListener("click", dismiss);
-  setTimeout(()=>{ if(tribeCard.classList.contains("show")) dismiss(); }, 3200);
+  setTimeout(dismiss, 3200);
 }
+
+function spawnLevelBurst(count){
+  const glyphs = ["✨","💫","⭐","💧"];
+  for(let i=0;i<count;i++){
+    const drop = document.createElement("div");
+    drop.className = "burstDrop";
+    const angle = (i / count) * Math.PI * 2 + Math.random() * .4;
+    const dist = 90 + Math.random() * 110;
+    drop.style.setProperty("--bx", (Math.cos(angle) * dist).toFixed(1) + "px");
+    drop.style.setProperty("--by", (Math.sin(angle) * dist * .8).toFixed(1) + "px");
+    drop.style.animationDelay = (Math.random() * .15).toFixed(2) + "s";
+    lcBurst.appendChild(drop);
+    setTimeout(()=>drop.remove(), 1600);
+  }
+  for(let i=0;i<Math.ceil(count/3);i++){
+    const s = document.createElement("span");
+    s.className = "badgeSparkle";
+    s.textContent = glyphs[i % glyphs.length];
+    s.style.left = ((Math.random() - .5) * 240).toFixed(0) + "px";
+    s.style.top = ((Math.random() - .5) * 160).toFixed(0) + "px";
+    s.style.setProperty("--sx", ((Math.random()-.5)*80)+"px");
+    s.style.setProperty("--sy", (-40 - Math.random()*50)+"px");
+    lcBurst.appendChild(s);
+    setTimeout(()=>s.remove(), 950);
+  }
+}
+
+/* =========================================================
+   v2 — WALLET / UNLOCKS (songs, skins, characters)
+========================================================= */
+function isUnlocked(category, id){ return (state[UNLOCK_STATE_KEY[category]] || []).includes(id); }
+function nextLockedItem(category){ return (UNLOCK_CATALOG[category] || []).find(it => !isUnlocked(category, it.id)) || null; }
+
+/* Generic purchase: never lets the wallet go negative, never unlocks twice. */
+function purchaseItem(category, id, opts = {}){
+  const catalog = UNLOCK_CATALOG[category];
+  if(!catalog) return { ok:false, message:"Unknown item type." };
+  const item = catalog.find(i => i.id === id);
+  if(!item) return { ok:false, message:"That item doesn't exist." };
+  if(isUnlocked(category, id)) return { ok:false, message:"Already unlocked." };
+  const cost = Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
+  if(state.totalFlOz < cost) return { ok:false, message:`Need ${fmt(cost)} FL OZ — you have ${fmt(state.totalFlOz)}.` };
+  state.totalFlOz -= cost;
+  state[UNLOCK_STATE_KEY[category]].push(id);
+  if(opts.save !== false){ saveGame(); renderRadio(); renderStore(); }
+  return { ok:true, item, cost };
+}
+
+/* Payment hook. Your checkout calls this after a verified payment; receipt ids are
+   remembered so the same payment can never be credited twice. */
+function creditPack(packId, receiptId){
+  const pack = STORE_PACKS.find(p => p.id === packId);
+  if(!pack) return { ok:false, message:"Unknown pack." };
+  if(typeof receiptId !== "string" || !receiptId) return { ok:false, message:"A receipt id is required." };
+  if(state.processedReceipts.includes(receiptId)) return { ok:false, message:"Receipt already credited." };
+  state.processedReceipts.push(receiptId);
+  state.totalFlOz += pack.flOz;
+  saveGame(); renderStore(); renderRadio();
+  showToast(`+${fmt(pack.flOz)} FL OZ added`);
+  return { ok:true, credited: pack.flOz };
+}
+
+function startCheckout(packId){
+  const pack = STORE_PACKS.find(p => p.id === packId);
+  if(!pack) return;
+  const pay = window.YALLTOO_PAYMENTS;
+  if(pay && typeof pay.checkout === "function"){
+    pay.checkout({ ...pack }, receiptId => creditPack(pack.id, receiptId));
+  } else {
+    setStoreMsg("Checkout isn't connected yet — packs will be available soon.");
+  }
+}
+
+window.YalltooDamEconomy = {
+  creditPack,
+  getSnapshot: () => ({ level: state.level, totalFlOz: state.totalFlOz, levelFlOz: state.levelFlOz,
+    unlockedSongs: state.unlockedSongs.slice(), unlockedSkins: state.unlockedSkins.slice(), unlockedCharacters: state.unlockedCharacters.slice() }),
+  packs: STORE_PACKS.map(p => ({ ...p }))
+};
 
 let lastTribeName = null;
 function pickTribe(){
@@ -1594,6 +2467,7 @@ function resetSystem(){
   state.tapCount = 0;
   activateStation(0);
   updateProgressDots();
+  renderHud();
 }
 
 /* =========================================================
@@ -1604,6 +2478,10 @@ document.getElementById("rebuildBtn").addEventListener("click", rebuildSystem);
 
 function triggerDamBreak(){
   if(state.gameOver) return;
+  if(state.phase === "levelComplete" || state.phase === "redeemed") return;  // earned level is protected
+  stopDayTimer();
+  timeUpCard.classList.remove("show");
+  dayRewardEl.classList.remove("show");
   state.gameOver = true;
   state.busy = true;
   playDamBreakSound();
@@ -1625,11 +2503,14 @@ function rebuildSystem(){
   state.gameOver = false;
   state.busy = false;
   state.millStage = 0;
-  state.loop = 0;
-  loopCountEl.textContent = 0;
+  // v2: the unfinished level restarts at Day 1. Already-earned FL OZ stays in the wallet;
+  // level number, completed loops and unlocks are permanent progress and are not reset.
+  state.levelFlOz = 0;
   renderMillStage();
   clearCertificates();
   resetSystem();
+  saveGame();
+  beginDay(0);
 }
 
 /* =========================================================
@@ -1692,8 +2573,156 @@ fullscreenBtn.addEventListener("click", toggleFullscreen);
 /* =========================================================
    TRIBES PANEL
 ========================================================= */
-document.getElementById("tribesBtn").addEventListener("click", ()=>{
-  document.getElementById("tribesPanel").classList.toggle("open");
+function anyPanelOpen(){ return Object.values(PANELS).some(p => p.classList.contains("open")); }
+function closePanels(){
+  Object.values(PANELS).forEach(p => p.classList.remove("open"));
+  syncTimerPause();
+}
+function togglePanel(name){
+  const willOpen = !PANELS[name].classList.contains("open");
+  Object.values(PANELS).forEach(p => p.classList.remove("open"));
+  if(willOpen){
+    if(name === "radio") renderRadio();
+    if(name === "store") renderStore();
+    PANELS[name].classList.add("open");
+  }
+  syncTimerPause();                                  // open panel pauses the day clock
+}
+document.getElementById("tribesBtn").addEventListener("click", ()=> togglePanel("tribes"));
+$("radioBtn").addEventListener("click", ()=> togglePanel("radio"));
+$("storeBtn").addEventListener("click", ()=> togglePanel("store"));
+document.querySelectorAll("[data-close-panel]").forEach(b => b.addEventListener("click", closePanels));
+
+/* =========================================================
+   v2 — RADIO (plays unlocked songs only)
+========================================================= */
+let radioAudio = null;
+let nowPlayingId = null;
+const songList = $("songList"), nowPlaying = $("nowPlaying");
+
+function renderRadio(){
+  $("radioWallet").innerHTML = `Unlocked: <strong>${state.unlockedSongs.length} / ${SONGS.length}</strong> songs · Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  const playing = radioAudio && !radioAudio.paused ? SONGS.find(s=>s.id === nowPlayingId) : null;
+  nowPlaying.textContent = playing ? `▶ Now playing: ${playing.title}` : "";
+  songList.innerHTML = SONGS.map((s, i) => {
+    const open = isUnlocked("songs", s.id);
+    const isPlaying = playing && playing.id === s.id;
+    const action = open
+      ? `<button class="playBtn" data-play="${esc(s.id)}" aria-label="${isPlaying ? "Pause" : "Play"} ${esc(s.title)}">${isPlaying ? "❚❚ PAUSE" : "▶ PLAY"}</button>`
+      : `<div class="lockTag">🔒 LOCKED<br>Redeem ${fmt(UNLOCK_COST_FL_OZ)} FL OZ</div>`;
+    return `<div class="songRow ${open ? "" : "locked"} ${isPlaying ? "playing" : ""}">
+      <div class="songNum">${i + 1}</div>
+      <div class="songMeta"><div class="songTitle">${open ? "🎵" : "🔒"} ${esc(s.title)}</div><div class="songArtist">${esc(s.artist)}</div></div>
+      ${action}</div>`;
+  }).join("");
+}
+
+songList.addEventListener("click", e => {
+  const btn = e.target.closest("[data-play]");
+  if(btn) playSong(btn.getAttribute("data-play"));
+});
+
+function playSong(id){
+  const song = SONGS.find(s => s.id === id);
+  // Unlock is checked here, at play time, against live state — not against the button that was clicked.
+  if(!song || !isUnlocked("songs", id)){ showToast("🔒 Locked — complete another hydraulic level"); return; }
+  if(!radioAudio){
+    radioAudio = new Audio();
+    radioAudio.preload = "none";
+    ["ended","pause","play"].forEach(ev => radioAudio.addEventListener(ev, renderRadio));
+    radioAudio.addEventListener("error", ()=>{ showToast("Couldn't load that track"); renderRadio(); });
+  }
+  if(nowPlayingId === id && !radioAudio.paused){ radioAudio.pause(); return; }
+  if(nowPlayingId !== id){ radioAudio.src = song.src; nowPlayingId = id; }
+  const p = radioAudio.play();
+  if(p && p.catch) p.catch(()=> showToast("Tap play again to start audio"));
+  renderRadio();
+}
+
+/* =========================================================
+   v2 — STORE
+========================================================= */
+let storeMsgText = "";
+function setStoreMsg(t){ storeMsgText = t; const el = $("storeMsg"); if(el) el.textContent = t; }
+let charMsgText = "";
+function renderStoreCharacters(){
+  const grid = $("storeCharacters");
+  grid.innerHTML = "";
+  CHARACTERS.forEach(c => {
+    const owned = isUnlocked("characters", c.id);
+    const active = state.activeCharacter === c.id;
+    const card = document.createElement("div");
+    card.className = "charCard" + (active ? " active" : "") + (owned ? "" : " locked");
+    const thumb = document.createElement("div");
+    thumb.className = "charThumb";
+    const img = characterImage(c, "charThumbImg");
+    img.loading = "lazy";
+    thumb.appendChild(img);
+    const status = c.isDefault ? "DEFAULT CHARACTER" : owned ? "UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+    let btn;
+    if(active) btn = `<button class="storeBtn" disabled>ACTIVE</button>`;
+    else if(owned) btn = `<button class="storeBtn" data-char-use="${esc(c.id)}">USE CHARACTER</button>`;
+    else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>NEED ${fmt(c.cost)} FL OZ</button>`;
+    else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">UNLOCK · ${fmt(c.cost)} FL OZ</button>`;
+    const info = document.createElement("div");
+    info.className = "charInfo";
+    info.innerHTML = `<div class="packName">${esc(c.name)}</div><div class="packDetail">${status}</div>${btn}`;
+    card.appendChild(thumb);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+  $("charMsg").textContent = charMsgText;
+}
+
+function renderStore(){
+  renderStoreCharacters();
+  $("storeWallet").innerHTML = `Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  const next = nextLockedItem("songs");
+  $("storeRedeem").innerHTML = next
+    ? `<div class="redeemBox"><div class="packName">Next song: “${esc(next.title)}”</div>
+        <div class="packDetail">${fmt(UNLOCK_COST_FL_OZ)} FL OZ = 1 song unlock</div>
+        <button class="storeBtn" id="storeRedeemBtn" ${state.totalFlOz < UNLOCK_COST_FL_OZ ? "disabled" : ""}>UNLOCK FOR ${fmt(UNLOCK_COST_FL_OZ)} FL OZ</button>
+        <div class="storeMsg" id="storeMsg">${esc(storeMsgText)}</div></div>`
+    : `<div class="redeemBox"><div class="packName">🎶 Music collection complete</div><div class="storeMsg" id="storeMsg">${esc(storeMsgText)}</div></div>`;
+  $("storePacks").innerHTML = STORE_PACKS.map(p => `
+    <div class="packCard ${p.badge ? "best" : ""}">
+      <div class="packInfo">
+        <div class="packName">${esc(p.priceLabel)} · ${fmt(p.flOz)} FL OZ${p.badge ? `<span class="packBadge">${esc(p.badge)}</span>` : ""}</div>
+        <div class="packDetail">${p.unlocks > 1 ? `${p.unlocks} × ${fmt(UNLOCK_COST_FL_OZ)} FL OZ = ` : ""}${p.unlocks} song unlock${p.unlocks > 1 ? "s" : ""}</div>
+      </div>
+      <button class="storeBtn" data-pack="${esc(p.id)}">BUY</button>
+    </div>`).join("");
+}
+$("storePanel").addEventListener("click", e => {
+  const unlockBtn = e.target.closest("[data-char-unlock]");
+  if(unlockBtn){
+    unlockBtn.disabled = true;                      // one click = one purchase attempt
+    const id = unlockBtn.getAttribute("data-char-unlock");
+    const res = purchaseItem("characters", id);     // balance check, subtract, unlock, save
+    const c = CHARACTERS.find(x => x.id === id);
+    charMsgText = res.ok ? `🎉 ${c.name} unlocked — tap USE CHARACTER` : res.message;
+    if(res.ok) playSongUnlockSound();
+    renderStore();
+    return;
+  }
+  const useBtn = e.target.closest("[data-char-use]");
+  if(useBtn){
+    const id = useBtn.getAttribute("data-char-use");
+    const c = CHARACTERS.find(x => x.id === id);
+    charMsgText = setActiveCharacter(id) ? `✅ ${c.name} is now your character` : "That character is locked.";
+    renderStore();
+    return;
+  }
+  if(e.target.closest("#storeRedeemBtn")){
+    const next = nextLockedItem("songs");
+    if(!next) return;
+    const res = purchaseItem("songs", next.id);
+    setStoreMsg(res.ok ? `🎵 Unlocked “${next.title}”` : res.message);
+    if(res.ok){ playSongUnlockSound(); renderStore(); }
+    return;
+  }
+  const packBtn = e.target.closest("[data-pack]");
+  if(packBtn) startCheckout(packBtn.getAttribute("data-pack"));
 });
 
 /* =========================================================
@@ -1798,6 +2827,24 @@ function playDamBreakSound(){
   playTone(90, 0.6, "sawtooth");
   setTimeout(()=>playWaterNoise(2.2, 400, 60, 0.28), 150);
 }
+/* v2 sounds — same synth, no audio files */
+function playTimerWarningSound(sec){ playTone(sec <= 1 ? 1175 : 880, 0.09, "square"); }
+function playTimeoutSound(){
+  playTone(196, 0.45, "sawtooth");
+  setTimeout(()=>playTone(147, 0.5, "sawtooth"), 160);
+  setTimeout(()=>playWaterNoise(1.2, 1100, 140, 0.2), 60);   // pressure escaping
+}
+function playDayRewardSound(){
+  [784, 988, 1318].forEach((f,i)=> setTimeout(()=>playTone(f, 0.16, "triangle"), i*70));
+}
+function playLevelFanfare(){
+  playWaterNoise(1.6, 200, 1800, 0.16);                        // water burst
+  [523,659,784,1046,784,1046,1318].forEach((f,i)=> setTimeout(()=>playTone(f, i === 6 ? 0.6 : 0.26, "triangle"), 140 + i*120));
+}
+function playSongUnlockSound(){
+  [659,831,988,1318,1661].forEach((f,i)=> setTimeout(()=>playTone(f, 0.3, "sine"), i*90));
+  setTimeout(()=>playWaterNoise(0.6, 1400, 2400, 0.05), 80);
+}
 
 /* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
@@ -1811,9 +2858,42 @@ window.addEventListener("load", reportHeight);
 /* =========================================================
    INIT
 ========================================================= */
-activateStation(0);
-updateProgressDots();
-showToast("Tap anywhere to begin the flow");
+loadGame();
+restoreVisualProgress();
+renderTribesList();
+renderRadio();
+renderStore();
+if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
+  // Refreshed while the level card was waiting: the reward is still unredeemed.
+  oceanGroup.classList.add("reached");
+  showLevelComplete({ quiet:true });
+} else {
+  // Resume on the saved day with a FRESH clock that starts on the first tap (no stale countdowns).
+  state.phase = "ready";
+  activateStation(state.currentStep);
+  updateProgressDots();
+  renderHud();
+  showToast(state.levelFlOz > 0 ? `Level ${state.level} · tap to resume Day ${state.currentStep + 1}` : "Tap anywhere to begin the flow");
+}
+broadcastUnlocks();
+preloadCharacter(getActiveCharacter());
+
+/* Redraw days already completed in this level (after a refresh) without sounds. */
+function restoreVisualProgress(){
+  renderMillStage();
+  const done = daysDoneThisLevel();
+  for(let i = 0; i < done; i++){
+    const g = stationsGroup.querySelector(`.station[data-index="${i}"]`);
+    g.classList.remove("locked","active");
+    g.classList.add("done","showName");
+    segments[i].style.transition = "none";
+    segments[i].style.strokeDashoffset = "0";
+    segments[i].classList.add("flowing");
+    void segments[i].getBoundingClientRect();
+    segments[i].style.transition = "";
+    spawnCertificate(i, { silent:true });
+  }
+}
 
 </script>
 
