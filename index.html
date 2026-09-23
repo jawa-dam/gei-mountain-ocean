@@ -1270,15 +1270,15 @@ Rebuild it from the Mountain up.</div>
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
         <div class="panelTitle">🛒 FL OZ Store</div>
         <div class="walletLine" id="storeWallet"></div>
-        <div class="panelGroup">Redeem</div>
+        <div class="panelGroup">🎵 Songs</div>
         <div id="storeRedeem"></div>
-        <div class="panelGroup">Get FL OZ</div>
-        <div id="storePacks"></div>
-        <div class="panelGroup">Skins</div>
-        <div class="emptyNote">Premium skins will cost 666 FL OZ each. The 7 built-in skins stay free.</div>
-        <div class="panelGroup">Characters</div>
+        <div class="panelGroup">👤 Characters</div>
         <div class="charGrid" id="storeCharacters"></div>
         <div class="storeMsg" id="charMsg"></div>
+        <div class="panelGroup">🎨 Skins</div>
+        <div class="emptyNote">Premium skins will cost 666 FL OZ each. The 7 built-in skins stay free.</div>
+        <div class="panelGroup">Get FL OZ</div>
+        <div id="storePacks"></div>
       </div>
     </div>
 
@@ -2155,8 +2155,6 @@ function reachOcean(){
    v2 — LEVEL COMPLETION → REDEEM → CONTINUE
    (replaces the old completeLoop → tribe card → resetSystem path)
 ========================================================= */
-let levelCardMode = "redeem";   // redeem | continue
-let redeemInFlight = false;
 
 function getActiveCharacter(){
   return CHARACTERS.find(x => x.id === state.activeCharacter && isUnlocked("characters", x.id))
@@ -2223,27 +2221,21 @@ function showLevelComplete(opts = {}){
   stopDayTimer();
   state.phase = "levelComplete";
   state.busy = false;
-  levelCardMode = "redeem";
-  redeemInFlight = false;
 
   lcLevel.textContent = `LEVEL ${fmt(state.level)} COMPLETE`;
   renderCharacter();
   renderLevelBackdrop();
   renderChain();
 
-  const next = nextLockedItem("songs");
+  // The level's 666 FL OZ (6 × 111, credited day by day in awardDay) is already in the wallet.
+  // Nothing is spent here: the player chooses what to unlock in the Store.
   lcSong.classList.remove("unlocked");
-  if(next){
-    lcSong.innerHTML = `<div class="lcSongLabel">Song ready to redeem</div>
-      <div class="lcSongTitle">“${esc(next.title)}”</div><div class="lcSongArtist">${esc(next.artist)}</div>`;
-    lcBtn.textContent = `REDEEM ${fmt(UNLOCK_COST_FL_OZ)} FL OZ`;
-  } else {
-    lcSong.innerHTML = `<div class="lcSongLabel">🎶 Music collection complete</div>
-      <div class="lcSongArtist">Every song is unlocked. Your ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ stays in your wallet for skins and characters.</div>`;
-    lcBtn.textContent = `BANK ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ & CONTINUE`;
-  }
+  lcSong.innerHTML = `<div class="lcSongLabel">💧 +${fmt(LEVEL_REWARD_FL_OZ)} FL OZ BANKED</div>
+    <div class="lcSongTitle">Wallet: ${fmt(state.totalFlOz)} FL OZ</div>
+    <div class="lcSongArtist">Spend it in the 🛒 Store whenever you choose — songs, characters or skins.</div>`;
+  lcBtn.textContent = `CONTINUE TO LEVEL ${fmt(state.level + 1)}`;
   lcBtn.disabled = false;
-  lcNote.innerHTML = `Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  lcNote.textContent = "";
   renderHud();
 
   levelCard.classList.add("show");
@@ -2256,47 +2248,17 @@ function showLevelComplete(opts = {}){
   setTimeout(()=>{ try{ lcBtn.focus({ preventScroll:true }); }catch(e){} }, 400);
 }
 
-lcBtn.addEventListener("click", ()=>{
-  if(levelCardMode === "redeem") redeemLevelReward();
-  else continueToNextLevel();
-});
+lcBtn.addEventListener("click", bankAndContinue);
 
-/* The one place a level reward is converted into a song. Runs at most once per level. */
-function redeemLevelReward(){
-  if(redeemInFlight || state.phase !== "levelComplete") return;
-  redeemInFlight = true;
+/* Level completion never spends FL OZ and never unlocks anything. It only advances the level;
+   the reward is already banked. Guarded by phase, so it runs at most once per completed level. */
+function bankAndContinue(){
+  if(state.phase !== "levelComplete") return;
   lcBtn.disabled = true;
-
-  const next = nextLockedItem("songs");
-  if(next){
-    const res = purchaseItem("songs", next.id, { save:false });   // 1. balance check  3. subtract  4. unlock
-    if(!res.ok){
-      lcNote.textContent = res.message;
-      redeemInFlight = false;
-      lcBtn.disabled = false;
-      return;
-    }
-  }
   advanceLevel();                                                  // level++, fresh Day 1
-  saveGame();                                                      // 5. persist (one atomic write)
-  renderRadio(); renderStore();                                    // 6. update radio
-
-  const upcoming = state.level;
-  if(next){
-    lcSong.classList.add("unlocked");                              // 7–8. announce the song
-    lcSong.innerHTML = `<div class="lcSongLabel">🎵 Song unlocked!</div>
-      <div class="lcSongTitle">“${esc(next.title)}”</div><div class="lcSongArtist">${esc(next.artist)} — now playable on the radio</div>`;
-    playSongUnlockSound();
-    spawnLevelBurst(16);
-  } else {
-    lcSong.innerHTML = `<div class="lcSongLabel">💧 ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ banked</div>
-      <div class="lcSongArtist">Save it for skins and characters.</div>`;
-  }
-  lcNote.innerHTML = `Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
-  levelCardMode = "continue";                                      // 9. continue button
-  lcBtn.textContent = `CONTINUE TO LEVEL ${fmt(upcoming)}`;
-  // Short delay so a double-click on Redeem can't skip straight past the unlock screen.
-  setTimeout(()=>{ lcBtn.disabled = false; redeemInFlight = false; }, 700);
+  saveGame();                                                      // one atomic write
+  renderRadio(); renderStore();
+  continueToNextLevel();
 }
 
 function advanceLevel(){
@@ -2308,7 +2270,7 @@ function advanceLevel(){
 }
 
 function continueToNextLevel(){
-  if(state.phase !== "redeemed" || redeemInFlight) return;
+  if(state.phase !== "redeemed") return;
   levelCard.classList.remove("show");
   clearCertificates();
   resetSystem();
@@ -2609,7 +2571,7 @@ function renderRadio(){
     const isPlaying = playing && playing.id === s.id;
     const action = open
       ? `<button class="playBtn" data-play="${esc(s.id)}" aria-label="${isPlaying ? "Pause" : "Play"} ${esc(s.title)}">${isPlaying ? "❚❚ PAUSE" : "▶ PLAY"}</button>`
-      : `<div class="lockTag">🔒 LOCKED<br>Redeem ${fmt(UNLOCK_COST_FL_OZ)} FL OZ</div>`;
+      : `<div class="lockTag">🔒 LOCKED<br>Unlock in 🛒 Store · ${fmt(UNLOCK_COST_FL_OZ)} FL OZ</div>`;
     return `<div class="songRow ${open ? "" : "locked"} ${isPlaying ? "playing" : ""}">
       <div class="songNum">${i + 1}</div>
       <div class="songMeta"><div class="songTitle">${open ? "🎵" : "🔒"} ${esc(s.title)}</div><div class="songArtist">${esc(s.artist)}</div></div>
@@ -2625,7 +2587,7 @@ songList.addEventListener("click", e => {
 function playSong(id){
   const song = SONGS.find(s => s.id === id);
   // Unlock is checked here, at play time, against live state — not against the button that was clicked.
-  if(!song || !isUnlocked("songs", id)){ showToast("🔒 Locked — complete another hydraulic level"); return; }
+  if(!song || !isUnlocked("songs", id)){ showToast("🔒 Locked — unlock it in the 🛒 Store for 666 FL OZ"); return; }
   if(!radioAudio){
     radioAudio = new Audio();
     radioAudio.preload = "none";
