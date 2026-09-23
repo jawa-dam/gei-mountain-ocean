@@ -970,6 +970,20 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .timerBar i{ display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--juicy-blue),var(--foam)); transition:width .1s linear; }
 .timerBar.urgent i{ background:var(--danger); }
 
+/* ============ v2.2: DAM HUMOR ============ */
+.damQuip{ font-size:.86rem; font-weight:800; line-height:1.35; color:var(--foam); overflow-wrap:anywhere; }
+.damQuip:empty{ display:none; }
+.drQuip{ margin-top:6px; color:var(--gold); }
+.lcQuip{ font-size:.92rem; margin:-4px 0 10px; font-style:italic; }
+.timeUpQuip{ font-size:1rem; margin:-2px 0 8px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.45); }
+.timeUpTip{ display:inline-block; margin-top:6px; font-weight:800; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.55); }
+.tribeQuip{ margin-top:8px; color:var(--gold); position:relative; }
+.panelQuip{ margin:-4px 0 10px; color:var(--gold); }
+.lcCharTitle{ font-size:.8rem; font-weight:800; color:var(--gold); }
+.lcCharTitle:empty{ display:none; }
+.charTitle{ font-size:.76rem; font-weight:800; color:var(--gold); margin-top:1px; }
+#lcNote{ font-size:.86rem; font-weight:700; color:rgba(255,255,255,.9); }
+
 /* ============ v2: DAILY REWARD POP ============ */
 .dayReward{
   position:absolute; left:50%; top:42%; z-index:45; pointer-events:none;
@@ -1220,6 +1234,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
           <div class="tribeName" id="tribeName">—</div>
           <div class="tribeCategory" id="tribeCategory">Tribal</div>
           <div class="tribeSub">The system flowed complete. Tap anywhere to flow again.</div>
+          <div class="damQuip tribeQuip" id="tribeQuip"></div>
         </div>
       </div>
 
@@ -1244,6 +1259,7 @@ Rebuild it from the Mountain up.</div>
         <div class="drTitle" id="drTitle">💧 Day 1 complete</div>
         <div class="drPlus">+111 FL OZ</div>
         <div class="drConv"><span id="drAmount">3.28266 Liters</span><span class="drArrow">→</span>111 FL OZ</div>
+        <div class="damQuip drQuip" id="drQuip"></div>
       </div>
 
       <!-- v2: timer failure -->
@@ -1251,7 +1267,8 @@ Rebuild it from the Mountain up.</div>
         <div class="gameOverInner">
           <div style="font-size:2.4rem;">⚠️</div>
           <div class="gameOverTitle" id="timeUpTitle">Time's Up</div>
-          <div class="gameOverSub">The water escaped before the step was completed.<br><span id="timeUpDetail"></span></div>
+          <div class="damQuip timeUpQuip" id="timeUpQuip"></div>
+          <div class="gameOverSub">The water escaped before the step was completed.<br><span id="timeUpDetail"></span><br><span class="timeUpTip" id="timeUpTip"></span></div>
           <button class="rebuildBtn" id="retryDayBtn">Try Day Again</button>
         </div>
       </div>
@@ -1261,6 +1278,7 @@ Rebuild it from the Mountain up.</div>
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
         <div class="panelTitle">🎵 Y'all Too Radio</div>
         <div class="walletLine" id="radioWallet"></div>
+        <div class="damQuip panelQuip" id="radioQuip"></div>
         <div class="nowPlaying" id="nowPlaying"></div>
         <div id="songList"></div>
       </div>
@@ -1270,6 +1288,7 @@ Rebuild it from the Mountain up.</div>
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
         <div class="panelTitle">🛒 FL OZ Store</div>
         <div class="walletLine" id="storeWallet"></div>
+        <div class="damQuip panelQuip" id="storeQuip"></div>
         <div class="panelGroup">🎵 Songs</div>
         <div id="storeRedeem"></div>
         <div class="panelGroup">👤 Characters</div>
@@ -1294,8 +1313,10 @@ Rebuild it from the Mountain up.</div>
           <div class="lcChar" id="lcChar"></div>
         </div>
         <div class="lcCharName" id="lcCharName"></div>
+        <div class="lcCharTitle" id="lcCharTitle"></div>
         <div class="lcCongrats">Congratulations!</div>
         <div class="lcOz"><span class="lcOzNum">666</span> FL OZ EARNED</div>
+        <div class="damQuip lcQuip" id="lcQuip"></div>
         <div class="lcChain" id="lcChain"></div>
         <div class="lcSong" id="lcSong"></div>
         <button class="lcBtn" id="lcBtn">REDEEM 666 FL OZ</button>
@@ -1420,6 +1441,208 @@ const STORE_PACKS = [
   { id:"single", label:"Single",   priceLabel:"$3", priceUsd:3, flOz:666,  unlocks:1 },
   { id:"six",    label:"Six-Pack", priceLabel:"$6", priceUsd:6, flOz:3996, unlocks:6, badge:"BEST OFFER!" }
 ];
+
+/* =========================================================
+   v2.2 — DAM HUMOR ENGINE (presentation only)
+   One catalog + one selector. Nothing here affects rewards, costs, timing or saves.
+   Figurative flavor only — not a translation of Genesis. DAM_DAYS[].meaning stays authoritative.
+========================================================= */
+const DAM_HUMOR = {
+  earn: [
+    "That's a dam good deposit.",
+    "Your liquid assets just went up.",
+    "Deposit complete. Flow preserved.",
+    "The water is officially in the bank.",
+    "Six days of flow, safely stored.",
+    "Your reservoir just got richer."
+  ],
+  save: [
+    "Don't spend it all in one dam place.",
+    "Save your flow.",
+    "Your reservoir is getting deep.",
+    "Stored water is prepared water.",
+    "You're building a liquid reserve.",
+    "A full reservoir never runs dry."
+  ],
+  bigWallet: [
+    "Now THAT is a reservoir.",
+    "Your wallet has serious water pressure.",
+    "That's not pocket change. That's hydraulic capital.",
+    "Your savings could power a mill.",
+    "Liquid assets: extremely liquid."
+  ],
+  insufficientFunds: [
+    "Not enough water in the reservoir.",
+    "Your flow needs a refill.",
+    "The wallet is running a little dry.",
+    "Pressure is low. Keep earning.",
+    "Come back when the flow is stronger."
+  ],
+  duplicatePurchase: [
+    "Already dammed!",
+    "You've already got this one.",
+    "That one's already in the reservoir.",
+    "No need to dam it twice."
+  ],
+  songPurchase: [
+    "New flow unlocked!",
+    "That's a dam good track.",
+    "Your radio just got wetter.",
+    "Another current joins the playlist.",
+    "Let the new flow begin."
+  ],
+  characterPurchase: [
+    "Well, dam! New operator unlocked.",
+    "Your dam crew just got bigger.",
+    "That's one dam good recruit.",
+    "Welcome to the hydraulic crew.",
+    "Another operator reports for duty."
+  ],
+  characterSelect: [
+    "Operator activated.",
+    "Ready to control the flow.",
+    "Your dam shift starts now.",
+    "New hands on the gates.",
+    "Fresh operator, same dam dedication."
+  ],
+  levelComplete: [
+    "That's a dam fine accomplishment.",
+    "You didn't let that reward run off.",
+    "The hydraulic cycle is making dam sense.",
+    "You held the flow and kept the pressure.",
+    "That's what I call controlled flow.",
+    "Dam right! Level complete.",
+    "Pressure managed. Water preserved.",
+    "Six days. One system. One dam good result.",
+    "Mountain to ocean without a single leak.",
+    "That's some dam fine engineering."
+  ],
+  day1: [
+    "Every great flow starts somewhere.",
+    "Straight from the source.",
+    "That's a mountain of potential.",
+    "Let the tributaries do their thing.",
+    "Source secured."
+  ],
+  day2: [
+    "Hold the line!",
+    "Now we're damming up.",
+    "Pressure contained.",
+    "That's a solid wall of progress.",
+    "Don't crack under pressure."
+  ],
+  day3: [
+    "Store now, flow later.",
+    "Your reservoir is filling.",
+    "Water saved is water preserved.",
+    "That's some deep thinking.",
+    "The pond is looking prosperous."
+  ],
+  day4: [
+    "Open the gate!",
+    "Control the flow.",
+    "Timing is everything.",
+    "Gate control: dam good.",
+    "A perfectly timed release."
+  ],
+  day5: [
+    "Now we're turning water into work.",
+    "Keep that wheel moving.",
+    "Round and round the water goes.",
+    "The current is doing the heavy lifting.",
+    "That wheel is really on a roll."
+  ],
+  day6: [
+    "Now the whole system is working.",
+    "That's how you make water work.",
+    "Factory flow achieved.",
+    "The machine is making dam sense.",
+    "System complete. Flow approved."
+  ],
+  timeout: [
+    "The water got away!",
+    "Too much flow, not enough dam.",
+    "That one ran downstream.",
+    "Close, but the water had other plans.",
+    "Don't let the next one run off!",
+    "The pressure slipped. Grab it again."
+  ],
+  ite: [
+    "Another -ite safely preserved.",
+    "The -ites are under hydraulic protection.",
+    "No -ite left behind the dam.",
+    "The reservoir is protecting the -ites.",
+    "Hydraulic preservation successful."
+  ],
+  continue: [
+    "Back to the mountain. Let's flow again.",
+    "Fresh cycle, same dam determination.",
+    "The water's ready when you are.",
+    "Another cycle, another reservoir.",
+    "Keep calm and dam on."
+  ],
+  radio: [
+    "Your dam radio is flowing.",
+    "Time to turn up the current.",
+    "Keep the water moving and the music flowing.",
+    "Streaming, the hydraulic way.",
+    "Now that's a sound current."
+  ],
+  figurative: [
+    "Hold the line.",
+    "Go with the flow.",
+    "Channel your energy.",
+    "Stay current.",
+    "Weather the pressure.",
+    "Build something that holds.",
+    "Keep the gates under control.",
+    "Make waves."
+  ],
+  general: [
+    "Water under control.",
+    "Flow secured.",
+    "Let the good flow.",
+    "That's a dam solid choice."
+  ]
+};
+
+/* Display subtitles only, keyed by the existing character ids. Not a catalog: ids, names,
+   costs and image URLs all still come from CHARACTERS. */
+const DAM_HUMOR_TITLES = {
+  "wilbert-dam-guide":       "The Original Dam Guide",
+  "yall-too-beaver":         "That Dam Busy Beaver",
+  "operator-fireman":        "The Fire Dam Marshal",
+  "operator-moses":          "The Waterway Operator",
+  "operator-valentine":      "The Dam Valentine",
+  "operator-sam":            "Sam the Dam Operator",
+  "operator-jack-o-lantern": "The Dam-O-Lantern",
+  "operator-santa-claus":    "Santa Dam Claus",
+  "operator-woman":          "The Dam Woman",
+  "operator-man":            "The Dam Man"
+};
+
+const damHumorRecent = {};
+/* Random line from a category, never repeating any of the last 3 picks from that category
+   (fewer for tiny pools). Unknown/empty categories fall back to "general". Never throws. */
+function getDamHumor(category){
+  try {
+    const key = (DAM_HUMOR[category] && DAM_HUMOR[category].length) ? category : "general";
+    const pool = DAM_HUMOR[key];
+    const recent = damHumorRecent[key] || (damHumorRecent[key] = []);
+    const avoid = Math.min(3, pool.length - 1);
+    const blocked = avoid > 0 ? recent.slice(-avoid) : [];
+    let options = pool.map((_, i) => i).filter(i => !blocked.includes(i));
+    if(!options.length) options = pool.map((_, i) => i);
+    const idx = options[Math.floor(Math.random() * options.length) % options.length];
+    recent.push(idx);
+    if(recent.length > 3) recent.shift();
+    return pool[idx] || "";
+  } catch(e){ return ""; }
+}
+function damTitle(id){ return DAM_HUMOR_TITLES[id] || ""; }
+function walletHumorCategory(w){
+  return w < UNLOCK_COST_FL_OZ ? "insufficientFunds" : (w >= 3 * UNLOCK_COST_FL_OZ ? "bigWallet" : "save");
+}
 
 /* =========================================================
    -ITES ROSTER — grouped by category
@@ -2017,6 +2240,7 @@ function showDayReward(index){
   const d = DAM_DAYS[index];
   drTitle.textContent = `💧 ${d.title} complete`;
   drAmount.textContent = d.displayAmount;
+  $("drQuip").textContent = getDamHumor("day" + d.day);
   dayRewardEl.classList.add("show");
   clearTimeout(dayRewardTimer);
   dayRewardTimer = setTimeout(()=> dayRewardEl.classList.remove("show"), 1500);
@@ -2112,6 +2336,8 @@ function handleDayTimeout(){
   renderTimer();
   const d = DAM_DAYS[state.currentStep];
   timeUpDetail.textContent = `${d.title} (${d.station}) — you keep your ${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ.`;
+  $("timeUpQuip").textContent = getDamHumor("timeout");
+  $("timeUpTip").textContent = "💡 " + getDamHumor("figurative");
   timeUpCard.classList.add("show");
   playTimeoutSound();
 }
@@ -2189,6 +2415,7 @@ function renderCharacter(){
   lcChar.innerHTML = "";
   lcChar.appendChild(characterImage(c, "lcCharImg"));
   lcCharName.textContent = c.name;
+  $("lcCharTitle").textContent = damTitle(c.id);
   // Restart the entrance animation each time the card opens.
   lcChar.style.animation = "none"; void lcChar.offsetWidth; lcChar.style.animation = "";
 }
@@ -2235,7 +2462,8 @@ function showLevelComplete(opts = {}){
     <div class="lcSongArtist">Spend it in the 🛒 Store whenever you choose — songs, characters or skins.</div>`;
   lcBtn.textContent = `CONTINUE TO LEVEL ${fmt(state.level + 1)}`;
   lcBtn.disabled = false;
-  lcNote.textContent = "";
+  $("lcQuip").textContent = getDamHumor("levelComplete");
+  lcNote.textContent = getDamHumor(state.totalFlOz >= 3 * UNLOCK_COST_FL_OZ ? "bigWallet" : "earn");
   renderHud();
 
   levelCard.classList.add("show");
@@ -2274,7 +2502,7 @@ function continueToNextLevel(){
   levelCard.classList.remove("show");
   clearCertificates();
   resetSystem();
-  showTribeReveal(state.lastTribe, ()=> beginDay(0));
+  showTribeReveal(state.lastTribe, ()=>{ beginDay(0); showToast(getDamHumor("continue")); });
 }
 
 /* The original -ite reveal, kept as a secondary reward shown after the level is redeemed. */
@@ -2282,6 +2510,7 @@ function showTribeReveal(tribe, onDone){
   if(!tribe){ onDone(); return; }
   tribeName.textContent = tribe.name;
   tribeCategory.textContent = tribe.category;
+  $("tribeQuip").textContent = getDamHumor("ite");
   tribeCard.classList.add("show");
   playLoopCompleteSound();
   let done = false;
@@ -2544,8 +2773,8 @@ function togglePanel(name){
   const willOpen = !PANELS[name].classList.contains("open");
   Object.values(PANELS).forEach(p => p.classList.remove("open"));
   if(willOpen){
-    if(name === "radio") renderRadio();
-    if(name === "store") renderStore();
+    if(name === "radio"){ radioQuipText = getDamHumor("radio"); renderRadio(); }
+    if(name === "store"){ storeQuipText = getDamHumor(walletHumorCategory(state.totalFlOz)); renderStore(); }
     PANELS[name].classList.add("open");
   }
   syncTimerPause();                                  // open panel pauses the day clock
@@ -2562,7 +2791,10 @@ let radioAudio = null;
 let nowPlayingId = null;
 const songList = $("songList"), nowPlaying = $("nowPlaying");
 
+let radioQuipText = "";
+let storeQuipText = "";
 function renderRadio(){
+  $("radioQuip").textContent = radioQuipText;
   $("radioWallet").innerHTML = `Unlocked: <strong>${state.unlockedSongs.length} / ${SONGS.length}</strong> songs · Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
   const playing = radioAudio && !radioAudio.paused ? SONGS.find(s=>s.id === nowPlayingId) : null;
   nowPlaying.textContent = playing ? `▶ Now playing: ${playing.title}` : "";
@@ -2595,7 +2827,7 @@ function playSong(id){
     radioAudio.addEventListener("error", ()=>{ showToast("Couldn't load that track"); renderRadio(); });
   }
   if(nowPlayingId === id && !radioAudio.paused){ radioAudio.pause(); return; }
-  if(nowPlayingId !== id){ radioAudio.src = song.src; nowPlayingId = id; }
+  if(nowPlayingId !== id){ radioAudio.src = song.src; nowPlayingId = id; radioQuipText = getDamHumor("radio"); }
   const p = radioAudio.play();
   if(p && p.catch) p.catch(()=> showToast("Tap play again to start audio"));
   renderRadio();
@@ -2628,7 +2860,7 @@ function renderStoreCharacters(){
     else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">UNLOCK · ${fmt(c.cost)} FL OZ</button>`;
     const info = document.createElement("div");
     info.className = "charInfo";
-    info.innerHTML = `<div class="packName">${esc(c.name)}</div><div class="packDetail">${status}</div>${btn}`;
+    info.innerHTML = `<div class="packName">${esc(c.name)}</div><div class="charTitle">${esc(damTitle(c.id))}</div><div class="packDetail">${status}</div>${btn}`;
     card.appendChild(thumb);
     card.appendChild(info);
     grid.appendChild(card);
@@ -2638,6 +2870,7 @@ function renderStoreCharacters(){
 
 function renderStore(){
   renderStoreCharacters();
+  $("storeQuip").textContent = storeQuipText;
   $("storeWallet").innerHTML = `Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
   const next = nextLockedItem("songs");
   $("storeRedeem").innerHTML = next
@@ -2655,14 +2888,22 @@ function renderStore(){
       <button class="storeBtn" data-pack="${esc(p.id)}">BUY</button>
     </div>`).join("");
 }
+/* Picks the humor for a purchase that is about to fail. Reads state only; decides nothing. */
+function purchaseFailureHumor(category, id){
+  if(isUnlocked(category, id)) return getDamHumor("duplicatePurchase");
+  const item = (UNLOCK_CATALOG[category] || []).find(i => i.id === id);
+  const cost = item && Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
+  return state.totalFlOz < cost ? getDamHumor("insufficientFunds") : "";
+}
 $("storePanel").addEventListener("click", e => {
   const unlockBtn = e.target.closest("[data-char-unlock]");
   if(unlockBtn){
     unlockBtn.disabled = true;                      // one click = one purchase attempt
     const id = unlockBtn.getAttribute("data-char-unlock");
+    const why = purchaseFailureHumor("characters", id);
     const res = purchaseItem("characters", id);     // balance check, subtract, unlock, save
     const c = CHARACTERS.find(x => x.id === id);
-    charMsgText = res.ok ? `🎉 ${c.name} unlocked — tap USE CHARACTER` : res.message;
+    charMsgText = res.ok ? `🎉 ${getDamHumor("characterPurchase")} ${c.name} — tap USE CHARACTER` : `${why} ${res.message}`.trim();
     if(res.ok) playSongUnlockSound();
     renderStore();
     return;
@@ -2671,15 +2912,16 @@ $("storePanel").addEventListener("click", e => {
   if(useBtn){
     const id = useBtn.getAttribute("data-char-use");
     const c = CHARACTERS.find(x => x.id === id);
-    charMsgText = setActiveCharacter(id) ? `✅ ${c.name} is now your character` : "That character is locked.";
+    charMsgText = setActiveCharacter(id) ? `✅ ${c.name} is now your character. ${getDamHumor("characterSelect")}` : "That character is locked.";
     renderStore();
     return;
   }
   if(e.target.closest("#storeRedeemBtn")){
     const next = nextLockedItem("songs");
     if(!next) return;
+    const why = purchaseFailureHumor("songs", next.id);
     const res = purchaseItem("songs", next.id);
-    setStoreMsg(res.ok ? `🎵 Unlocked “${next.title}”` : res.message);
+    setStoreMsg(res.ok ? `🎵 Unlocked “${next.title}” — ${getDamHumor("songPurchase")}` : `${why} ${res.message}`.trim());
     if(res.ok){ playSongUnlockSound(); renderStore(); }
     return;
   }
