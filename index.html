@@ -1037,6 +1037,98 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .bonusBtn{ flex:0 0 auto; }
 .srOnly{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
+/* =========================================================
+   v2.6 — DAM MACHINE (free hydraulic bonus arcade)
+   Same visual language as the waterwheel/level cards: juicy gradients, glass borders,
+   water glow. Fully fluid — fits 360px+ without horizontal scrolling.
+========================================================= */
+.dmCard{ position:absolute; inset:0; z-index:225; display:flex; align-items:center; justify-content:center;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 8px);
+  background:rgba(2,6,14,.84); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity .35s; }
+.dmCard.show{ opacity:1; pointer-events:auto; }
+.dmInner{ position:relative; width:100%; max-width:430px; max-height:100%; overflow:hidden auto; display:flex; flex-direction:column; align-items:center;
+  text-align:center; padding:16px 14px 16px; border-radius:28px;
+  background:linear-gradient(165deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 55%, var(--water-bright)) 55%, color-mix(in srgb, var(--juicy-blue) 60%, var(--juicy-navy)) 100%);
+  border:1.5px solid rgba(255,255,255,.45); box-shadow:0 0 60px color-mix(in srgb, var(--water-bright) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
+  transform:scale(.85); transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
+.dmCard.show .dmInner{ transform:none; }
+.dmCard.jackpotWin .dmInner{ animation:bwJackpotGlow 1.2s ease-in-out infinite alternate; }
+.dmClose{ position:absolute; top:8px; right:8px; z-index:6; width:38px; height:38px; border-radius:12px; cursor:pointer;
+  font-size:1rem; font-weight:900; color:#fff; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.35); }
+.dmClose:disabled{ opacity:.4; cursor:default; }
+.dmTitle{ font-size:clamp(1.6rem,7.5vw,2.2rem); font-weight:900; line-height:1.1; text-shadow:0 0 18px color-mix(in srgb, var(--water-bright) 70%, transparent); }
+.dmSubtitle{ font-size:.84rem; font-weight:800; font-style:italic; color:var(--foam); margin:2px 0 8px; }
+.dmPlays{ font-size:.78rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--juicy-navy);
+  background:linear-gradient(135deg, var(--gold), color-mix(in srgb, var(--gold) 55%, #fff));
+  padding:5px 14px; border-radius:999px; border:1.5px solid rgba(255,255,255,.7); box-shadow:0 0 14px color-mix(in srgb, var(--gold) 45%, transparent); }
+.dmPlays.none{ background:rgba(0,0,0,.35); color:rgba(255,255,255,.85); border-color:rgba(255,255,255,.3); box-shadow:none; }
+/* --- cabinet: pipes + reels --- */
+.dmCabinet{ position:relative; width:100%; display:flex; align-items:stretch; justify-content:center; gap:6px; margin:12px 0 4px; }
+.dmPipe{ flex:0 0 clamp(14px, 4vw, 22px); border-radius:10px;
+  background:linear-gradient(90deg, var(--dam-1), var(--dam-0) 45%, var(--dam-1));
+  border:1.5px solid var(--dam-stroke); box-shadow:inset 0 0 8px rgba(0,0,0,.35); }
+.dmReels{ flex:0 1 auto; min-width:0; display:flex; align-items:stretch; gap:7px; padding:9px;
+  border-radius:18px; background:linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.28));
+  border:2px solid var(--dam-stroke); box-shadow:inset 0 0 18px rgba(0,0,0,.55), 0 0 22px color-mix(in srgb, var(--water-bright) 30%, transparent); }
+.dmReel{ position:relative; flex:1 1 0; min-width:0; width:min(24vw, 92px); aspect-ratio:1 / 1.14; overflow:hidden; border-radius:12px;
+  --dmCells:1;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--juicy-navy) 80%, #000), color-mix(in srgb, var(--water-deep) 85%, #000));
+  border:1.5px solid rgba(255,255,255,.22);
+  box-shadow:inset 0 10px 14px rgba(0,0,0,.5), inset 0 -10px 14px rgba(0,0,0,.5); }
+.dmReel.stopped{ border-color:color-mix(in srgb, var(--water-bright) 65%, transparent); box-shadow:inset 0 10px 14px rgba(0,0,0,.5), 0 0 14px color-mix(in srgb, var(--water-bright) 55%, transparent); }
+.dmSeam{ flex:0 0 3px; border-radius:2px; background:linear-gradient(180deg, transparent, var(--water-bright), transparent); opacity:.7; }
+.dmStrip{ position:absolute; inset:0; display:flex; flex-direction:column; will-change:transform; }
+.dmCell{ flex:0 0 auto; height:calc(100% / var(--dmCells)); display:flex; align-items:center; justify-content:center; }
+.dmSym{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; }
+.dmSymEmoji{ font-size:clamp(2rem, 10vw, 3rem); line-height:1;
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--water-bright) 60%, transparent)); }
+.dmSymImg{ max-width:78%; max-height:78%; object-fit:contain; display:block;
+  filter:drop-shadow(0 0 10px color-mix(in srgb, var(--water-bright) 60%, transparent)); }
+.dmSymIcon{ width:62%; height:62%; display:block; }
+.dmMsg{ min-height:1.4em; font-size:.95rem; font-weight:900; font-style:italic; margin:8px 0 10px; }
+.dmSpinBtn{ flex:0 0 auto; min-height:54px; }
+.dmSpinBtn:disabled{ opacity:.55; cursor:default; }
+.dmNoPlays{ font-size:.86rem; font-weight:800; color:var(--gold); margin-top:10px; line-height:1.4; }
+.dmNoPlays[hidden]{ display:none; }
+/* --- result --- */
+.dmResult{ width:100%; display:flex; flex-direction:column; align-items:center; margin:2px 0 6px; }
+.dmResult[hidden]{ display:none; }
+.dmJackDrops{ font-size:1.3rem; letter-spacing:.2em; text-shadow:0 0 14px var(--water-bright); }
+.dmJackDrops[hidden]{ display:none; }
+.dmChar{ height:min(17vh, 120px); display:flex; align-items:flex-end; justify-content:center; filter:drop-shadow(0 0 14px var(--water-bright)); animation:fxPop .45s cubic-bezier(.34,1.8,.64,1) both; }
+.dmChar[hidden]{ display:none; }
+.dmCharImg{ height:100%; width:auto; max-width:100%; object-fit:contain; display:block; }
+.dmCharFallback{ font-size:1rem; font-weight:900; padding:10px 14px; border-radius:14px; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.35); white-space:nowrap; }
+.dmCharName{ font-size:.8rem; font-weight:800; color:rgba(255,255,255,.85); }
+.dmWon{ font-size:.72rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--foam); opacity:.85; margin-top:6px; }
+.dmPrizeTitle{ font-size:clamp(1.5rem,7.5vw,2.1rem); font-weight:900; margin:2px 0; color:var(--gold); text-shadow:0 0 18px color-mix(in srgb, var(--gold) 55%, transparent); }
+.dmCard.jackpotWin .dmPrizeTitle{ font-size:clamp(2rem,10vw,2.8rem); animation:ozPulse 1s ease-in-out infinite; }
+.dmPrizeDetail{ font-size:.95rem; font-weight:800; color:#fff; }
+.dmHumor{ margin-top:4px; font-size:1rem; font-weight:900; font-style:italic; line-height:1.3; }
+.dmBurst{ position:absolute; left:50%; top:42%; width:0; height:0; z-index:5; pointer-events:none; }
+/* jackpot screen flash (one shot, cheap) */
+.dmFlashFx{ position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0; background:radial-gradient(circle, color-mix(in srgb, var(--foam) 90%, transparent), color-mix(in srgb, var(--water-bright) 60%, transparent)); }
+.dmCard.jackpotWin .dmFlashFx{ animation:dmFlash 0.9s ease-out 1; }
+@keyframes dmFlash{ 0%{ opacity:.85; } 100%{ opacity:0; } }
+/* --- profile entry button --- */
+.dmEntryBtn{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; cursor:pointer;
+  margin-bottom:6px; padding:12px 14px; border-radius:16px; color:#fff;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--juicy-navy) 75%, var(--juicy-blue)), color-mix(in srgb, var(--juicy-violet) 55%, var(--juicy-navy)));
+  border:1.5px solid rgba(255,255,255,.35); box-shadow:0 0 18px color-mix(in srgb, var(--water-bright) 30%, transparent); }
+.dmEntryIcon{ font-size:1.9rem; line-height:1; }
+.dmEntryText{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.dmEntryText strong{ font-size:1rem; font-weight:900; letter-spacing:.06em; }
+.dmEntryText small{ font-size:.76rem; font-weight:700; color:var(--foam); }
+.dmEntryBtn:active{ transform:scale(.98); }
+.dmEntryNote{ margin-top:2px; }
+.dmBtnFocus:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.dmClose:focus-visible, .dmSpinBtn:focus-visible, .dmEntryBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+@media (max-width:380px){
+  .dmPipe{ flex:0 0 12px; }
+  .dmReels{ gap:5px; padding:7px; }
+  .dmSubtitle{ margin-bottom:6px; }
+}
+
 /* ============ v2.2: DAM HUMOR ============ */
 .damQuip{ font-size:.86rem; font-weight:800; line-height:1.35; color:var(--foam); overflow-wrap:anywhere; }
 .damQuip:empty{ display:none; }
@@ -1371,6 +1463,18 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
           <div class="profileRank" id="profileRank"></div>
         </div>
         <div class="profileGrid" id="profileStats"></div>
+
+        <!-- v2.6: Dam Machine entry (bonus arcade; spins never cost FL OZ) -->
+        <div class="panelGroup">🎰 Bonus arcade</div>
+        <button class="dmEntryBtn" id="dmOpenBtn" aria-label="Open the Dam Machine — free hydraulic bonus arcade">
+          <span class="dmEntryIcon" aria-hidden="true">🎰</span>
+          <span class="dmEntryText">
+            <strong>DAM MACHINE</strong>
+            <small id="dmEntrySub">Free plays ready: 0</small>
+          </span>
+        </button>
+        <div class="emptyNote dmEntryNote">Never costs FL OZ. Earn plays from bonus activities.</div>
+
         <div class="panelGroup">💧 How FL OZ works</div>
         <div class="profileEconomy" id="profileEconomy"></div>
       </div>
@@ -1408,7 +1512,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="bwFree">Free spin — you never pay FL OZ</div>
         <div class="bwWheelBox">
           <div class="bwRing" aria-hidden="true"></div>
-          <svg class="bwWheel" viewBox="-160 -170 320 330" role="img" aria-label="Bonus Waterwheel with 7 prizes: 111 FL OZ, free spin, 666 FL OZ, free song, 6,660 FL OZ jackpot, character unlock, dam pun">
+          <svg class="bwWheel" viewBox="-160 -170 320 330" role="img" aria-label="Bonus Waterwheel with 8 prizes: 111 FL OZ, free spin, 666 FL OZ, free song, 6,660 FL OZ jackpot, character unlock, dam pun, Dam Machine play">
             <g id="bwRotor" class="bwRotor"><g id="bwSlices"></g><circle r="150" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="4"/></g>
             <circle r="44" fill="var(--juicy-navy)" stroke="rgba(255,255,255,.7)" stroke-width="3"/>
             <g id="bwHub" class="bwHub"></g>
@@ -1427,6 +1531,44 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         </div>
         <button class="lcBtn bonusBtn" id="bonusBtn">SPIN!</button>
         <div class="srOnly" id="bwStatus" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- v2.6: DAM MACHINE — free hydraulic bonus arcade. Three reels, zero wagers:
+         a spin NEVER subtracts FL OZ, it only ever adds rewards. -->
+    <div class="dmCard" id="damMachineCard" role="dialog" aria-modal="true" aria-labelledby="dmTitle" aria-describedby="dmSubtitle">
+      <div class="dmInner">
+        <div class="dmFlashFx" aria-hidden="true"></div>
+        <button class="dmClose" id="dmCloseBtn" aria-label="Close the Dam Machine">✕</button>
+        <div class="bwEyebrow">💧 Free hydraulic arcade</div>
+        <div class="dmTitle" id="dmTitle">🎰 DAM MACHINE</div>
+        <div class="dmSubtitle" id="dmSubtitle">Where the flow meets the reels.</div>
+        <div class="dmPlays" id="dmPlays" role="status">NO FREE PLAYS</div>
+        <div class="dmCabinet" aria-hidden="true">
+          <div class="dmPipe dmPipeL"></div>
+          <div class="dmReels" id="dmReels">
+            <div class="dmReel" data-reel="0"><div class="dmStrip" id="dmStrip0"></div></div>
+            <div class="dmSeam" aria-hidden="true"></div>
+            <div class="dmReel" data-reel="1"><div class="dmStrip" id="dmStrip1"></div></div>
+            <div class="dmSeam" aria-hidden="true"></div>
+            <div class="dmReel" data-reel="2"><div class="dmStrip" id="dmStrip2"></div></div>
+          </div>
+          <div class="dmPipe dmPipeR"></div>
+        </div>
+        <div class="dmMsg" id="dmMsg"></div>
+        <button class="lcBtn dmSpinBtn" id="dmSpinBtn">SPIN THE DAM</button>
+        <div class="dmNoPlays" id="dmNoPlays" hidden>NO FREE PLAYS — complete bonus activities to earn another spin.</div>
+        <div class="dmResult" id="dmResult" hidden>
+          <div class="dmJackDrops" id="dmJackDrops" hidden>💧💧💧</div>
+          <div class="dmChar" id="dmChar"></div>
+          <div class="dmCharName" id="dmCharName"></div>
+          <div class="dmWon" id="dmWon">Machine result</div>
+          <div class="dmPrizeTitle" id="dmPrizeTitle"></div>
+          <div class="dmPrizeDetail" id="dmPrizeDetail"></div>
+          <div class="dmHumor" id="dmHumor"></div>
+        </div>
+        <div class="dmBurst" id="dmBurst" aria-hidden="true"></div>
+        <div class="srOnly" id="dmStatus" role="status" aria-live="polite"></div>
       </div>
     </div>
 
@@ -1923,6 +2065,68 @@ const DAM_HUMOR = {
     "Bonus banked. Flow on.",
     "The wheel rests. The water doesn't."
   ],
+  /* v2.6 — Dam Machine. Same engine, same catalog rules. "THE DAM HAS BEEN BROKEN!" is comedic
+     jackpot language ONLY — it never touches the real flood/game-over system. */
+  machineIdle: [
+    "Let's see what the dam has in store.",
+    "Ready to turn things around?",
+    "Keep your flow together.",
+    "Three reels. One dam good time.",
+    "Where the flow meets the reels.",
+    "Spin responsibly. Keep the dam intact.",
+    "Three reels. Zero dam breaks."
+  ],
+  machineSpin: [
+    "The pressure is building.",
+    "Something's flowing.",
+    "The reels are under pressure.",
+    "Don't let the dam down."
+  ],
+  machineLose: [
+    "Well... that was a little underwhelming.",
+    "The flow got held up.",
+    "Looks like the sluice was closed.",
+    "Back to the drawing dam.",
+    "That combination was not dam-tastic.",
+    "Don't worry. The reservoir isn't empty."
+  ],
+  machineWin: [
+    "That's a dam good result.",
+    "Flow achieved.",
+    "Now THAT'S hydraulic engineering.",
+    "You're really getting the hang of this."
+  ],
+  machineJackpot: [
+    "THE DAM HAS BEEN BROKEN!",
+    "Comedic damage report: the reservoir is now a liquor cabinet.",
+    "That's not a win. That's a flood of fortune.",
+    "Warning: dam output exceeds all projections."
+  ],
+  machineSong: [
+    "The machine is playing your tune.",
+    "A new track, piped straight from the reservoir.",
+    "The radio just got more dam pressure."
+  ],
+  machineCharacter: [
+    "The machine hired someone. No FL OZ spent.",
+    "A new operator squeezed out of the reels.",
+    "The dam crew just got hydraulically bigger."
+  ],
+  machinePun: [
+    "That's a dam good combination.",
+    "You really know how to turn things around.",
+    "Three laughs? That's a dam trifecta.",
+    "The reels are flowing.",
+    "That's what I call a hydraulic punchline.",
+    "Well dam! The machine has jokes.",
+    "Looks like somebody got a little wheel-y.",
+    "That's a reel dam good result."
+  ],
+  machinePlayAward: [
+    "The machine rumbles... a free play rolls out.",
+    "A Dam Machine play, fresh from the spillway.",
+    "The machine wants you back. Free of charge."
+  ],
   general: [
     "Water under control.",
     "Flow secured.",
@@ -2186,6 +2390,10 @@ const state = {
   activeCharacter:DEFAULT_CHARACTER_ID,
   processedReceipts:[],   // payment receipts already credited (prevents double credit)
   lastTribe:null,
+  /* v2.6 — Dam Machine (free bonus arcade; a spin NEVER subtracts FL OZ) */
+  damMachineFreePlays:0,  // available free plays (spin consumes exactly one, never below 0)
+  damMachineWins:0,       // winning combinations hit
+  damMachineJackpots:0,   // 6,660 FL OZ jackpots hit
   phase:"ready"           // ready | playing | timeout | levelComplete | redeemed  (not persisted)
 };
 
@@ -2232,7 +2440,11 @@ function saveGame(){
     processedReceipts: state.processedReceipts.slice(-200),
     tribesFound: state.tribesFound.slice(-300).map(t=>t.name),
     lastTribe: state.lastTribe ? state.lastTribe.name : null,
-    millStage: state.millStage
+    millStage: state.millStage,
+    /* v2.6 — Dam Machine (additive; old saves simply lack these and get safe defaults on load) */
+    damMachineFreePlays: state.damMachineFreePlays,
+    damMachineWins: state.damMachineWins,
+    damMachineJackpots: state.damMachineJackpots
   };
   storageSet(SAVE_KEY, JSON.stringify(data));
   broadcastUnlocks();
@@ -2267,6 +2479,10 @@ function loadGame(){
   state.processedReceipts = Array.isArray(d.processedReceipts) ? d.processedReceipts.filter(r=>typeof r === "string") : [];
   state.tribesFound     = Array.isArray(d.tribesFound) ? d.tribesFound.map(tribeByName).filter(Boolean) : [];
   state.lastTribe       = tribeByName(d.lastTribe);
+  /* v2.6 — Dam Machine migration: missing fields get safe defaults; nothing existing is overwritten. */
+  state.damMachineFreePlays = toInt(d.damMachineFreePlays, 0, 999, 0);
+  state.damMachineWins      = toInt(d.damMachineWins, 0, 1e6, 0);
+  state.damMachineJackpots  = toInt(d.damMachineJackpots, 0, 1e6, 0);
   return true;
 }
 
@@ -2644,7 +2860,7 @@ function resumeDayTimer(){
   if(!timerPaused || state.phase !== "playing" || state.busy) return;
   startDayTimer(dayTimerRemainingMs);
 }
-function isTimerBlocked(){ return anyPanelOpen() || document.hidden; }
+function isTimerBlocked(){ return anyPanelOpen() || document.hidden || (typeof damMachine === "object" && damMachine.open); }
 function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayTimer(); }
 
 function tickDayTimer(){
@@ -2779,7 +2995,7 @@ function onCharacterImageError(e){
   const img = e.currentTarget;
   safeWarn("Character image failed to load: " + img.src);
   const label = document.createElement("span");
-  label.className = ({ lcCharImg:"lcCharFallback", celebCharImg:"celebCharFallback", profileCharImg:"lcCharFallback", bonusCharImg:"lcCharFallback" })[img.className] || "charThumbFallback";
+  label.className = ({ lcCharImg:"lcCharFallback", celebCharImg:"celebCharFallback", profileCharImg:"lcCharFallback", bonusCharImg:"lcCharFallback", dmCharImg:"dmCharFallback" })[img.className] || "charThumbFallback";
   label.textContent = img.dataset.charName || "Character";
   if(img.parentNode) img.parentNode.replaceChild(label, img);
 }
@@ -2885,7 +3101,9 @@ const BONUS_WATERWHEEL_PRIZES = [
   { id:"jackpot",   icon:"🚨", short:()=>fmt(UNLOCK_COST_FL_OZ),  kind:"flOz", amount:()=>UNLOCK_COST_FL_OZ,  weight:3,  humor:"jackpot", jackpot:true },
   { id:"character", icon:"👤", short:()=>"CREW",                  kind:"character",                           weight:9,  humor:"bonusCharacter",
     fallback:{ amount:()=>LEVEL_REWARD_FL_OZ, title:"THE WHOLE DAM CREW IS HERE!" } },
-  { id:"dam-pun",   icon:"😂", short:()=>"PUN",                   kind:"pun",                                 weight:27, humor:"bonusPun" }
+  { id:"dam-pun",   icon:"😂", short:()=>"PUN",                   kind:"pun",                                 weight:22, humor:"bonusPun" },
+  /* v2.6 — Dam Machine play: +1 free play for the hydraulic arcade machine (never sold, never wagered). */
+  { id:"dam-play",  icon:"🎰", short:()=>"DAM PLAY",              kind:"damPlay",                             weight:5,  humor:"machinePlayAward" }
 ];
 const BONUS_FREE_SPIN_CAP = 3;   // max consecutive free spins; runtime only, never saved
 const bonusReducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } };
@@ -2928,6 +3146,10 @@ function commitBonusPrize(prize){
     }
   } else if(prize.kind === "freeSpin"){
     res.title = "🎡 FREE SPIN!"; res.detail = "The wheel wants another turn.";
+  } else if(prize.kind === "damPlay"){
+    state.damMachineFreePlays = Math.min(999, state.damMachineFreePlays + 1);   // free play only; FL OZ untouched
+    res.title = "🎰 DAM MACHINE PLAY!";
+    res.detail = "One free Dam Machine spin is waiting in your 👤 Profile.";
   } else {
     res.title = "😂 DAM PUN!"; res.detail = "";
   }
@@ -3039,6 +3261,7 @@ function revealBonusResult(result){
     btn.textContent = `CONTINUE TO LEVEL ${fmt(state.level)}`;
     if(result.prize.jackpot){ spawnBonusBurst(34, true); playLevelFanfare(); }
     else if(result.kind === "pun") playPunSound();
+    else if(result.kind === "damPlay"){ spawnBonusBurst(16, false); playDamMachineAwardSound(); }
     else if(result.amount >= LEVEL_REWARD_FL_OZ || result.unlockedId) { spawnBonusBurst(18, false); playSongUnlockSound(); }
     else { spawnBonusBurst(12, false); playDayRewardSound(); }
   }
@@ -3066,6 +3289,408 @@ function spawnBonusBurst(count, gold){
     box.appendChild(d);
     setTimeout(()=> d.remove(), 1700);
   }
+}
+
+/* =========================================================
+   v2.6 — DAM MACHINE (free three-reel hydraulic bonus arcade)
+   Rules of the machine:
+   • A spin NEVER subtracts FL OZ. It consumes one free play (state.damMachineFreePlays)
+     and can only ADD rewards (FL OZ / song / character / pun / another free play).
+   • One play = exactly one result. Selection → evaluation → commit are separate steps;
+     the reel animation only decides what is DISPLAYED, never what is AWARDED.
+   • The symbol catalog below is the ONLY copy. Every symbol carries imageUrl + fallback,
+     so custom artwork can be added later by editing this catalog alone (renderDamSymbol
+     already handles image → icon → emoji without touching reel logic).
+   • "THE DAM HAS BEEN BROKEN!" is comedic jackpot language ONLY. It never calls
+     breakTheDam() or touches the real flood / game-over system.
+========================================================= */
+const DAM_MACHINE_SYMBOLS = [
+  { id:"water",    label:"WATER",        fallback:"💧", iconClass:null, imageUrl:null },
+  { id:"dam",      label:"DAM",          fallback:"🧱", iconClass:null, imageUrl:null },
+  { id:"millpond", label:"MILLPOND",     fallback:"🌊", iconClass:null, imageUrl:null },
+  { id:"sluice",   label:"SLUICE",       fallback:"🚪", iconClass:null, imageUrl:null },
+  { id:"wheel",    label:"WATERWHEEL",   fallback:"⚙️", iconClass:null, imageUrl:null },
+  { id:"factory",  label:"FACTORY",      fallback:"🏭", iconClass:null, imageUrl:null },
+  { id:"fl-111",   label:"111 FL OZ",    fallback:"💧", iconClass:null, imageUrl:null },
+  { id:"fl-666",   label:"666 FL OZ",    fallback:"💧", iconClass:null, imageUrl:null },
+  { id:"fl-6660",  label:"6,660 FL OZ",  fallback:"🚨", iconClass:null, imageUrl:null },
+  { id:"song",     label:"FREE SONG",    fallback:"🎵", iconClass:null, imageUrl:null },
+  { id:"character",label:"CHARACTER",    fallback:"👤", iconClass:null, imageUrl:null },
+  { id:"pun",      label:"DAM PUN",      fallback:"😂", iconClass:null, imageUrl:null }
+];
+const DAM_SYMBOL_BY_ID = {};
+DAM_MACHINE_SYMBOLS.forEach(s => { DAM_SYMBOL_BY_ID[s.id] = s; });
+
+/* Reel odds (per reel, weights sum to 100 = %). The 6,660 jackpot is deliberately rare. */
+const DAM_REEL_WEIGHTS = {
+  "water":20, "dam":16, "millpond":12, "sluice":12, "wheel":12, "factory":8,
+  "fl-111":6, "fl-666":4, "fl-6660":1, "song":3, "character":3, "pun":3
+};
+
+const DAM_REEL_MS = [1800, 2400, 3000];            // staggered stops: reel 1 → 2 → 3
+const DAM_REEL_MS_REDUCED = [450, 600, 750];       // reduced motion: short transitions only
+const DAM_MACHINE_MAX_PLAYS = 999;
+
+/* Runtime only — never saved. `var` (not let/const) so isTimerBlocked can probe it safely. */
+var damMachine = { open:false, spinning:false, revealed:false, forcedResult:null, spinToken:0, timers:[], reelIds:["water","wheel","millpond"] };
+
+/* ---------- ONE canonical symbol renderer: custom image → CSS icon → emoji fallback.
+   Reel logic calls this and never checks for images itself. ---------- */
+function renderDamSymbol(symbol, className){
+  const el = document.createElement("span");
+  el.className = "dmSym" + (className ? " " + className : "");
+  el.dataset.symbolId = symbol.id;
+  if(symbol.imageUrl){
+    const img = document.createElement("img");
+    img.className = "dmSymImg";
+    img.alt = symbol.label;
+    img.decoding = "async";
+    img.loading = "lazy";
+    img.addEventListener("error", () => {            // a broken custom image falls back, always
+      const t = document.createTextNode(symbol.fallback || "💧");
+      el.textContent = "";
+      el.appendChild(t);
+    }, { once:true });
+    img.src = symbol.imageUrl;
+    el.appendChild(img);
+    return el;
+  }
+  if(symbol.iconClass){
+    const ic = document.createElement("span");
+    ic.className = "dmSymIcon " + symbol.iconClass;
+    ic.setAttribute("role", "img");
+    ic.setAttribute("aria-label", symbol.label);
+    el.appendChild(ic);
+    return el;
+  }
+  el.classList.add("dmSymEmoji");
+  el.textContent = symbol.fallback || "💧";
+  return el;
+}
+
+/* ---------- Reel result selection (pure; `rng` exists for tests only). ---------- */
+function pickDamSymbolId(rng = Math.random){
+  const entries = Object.entries(DAM_REEL_WEIGHTS);
+  let r = rng() * entries.reduce((a, [, w]) => a + w, 0);
+  for(const [id, w] of entries){ r -= w; if(r < 0) return id; }
+  return entries[entries.length - 1][0];
+}
+function selectDamMachineResult({ forcedResult = null, rng = Math.random } = {}){
+  const forced = Array.isArray(forcedResult) ? forcedResult : null;
+  if(forced && forced.length === 3 && forced.every(id => DAM_SYMBOL_BY_ID[id])) return forced.slice();
+  return [pickDamSymbolId(rng), pickDamSymbolId(rng), pickDamSymbolId(rng)];
+}
+
+/* ---------- ONE canonical combination evaluator (pure; no DOM, no state, no animation).
+   Returns a reward descriptor or null (no reward). Special hydraulic sequences are
+   checked first, then triples. ---------- */
+function evaluateDamCombination(ids){
+  if(!Array.isArray(ids) || ids.length !== 3 || !ids.every(id => DAM_SYMBOL_BY_ID[id])) return null;
+  const [a, b, c] = ids;
+  const oz = n => ({ kind:"flOz", amount:n, jackpot:false });
+  if(a === "dam"    && b === "water" && c === "dam")     return { ...oz(DAY_REWARD_FL_OZ),   title:"THE DAM IS HOLDING!",            humorKey:"machineWin",  detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — pressure contained.` };
+  if(a === "water"  && b === "wheel" && c === "water")   return { ...oz(LEVEL_REWARD_FL_OZ), title:"NOW THAT'S FLOW!",               humorKey:"machineWin",  detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the wheel barely got wet.` };
+  if(a === "dam"    && b === "wheel" && c === "factory") return { kind:"play",               title:"THE WHOLE SYSTEM IS RUNNING!",   humorKey:"machineWin",  detail:"+1 free Dam Machine play — the whole flow, end to end." };
+  if(a === "sluice" && b === "water" && c === "millpond")return { ...oz(DAY_REWARD_FL_OZ),   title:"FLOW ACHIEVED.",                 humorKey:"machineWin",  detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — gate to pond, no leaks.` };
+  if(a === b && b === c){
+    switch(a){
+      case "water":   return { ...oz(DAY_REWARD_FL_OZ),   title:"WATER TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
+      case "dam":     return { ...oz(LEVEL_REWARD_FL_OZ), title:"DAM TRIPLE!",    humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ` };
+      case "wheel":   return { ...oz(LEVEL_REWARD_FL_OZ), title:"WHEEL TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — round and round she goes.` };
+      case "fl-111":  return { ...oz(DAY_REWARD_FL_OZ),   title:"111 TRIPLE!",    humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
+      case "fl-666":  return { ...oz(LEVEL_REWARD_FL_OZ), title:"666 TRIPLE!",    humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ` };
+      case "fl-6660": return { ...oz(UNLOCK_COST_FL_OZ),  title:"DAM JACKPOT",    humorKey:"machineJackpot", jackpot:true, detail:`+${fmt(UNLOCK_COST_FL_OZ)} FL OZ` };
+      case "song":     return { kind:"song",     title:"🎵 FREE SONG!",         humorKey:"machineSong",     detail:"The next locked song joins the radio. No FL OZ spent." };
+      case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };
+      case "pun":      return { kind:"pun",      title:"😂 DAM PUN!",           humorKey:"machinePun",      detail:"The machine has jokes." };
+      default:        return { ...oz(DAY_REWARD_FL_OZ),   title:"TRIPLE FLOW!",   humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
+    }
+  }
+  return null;                                          // no combination: the machine keeps its water
+}
+
+/* ---------- Reward COMMIT: additive only, runs exactly once per spin, saves immediately. ---------- */
+function commitDamResult(combo){
+  const before = state.totalFlOz;
+  const res = { combo, kind:combo.kind, amount:0, title:"", detail:"", humor:"", jackpot:!!combo.jackpot, unlockedId:null, fallback:false };
+  if(combo.kind === "flOz"){
+    res.amount = combo.amount;
+  } else if(combo.kind === "song" || combo.kind === "character"){
+    const cat = combo.kind === "song" ? "songs" : "characters";
+    const next = nextLockedItem(cat);                   // next eligible, canonical order, never random
+    if(next && !state[UNLOCK_STATE_KEY[cat]].includes(next.id)){
+      state[UNLOCK_STATE_KEY[cat]].push(next.id);       // free: no FL OZ touched
+      res.unlockedId = next.id;
+      res.detail = combo.kind === "song" ? `“${next.title}” has entered the radio.` : `${next.name} has joined the dam crew.`;
+    } else {                                            // everything already unlocked → FL OZ fallback
+      res.fallback = true; res.amount = LEVEL_REWARD_FL_OZ;
+      res.title = combo.kind === "song" ? "THE RADIO IS FULLY DAMMED!" : "THE WHOLE DAM CREW IS HERE!";
+      res.detail = `+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ instead.`;
+    }
+  } else if(combo.kind === "play"){
+    state.damMachineFreePlays = Math.min(DAM_MACHINE_MAX_PLAYS, state.damMachineFreePlays + 1);
+  }
+  if(!res.title) res.title = combo.title;
+  state.totalFlOz += res.amount;                        // amount ≥ 0 always — the machine never takes
+  if(state.totalFlOz < before) state.totalFlOz = before;
+  state.damMachineWins++;
+  if(res.jackpot) state.damMachineJackpots++;
+  res.humor = getDamHumor(combo.humorKey || "machineWin");
+  saveGame();
+  renderRadio(); renderStore(); renderHud(); renderProfile();
+  if(damMachine.open) renderDamMachineHeader();
+  return res;
+}
+
+/* ---------- Machine UI ---------- */
+const dmCard = () => $("damMachineCard");
+function renderDamSymbolCell(id, cells){
+  const sym = DAM_SYMBOL_BY_ID[id] || DAM_MACHINE_SYMBOLS[0];
+  const cell = document.createElement("div");
+  cell.className = "dmCell";
+  cell.appendChild(renderDamSymbol(sym));
+  if(cells) cell.style.height = `calc(100% / ${cells})`;
+  return cell;
+}
+function buildReelStrip(reelIndex, ids){
+  const strip = $("dmStrip" + reelIndex);
+  if(!strip) return;
+  strip.innerHTML = "";
+  ids.forEach(id => strip.appendChild(renderDamSymbolCell(id, ids.length)));
+  strip.parentElement.style.setProperty("--dmCells", String(ids.length));
+  strip.style.transition = "none";
+  strip.style.transform = "translateY(0%)";
+}
+function renderDamMachineHeader(){
+  const plays = state.damMachineFreePlays;
+  const pill = $("dmPlays");
+  pill.textContent = plays > 0 ? `DAM MACHINE PLAYS: ${fmt(plays)}` : "NO FREE PLAYS";
+  pill.classList.toggle("none", plays <= 0);
+  const sub = $("dmEntrySub");
+  if(sub) sub.textContent = `Free plays ready: ${fmt(plays)}`;
+  const btn = $("dmSpinBtn");
+  const busy = damMachine.spinning;
+  btn.disabled = busy || plays <= 0;
+  if(!busy) btn.textContent = plays > 0 ? "SPIN THE DAM" : "NO FREE PLAYS";
+  $("dmNoPlays").hidden = plays > 0;
+}
+
+function openDamMachine(){
+  if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
+  closePanels();
+  damMachine.open = true; damMachine.revealed = false;
+  // note: a forced test result set before opening is intentionally kept — it is consumed by the next spin only.
+  const card = dmCard();
+  card.classList.remove("show", "jackpotWin");
+  card.classList.add("show");
+  $("dmResult").hidden = true;
+  $("dmJackDrops").hidden = true;
+  $("dmChar").hidden = true;
+  $("dmChar").innerHTML = "";
+  document.querySelectorAll("#dmReels .dmReel").forEach(r => r.classList.remove("stopped"));
+  damMachine.reelIds.forEach((id, i) => buildReelStrip(i, [id]));
+  $("dmMsg").textContent = getDamHumor("machineIdle");
+  $("dmStatus").textContent = "Dam Machine. Free hydraulic arcade. Spins never cost FL OZ.";
+  renderDamMachineHeader();
+  syncTimerPause();                                     // the day clock pauses while the machine is open
+  dmSfx(() => playWaterNoise(0.7, 250, 1400, 0.1));     // hydraulic power-up
+}
+
+function closeDamMachine(){
+  if(!damMachine.open || damMachine.spinning) return;   // no abandoning a spin mid-flow
+  damMachine.open = false;
+  dmCard().classList.remove("show", "jackpotWin");
+  syncTimerPause();
+}
+
+/* ---------- Spin: consume one play → choose result → animate → evaluate → commit once. ---------- */
+function damMachineCanSpin(){ return damMachine.open && !damMachine.spinning && state.damMachineFreePlays > 0; }
+
+function spinDamMachine(){
+  if(!damMachineCanSpin()) return null;                 // blocks: closed, mid-spin, or zero free plays
+  damMachine.spinning = true; damMachine.revealed = false;
+  const token = ++damMachine.spinToken;                 // one token per play: stale callbacks are ignored
+
+  // The ONLY cost of a spin: one free play. FL OZ is never read as a stake and never subtracted.
+  state.damMachineFreePlays = Math.max(0, state.damMachineFreePlays - 1);
+  saveGame();
+
+  const forced = damMachine.forcedResult;               // test pathway (consumed once, then cleared)
+  damMachine.forcedResult = null;
+  const ids = selectDamMachineResult({ forcedResult: forced });
+  damMachine.lastIds = ids;
+
+  const card = dmCard();
+  card.classList.remove("jackpotWin");
+  document.querySelectorAll("#dmReels .dmReel").forEach(r => r.classList.remove("stopped"));   // fresh glow per spin
+  $("dmResult").hidden = true;
+  $("dmJackDrops").hidden = true;
+  $("dmChar").hidden = true; $("dmChar").innerHTML = "";
+  $("dmMsg").textContent = getDamHumor("machineSpin");
+  $("dmStatus").textContent = "Dam Machine spinning…";
+  renderDamMachineHeader();
+  $("dmSpinBtn").disabled = true; $("dmSpinBtn").textContent = "SPINNING…";
+  $("dmCloseBtn").disabled = true;
+
+  const reduced = bonusReducedMotion();
+  const durs = reduced ? DAM_REEL_MS_REDUCED : DAM_REEL_MS;
+  const lastDur = durs[durs.length - 1];
+  if(!reduced) dmSfx(() => playBonusSpinSounds(lastDur));
+  dmSfx(() => playWaterNoise(0.8, 180, 1600, 0.14));    // hydraulic whoosh on launch
+
+  durs.forEach((dur, i) => {
+    const filler = [];
+    for(let k = 0; k < 12; k++) filler.push(DAM_MACHINE_SYMBOLS[Math.floor(Math.random() * DAM_MACHINE_SYMBOLS.length)].id);
+    const seq = [damMachine.reelIds[i], ...filler, ids[i]];
+    buildReelStrip(i, seq);
+    const strip = $("dmStrip" + i);
+    const targetPct = `-${(100 - 100 / seq.length).toFixed(4)}%`;
+    void strip.getBoundingClientRect();                 // flush so the transition always runs
+    strip.style.transition = reduced
+      ? `transform ${dur}ms ease-out`
+      : `transform ${dur}ms cubic-bezier(.15,.65,.15,1)`;
+    strip.style.transform = `translateY(${targetPct})`;
+    damMachine.timers.push(setTimeout(() => {           // setTimeout (not transitionend): deterministic in tests
+      if(token !== damMachine.spinToken) return;
+      damMachine.reelIds[i] = ids[i];
+      $("dmStrip" + i).parentElement.classList.add("stopped");
+      dmSfx(() => playDamReelStopClunk());              // hydraulic clunk per reel
+      if(i === durs.length - 1) revealDamResult(token, ids);
+    }, dur + 40));
+  });
+  return { token, ids };
+}
+
+/* ---------- Reveal: evaluate (canonical evaluator) then commit exactly once. ---------- */
+function revealDamResult(token, ids){
+  if(token !== damMachine.spinToken || !damMachine.spinning) return;   // stale / duplicate callback
+  const combo = evaluateDamCombination(ids);            // evaluation is separate from animation
+  const won = !!combo;
+  const res = won ? commitDamResult(combo) : null;      // commit runs once, before any presentation
+  damMachine.spinning = false;
+  damMachine.revealed = true;
+  damMachine.timers = [];                               // all spin timers have fired; release them
+  $("dmCloseBtn").disabled = false;
+
+  const card = dmCard();
+  card.classList.toggle("jackpotWin", !!(res && res.jackpot));
+  const box = $("dmResult");
+  box.hidden = false;
+  $("dmJackDrops").hidden = !(res && res.jackpot);
+  if(res){
+    $("dmPrizeTitle").textContent = (res.jackpot ? "💧💧💧 " : "") + res.title + (res.jackpot ? " 💧💧💧" : "");
+    $("dmPrizeDetail").textContent = res.detail;
+    $("dmHumor").textContent = res.humor;
+    const who = $("dmChar"), c = getActiveCharacter();  // the active operator joins the celebration
+    who.innerHTML = "";
+    who.appendChild(characterImage(c, "dmCharImg"));
+    who.hidden = false;
+    $("dmCharName").textContent = c.name;
+    if(res.jackpot){ spawnDamBurst(34, true); dmSfx(() => playLevelFanfare()); }        // existing major fanfare
+    else if(res.kind === "pun"){ dmSfx(() => playPunSound()); }
+    else if(res.kind === "song"){ spawnDamBurst(16, false); dmSfx(() => playSongUnlockSound()); }
+    else if(res.kind === "character"){ spawnDamBurst(16, false); dmSfx(() => playDamCharacterSound()); }
+    else if(res.kind === "play"){ dmSfx(() => playDamMachineAwardSound()); }
+    else if(res.amount >= LEVEL_REWARD_FL_OZ){ spawnDamBurst(20, false); dmSfx(() => playDamWinBigSound()); }
+    else { spawnDamBurst(12, false); dmSfx(() => playDayRewardSound()); }
+    $("dmStatus").textContent = `Dam Machine result: ${res.title}${res.detail ? " — " + res.detail : ""}`;
+  } else {
+    $("dmPrizeTitle").textContent = "NO FLOW";
+    $("dmPrizeDetail").textContent = "No combination this time. The reservoir keeps its water.";
+    $("dmHumor").textContent = getDamHumor("machineLose");
+    $("dmStatus").textContent = "Dam Machine result: no combination.";
+  }
+  $("dmMsg").textContent = res ? res.humor : getDamHumor("machineLose");
+  renderDamMachineHeader();
+}
+
+/* water burst — same particle idea as the waterwheel's, inside the machine card */
+function spawnDamBurst(count, gold){
+  const box = $("dmBurst");
+  for(let i = 0; i < count; i++){
+    const d = document.createElement("div");
+    d.className = "burstDrop" + (gold && i % 2 ? " gold" : "");
+    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.4, dist = 90 + Math.random() * (gold ? 150 : 90);
+    d.style.setProperty("--bx", (Math.cos(ang) * dist).toFixed(1) + "px");
+    d.style.setProperty("--by", (Math.sin(ang) * dist * 0.8).toFixed(1) + "px");
+    d.style.animationDelay = (Math.random() * 0.15).toFixed(2) + "s";
+    box.appendChild(d);
+    setTimeout(() => d.remove(), 1700);
+  }
+}
+
+/* ---------- Free-play award (development/test pathway; the Waterwheel also grants plays). ---------- */
+function awardDamMachinePlay(n = 1){
+  const k = Math.min(DAM_MACHINE_MAX_PLAYS, Math.max(0, Math.floor(Number(n) || 1)));
+  state.damMachineFreePlays = Math.min(DAM_MACHINE_MAX_PLAYS, state.damMachineFreePlays + k);
+  saveGame();
+  if(damMachine.open) renderDamMachineHeader();
+  renderProfile();
+  return state.damMachineFreePlays;
+}
+
+/* ---------- Deterministic test pathway: force the NEXT spin's reels (players never see this). ---------- */
+function forceDamMachineResult(ids){
+  const clean = Array.isArray(ids) ? ids.map(id => (typeof id === "string" && DAM_SYMBOL_BY_ID[id]) ? id : null) : [];
+  if(clean.length !== 3 || clean.some(x => x === null)){
+    safeWarn("forceDamMachineResult: pass an array of 3 valid symbol ids: " + DAM_MACHINE_SYMBOLS.map(s => s.id).join(", "));
+    return false;
+  }
+  damMachine.forcedResult = clean.slice();
+  return true;
+}
+
+/* ---------- v2.6 sounds — same Web Audio engine, same synth, no external files, never throws. ---------- */
+function dmSfx(fn){ try { fn(); } catch(e){ safeWarn("Dam Machine sound skipped: " + e); } }
+function playDamReelStopClunk(){ playTone(150, 0.16, "square"); setTimeout(() => playWaterNoise(0.18, 700, 160, 0.1), 30); }
+function playDamWinBigSound(){ [659, 784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => playTone(f, 0.22, "triangle"), i * 90)); }
+function playDamCharacterSound(){ [523, 659, 784, 1046, 784, 1318].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "sine"), i * 80)); }
+function playDamMachineAwardSound(){ playWaterNoise(0.5, 200, 1500, 0.1); setTimeout(() => [784, 988, 1175].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "triangle"), i * 80)), 300); }
+
+/* ---------- wiring ---------- */
+$("dmOpenBtn").addEventListener("click", openDamMachine);
+$("dmCloseBtn").addEventListener("click", closeDamMachine);
+$("dmSpinBtn").addEventListener("click", () => spinDamMachine());
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape" && damMachine.open) closeDamMachine();
+});
+document.addEventListener("visibilitychange", () => { if(damMachine.open) syncTimerPause(); });
+
+/* ---------- in-page self-test (console only; invisible to players; touches no persistent state).
+   runDamMachineSelfTest() → { pass, fail, results:[…] } ---------- */
+function runDamMachineSelfTest(){
+  const results = [];
+  const t = (name, ok) => results.push({ name, ok:!!ok });
+  const ids = DAM_MACHINE_SYMBOLS.map(s => s.id);
+  t("catalog: 12 symbols with unique ids", DAM_MACHINE_SYMBOLS.length === 12 && new Set(ids).size === 12);
+  t("catalog: every symbol has fallback + imageUrl field", DAM_MACHINE_SYMBOLS.every(s => typeof s.fallback === "string" && s.fallback.length > 0 && "imageUrl" in s && "iconClass" in s));
+  t("catalog: production imageUrl all null (no fake artwork)", DAM_MACHINE_SYMBOLS.every(s => s.imageUrl === null));
+  t("weights sum to 100", Object.values(DAM_REEL_WEIGHTS).reduce((a, b) => a + b, 0) === 100);
+  const el1 = renderDamSymbol({ id:"x", label:"X", fallback:"🧪", iconClass:null, imageUrl:null });
+  t("renderer: fallback emoji when imageUrl null", el1.classList.contains("dmSymEmoji") && el1.textContent === "🧪");
+  const el2 = renderDamSymbol({ id:"y", label:"Y", fallback:"🧪", iconClass:null, imageUrl:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E" });
+  t("renderer: custom image when imageUrl set", !!el2.querySelector("img.dmSymImg"));
+  t("renderer: broken image falls back to emoji", (() => {
+    const e3 = renderDamSymbol({ id:"z", label:"Z", fallback:"🧪", iconClass:null, imageUrl:"data:image/gif,BROKEN" });
+    e3.querySelector("img").dispatchEvent(new window.Event("error"));
+    return e3.textContent === "🧪";
+  })());
+  const ev = evaluateDamCombination;
+  t("evaluator: water triple = +111", ev(["water","water","water"]).amount === DAY_REWARD_FL_OZ);
+  t("evaluator: dam triple = +666", ev(["dam","dam","dam"]).amount === LEVEL_REWARD_FL_OZ);
+  t("evaluator: wheel triple = +666", ev(["wheel","wheel","wheel"]).amount === LEVEL_REWARD_FL_OZ);
+  t("evaluator: 6,660 jackpot", ev(["fl-6660","fl-6660","fl-6660"]).amount === UNLOCK_COST_FL_OZ && ev(["fl-6660","fl-6660","fl-6660"]).jackpot);
+  t("evaluator: song/character/pun kinds", ev(["song","song","song"]).kind === "song" && ev(["character","character","character"]).kind === "character" && ev(["pun","pun","pun"]).kind === "pun");
+  t("evaluator: dam-water-dam special = +111", ev(["dam","water","dam"]).amount === DAY_REWARD_FL_OZ && ev(["dam","water","dam"]).title === "THE DAM IS HOLDING!");
+  t("evaluator: water-wheel-water special = +666", ev(["water","wheel","water"]).amount === LEVEL_REWARD_FL_OZ);
+  t("evaluator: dam-wheel-factory special = +1 play", ev(["dam","wheel","factory"]).kind === "play");
+  t("evaluator: sluice-water-millpond special = +111", ev(["sluice","water","millpond"]).amount === DAY_REWARD_FL_OZ);
+  t("evaluator: no match → null", ev(["water","dam","wheel"]) === null);
+  ["machineIdle","machineSpin","machineLose","machineWin","machineJackpot","machineSong","machineCharacter","machinePun","machinePlayAward"].forEach(k =>
+    t("humor: " + k + " non-empty", Array.isArray(DAM_HUMOR[k]) && DAM_HUMOR[k].length > 0));
+  t("waterwheel: dam-play prize present, weights still 100", BONUS_WATERWHEEL_PRIZES.some(p => p.kind === "damPlay") && BONUS_WATERWHEEL_PRIZES.reduce((a, p) => a + p.weight, 0) === 100);
+  const pass = results.filter(r => r.ok).length;
+  return { pass, fail:results.length - pass, results };
 }
 
 function preloadCharacter(c){
@@ -3443,7 +4068,11 @@ function renderProfile(){
     ["Songs", `${state.unlockedSongs.length} / ${SONGS.length}`, "unlocked"],
     ["Operator crew", `${state.unlockedCharacters.length} / ${CHARACTERS.length}`, "characters"],
     ["Skins", `${skinsOwned} / ${skinsTotal}`, "available"],
-    ["-ites preserved", `${ites} / ${ALL_TRIBES.length}`, "discovered"]
+    ["-ites preserved", `${ites} / ${ALL_TRIBES.length}`, "discovered"],
+    /* v2.6 — Dam Machine */
+    ["Dam Machine plays", `${fmt(state.damMachineFreePlays)}`, "free plays ready"],
+    ["Dam Machine wins", `${fmt(state.damMachineWins)}`, "winning combos"],
+    ["Dam Machine jackpots", `${fmt(state.damMachineJackpots)}`, "6,660 FL OZ hits"]
   ];
   const econ = [
     ["FL OZ wallet", `${fmt(state.totalFlOz)} FL OZ`],
