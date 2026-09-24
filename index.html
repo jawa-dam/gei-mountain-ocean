@@ -991,6 +991,52 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .peRow{ display:flex; justify-content:space-between; gap:10px; padding:9px 12px; border-radius:12px; background:rgba(255,255,255,.07); font-size:.9rem; font-weight:700; }
 .peRow strong{ color:var(--gold); font-variant-numeric:tabular-nums; white-space:nowrap; }
 
+/* ============ v2.5: BONUS WATERWHEEL ============ */
+.bonusCard{ position:absolute; inset:0; z-index:220; display:flex; align-items:center; justify-content:center;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 8px);
+  background:rgba(2,6,14,.84); backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity .35s; }
+.bonusCard.show{ opacity:1; pointer-events:auto; }
+.bonusInner{ position:relative; width:100%; max-width:430px; max-height:100%; overflow:hidden; display:flex; flex-direction:column; align-items:center;
+  text-align:center; padding:14px 16px 16px; border-radius:28px;
+  background:linear-gradient(165deg, var(--juicy-navy) 0%, color-mix(in srgb, var(--juicy-navy) 55%, var(--water-bright)) 55%, color-mix(in srgb, var(--juicy-violet) 70%, var(--juicy-navy)) 100%);
+  border:1.5px solid rgba(255,255,255,.45); box-shadow:0 0 60px color-mix(in srgb, var(--water-bright) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
+  transform:scale(.85); transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
+.bonusCard.show .bonusInner{ transform:none; }
+.bwEyebrow{ font-size:.9rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.bwTitle{ font-size:clamp(1.6rem,7.5vw,2.2rem); font-weight:900; line-height:1.1; text-shadow:0 0 18px color-mix(in srgb, var(--water-bright) 70%, transparent); }
+.bwFree{ font-size:.82rem; font-weight:800; color:var(--foam); margin:2px 0 4px; }
+.bwWheelBox{ position:relative; width:min(78vw, 40vh, 330px); aspect-ratio:1 / 1.03; flex:0 0 auto; transition:width .45s ease; }
+.bonusCard.hasResult .bwWheelBox{ width:min(46vw, 22vh, 210px); }
+.bwWheel{ position:relative; z-index:1; width:100%; height:100%; display:block; overflow:visible; }
+.bwRotor{ transform-box:view-box; transform-origin:0 0; }
+.bwSlice path{ stroke:rgba(255,255,255,.55); stroke-width:2; }
+.bwSlice.win path{ stroke:var(--gold); stroke-width:7; filter:brightness(1.25) drop-shadow(0 0 10px var(--gold)); }
+.bwIcon{ font-size:26px; }
+.bwText{ font-size:21px; font-weight:900; fill:#fff; stroke:rgba(0,0,0,.65); stroke-width:4px; paint-order:stroke; stroke-linejoin:round; }
+.bwSlice.jackpot .bwText{ fill:var(--juicy-navy); stroke:rgba(255,255,255,.6); }
+.bwPointer{ fill:var(--gold); stroke:#000; stroke-width:2; filter:drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+.bwRing{ position:absolute; inset:6%; border-radius:50%; border:6px solid transparent; z-index:0; pointer-events:none; }
+.bonusCard.jackpotWin .bwRing{ border-color:var(--gold); animation:bwRingPulse .9s ease-out infinite; }
+@keyframes bwRingPulse{ from{ transform:scale(.95); opacity:1; } to{ transform:scale(1.35); opacity:0; } }
+.bonusCard.jackpotWin .bonusInner{ animation:bwJackpotGlow 1.2s ease-in-out infinite alternate; }
+@keyframes bwJackpotGlow{ from{ box-shadow:0 0 40px color-mix(in srgb, var(--gold) 50%, transparent); } to{ box-shadow:0 0 90px var(--gold); } }
+.bwBurst{ position:absolute; left:50%; top:50%; width:0; height:0; z-index:3; pointer-events:none; }
+.bwPrompt{ font-size:1rem; font-weight:800; font-style:italic; margin:8px 0 10px; min-height:1.3em; }
+.bonusCard.hasResult .bwPrompt{ display:none; }
+.bwResult{ width:100%; display:flex; flex-direction:column; align-items:center; margin:4px 0 10px; }
+.bwResult[hidden]{ display:none; }
+.bwChar{ height:min(17vh, 130px); display:flex; align-items:flex-end; justify-content:center; filter:drop-shadow(0 0 14px var(--water-bright)); animation:fxPop .45s cubic-bezier(.34,1.8,.64,1) both; }
+.bonusCharImg{ height:100%; width:auto; max-width:100%; object-fit:contain; display:block; }
+.bwCharName{ font-size:.8rem; font-weight:800; color:rgba(255,255,255,.85); }
+.bwWon{ margin-top:4px; font-size:.8rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--foam); }
+.bwPrizeTitle{ font-size:clamp(1.5rem,7vw,2rem); font-weight:900; line-height:1.15; color:var(--gold); text-shadow:0 0 16px color-mix(in srgb, var(--gold) 60%, transparent); }
+.bonusCard.jackpotWin .bwPrizeTitle{ font-size:clamp(2rem,10vw,2.8rem); animation:ozPulse 1s ease-in-out infinite; }
+.bwPrizeDetail{ font-size:1rem; font-weight:800; }
+.bwPrizeDetail[hidden]{ display:none; }
+.bwHumor{ margin-top:4px; font-size:1.02rem; font-weight:900; font-style:italic; line-height:1.3; }
+.bonusBtn{ flex:0 0 auto; }
+.srOnly{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
 /* ============ v2.2: DAM HUMOR ============ */
 .damQuip{ font-size:.86rem; font-weight:800; line-height:1.35; color:var(--foam); overflow-wrap:anywhere; }
 .damQuip:empty{ display:none; }
@@ -1351,6 +1397,36 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="panelGroup">Get FL OZ</div>
         <div class="groupPrice">Earn it through gameplay (${DAY_REWARD} per day) — or grab a pack</div>
         <div id="storePacks"></div>
+      </div>
+    </div>
+
+    <!-- v2.5: BONUS WATERWHEEL -->
+    <div class="bonusCard" id="bonusCard" role="dialog" aria-modal="true" aria-labelledby="bwTitle">
+      <div class="bonusInner">
+        <div class="bwEyebrow">🎉 Bonus flow!</div>
+        <div class="bwTitle" id="bwTitle">🎡 Waterwheel</div>
+        <div class="bwFree">Free spin — you never pay FL OZ</div>
+        <div class="bwWheelBox">
+          <div class="bwRing" aria-hidden="true"></div>
+          <svg class="bwWheel" viewBox="-160 -170 320 330" role="img" aria-label="Bonus Waterwheel with 7 prizes: 111 FL OZ, free spin, 666 FL OZ, free song, 6,660 FL OZ jackpot, character unlock, dam pun">
+            <g id="bwRotor" class="bwRotor"><g id="bwSlices"></g><circle r="150" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="4"/></g>
+            <circle r="44" fill="var(--juicy-navy)" stroke="rgba(255,255,255,.7)" stroke-width="3"/>
+            <g id="bwHub" class="bwHub"></g>
+            <path class="bwPointer" d="M-16 -168 L16 -168 L0 -136 Z"/>
+          </svg>
+          <div class="bwBurst" id="bwBurst"></div>
+        </div>
+        <div class="bwPrompt" id="bwPrompt"></div>
+        <div class="bwResult" id="bwResult" hidden>
+          <div class="bwChar" id="bwChar"></div>
+          <div class="bwCharName" id="bwCharName"></div>
+          <div class="bwWon">Prize won</div>
+          <div class="bwPrizeTitle" id="bwPrizeTitle"></div>
+          <div class="bwPrizeDetail" id="bwPrizeDetail"></div>
+          <div class="bwHumor" id="bwHumor"></div>
+        </div>
+        <button class="lcBtn bonusBtn" id="bonusBtn">SPIN!</button>
+        <div class="srOnly" id="bwStatus" role="status" aria-live="polite"></div>
       </div>
     </div>
 
@@ -1784,6 +1860,68 @@ const DAM_HUMOR = {
     "{cost}! Now THAT'S a dam reserve.",
     "You've got enough liquid assets for an unlock.",
     "Ten levels of flow just paid off."
+  ],
+  bonusWheel: [
+    "Let's see what the dam has in store...",
+    "Keep calm and spin the dam wheel.",
+    "Give it a whirl. The dam insists.",
+    "The wheel is thirsty for action.",
+    "One free spin, fresh from the reservoir."
+  ],
+  bonusSmall: [
+    "That's a dam good bonus.",
+    "That's one wheel of a reward.",
+    "Your luck is flowing.",
+    "Looks like the wheel had a little flow.",
+    "Bonus water, no strings attached."
+  ],
+  bonusBig: [
+    "THE DAM JUST GOT DEEPER.",
+    "That's a reservoir of a reward.",
+    "Six hundred sixty-six reasons to smile.",
+    "That wheel just made some dam decisions."
+  ],
+  jackpot: [
+    "THE DAM JUST HIT THE BIG ONE!",
+    "That's a DAM-sized reservoir.",
+    "Well, well, well... LOOK AT THAT FLOW.",
+    "{cost}! Somebody built a bigger dam."
+  ],
+  freeSpin: [
+    "Well, dam! The wheel wants another turn.",
+    "Round two. The wheel insists.",
+    "Don't get wheel-y excited... okay, get excited.",
+    "Somebody oil that wheel. It's working overtime."
+  ],
+  bonusSong: [
+    "Free tunes, straight from the spillway.",
+    "The playlist just got a little wetter.",
+    "Your radio says thank you.",
+    "A brand-new current for your radio."
+  ],
+  bonusCharacter: [
+    "The dam crew just grew. No FL OZ spent.",
+    "A new operator rolled in on the wheel.",
+    "Free hire! The dam approves.",
+    "Welcome aboard. Hard hats are free."
+  ],
+  bonusPun: [
+    "That's a dam good spin.",
+    "Well, dam! Look what happened.",
+    "You really know how to turn things around.",
+    "Wheel, wheel, wheel... look who showed up.",
+    "That was a wheel good decision.",
+    "Pressure makes diamonds. Around here, it makes jokes.",
+    "You spun it. The dam answered.",
+    "That's how we roll... hydraulically.",
+    "Don't stop believin' in the dam.",
+    "That's a hydraulic miracle.",
+    "Now THAT'S a dam surprise."
+  ],
+  bonusComplete: [
+    "Back to the dam. Keep building.",
+    "Bonus banked. Flow on.",
+    "The wheel rests. The water doesn't."
   ],
   general: [
     "Water under control.",
@@ -2641,7 +2779,7 @@ function onCharacterImageError(e){
   const img = e.currentTarget;
   safeWarn("Character image failed to load: " + img.src);
   const label = document.createElement("span");
-  label.className = ({ lcCharImg:"lcCharFallback", celebCharImg:"celebCharFallback", profileCharImg:"lcCharFallback" })[img.className] || "charThumbFallback";
+  label.className = ({ lcCharImg:"lcCharFallback", celebCharImg:"celebCharFallback", profileCharImg:"lcCharFallback", bonusCharImg:"lcCharFallback" })[img.className] || "charThumbFallback";
   label.textContent = img.dataset.charName || "Character";
   if(img.parentNode) img.parentNode.replaceChild(label, img);
 }
@@ -2732,6 +2870,204 @@ function showDayCelebration(index){
   celebTimers.push(setTimeout(()=>{ card.classList.remove("show", "exit"); $("celebFx").innerHTML = ""; }, CELEBRATION_MS - 100));
 }
 
+/* =========================================================
+   v2.5 — BONUS WATERWHEEL (free bonus after a completed level; never costs or removes FL OZ)
+   One canonical catalog. Odds come from `weight` (sum = 100, so weight = % chance); every slice
+   is drawn the same size, so the picture does not show the odds. Amounts reuse the canonical
+   economy constants (111 = day, 666 = level, 6,660 = one unlock).
+========================================================= */
+const BONUS_WATERWHEEL_PRIZES = [
+  { id:"fl-111",    icon:"💧", short:()=>fmt(DAY_REWARD_FL_OZ),   kind:"flOz", amount:()=>DAY_REWARD_FL_OZ,   weight:26, humor:"bonusSmall" },
+  { id:"free-spin", icon:"🎡", short:()=>"SPIN",                  kind:"freeSpin",                            weight:10, humor:"freeSpin" },
+  { id:"fl-666",    icon:"💧", short:()=>fmt(LEVEL_REWARD_FL_OZ), kind:"flOz", amount:()=>LEVEL_REWARD_FL_OZ, weight:16, humor:"bonusBig" },
+  { id:"free-song", icon:"🎵", short:()=>"SONG",                  kind:"song",                                weight:9,  humor:"bonusSong",
+    fallback:{ amount:()=>LEVEL_REWARD_FL_OZ, title:"THE RADIO IS FULLY DAMMED!" } },
+  { id:"jackpot",   icon:"🚨", short:()=>fmt(UNLOCK_COST_FL_OZ),  kind:"flOz", amount:()=>UNLOCK_COST_FL_OZ,  weight:3,  humor:"jackpot", jackpot:true },
+  { id:"character", icon:"👤", short:()=>"CREW",                  kind:"character",                           weight:9,  humor:"bonusCharacter",
+    fallback:{ amount:()=>LEVEL_REWARD_FL_OZ, title:"THE WHOLE DAM CREW IS HERE!" } },
+  { id:"dam-pun",   icon:"😂", short:()=>"PUN",                   kind:"pun",                                 weight:27, humor:"bonusPun" }
+];
+const BONUS_FREE_SPIN_CAP = 3;   // max consecutive free spins; runtime only, never saved
+const bonusReducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } };
+const BONUS_SPIN_MS = 3200, BONUS_SPIN_MS_REDUCED = 450;
+const bonus = { open:false, spinning:false, awaiting:"spin", freeStreak:0, rotation:0, lastResult:null };
+
+/* Prize SELECTION (pure; separate from animation). `forcedPrizeId` and `rng` exist for tests only —
+   there is no player-facing control for them. After BONUS_FREE_SPIN_CAP consecutive free spins,
+   the free spin is removed from the draw (a forced free spin is re-drawn from the rest). */
+function selectBonusPrize({ forcedPrizeId = null, freeStreak = bonus.freeStreak, rng = Math.random } = {}){
+  const capped = freeStreak >= BONUS_FREE_SPIN_CAP;
+  const forced = BONUS_WATERWHEEL_PRIZES.find(p => p.id === forcedPrizeId);
+  if(forced && !(capped && forced.kind === "freeSpin")) return forced;
+  const pool = BONUS_WATERWHEEL_PRIZES.filter(p => !(capped && p.kind === "freeSpin"));
+  let r = rng() * pool.reduce((a, p) => a + p.weight, 0);
+  for(const p of pool){ r -= p.weight; if(r < 0) return p; }
+  return pool[pool.length - 1];
+}
+
+/* Prize COMMIT: additive only, runs once per spin, saves immediately. A final (non-free-spin)
+   prize also advances the level in the same save, so a reload can never replay the bonus. */
+function commitBonusPrize(prize){
+  const before = state.totalFlOz;
+  const res = { prize, id:prize.id, kind:prize.kind, amount:0, title:"", detail:"", fallback:false, unlockedId:null };
+  if(prize.kind === "flOz"){
+    res.amount = prize.amount();
+    res.title = prize.jackpot ? "DAM JACKPOT!" : `+${fmt(res.amount)} FL OZ`;
+    res.detail = prize.jackpot ? `+${fmt(res.amount)} FL OZ` : "added to your wallet";
+  } else if(prize.kind === "song" || prize.kind === "character"){
+    const cat = prize.kind === "song" ? "songs" : "characters";
+    const next = nextLockedItem(cat);                          // next eligible, canonical order
+    if(next){
+      state[UNLOCK_STATE_KEY[cat]].push(next.id);               // free: no FL OZ touched
+      res.unlockedId = next.id;
+      res.title = prize.kind === "song" ? "🎵 FREE SONG!" : "👤 CHARACTER UNLOCKED!";
+      res.detail = prize.kind === "song" ? `“${next.title}” has entered the radio.` : `${next.name} has joined the dam crew.`;
+    } else {
+      res.fallback = true; res.amount = prize.fallback.amount();
+      res.title = prize.fallback.title; res.detail = `+${fmt(res.amount)} FL OZ instead.`;
+    }
+  } else if(prize.kind === "freeSpin"){
+    res.title = "🎡 FREE SPIN!"; res.detail = "The wheel wants another turn.";
+  } else {
+    res.title = "😂 DAM PUN!"; res.detail = "";
+  }
+  state.totalFlOz += res.amount;                                // amount ≥ 0 always
+  if(state.totalFlOz < before) state.totalFlOz = before;        // belt and braces: a spin never reduces the wallet
+  res.humor = getDamHumor(prize.humor);
+  if(prize.kind !== "freeSpin"){ advanceLevel(); res.final = true; }
+  saveGame();
+  renderRadio(); renderStore(); renderHud();
+  return res;
+}
+
+function buildBonusWheel(){
+  const n = BONUS_WATERWHEEL_PRIZES.length, a = 360 / n, r = 150;
+  const pt = (deg, rad) => [ (rad * Math.sin(deg * Math.PI / 180)).toFixed(2), (-rad * Math.cos(deg * Math.PI / 180)).toFixed(2) ];
+  const fills = ["var(--juicy-blue)","var(--juicy-violet)","color-mix(in srgb, var(--water-bright) 70%, var(--juicy-navy))","var(--juicy-magenta)"];
+  $("bwSlices").innerHTML = BONUS_WATERWHEEL_PRIZES.map((p, i) => {
+    const [x1, y1] = pt(i * a, r), [x2, y2] = pt((i + 1) * a, r), mid = i * a + a / 2;
+    const fill = p.jackpot ? "var(--gold)" : fills[i % fills.length];
+    return `<g class="bwSlice${p.jackpot ? " jackpot" : ""}" data-prize="${p.id}">
+      <path d="M0 0 L${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} Z" fill="${fill}"/>
+      <g transform="rotate(${mid.toFixed(2)}) translate(0 -98)"><g class="bwUpright" data-mid="${mid.toFixed(2)}">
+        <text class="bwIcon" y="-13" text-anchor="middle" dominant-baseline="middle">${p.icon}</text>
+        <text class="bwText" y="14" text-anchor="middle" dominant-baseline="middle">${esc(p.short())}</text></g></g></g>`;
+  }).join("");
+  setBonusLabelsUpright(bonus.rotation);
+  $("bwHub").innerHTML = `<g transform="scale(.62)">${ILLUSTRATIONS.wheel}</g>`;   // the game's own waterwheel art
+}
+
+/* Labels turn with the wheel while it spins, then stand upright at rest, so nothing is ever read
+   upside-down (an inverted "666" looks like "999"). */
+function setBonusLabelsUpright(rotation){
+  document.querySelectorAll(".bwUpright").forEach(g => {
+    const up = -((+g.dataset.mid + rotation) % 360);
+    g.setAttribute("transform", `rotate(${up.toFixed(2)})`);
+  });
+}
+function openBonusWheel(){
+  if(bonus.open || state.phase !== "levelComplete") return;
+  bonus.open = true; bonus.spinning = false; bonus.awaiting = "spin"; bonus.freeStreak = 0; bonus.lastResult = null;
+  buildBonusWheel();
+  const card = $("bonusCard");
+  card.classList.remove("hasResult", "jackpotWin");
+  $("bwPrompt").textContent = getDamHumor("bonusWheel");
+  $("bwResult").hidden = true;
+  $("bwStatus").textContent = "Bonus Waterwheel. Spin button.";
+  const btn = $("bonusBtn"); btn.textContent = "SPIN!"; btn.disabled = false;
+  levelCard.classList.remove("show");
+  card.classList.add("show");
+  playWaterNoise(0.7, 300, 1400, 0.1);
+  setTimeout(()=>{ try{ btn.focus({ preventScroll:true }); }catch(e){} }, 350);
+}
+
+function spinBonusWheel(opts = {}){
+  if(!bonus.open || bonus.spinning || bonus.awaiting !== "spin") return null;   // no re-entry, no double spin
+  bonus.spinning = true;
+  const btn = $("bonusBtn"); btn.disabled = true; btn.textContent = "SPINNING…";
+  $("bonusCard").classList.remove("hasResult", "jackpotWin");
+  $("bwResult").hidden = true;
+  $("bwStatus").textContent = "Spinning…";
+  document.querySelectorAll(".bwSlice.win").forEach(el => el.classList.remove("win"));
+  const prize = selectBonusPrize({ forcedPrizeId: opts.forcedPrizeId });
+  const result = commitBonusPrize(prize);                       // committed exactly once, before any animation
+  bonus.lastResult = result;
+  // animate to the chosen slice (pointer at top)
+  const n = BONUS_WATERWHEEL_PRIZES.length, a = 360 / n, i = BONUS_WATERWHEEL_PRIZES.indexOf(prize);
+  const mid = i * a + a / 2, jitter = (Math.random() - 0.5) * a * 0.5;
+  const base = bonus.rotation - (((bonus.rotation % 360) + 360) % 360);
+  const target = base + 360 * 5 + ((360 - mid + jitter) % 360 + 360) % 360;
+  const reduced = bonusReducedMotion(), dur = reduced ? BONUS_SPIN_MS_REDUCED : BONUS_SPIN_MS;
+  const wheel = $("bwRotor");
+  if(reduced){
+    wheel.style.transition = `transform ${dur}ms ease-out`; wheel.style.transform = `rotate(${target}deg)`;
+  } else {
+    wheel.style.transition = `transform ${Math.round(dur * 0.88)}ms cubic-bezier(.12,.62,.12,1)`;
+    wheel.style.transform = `rotate(${target + 6}deg)`;
+    setTimeout(()=>{ wheel.style.transition = `transform ${Math.round(dur * 0.12)}ms ease-out`; wheel.style.transform = `rotate(${target}deg)`; }, Math.round(dur * 0.88));
+    playBonusSpinSounds(dur);
+  }
+  bonus.rotation = target;
+  setTimeout(()=> revealBonusResult(result), dur + 40);
+  return result;
+}
+
+function revealBonusResult(result){
+  if(bonus.lastResult !== result || !bonus.spinning) return;     // stale/duplicate callback: ignore
+  bonus.spinning = false;
+  const card = $("bonusCard"), slice = document.querySelector(`.bwSlice[data-prize="${result.id}"]`);
+  if(slice) slice.classList.add("win");
+  setBonusLabelsUpright(bonus.rotation);
+  $("bwPrizeTitle").textContent = result.title;
+  $("bwPrizeDetail").textContent = result.detail;
+  $("bwPrizeDetail").hidden = !result.detail;
+  $("bwHumor").textContent = result.humor;
+  const who = $("bwChar"), c = getActiveCharacter();
+  who.innerHTML = ""; who.appendChild(characterImage(c, "bonusCharImg"));
+  $("bwCharName").textContent = c.name;
+  $("bwResult").hidden = false;
+  card.classList.add("hasResult");
+  card.classList.toggle("jackpotWin", !!result.prize.jackpot);
+  const btn = $("bonusBtn");
+  if(result.kind === "freeSpin"){
+    bonus.freeStreak++;
+    bonus.awaiting = "spin";
+    btn.textContent = "🎡 SPIN AGAIN";
+    playFreeSpinSound();
+  } else {
+    bonus.awaiting = "continue";
+    btn.textContent = `CONTINUE TO LEVEL ${fmt(state.level)}`;
+    if(result.prize.jackpot){ spawnBonusBurst(34, true); playLevelFanfare(); }
+    else if(result.kind === "pun") playPunSound();
+    else if(result.amount >= LEVEL_REWARD_FL_OZ || result.unlockedId) { spawnBonusBurst(18, false); playSongUnlockSound(); }
+    else { spawnBonusBurst(12, false); playDayRewardSound(); }
+  }
+  $("bwStatus").textContent = `Bonus prize: ${result.title}${result.detail ? " — " + result.detail : ""}`;
+  setTimeout(()=>{ btn.disabled = false; try{ btn.focus({ preventScroll:true }); }catch(e){} }, 450);   // blocks accidental double-taps
+}
+
+function continueFromBonus(){
+  if(!bonus.open || bonus.spinning || bonus.awaiting !== "continue") return;
+  bonus.open = false; bonus.awaiting = "done";
+  $("bonusCard").classList.remove("show", "hasResult", "jackpotWin");
+  continueToNextLevel();                                        // existing flow: tribe reveal → Day 1
+  showToast(getDamHumor("bonusComplete"));
+}
+
+function spawnBonusBurst(count, gold){
+  const box = $("bwBurst");
+  for(let i = 0; i < count; i++){
+    const d = document.createElement("div");
+    d.className = "burstDrop" + (gold && i % 2 ? " gold" : "");
+    const ang = (i / count) * Math.PI * 2 + Math.random() * 0.4, dist = 90 + Math.random() * (gold ? 150 : 90);
+    d.style.setProperty("--bx", (Math.cos(ang) * dist).toFixed(1) + "px");
+    d.style.setProperty("--by", (Math.sin(ang) * dist * 0.8).toFixed(1) + "px");
+    d.style.animationDelay = (Math.random() * 0.15).toFixed(2) + "s";
+    box.appendChild(d);
+    setTimeout(()=> d.remove(), 1700);
+  }
+}
+
 function preloadCharacter(c){
   try { const im = new Image(); im.decoding = "async"; im.src = c.img; } catch(e){}
 }
@@ -2802,18 +3138,7 @@ function showLevelComplete(opts = {}){
   setTimeout(()=>{ try{ lcBtn.focus({ preventScroll:true }); }catch(e){} }, 400);
 }
 
-lcBtn.addEventListener("click", bankAndContinue);
-
-/* Level completion never spends FL OZ and never unlocks anything. It only advances the level;
-   the reward is already banked. Guarded by phase, so it runs at most once per completed level. */
-function bankAndContinue(){
-  if(state.phase !== "levelComplete") return;
-  lcBtn.disabled = true;
-  advanceLevel();                                                  // level++, fresh Day 1
-  saveGame();                                                      // one atomic write
-  renderRadio(); renderStore();
-  continueToNextLevel();
-}
+lcBtn.addEventListener("click", openBonusWheel);   // v2.5: level card → Bonus Waterwheel → next level
 
 function advanceLevel(){
   state.level++;
@@ -3064,6 +3389,7 @@ function togglePanel(name){
   syncTimerPause();                                  // open panel pauses the day clock
 }
 document.getElementById("tribesBtn").addEventListener("click", ()=> togglePanel("tribes"));
+$("bonusBtn").addEventListener("click", ()=>{ if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
 $("profileBtn").addEventListener("click", ()=> togglePanel("profile"));
 $("radioBtn").addEventListener("click", ()=> togglePanel("radio"));
 $("storeBtn").addEventListener("click", ()=> togglePanel("store"));
@@ -3392,6 +3718,14 @@ function playLevelFanfare(){
   playWaterNoise(1.6, 200, 1800, 0.16);                        // water burst
   [523,659,784,1046,784,1046,1318].forEach((f,i)=> setTimeout(()=>playTone(f, i === 6 ? 0.6 : 0.26, "triangle"), 140 + i*120));
 }
+function playBonusSpinSounds(dur){
+  playWaterNoise(0.6, 200, 1500, 0.12);                          // hydraulic whoosh
+  let t = 0, gap = 45;
+  while(t < dur * 0.9){ const at = t; setTimeout(()=> playTone(1400, 0.02, "square"), at); t += gap; gap *= 1.085; }   // ratchet slows down
+  setTimeout(()=> playTone(520, 0.08, "triangle"), dur);          // landing click
+}
+function playFreeSpinSound(){ [784,988,784,1175].forEach((f,i)=> setTimeout(()=>playTone(f, 0.12, "triangle"), i*80)); }
+function playPunSound(){ [392,370,349,294].forEach((f,i)=> setTimeout(()=>playTone(f, i===3 ? 0.4 : 0.16, "sawtooth"), i*160)); }   // wah-wah-wah-waaah
 function playSongUnlockSound(){
   [659,831,988,1318,1661].forEach((f,i)=> setTimeout(()=>playTone(f, 0.3, "sine"), i*90));
   setTimeout(()=>playWaterNoise(0.6, 1400, 2400, 0.05), 80);
