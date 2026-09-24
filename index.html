@@ -3299,13 +3299,17 @@ function spawnBonusBurst(count, gold){
    • One play = exactly one result. Selection → evaluation → commit are separate steps;
      the reel animation only decides what is DISPLAYED, never what is AWARDED.
    • The symbol catalog below is the ONLY copy. Every symbol carries imageUrl + fallback,
-     so custom artwork can be added later by editing this catalog alone (renderDamSymbol
-     already handles image → icon → emoji without touching reel logic).
+     so custom artwork is added by editing this catalog alone (renderDamSymbol already
+     handles image → icon → emoji without touching reel logic). v2.6.1: three owner-provided
+     images are live (water / character / fl-6660); the rest stay on emoji fallback until
+     more art is provided.
    • "THE DAM HAS BEEN BROKEN!" is comedic jackpot language ONLY. It never calls
      breakTheDam() or touches the real flood / game-over system.
 ========================================================= */
+/* Owner-provided symbol artwork — same CDN as SONGS/CHARACTERS. Referenced by URL only. */
+const DAM_IMAGE_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
 const DAM_MACHINE_SYMBOLS = [
-  { id:"water",    label:"WATER",        fallback:"💧", iconClass:null, imageUrl:null },
+  { id:"water",    label:"WATER",        fallback:"💧", iconClass:null, imageUrl: DAM_IMAGE_BASE + "gei-wet-floor-VORHZm8eHpZLzJTv.png" },
   { id:"dam",      label:"DAM",          fallback:"🧱", iconClass:null, imageUrl:null },
   { id:"millpond", label:"MILLPOND",     fallback:"🌊", iconClass:null, imageUrl:null },
   { id:"sluice",   label:"SLUICE",       fallback:"🚪", iconClass:null, imageUrl:null },
@@ -3313,9 +3317,9 @@ const DAM_MACHINE_SYMBOLS = [
   { id:"factory",  label:"FACTORY",      fallback:"🏭", iconClass:null, imageUrl:null },
   { id:"fl-111",   label:"111 FL OZ",    fallback:"💧", iconClass:null, imageUrl:null },
   { id:"fl-666",   label:"666 FL OZ",    fallback:"💧", iconClass:null, imageUrl:null },
-  { id:"fl-6660",  label:"6,660 FL OZ",  fallback:"🚨", iconClass:null, imageUrl:null },
+  { id:"fl-6660",  label:"6,660 FL OZ",  fallback:"🚨", iconClass:null, imageUrl: DAM_IMAGE_BASE + "wilbert-bouie-jr-gei-y-all-too-WNMWb3MfHDWZOOZM.png" },
   { id:"song",     label:"FREE SONG",    fallback:"🎵", iconClass:null, imageUrl:null },
-  { id:"character",label:"CHARACTER",    fallback:"👤", iconClass:null, imageUrl:null },
+  { id:"character",label:"CHARACTER",    fallback:"👤", iconClass:null, imageUrl: DAM_IMAGE_BASE + "adam-the-yalltoo-mascot-gei-beaver-G0C3b8xauhYy7K6L.png" },
   { id:"pun",      label:"DAM PUN",      fallback:"😂", iconClass:null, imageUrl:null }
 ];
 const DAM_SYMBOL_BY_ID = {};
@@ -3344,8 +3348,7 @@ function renderDamSymbol(symbol, className){
     const img = document.createElement("img");
     img.className = "dmSymImg";
     img.alt = symbol.label;
-    img.decoding = "async";
-    img.loading = "lazy";
+    img.decoding = "async";                            // small UI glyphs: eager, always spin-ready
     img.addEventListener("error", () => {            // a broken custom image falls back, always
       const t = document.createTextNode(symbol.fallback || "💧");
       el.textContent = "";
@@ -3488,6 +3491,9 @@ function openDamMachine(){
   $("dmChar").hidden = true;
   $("dmChar").innerHTML = "";
   document.querySelectorAll("#dmReels .dmReel").forEach(r => r.classList.remove("stopped"));
+  DAM_MACHINE_SYMBOLS.forEach(s => {                    // warm the cache so custom art never pops in mid-spin
+    if(s.imageUrl){ try { const im = new Image(); im.decoding = "async"; im.src = s.imageUrl; } catch(e){} }
+  });
   damMachine.reelIds.forEach((id, i) => buildReelStrip(i, [id]));
   $("dmMsg").textContent = getDamHumor("machineIdle");
   $("dmStatus").textContent = "Dam Machine. Free hydraulic arcade. Spins never cost FL OZ.";
@@ -3664,7 +3670,11 @@ function runDamMachineSelfTest(){
   const ids = DAM_MACHINE_SYMBOLS.map(s => s.id);
   t("catalog: 12 symbols with unique ids", DAM_MACHINE_SYMBOLS.length === 12 && new Set(ids).size === 12);
   t("catalog: every symbol has fallback + imageUrl field", DAM_MACHINE_SYMBOLS.every(s => typeof s.fallback === "string" && s.fallback.length > 0 && "imageUrl" in s && "iconClass" in s));
-  t("catalog: production imageUrl all null (no fake artwork)", DAM_MACHINE_SYMBOLS.every(s => s.imageUrl === null));
+  t("catalog: custom art only on water/character/fl-6660, all from the approved CDN", (() => {
+    const withArt = DAM_MACHINE_SYMBOLS.filter(s => s.imageUrl).map(s => s.id).sort();
+    return JSON.stringify(withArt) === JSON.stringify(["character","fl-6660","water"]) &&
+      DAM_MACHINE_SYMBOLS.every(s => !s.imageUrl || s.imageUrl.indexOf(DAM_IMAGE_BASE) === 0);
+  })());
   t("weights sum to 100", Object.values(DAM_REEL_WEIGHTS).reduce((a, b) => a + b, 0) === 100);
   const el1 = renderDamSymbol({ id:"x", label:"X", fallback:"🧪", iconClass:null, imageUrl:null });
   t("renderer: fallback emoji when imageUrl null", el1.classList.contains("dmSymEmoji") && el1.textContent === "🧪");
