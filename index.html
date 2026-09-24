@@ -707,7 +707,6 @@ html.skin-heaven .world{
   box-shadow:0 0 10px color-mix(in srgb, var(--juicy-blue) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.55);
 }
 .iconBtn:active{ transform:scale(.92); }
-.iconBtn.danger{ background:linear-gradient(135deg, var(--danger), var(--juicy-magenta) 60%, color-mix(in srgb, var(--juicy-magenta) 40%, #000)); box-shadow:0 0 10px color-mix(in srgb, var(--danger) 60%, transparent), inset 0 1px 0 rgba(255,255,255,.5); }
 
 .progressRow{ display:flex; align-items:center; gap:6px; margin-top:10px; }
 .dot{ flex:1; height:8px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; }
@@ -741,7 +740,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .station.highlight .body{ filter:drop-shadow(0 0 16px var(--water-bright)); }
 .station.tapped{ animation:tapPop .25s ease; }
 @keyframes tapPop{ 0%{transform:scale(1);} 45%{transform:scale(1.08);} 100%{transform:scale(1);} }
-.station .nameLabel{ opacity:0; transform:translateY(4px); transition:opacity .3s, transform .3s; }
+.station .nameLabel{ opacity:0; transform:translateY(4px); transition:opacity .3s, transform .3s;
+  font-weight:900; letter-spacing:.02em; fill:var(--gold); stroke:rgba(0,0,0,.72); stroke-width:5px; stroke-linejoin:round; paint-order:stroke; }
 .station.showName .nameLabel{ opacity:1; transform:translateY(0); }
 
 /* ============ WATERY RINGS ============ */
@@ -970,6 +970,105 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .timerBar i{ display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--juicy-blue),var(--foam)); transition:width .1s linear; }
 .timerBar.urgent i{ background:var(--danger); }
 
+/* ============ v2.3: PRESSURE / CELEBRATION / PROFILE / RADIO ============ */
+.timerBox{ min-width:96px; max-width:112px; }
+.timerUnit{ white-space:normal; text-align:center; line-height:1.15; }
+.timerBox.p-rising{ border-color:#ffb347; background:color-mix(in srgb, #ffb347 20%, transparent); }
+.timerBox.p-rising .timerNum{ color:#ffd9a0; }
+.timerBox.p-critical{ animation-duration:.32s; }
+.timerBox.p-imminent{ animation-duration:.16s; background:color-mix(in srgb, var(--danger) 45%, transparent); }
+.world.pressureCritical{ box-shadow:inset 0 0 40px color-mix(in srgb, var(--danger) 45%, transparent), 0 0 30px color-mix(in srgb, var(--danger) 35%, transparent); }
+.world.pressureImminent{ animation:pressureShake .14s linear infinite; box-shadow:inset 0 0 80px color-mix(in srgb, var(--danger) 70%, transparent), 0 0 40px var(--danger); }
+@keyframes pressureShake{ 0%,100%{ transform:translate(0,0); } 25%{ transform:translate(-2px,1px); } 50%{ transform:translate(2px,-1px); } 75%{ transform:translate(-1px,-1px); } }
+.floodOverlay.fast{ transition:height 1.1s cubic-bezier(.3,0,.7,1); }
+
+.celebCard{ position:absolute; inset:0; z-index:96; display:flex; align-items:center; justify-content:center; pointer-events:none; visibility:hidden; }
+.celebCard.show{ visibility:visible; }
+.celebInner{
+  position:relative; width:min(92%, 400px); height:92%; display:flex; flex-direction:column; align-items:center;
+  padding:12px 14px 14px; border-radius:26px; overflow:hidden; text-align:center;
+  background:linear-gradient(165deg, color-mix(in srgb, var(--juicy-navy) 92%, transparent), color-mix(in srgb, var(--juicy-violet) 55%, var(--juicy-navy)) 60%, color-mix(in srgb, var(--water-bright) 35%, var(--juicy-navy)));
+  border:1.5px solid rgba(255,255,255,.4);
+  box-shadow:0 0 44px color-mix(in srgb, var(--water-bright) 45%, transparent), inset 0 1px 0 rgba(255,255,255,.4);
+  opacity:0;
+}
+.celebCard.show .celebInner{ animation:celebIn .38s cubic-bezier(.34,1.56,.64,1) both; }
+.celebCard.show.exit .celebInner{ animation:celebOut .6s ease-in both; }
+@keyframes celebIn{ from{ opacity:0; transform:scale(.7) translateY(30px); } to{ opacity:1; transform:none; } }
+@keyframes celebOut{ from{ opacity:1; transform:none; } to{ opacity:0; transform:scale(.85) translateY(-40px); } }
+.celebFx{ position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+.celebStage{ position:relative; z-index:1; flex:1 1 auto; min-height:0; max-height:66%; width:100%; display:flex; align-items:flex-end; justify-content:center; }
+.celebChar{ height:100%; max-width:100%; display:flex; align-items:flex-end; justify-content:center; filter:drop-shadow(0 0 18px var(--water-bright)); }
+.celebCharImg{ height:100%; width:auto; max-width:100%; object-fit:contain; display:block; }
+.celebCharFallback{ align-self:center; font-size:1.5rem; font-weight:900; padding:14px 18px; border-radius:16px; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.35); }
+.celebDay{ position:relative; z-index:1; margin-top:6px; font-size:.95rem; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+.celebMeaning{ position:relative; z-index:1; font-size:.84rem; font-weight:700; color:rgba(255,255,255,.85); }
+.celebOz{ position:relative; z-index:1; font-size:clamp(2rem,9vw,2.6rem); font-weight:900; line-height:1.05; color:var(--gold); text-shadow:0 0 18px color-mix(in srgb, var(--gold) 65%, transparent); }
+.celebConv{ position:relative; z-index:1; font-size:.84rem; font-weight:800; color:var(--foam); text-transform:uppercase; }
+.celebTag{ position:relative; z-index:1; margin-top:4px; font-size:.78rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--foam); opacity:.9; }
+.celebTag:empty{ display:none; }
+.celebLine{ position:relative; z-index:1; margin-top:2px; font-size:1.05rem; font-weight:900; line-height:1.3; color:#fff; font-style:italic; }
+.celebCard.show .celebOz{ animation:celebFadeUp .3s ease-out .3s both; }
+.celebCard.show .celebLine, .celebCard.show .celebTag{ animation:celebFadeUp .3s ease-out .4s both; }
+@keyframes celebFadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+/* Character entrances (idle bob follows; both inside the card, so exit is shared) */
+.celebCard.show .celebChar.fxRise { animation:fxRise .55s cubic-bezier(.34,1.56,.64,1) .1s both, celebIdle 1.6s ease-in-out .7s infinite; }
+.celebCard.show .celebChar.fxDrop { animation:fxDrop .6s cubic-bezier(.3,1.4,.6,1) .1s both, celebIdle 1.6s ease-in-out .75s infinite; }
+.celebCard.show .celebChar.fxWave { animation:fxWave .6s ease-out .1s both, celebIdle 1.6s ease-in-out .75s infinite; }
+.celebCard.show .celebChar.fxLift { animation:fxLift .6s cubic-bezier(.2,.8,.3,1) .1s both, celebIdle 1.6s ease-in-out .75s infinite; }
+.celebCard.show .celebChar.fxBurst{ animation:fxBurst .5s cubic-bezier(.34,1.56,.64,1) .1s both, celebIdle 1.6s ease-in-out .65s infinite; }
+.celebCard.show .celebChar.fxSpin { animation:fxSpin .6s ease-out .1s both, celebIdle 1.6s ease-in-out .75s infinite; }
+.celebCard.show .celebChar.fxGlow { animation:fxGlow .6s ease-out .1s both, celebIdle 1.6s ease-in-out .75s infinite; }
+.celebCard.show .celebChar.fxFloat{ animation:fxFloat .6s ease-out .1s both, celebIdle 1.6s ease-in-out .75s infinite; }
+.celebCard.show .celebChar.fxSlide{ animation:fxSlide .55s cubic-bezier(.3,1.3,.6,1) .1s both, celebIdle 1.6s ease-in-out .7s infinite; }
+.celebCard.show .celebChar.fxPop  { animation:fxPop .4s cubic-bezier(.34,1.8,.64,1) .1s both, celebIdle 1.6s ease-in-out .55s infinite; }
+@keyframes celebIdle{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+@keyframes fxRise { from{ transform:translateY(60%) scale(.7); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes fxDrop { 0%{ transform:translateY(-120%); opacity:0; } 60%{ transform:translateY(6%); opacity:1; } 80%{ transform:translateY(-3%); } 100%{ transform:none; } }
+@keyframes fxWave { 0%{ transform:translateX(-110%) rotate(-10deg); opacity:0; } 70%{ transform:translateX(6%) rotate(4deg); opacity:1; } 100%{ transform:none; } }
+@keyframes fxLift { from{ transform:translateY(100%); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes fxBurst{ 0%{ transform:scale(.05); opacity:0; } 70%{ transform:scale(1.15); opacity:1; } 100%{ transform:none; } }
+@keyframes fxSpin { from{ transform:rotate(-360deg) scale(.3); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes fxGlow { from{ transform:scale(.9); opacity:0; filter:brightness(2.2); } to{ transform:none; opacity:1; filter:none; } }
+@keyframes fxFloat{ from{ transform:translateY(-30%); opacity:0; } to{ transform:none; opacity:1; } }
+@keyframes fxSlide{ 0%{ transform:translateX(120%); opacity:0; } 75%{ transform:translateX(-6%); opacity:1; } 100%{ transform:none; } }
+@keyframes fxPop  { 0%{ transform:scale(0); opacity:0; } 55%{ transform:scale(1.3,.85); opacity:1; } 80%{ transform:scale(.92,1.08); } 100%{ transform:none; } }
+.fxOrigin{ position:absolute; left:50%; top:58%; width:0; height:0; }
+.burstDrop.gold{ background:var(--gold); box-shadow:0 0 12px var(--gold); }
+.fxRain{ position:absolute; top:-16px; width:4px; height:16px; border-radius:3px; background:var(--foam); opacity:.85; animation:fxRainFall .9s linear both; }
+@keyframes fxRainFall{ to{ transform:translateY(560px); opacity:.2; } }
+.fxShock{ position:absolute; left:50%; top:72%; width:40px; height:40px; border:5px solid var(--foam); border-radius:50%; transform:translate(-50%,-50%); opacity:0; animation:fxShockRing .75s ease-out .2s both; }
+@keyframes fxShockRing{ 0%{ opacity:1; transform:translate(-50%,-50%) scale(.5); } 100%{ opacity:0; transform:translate(-50%,-50%) scale(9); } }
+.fxWaveBand{ position:absolute; left:-60%; bottom:-6%; width:220%; height:30%; border-radius:50% 50% 0 0;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--water-bright) 75%, transparent), color-mix(in srgb, var(--ocean) 55%, transparent)); animation:fxWaveSweep 1.2s ease-out both; }
+@keyframes fxWaveSweep{ from{ transform:translateX(-35%) translateY(30%); } to{ transform:translateX(10%) translateY(0); } }
+
+.profileHero{ text-align:center; padding:6px 0 10px; }
+.profileChar{ height:clamp(150px, 34vh, 240px); display:flex; align-items:flex-end; justify-content:center; filter:drop-shadow(0 0 16px var(--water-bright)); }
+.profileCharImg{ height:100%; width:auto; max-width:100%; object-fit:contain; display:block; }
+.profileLabel{ margin-top:6px; font-size:.78rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--juicy-blue); }
+.profileName{ font-size:1.3rem; font-weight:900; line-height:1.2; }
+.profileRank{ margin-top:6px; font-size:.86rem; font-weight:700; }
+.profileRank strong{ color:var(--gold); }
+.profileGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pStat{ padding:10px; border-radius:14px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); min-width:0; }
+.pLabel{ font-size:.74rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--juicy-blue); }
+.pValue{ font-size:1.3rem; font-weight:900; line-height:1.2; color:#fff; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+.pSub{ font-size:.76rem; font-weight:700; color:rgba(255,255,255,.75); }
+
+.radioPlayer{ padding:14px; margin-bottom:6px; border-radius:18px; text-align:center;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--juicy-blue) 25%, transparent), color-mix(in srgb, var(--juicy-violet) 30%, transparent)); border:1.5px solid rgba(255,255,255,.25); }
+.rpLabel{ font-size:.76rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--foam); opacity:.85; }
+.rpTitle{ font-size:1.3rem; font-weight:900; line-height:1.2; margin-top:4px; overflow-wrap:anywhere; }
+.rpArtist{ font-size:.82rem; font-weight:700; color:rgba(255,255,255,.8); margin-top:2px; }
+.rpProgress{ height:8px; border-radius:999px; background:rgba(255,255,255,.15); overflow:hidden; margin:10px 0; }
+.rpProgress i{ display:block; height:100%; width:0%; background:linear-gradient(90deg, var(--juicy-blue), var(--gold)); transition:width .25s linear; }
+.rpBtn{ min-width:140px; padding:12px 20px; border-radius:999px; border:1.5px solid rgba(255,255,255,.6); cursor:pointer;
+  font-size:1rem; font-weight:900; color:var(--juicy-navy); background:linear-gradient(135deg, var(--gold), color-mix(in srgb, var(--gold) 55%, #fff)); }
+.rpBtn:focus-visible, .playBtn:focus-visible, .storeBtn:focus-visible, .iconBtn:focus-visible, .panelClose:focus-visible, .lcBtn:focus-visible, .rebuildBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.rpNext{ margin-top:10px; font-size:.86rem; font-weight:700; }
+.rpNext strong{ color:var(--gold); }
+
 /* ============ v2.2: DAM HUMOR ============ */
 .damQuip{ font-size:.86rem; font-weight:800; line-height:1.35; color:var(--foam); overflow-wrap:anywhere; }
 .damQuip:empty{ display:none; }
@@ -1011,7 +1110,6 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 }
 .walletLine{ font-size:.9rem; font-weight:800; margin-bottom:10px; }
 .walletLine strong{ color:var(--gold); }
-.nowPlaying{ font-size:.8rem; font-weight:700; color:var(--foam); margin-bottom:10px; min-height:1em; }
 .songRow{
   display:flex; align-items:center; gap:10px; padding:10px 12px; margin-bottom:7px; border-radius:12px;
   background:rgba(255,255,255,.06); border-left:3px solid var(--juicy-blue);
@@ -1020,7 +1118,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .songRow.locked .songMeta{ opacity:.6; }
 .songRow.playing{ background:color-mix(in srgb, var(--juicy-blue) 22%, transparent); }
 .songMeta{ flex:1; min-width:0; }
-.songTitle{ font-size:.86rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.songTitle{ font-size:.86rem; font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
 .songArtist{ font-size:.74rem; color:rgba(255,255,255,.7); }
 .songNum{ font-size:.74rem; font-weight:800; color:rgba(255,255,255,.55); width:1.6em; text-align:right; font-variant-numeric:tabular-nums; }
 .playBtn, .storeBtn{
@@ -1029,7 +1127,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   background:linear-gradient(135deg,var(--juicy-blue),var(--juicy-violet));
 }
 .playBtn:disabled, .storeBtn:disabled{ opacity:.45; cursor:not-allowed; }
-.lockTag{ flex:0 0 auto; text-align:right; font-size:.72rem; font-weight:800; color:rgba(255,255,255,.7); line-height:1.3; }
+.lockTag{ flex:0 1 auto; max-width:46%; text-align:right; font-size:.72rem; font-weight:800; color:rgba(255,255,255,.7); line-height:1.3; overflow-wrap:anywhere; }
 .packCard{
   position:relative; padding:12px 14px; margin-bottom:9px; border-radius:14px;
   background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.18);
@@ -1149,7 +1247,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="logo" id="gameLogo">Let There Be Liters</div>
         <div class="hudRight">
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
-          <button class="iconBtn danger" id="damBreakBtn" title="Break the Firmament" aria-label="Break the Firmament">💥</button>
+          <button class="iconBtn" id="profileBtn" title="Player profile" aria-label="Player profile">👤</button>
           <button class="iconBtn" id="tribesBtn" aria-label="Tribes discovered">🚢</button>
           <button class="iconBtn" id="radioBtn" aria-label="Radio — unlocked songs">🎵</button>
           <button class="iconBtn" id="storeBtn" aria-label="FL OZ store">🛒</button>
@@ -1238,15 +1336,6 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         </div>
       </div>
 
-      <div class="gameOverCard" id="gameOverCard">
-        <div class="gameOverInner">
-          <div style="font-size:2.4rem;">🏗️</div>
-          <div class="gameOverTitle">The Dam Has Broken</div>
-          <div class="gameOverSub">The system has failed and flooded.
-Rebuild it from the Mountain up.</div>
-          <button class="rebuildBtn" id="rebuildBtn">Rebuild System</button>
-        </div>
-      </div>
 
       <div class="sidePanel" id="tribesPanel">
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
@@ -1262,11 +1351,25 @@ Rebuild it from the Mountain up.</div>
         <div class="damQuip drQuip" id="drQuip"></div>
       </div>
 
+      <!-- v2.3: Day 1–5 celebration. The character lives INSIDE the card, so they enter and exit as one. -->
+      <div class="celebCard" id="celebCard" aria-live="polite">
+        <div class="celebInner" id="celebInner">
+          <div class="celebFx" id="celebFx"></div>
+          <div class="celebStage"><div class="celebChar" id="celebChar"></div></div>
+          <div class="celebDay" id="celebDay"></div>
+          <div class="celebMeaning" id="celebMeaning"></div>
+          <div class="celebOz">+111 FL OZ</div>
+          <div class="celebConv" id="celebConv"></div>
+          <div class="celebTag" id="celebTag"></div>
+          <div class="celebLine" id="celebLine"></div>
+        </div>
+      </div>
+
       <!-- v2: timer failure -->
       <div class="gameOverCard timeUpCard" id="timeUpCard" role="alertdialog" aria-labelledby="timeUpTitle">
         <div class="gameOverInner">
-          <div style="font-size:2.4rem;">⚠️</div>
-          <div class="gameOverTitle" id="timeUpTitle">Time's Up</div>
+          <div style="font-size:2.4rem;">💥</div>
+          <div class="gameOverTitle" id="timeUpTitle">The Dam Broke!</div>
           <div class="damQuip timeUpQuip" id="timeUpQuip"></div>
           <div class="gameOverSub">The water escaped before the step was completed.<br><span id="timeUpDetail"></span><br><span class="timeUpTip" id="timeUpTip"></span></div>
           <button class="rebuildBtn" id="retryDayBtn">Try Day Again</button>
@@ -1279,8 +1382,31 @@ Rebuild it from the Mountain up.</div>
         <div class="panelTitle">🎵 Y'all Too Radio</div>
         <div class="walletLine" id="radioWallet"></div>
         <div class="damQuip panelQuip" id="radioQuip"></div>
-        <div class="nowPlaying" id="nowPlaying"></div>
+        <div class="radioPlayer" aria-live="polite">
+          <div class="rpLabel">Now playing</div>
+          <div class="rpTitle" id="rpTitle">Nothing playing</div>
+          <div class="rpArtist" id="rpArtist"></div>
+          <div class="rpProgress" aria-hidden="true"><i id="rpFill"></i></div>
+          <button class="rpBtn" id="rpToggle" aria-label="Play">▶ PLAY</button>
+          <div class="rpNext">Up next: <strong id="rpNext">—</strong></div>
+        </div>
+        <div class="panelGroup">Unlocked playlist</div>
         <div id="songList"></div>
+      </div>
+
+      <!-- v2.3: profile (read-only view of existing state) -->
+      <div class="sidePanel" id="profilePanel">
+        <button class="panelClose" data-close-panel aria-label="Close">✕</button>
+        <div class="panelTitle">👤 Player Profile</div>
+        <div class="damQuip panelQuip" id="profileQuip"></div>
+        <div class="profileHero">
+          <div class="profileChar" id="profileChar"></div>
+          <div class="profileLabel">Current operator</div>
+          <div class="profileName" id="profileName"></div>
+          <div class="charTitle" id="profileTitle"></div>
+          <div class="profileRank" id="profileRank"></div>
+        </div>
+        <div class="profileGrid" id="profileStats"></div>
       </div>
 
       <!-- v2: store (economy hooks; no payment processing here) -->
@@ -1352,8 +1478,17 @@ const DAY_REWARD_FL_OZ   = 111;
 const DAYS_PER_LEVEL     = 6;
 const LEVEL_REWARD_FL_OZ = DAY_REWARD_FL_OZ * DAYS_PER_LEVEL; // 666
 const UNLOCK_COST_FL_OZ  = 666;                               // any song, skin or character
-const DAY_TIME_LIMIT_MS  = 10000;
-const DAY_WARNING_MS     = 3000;
+const DAY_TIME_LIMIT_MS  = 6000;                              // the ONE day-time constant
+/* Pressure phases are presentation of the same clock (no second timer). */
+const PRESSURE_PHASES = [
+  { key:"normal",   label:"Normal flow",          aboveMs:4000 },
+  { key:"rising",   label:"Pressure rising",      aboveMs:2000 },
+  { key:"critical", label:"Critical pressure",    aboveMs:1000 },
+  { key:"imminent", label:"Dam failure imminent", aboveMs:0 }
+];
+function pressurePhase(remMs){ return PRESSURE_PHASES.find(p => remMs > p.aboveMs) || PRESSURE_PHASES[PRESSURE_PHASES.length - 1]; }
+const CELEBRATION_MS     = 3000;   // Day 1–5 celebration, card + character as one unit
+const CELEBRATION_EXIT_AT = 2200;
 const SAVE_KEY           = "yalltooDamGame.v2";
 const SAVE_VERSION       = 2;
 
@@ -1522,42 +1657,59 @@ const DAM_HUMOR = {
     "Straight from the source.",
     "That's a mountain of potential.",
     "Let the tributaries do their thing.",
-    "Source secured."
+    "Source secured.",
+    "Water you waiting for?",
+    "Let's get this water moving.",
+    "Tributaries: small streams, big dreams."
   ],
   day2: [
     "Hold the line!",
     "Now we're damming up.",
     "Pressure contained.",
     "That's a solid wall of progress.",
-    "Don't crack under pressure."
+    "Don't crack under pressure.",
+    "That's what I call a solid foundation.",
+    "Pressure makes diamonds. Here, it makes dams.",
+    "Don't crack under pressure. Unless you're the dam."
   ],
   day3: [
     "Store now, flow later.",
     "Your reservoir is filling.",
     "Water saved is water preserved.",
     "That's some deep thinking.",
-    "The pond is looking prosperous."
+    "The pond is looking prosperous.",
+    "Keep your head above water.",
+    "That's some deep reservoir energy.",
+    "The millpond says thank you."
   ],
   day4: [
     "Open the gate!",
     "Control the flow.",
     "Timing is everything.",
     "Gate control: dam good.",
-    "A perfectly timed release."
+    "A perfectly timed release.",
+    "Gate open. Problems closed.",
+    "Gate expectations.",
+    "You opened that gate like a pro."
   ],
   day5: [
     "Now we're turning water into work.",
     "Keep that wheel moving.",
     "Round and round the water goes.",
     "The current is doing the heavy lifting.",
-    "That wheel is really on a roll."
+    "That wheel is really on a roll.",
+    "Wheel done!",
+    "You're on a roll... a WATERWHEEL roll.",
+    "Mill-diculous! You actually pulled it off."
   ],
   day6: [
     "Now the whole system is working.",
     "That's how you make water work.",
     "Factory flow achieved.",
     "The machine is making dam sense.",
-    "System complete. Flow approved."
+    "System complete. Flow approved.",
+    "Factory settings: AWESOME.",
+    "The whole mill is humming your song."
   ],
   timeout: [
     "The water got away!",
@@ -1565,14 +1717,33 @@ const DAM_HUMOR = {
     "That one ran downstream.",
     "Close, but the water had other plans.",
     "Don't let the next one run off!",
-    "The pressure slipped. Grab it again."
+    "The pressure slipped. Grab it again.",
+    "Well... that went downstream.",
+    "Your dam had a pressure problem.",
+    "That was a DAMergency.",
+    "The water has officially resigned.",
+    "Pressure: 1. You: 0.",
+    "Your dam clock ran out of dam time.",
+    "Six seconds wasn't enough? DAM.",
+    "The water said, 'I'm out.'",
+    "That's one way to create a flood.",
+    "Your containment strategy needs containment.",
+    "Pressure got the best of you.",
+    "That dam had one job.",
+    "Well... that escalated quickly.",
+    "Your dam has officially left the chat.",
+    "That's not a leak. It's an unscheduled water feature."
   ],
   ite: [
     "Another -ite safely preserved.",
     "The -ites are under hydraulic protection.",
     "No -ite left behind the dam.",
     "The reservoir is protecting the -ites.",
-    "Hydraulic preservation successful."
+    "Hydraulic preservation successful.",
+    "Preserve the -ites. Protect the flow.",
+    "The -ites are safe... for now.",
+    "Save the water. Save the -ites. Build the dam.",
+    "Another -ite saved from the overflow."
   ],
   continue: [
     "Back to the mountain. Let's flow again.",
@@ -1598,6 +1769,77 @@ const DAM_HUMOR = {
     "Keep the gates under control.",
     "Make waves."
   ],
+  dayReward: [
+    "111 FL OZ secured. That's a DAM fine deposit.",
+    "Another 111 FL OZ safely contained.",
+    "That's another 111 FL OZ in the reservoir.",
+    "Flow secured. Wallet watered.",
+    "That's what I call liquid progress.",
+    "Your wallet just got a little wetter.",
+    "Another day, another dam.",
+    "Dam straight.",
+    "Dam near perfect.",
+    "That was dam impressive.",
+    "You're really holding it together.",
+    "That flow was under control.",
+    "That was a flood of progress.",
+    "Consider the water preserved.",
+    "Pressure detected. Panic rejected.",
+    "Well, well, well... look who controlled the water.",
+    "That's some reservoir-caliber work.",
+    "You're giving the water some serious direction."
+  ],
+  metaphor: [
+    "Pressure is the language of the dam.",
+    "Your wallet is a reservoir of hard work.",
+    "Every gate is a decision.",
+    "Time is a river, and you just dammed it.",
+    "The millpond is the dam's savings account."
+  ],
+  personification: [
+    "The water was getting impatient.",
+    "The river just gave you a standing ovation.",
+    "The wheel is dizzy with joy.",
+    "The dam is blushing.",
+    "The reservoir whispered, 'Thank you.'"
+  ],
+  hyperbole: [
+    "That flow could power a whole city!",
+    "That was the greatest splash in history.",
+    "A billion droplets just cheered.",
+    "You saved an ocean's worth of water!",
+    "That gate opened faster than light."
+  ],
+  simile: [
+    "That pressure hit like a runaway river.",
+    "Smooth as a millpond at midnight.",
+    "Steady as a dam in a thunderstorm.",
+    "You moved like water through a sluice.",
+    "Strong as reinforced concrete."
+  ],
+  wordplay: [
+    "You're making waves.",
+    "Don't be a drip.",
+    "Your flow is showing.",
+    "That's some serious flow state.",
+    "Water you doing? KEEP BUILDING.",
+    "Current events: you're winning."
+  ],
+  rare: [
+    "Water under the bridge? Not here. We built the bridge.",
+    "Legend says the dam still talks about you.",
+    "Scientists confirm: you are 60% water, 40% dam.",
+    "The fish are writing songs about you.",
+    "Somewhere, a beaver is taking notes.",
+    "Achievement unlocked: Certified Dam Legend."
+  ],
+  profile: [
+    "Keep the flow. Save the -ites.",
+    "Operator on duty. Water under control.",
+    "Your dam résumé is looking wet.",
+    "Hydraulic greatness in progress.",
+    "The dam knows your name."
+  ],
   general: [
     "Water under control.",
     "Flow secured.",
@@ -1621,13 +1863,47 @@ const DAM_HUMOR_TITLES = {
   "operator-man":            "The Dam Man"
 };
 
+/* Optional character jokes, keyed by existing character ids (not a catalog). */
+const DAM_HUMOR_CHARACTER = {
+  "wilbert-dam-guide":       ["The DAM Guide has spoken.", "Guide the flow. Preserve the -ites.", "Wilbert approves this water.", "Follow the guide. Follow the flow."],
+  "yall-too-beaver":         ["That's a dam busy beaver.", "Beaver pressure. Better construction.", "Gnaw-thing can stop this beaver.", "Teeth: sharp. Dam: sharper."],
+  "operator-fireman":        ["Fighting fire with water. Obviously.", "This operator is on fire. Safely.", "Hose-ly moly, nice work!", "Put out the pressure. Keep the flow."],
+  "operator-moses":          ["That's one way to move some water.", "Looks like somebody parted the pressure.", "The Waterway Operator delivers."],
+  "operator-valentine":      ["I love the way you flow.", "Roses are red, reservoirs are blue.", "This dam is a love letter to water."],
+  "operator-sam":            ["Sam the Dam says: nice.", "Sam I am. Dam I am.", "Sam's on shift. Water's on track."],
+  "operator-jack-o-lantern": ["That's a frightfully good flow.", "Something spooky is brewing in the reservoir.", "Trick or treat? Treat: 111 FL OZ.", "Pumpkin-powered hydraulics!"],
+  "operator-santa-claus":    ["Ho ho hold the flow!", "Santa checked the list. The dam made the nice list.", "Sleigh the pressure!", "Dam-cember came early."],
+  "operator-woman":          ["The Dam Woman runs a tight reservoir.", "She built that. Dam right.", "Flow boss, reporting in."],
+  "operator-man":            ["The Dam Man has entered the chat.", "Hard hat on. Water under control.", "The Dam Man can. And did."]
+};
+const FIGURATIVE_DEVICES = [["metaphor","Metaphor"],["personification","Personification"],["hyperbole","Hyperbole"],["simile","Simile"],["wordplay","Wordplay"]];
+/* "Degree of Dammin'": a rank derived from completed loops. Nothing stored. */
+const DAM_RANKS = [[0,"Dam Apprentice"],[1,"Junior Dam Operator"],[3,"Certified Dam Engineer"],[6,"Senior Hydraulic Officer"],[10,"Grand Master of the Dam"]];
+function damRank(loops){ let r = DAM_RANKS[0][1]; DAM_RANKS.forEach(([min, name]) => { if(loops >= min) r = name; }); return r; }
+
 const damHumorRecent = {};
 /* Random line from a category, never repeating any of the last 3 picks from that category
    (fewer for tiny pools). Unknown/empty categories fall back to "general". Never throws. */
 function getDamHumor(category){
+  const key = (DAM_HUMOR[category] && DAM_HUMOR[category].length) ? category : "general";
+  return pickDamLine(key, DAM_HUMOR[key]);
+}
+function getCharacterHumor(id){
+  const pool = DAM_HUMOR_CHARACTER[id];
+  return pool && pool.length ? pickDamLine("char:" + id, pool) : "";
+}
+/* Day 1–5 celebration line: a mix so it never feels like one joke on repeat.
+   ~5% rare, ~25% character, ~20% figurative (labelled), rest station/day or reward. */
+function getCelebrationLine(day, charId){
+  const r = Math.random();
+  if(r < 0.05) return { text:getDamHumor("rare"), tag:"✨ Rare dam joke" };
+  if(r < 0.30){ const t = getCharacterHumor(charId); if(t) return { text:t, tag:"" }; }
+  if(r < 0.50){ const [k, name] = FIGURATIVE_DEVICES[Math.floor(Math.random() * FIGURATIVE_DEVICES.length)]; return { text:getDamHumor(k), tag:"🗣️ " + name }; }
+  if(r < 0.75) return { text:getDamHumor("day" + day), tag:"" };
+  return { text:getDamHumor("dayReward"), tag:"" };
+}
+function pickDamLine(key, pool){
   try {
-    const key = (DAM_HUMOR[category] && DAM_HUMOR[category].length) ? category : "general";
-    const pool = DAM_HUMOR[key];
     const recent = damHumorRecent[key] || (damHumorRecent[key] = []);
     const avoid = Math.min(3, pool.length - 1);
     const blocked = avoid > 0 ? recent.slice(-avoid) : [];
@@ -1808,7 +2084,7 @@ function millScale(stage){
 ========================================================= */
 const state = {
   currentStep:0, tapCount:0, tribesFound:[],
-  busy:false, gameOver:false, millStage:0,
+  busy:false, millStage:0,
   /* v2 */
   level:1,
   levelFlOz:0,            // FL OZ earned inside the current level (0..666, multiples of 111)
@@ -1933,7 +2209,6 @@ const tribeCategory = document.getElementById("tribeCategory");
 const tribesList = document.getElementById("tribesList");
 const particleLayer = document.getElementById("particleLayer");
 const floodOverlay = document.getElementById("floodOverlay");
-const gameOverCard = document.getElementById("gameOverCard");
 const railLeft = document.getElementById("railLeft");
 const railRight = document.getElementById("railRight");
 const mobileDayRow = document.getElementById("mobileDayRow");
@@ -1946,7 +2221,7 @@ const dayRewardEl = $("dayReward"), drTitle = $("drTitle"), drAmount = $("drAmou
 const timeUpCard = $("timeUpCard"), timeUpDetail = $("timeUpDetail");
 const levelCard = $("levelCard"), levelInner = $("levelInner"), lcLevel = $("lcLevel"), lcBackdrop = $("lcBackdrop");
 const lcChar = $("lcChar"), lcCharName = $("lcCharName"), lcChain = $("lcChain"), lcSong = $("lcSong"), lcBtn = $("lcBtn"), lcNote = $("lcNote"), lcBurst = $("lcBurst");
-const PANELS = { tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel") };
+const PANELS = { tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel"), profile: $("profilePanel") };
 const fmt = n => Number(n).toLocaleString("en-US");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -2005,18 +2280,59 @@ function stationGraphic(step, index){
 
   const nameLabel = document.createElementNS(NS, "text");
   nameLabel.setAttribute("class", "nameLabel");
-  nameLabel.setAttribute("x", 200); nameLabel.setAttribute("y", cy + 82);
   nameLabel.setAttribute("text-anchor", "middle");
-  nameLabel.setAttribute("font-size", 15);
-  nameLabel.setAttribute("font-weight", "800");
-  nameLabel.setAttribute("fill", "var(--gold)");
-  nameLabel.textContent = step.name;
+  nameLabel.setAttribute("aria-label", STATION_LABELS[step.id].aria);
+  STATION_LABELS[step.id].lines.forEach(line => {
+    const t = document.createElementNS(NS, "tspan");
+    t.textContent = line;
+    nameLabel.appendChild(t);
+  });
   g.appendChild(nameLabel);
 
   return g;
 }
 
+/* Station signage (presentation only; STEPS names are untouched). Stations 1–5 use the clear
+   right-hand column; the grown Factory is wide, so its sign sits in the strip below it. */
+const STATION_LABELS = {
+  mountain: { lines:["💧","TRIBU-","TARIES"], aria:"Tributaries" },
+  dam:      { lines:["🧱","DAM"],             aria:"Dam" },
+  millpond: { lines:["🌊","MILL","POND"],     aria:"Millpond" },
+  sluice:   { lines:["🚪","SLUICE-","GATE"],  aria:"Sluice-gate" },
+  wheel:    { lines:["⚙️","WATER","WHEEL"],   aria:"Waterwheel" },
+  mill:     { lines:["🏭 FACTORY"],           aria:"Factory", below:true }
+};
+const LABEL_MAX = 30, LABEL_MIN = 18, LABEL_RIGHT = 394, LABEL_GAP = 8, LABEL_COL_LEFT = 266;
+function measureLine(t){ try { return t.getComputedTextLength(); } catch(e){ return 0; } }
+/* Size every side label to the SAME font size: the largest that fits the narrowest line
+   in the right column, measured in the real browser font. Falls back gracefully (e.g. jsdom). */
+function layoutStationLabels(){
+  const labels = [...stationsGroup.querySelectorAll(".station")].map(g => ({ g, idx:+g.dataset.index, el:g.querySelector(".nameLabel") }));
+  const colW = LABEL_RIGHT - LABEL_COL_LEFT;
+  let size = LABEL_MAX;
+  labels.forEach(({ el, idx }) => {
+    if(STATION_LABELS[STEPS[idx].id].below) return;
+    el.setAttribute("font-size", LABEL_MAX);
+    [...el.children].slice(1).forEach(t => { const w = measureLine(t); if(w > 0) size = Math.min(size, LABEL_MAX * colW / w); });
+  });
+  size = Math.max(LABEL_MIN, Math.floor(size));
+  labels.forEach(({ el, idx }) => {
+    const cfg = STATION_LABELS[STEPS[idx].id], cy = CENTERS[idx], spans = [...el.children];
+    if(cfg.below){
+      const fs = Math.min(LABEL_MAX, size + 2);
+      el.setAttribute("font-size", fs);
+      spans[0].setAttribute("x", 200); spans[0].setAttribute("y", (792 - fs * 0.3).toFixed(1));   // keeps a margin above the frame edge
+      return;
+    }
+    el.setAttribute("font-size", size);
+    const x = (LABEL_COL_LEFT + LABEL_RIGHT) / 2, lh = size * 1.02;
+    const top = cy - (spans.length * lh) / 2 + size * 0.82;
+    spans.forEach((t, i) => { t.setAttribute("x", x); t.setAttribute("y", (top + i * lh).toFixed(1)); });
+  });
+}
+
 STEPS.forEach((step, i)=> stationsGroup.appendChild(stationGraphic(step, i)));
+layoutStationLabels();
 
 function renderMillStage(){
   const g = stationsGroup.querySelector(`.station[data-index="${MILL_INDEX}"]`);
@@ -2128,7 +2444,7 @@ world.addEventListener("click", (e)=>{
   // re-rendered itself (and detached e.target) before the click bubbled up to the world.
   if(e.composedPath().some(n => n instanceof Element && n.matches(".sidePanel, .tribeCard, .gameOverCard, .hud"))) return;
   if(anyPanelOpen()){ closePanels(); return; }          // tapping the board closes an open panel
-  if(state.busy || state.gameOver) return;
+  if(state.busy) return;
   if(state.phase === "ready"){ beginDay(state.currentStep); return; }  // first tap starts the clock
   if(state.phase !== "playing") return;
 
@@ -2186,7 +2502,6 @@ function flowSegment(index){
   playFlowSound();
 
   setTimeout(()=>{
-    if(state.gameOver) return;                        // dam broke mid-flow: rebuild owns the reset
     state.busy = false;
     state.tapCount = 0;
     if(index < STEPS.length - 1){
@@ -2194,7 +2509,7 @@ function flowSegment(index){
     } else {
       reachOcean();
     }
-  }, 950);
+  }, index < STEPS.length - 1 ? CELEBRATION_MS : 950);   // next day starts after the celebration
 }
 
 /* =========================================================
@@ -2202,7 +2517,6 @@ function flowSegment(index){
 ========================================================= */
 /* Starts (or restarts) the day at `index` with a fresh 10-second clock. */
 function beginDay(index){
-  if(state.gameOver) return;
   state.currentStep = index;
   state.tapCount = 0;
   state.phase = "playing";
@@ -2237,6 +2551,7 @@ function awardDay(index){
 
 let dayRewardTimer;
 function showDayReward(index){
+  if(index < DAYS_PER_LEVEL - 1){ showDayCelebration(index); return; }   // Days 1–5 celebrate; Day 6 keeps the pop
   const d = DAM_DAYS[index];
   drTitle.textContent = `💧 ${d.title} complete`;
   drAmount.textContent = d.displayAmount;
@@ -2287,7 +2602,7 @@ function pauseDayTimer(){
   renderTimer();
 }
 function resumeDayTimer(){
-  if(!timerPaused || state.phase !== "playing" || state.busy || state.gameOver) return;
+  if(!timerPaused || state.phase !== "playing" || state.busy) return;
   startDayTimer(dayTimerRemainingMs);
 }
 function isTimerBlocked(){ return anyPanelOpen() || document.hidden; }
@@ -2296,9 +2611,12 @@ function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayT
 function tickDayTimer(){
   const rem = currentRemainingMs();
   dayTimerRemainingMs = rem;
-  if(rem > 0 && rem <= DAY_WARNING_MS){
-    const sec = Math.ceil(rem / 1000);
-    if(sec !== lastWarnSecond){ lastWarnSecond = sec; playTimerWarningSound(sec); }
+  const ph = pressurePhase(rem);
+  if(rem > 0 && ph.key !== "normal"){
+    // Faster beats as pressure climbs: 1/s rising, 2/s critical, 4/s imminent.
+    const step = ph.key === "imminent" ? 250 : ph.key === "critical" ? 500 : 1000;
+    const beat = ph.key + Math.ceil(rem / step);
+    if(beat !== lastWarnSecond){ lastWarnSecond = beat; playTimerWarningSound(ph.key); }
   }
   renderTimer();
   if(rem <= 0) handleDayTimeout();
@@ -2308,16 +2626,21 @@ function renderTimer(){
   const rem = currentRemainingMs();
   const running = dayTimerId !== null;
   const phase = state.phase;
-  let unit = "Seconds";
+  const ph = pressurePhase(rem);
+  let unit = ph.label;
   if(phase === "ready") unit = "Tap to start";
-  else if(phase === "timeout") unit = "Time's up";
+  else if(phase === "timeout") unit = "Dam broke";
   else if(phase === "levelComplete" || phase === "redeemed") unit = "Cycle done";
   else if(timerPaused) unit = "Paused";
   timerNum.textContent = (Math.ceil(rem / 100) / 10).toFixed(1);
   timerUnit.textContent = unit;
-  const urgent = running && rem <= DAY_WARNING_MS;
+  const live = running && phase === "playing";
+  const urgent = live && (ph.key === "critical" || ph.key === "imminent");
   timerBox.classList.toggle("urgent", urgent);
   timerBar.classList.toggle("urgent", urgent);
+  PRESSURE_PHASES.forEach(p => timerBox.classList.toggle("p-" + p.key, live && p.key === ph.key));
+  world.classList.toggle("pressureCritical", live && ph.key === "critical");
+  world.classList.toggle("pressureImminent", live && ph.key === "imminent");
   timerBox.classList.toggle("idle", phase === "ready" || timerPaused);
   timerBox.classList.toggle("expired", phase === "timeout");
   timerFill.style.width = (rem / DAY_TIME_LIMIT_MS * 100) + "%";
@@ -2339,12 +2662,28 @@ function handleDayTimeout(){
   $("timeUpQuip").textContent = getDamHumor("timeout");
   $("timeUpTip").textContent = "💡 " + getDamHumor("figurative");
   timeUpCard.classList.add("show");
-  playTimeoutSound();
+  breakTheDam();
 }
 
+/* Timer hit zero: the existing flood, shake and dam-break sound, now driven by the clock. */
+function breakTheDam(){
+  world.classList.remove("pressureCritical","pressureImminent","bigShake");
+  void world.offsetWidth;
+  world.classList.add("bigShake");
+  setTimeout(()=> world.classList.remove("bigShake"), 1000);
+  floodOverlay.classList.add("fast","rising");
+  playDamBreakSound();
+}
+function drainFlood(){
+  floodOverlay.style.transition = "none";
+  floodOverlay.classList.remove("rising","fast");
+  void floodOverlay.offsetWidth;
+  floodOverlay.style.transition = "";
+}
 function retryDay(){
   if(state.phase !== "timeout") return;
   timeUpCard.classList.remove("show");
+  drainFlood();
   beginDay(state.currentStep);
 }
 $("retryDayBtn").addEventListener("click", retryDay);
@@ -2369,7 +2708,6 @@ function renderHud(){
    OCEAN + LOOP COMPLETE
 ========================================================= */
 function reachOcean(){
-  if(state.gameOver) return;
   oceanGroup.classList.add("reached");
   playOceanSound();
   world.classList.add("flash");
@@ -2402,10 +2740,97 @@ function onCharacterImageError(e){
   const img = e.currentTarget;
   safeWarn("Character image failed to load: " + img.src);
   const label = document.createElement("span");
-  label.className = img.className === "lcCharImg" ? "lcCharFallback" : "charThumbFallback";
+  label.className = ({ lcCharImg:"lcCharFallback", celebCharImg:"celebCharFallback", profileCharImg:"lcCharFallback" })[img.className] || "charThumbFallback";
   label.textContent = img.dataset.charName || "Character";
   if(img.parentNode) img.parentNode.replaceChild(label, img);
 }
+/* ---------- v2.3 celebration effect engine ---------- */
+const CELEBRATION_EFFECTS = [
+  { id:"splash",  name:"Water Splash",      days:[1,4], anim:"fxRise",  particles:"splash" },
+  { id:"impact",  name:"Dam Impact",        days:[2],   anim:"fxDrop",  particles:"shock"  },
+  { id:"wave",    name:"Wave Ride",         days:[1,3], anim:"fxWave",  particles:"wave"   },
+  { id:"lift",    name:"Hydraulic Lift",    days:[2],   anim:"fxLift",  particles:"none"   },
+  { id:"burst",   name:"Pressure Burst",    days:[2,4], anim:"fxBurst", particles:"splash" },
+  { id:"spin",    name:"Flow Spin",         days:[3,5], anim:"fxSpin",  particles:"swirl"  },
+  { id:"gold",    name:"Golden Flow",       days:[3],   anim:"fxGlow",  particles:"gold"   },
+  { id:"rain",    name:"Rain Drop",         days:[1],   anim:"fxFloat", particles:"rain"   },
+  { id:"builder", name:"Builder Entrance",  days:[5],   anim:"fxSlide", particles:"none"   },
+  { id:"damgood", name:"Dam Good Entrance", days:[4],   anim:"fxPop",   particles:"shock"  }
+];
+const CELEBRATION_SOUNDS = {
+  splash:  ()=> playWaterNoise(0.5, 600, 2000, 0.12),
+  impact:  ()=>{ playTone(110, 0.35, "sawtooth"); playWaterNoise(0.4, 300, 90, 0.14); },
+  wave:    ()=> playWaterNoise(1.0, 200, 900, 0.12),
+  lift:    ()=> [330,440,550].forEach((f,i)=> setTimeout(()=>playTone(f, 0.14, "triangle"), i*90)),
+  burst:   ()=> playWaterNoise(0.35, 1500, 400, 0.14),
+  spin:    ()=> [523,659,784,988].forEach((f,i)=> setTimeout(()=>playTone(f, 0.1, "sine"), i*60)),
+  gold:    ()=> [1046,1318,1568].forEach((f,i)=> setTimeout(()=>playTone(f, 0.16, "triangle"), i*80)),
+  rain:    ()=> [0,120,240].forEach(t=> setTimeout(()=>playWaterNoise(0.12, 2200, 3000, 0.05), t)),
+  builder: ()=> [392,392,523].forEach((f,i)=> setTimeout(()=>playTone(f, 0.08, "square"), i*110)),
+  damgood: ()=>{ playTone(180, 0.12, "square"); setTimeout(()=>playTone(880, 0.14, "triangle"), 90); }
+};
+let lastCelebrationEffectId = null;   // runtime only: never the same effect twice in a row
+function pickCelebrationEffect(day){
+  const pool = CELEBRATION_EFFECTS.filter(e => e.id !== lastCelebrationEffectId);
+  const weights = pool.map(e => e.days.includes(day) ? 4 : 1);   // day flavor, not a lock
+  let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+  let pick = pool[pool.length - 1];
+  for(let i = 0; i < pool.length; i++){ r -= weights[i]; if(r < 0){ pick = pool[i]; break; } }
+  lastCelebrationEffectId = pick.id;
+  return pick;
+}
+function spawnCelebrationParticles(kind){
+  const fx = $("celebFx");
+  fx.innerHTML = "";
+  if(kind === "none") return;
+  if(kind === "shock"){ const r = document.createElement("div"); r.className = "fxShock"; fx.appendChild(r); return; }
+  if(kind === "wave"){ const w = document.createElement("div"); w.className = "fxWaveBand"; fx.appendChild(w); return; }
+  if(kind === "rain"){
+    for(let i = 0; i < 22; i++){
+      const d = document.createElement("i"); d.className = "fxRain";
+      d.style.left = (4 + Math.random() * 92).toFixed(1) + "%";
+      d.style.animationDelay = (Math.random() * 0.9).toFixed(2) + "s";
+      fx.appendChild(d);
+    }
+    return;
+  }
+  const origin = document.createElement("div"); origin.className = "fxOrigin"; fx.appendChild(origin);
+  const n = kind === "swirl" ? 16 : 20;
+  for(let i = 0; i < n; i++){
+    const d = document.createElement("div");
+    d.className = "burstDrop" + (kind === "gold" && i % 2 ? " gold" : "");
+    const a = (i / n) * Math.PI * 2 + (kind === "swirl" ? 0.35 : Math.random() * 0.4);
+    const dist = 90 + Math.random() * 90;
+    d.style.setProperty("--bx", (Math.cos(a) * dist).toFixed(1) + "px");
+    d.style.setProperty("--by", (Math.sin(a) * dist * (kind === "splash" ? 0.9 : 0.7) - (kind === "splash" ? 40 : 0)).toFixed(1) + "px");
+    d.style.animationDelay = (Math.random() * 0.15).toFixed(2) + "s";
+    origin.appendChild(d);
+  }
+}
+let celebTimers = [];
+function showDayCelebration(index){
+  const d = DAM_DAYS[index], c = getActiveCharacter(), fx = pickCelebrationEffect(d.day), line = getCelebrationLine(d.day, c.id);
+  const card = $("celebCard"), who = $("celebChar");
+  celebTimers.forEach(clearTimeout); celebTimers = [];
+  card.classList.remove("show", "exit"); void card.offsetWidth;
+  $("celebDay").textContent = `${d.title} complete · ${d.station}`;
+  $("celebMeaning").textContent = d.meaning;
+  $("celebConv").textContent = `${d.displayAmount} → ${DAY_REWARD_FL_OZ} FL OZ`;
+  $("celebTag").textContent = line.tag;
+  $("celebLine").textContent = line.text;
+  who.innerHTML = "";
+  who.appendChild(characterImage(c, "celebCharImg"));
+  who.className = "celebChar " + fx.anim;
+  card.dataset.effect = fx.id;
+  card.dataset.character = c.id;
+  spawnCelebrationParticles(fx.particles);
+  clearTimeout(toastTimer); labelToast.classList.remove("show");   // the card shows the day's meaning itself
+  card.classList.add("show");
+  try { CELEBRATION_SOUNDS[fx.id](); } catch(e){}
+  celebTimers.push(setTimeout(()=> card.classList.add("exit"), CELEBRATION_EXIT_AT));
+  celebTimers.push(setTimeout(()=>{ card.classList.remove("show", "exit"); $("celebFx").innerHTML = ""; }, CELEBRATION_MS - 100));
+}
+
 function preloadCharacter(c){
   try { const im = new Image(); im.decoding = "async"; im.src = c.img; } catch(e){}
 }
@@ -2661,48 +3086,6 @@ function resetSystem(){
   renderHud();
 }
 
-/* =========================================================
-   DAM BREAK / FLOOD / GAME OVER
-========================================================= */
-document.getElementById("damBreakBtn").addEventListener("click", triggerDamBreak);
-document.getElementById("rebuildBtn").addEventListener("click", rebuildSystem);
-
-function triggerDamBreak(){
-  if(state.gameOver) return;
-  if(state.phase === "levelComplete" || state.phase === "redeemed") return;  // earned level is protected
-  stopDayTimer();
-  timeUpCard.classList.remove("show");
-  dayRewardEl.classList.remove("show");
-  state.gameOver = true;
-  state.busy = true;
-  playDamBreakSound();
-  world.classList.add("bigShake");
-  setTimeout(()=>world.classList.remove("bigShake"), 1000);
-  floodOverlay.classList.add("rising");
-  setTimeout(()=>{
-    gameOverCard.classList.add("show");
-  }, 2600);
-}
-
-function rebuildSystem(){
-  gameOverCard.classList.remove("show");
-  floodOverlay.style.transition = "none";
-  floodOverlay.classList.remove("rising");
-  void floodOverlay.offsetWidth;
-  floodOverlay.style.transition = "";
-
-  state.gameOver = false;
-  state.busy = false;
-  state.millStage = 0;
-  // v2: the unfinished level restarts at Day 1. Already-earned FL OZ stays in the wallet;
-  // level number, completed loops and unlocks are permanent progress and are not reset.
-  state.levelFlOz = 0;
-  renderMillStage();
-  clearCertificates();
-  resetSystem();
-  saveGame();
-  beginDay(0);
-}
 
 /* =========================================================
    TOAST
@@ -2774,12 +3157,14 @@ function togglePanel(name){
   Object.values(PANELS).forEach(p => p.classList.remove("open"));
   if(willOpen){
     if(name === "radio"){ radioQuipText = getDamHumor("radio"); renderRadio(); }
+    if(name === "profile"){ profileQuipText = getDamHumor("profile"); renderProfile(); }
     if(name === "store"){ storeQuipText = getDamHumor(walletHumorCategory(state.totalFlOz)); renderStore(); }
     PANELS[name].classList.add("open");
   }
   syncTimerPause();                                  // open panel pauses the day clock
 }
 document.getElementById("tribesBtn").addEventListener("click", ()=> togglePanel("tribes"));
+$("profileBtn").addEventListener("click", ()=> togglePanel("profile"));
 $("radioBtn").addEventListener("click", ()=> togglePanel("radio"));
 $("storeBtn").addEventListener("click", ()=> togglePanel("store"));
 document.querySelectorAll("[data-close-panel]").forEach(b => b.addEventListener("click", closePanels));
@@ -2789,7 +3174,54 @@ document.querySelectorAll("[data-close-panel]").forEach(b => b.addEventListener(
 ========================================================= */
 let radioAudio = null;
 let nowPlayingId = null;
-const songList = $("songList"), nowPlaying = $("nowPlaying");
+const songList = $("songList");
+/* Queue = unlocked songs in canonical SONGS order, derived live from state.unlockedSongs. */
+function unlockedSongsInOrder(){ return SONGS.filter(s => isUnlocked("songs", s.id)); }
+function nextUnlockedAfter(id){
+  const start = id ? SONGS.findIndex(s => s.id === id) : -1;
+  for(let i = start + 1; i < SONGS.length; i++) if(isUnlocked("songs", SONGS[i].id)) return SONGS[i];
+  return null;   // end of playlist: stop, no loop
+}
+function onRadioEnded(){
+  const next = nextUnlockedAfter(nowPlayingId);
+  if(next){ playSong(next.id); return; }
+  nowPlayingId = null;
+  radioFinished = true;
+  renderRadio();
+}
+function onRadioProgress(){
+  const d = radioAudio && radioAudio.duration;
+  $("rpFill").style.width = (d && isFinite(d) ? Math.min(100, radioAudio.currentTime / d * 100) : 0) + "%";
+}
+let radioFinished = false;
+
+let profileQuipText = "";
+function renderProfile(){
+  const c = getActiveCharacter();
+  $("profileQuip").textContent = profileQuipText;
+  const holder = $("profileChar");
+  holder.innerHTML = "";
+  holder.appendChild(characterImage(c, "profileCharImg"));
+  $("profileName").textContent = c.name;
+  $("profileTitle").textContent = damTitle(c.id);
+  $("profileRank").innerHTML = `Degree of Dammin': <strong>${esc(damRank(state.completedLevels))}</strong>`;
+  const day = Math.min(daysDoneThisLevel() + 1, DAYS_PER_LEVEL);
+  const ites = new Set(state.tribesFound.map(t => t.name)).size;
+  const skinsTotal = Object.keys(SKIN_META).length + PREMIUM_SKINS.length;
+  const skinsOwned = Object.keys(SKIN_META).length + state.unlockedSkins.length;
+  const stats = [
+    ["Dam status", `Level ${fmt(state.level)}`, daysDoneThisLevel() >= DAYS_PER_LEVEL ? "Day 6 / 6 ✓" : `Day ${day} / ${DAYS_PER_LEVEL}`],
+    ["Liquid assets", `${fmt(state.totalFlOz)}`, "FL OZ wallet"],
+    ["Reservoir level", `${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)}`, "FL OZ this level"],
+    ["Flow record", `${fmt(state.completedLevels)}`, "loops completed"],
+    ["Songs", `${state.unlockedSongs.length} / ${SONGS.length}`, "unlocked"],
+    ["Operator crew", `${state.unlockedCharacters.length} / ${CHARACTERS.length}`, "characters"],
+    ["Skins", `${skinsOwned} / ${skinsTotal}`, "available"],
+    ["-ites preserved", `${ites} / ${ALL_TRIBES.length}`, "discovered"]
+  ];
+  $("profileStats").innerHTML = stats.map(([label, value, sub]) =>
+    `<div class="pStat"><div class="pLabel">${esc(label)}</div><div class="pValue">${esc(value)}</div><div class="pSub">${esc(sub)}</div></div>`).join("");
+}
 
 let radioQuipText = "";
 let storeQuipText = "";
@@ -2797,7 +3229,16 @@ function renderRadio(){
   $("radioQuip").textContent = radioQuipText;
   $("radioWallet").innerHTML = `Unlocked: <strong>${state.unlockedSongs.length} / ${SONGS.length}</strong> songs · Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
   const playing = radioAudio && !radioAudio.paused ? SONGS.find(s=>s.id === nowPlayingId) : null;
-  nowPlaying.textContent = playing ? `▶ Now playing: ${playing.title}` : "";
+  const current = SONGS.find(s => s.id === nowPlayingId) || null;
+  const first = unlockedSongsInOrder()[0] || null;
+  $("rpTitle").textContent = current ? current.title : (radioFinished ? "Playlist finished" : "Nothing playing");
+  $("rpArtist").textContent = current ? current.artist : (first ? `Press play to start with “${first.title}”` : "");
+  const toggle = $("rpToggle");
+  toggle.textContent = playing ? "❚❚ PAUSE" : "▶ PLAY";
+  toggle.setAttribute("aria-label", playing ? "Pause" : "Play");
+  const upNext = current ? nextUnlockedAfter(current.id) : (first ? nextUnlockedAfter(first.id) : null);
+  $("rpNext").textContent = upNext ? upNext.title : "End of your playlist";
+  if(!current) $("rpFill").style.width = "0%";
   songList.innerHTML = SONGS.map((s, i) => {
     const open = isUnlocked("songs", s.id);
     const isPlaying = playing && playing.id === s.id;
@@ -2811,6 +3252,11 @@ function renderRadio(){
   }).join("");
 }
 
+$("rpToggle").addEventListener("click", ()=>{
+  if(radioAudio && nowPlayingId){ if(radioAudio.paused) playSong(nowPlayingId); else radioAudio.pause(); return; }
+  const first = unlockedSongsInOrder()[0];
+  if(first) playSong(first.id);
+});
 songList.addEventListener("click", e => {
   const btn = e.target.closest("[data-play]");
   if(btn) playSong(btn.getAttribute("data-play"));
@@ -2823,11 +3269,13 @@ function playSong(id){
   if(!radioAudio){
     radioAudio = new Audio();
     radioAudio.preload = "none";
-    ["ended","pause","play"].forEach(ev => radioAudio.addEventListener(ev, renderRadio));
+    ["pause","play"].forEach(ev => radioAudio.addEventListener(ev, renderRadio));
+    radioAudio.addEventListener("ended", onRadioEnded);
+    radioAudio.addEventListener("timeupdate", onRadioProgress);
     radioAudio.addEventListener("error", ()=>{ showToast("Couldn't load that track"); renderRadio(); });
   }
   if(nowPlayingId === id && !radioAudio.paused){ radioAudio.pause(); return; }
-  if(nowPlayingId !== id){ radioAudio.src = song.src; nowPlayingId = id; radioQuipText = getDamHumor("radio"); }
+  if(nowPlayingId !== id){ radioAudio.src = song.src; nowPlayingId = id; radioFinished = false; radioQuipText = getDamHumor("radio"); }
   const p = radioAudio.play();
   if(p && p.catch) p.catch(()=> showToast("Tap play again to start audio"));
   renderRadio();
@@ -3032,11 +3480,8 @@ function playDamBreakSound(){
   setTimeout(()=>playWaterNoise(2.2, 400, 60, 0.28), 150);
 }
 /* v2 sounds — same synth, no audio files */
-function playTimerWarningSound(sec){ playTone(sec <= 1 ? 1175 : 880, 0.09, "square"); }
-function playTimeoutSound(){
-  playTone(196, 0.45, "sawtooth");
-  setTimeout(()=>playTone(147, 0.5, "sawtooth"), 160);
-  setTimeout(()=>playWaterNoise(1.2, 1100, 140, 0.2), 60);   // pressure escaping
+function playTimerWarningSound(phaseKey){
+  playTone(phaseKey === "imminent" ? 1175 : phaseKey === "critical" ? 988 : 880, phaseKey === "imminent" ? 0.06 : 0.09, "square");
 }
 function playDayRewardSound(){
   [784, 988, 1318].forEach((f,i)=> setTimeout(()=>playTone(f, 0.16, "triangle"), i*70));
