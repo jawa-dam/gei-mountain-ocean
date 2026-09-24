@@ -1110,19 +1110,31 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .dmFlashFx{ position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0; background:radial-gradient(circle, color-mix(in srgb, var(--foam) 90%, transparent), color-mix(in srgb, var(--water-bright) 60%, transparent)); }
 .dmCard.jackpotWin .dmFlashFx{ animation:dmFlash 0.9s ease-out 1; }
 @keyframes dmFlash{ 0%{ opacity:.85; } 100%{ opacity:0; } }
-/* --- profile entry button --- */
-.dmEntryBtn{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; cursor:pointer;
-  margin-bottom:6px; padding:12px 14px; border-radius:16px; color:#fff;
-  background:linear-gradient(135deg, color-mix(in srgb, var(--juicy-navy) 75%, var(--juicy-blue)), color-mix(in srgb, var(--juicy-violet) 55%, var(--juicy-navy)));
-  border:1.5px solid rgba(255,255,255,.35); box-shadow:0 0 18px color-mix(in srgb, var(--water-bright) 30%, transparent); }
-.dmEntryIcon{ font-size:1.9rem; line-height:1; }
-.dmEntryText{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-.dmEntryText strong{ font-size:1rem; font-weight:900; letter-spacing:.06em; }
-.dmEntryText small{ font-size:.76rem; font-weight:700; color:var(--foam); }
-.dmEntryBtn:active{ transform:scale(.98); }
-.dmEntryNote{ margin-top:2px; }
-.dmBtnFocus:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
-.dmClose:focus-visible, .dmSpinBtn:focus-visible, .dmEntryBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+/* --- v2.6.2: consolidated navigation sheet (entry points only) --- */
+.navMenuBtn{ position:relative; z-index:2; }
+.navSheet{ position:absolute; top:66px; right:10px; z-index:89; width:min(78vw, 290px); max-height:70vh; overflow:auto;
+  padding:8px; border-radius:18px; display:none; text-align:left;
+  background:color-mix(in srgb, var(--juicy-navy) 97%, #000); backdrop-filter:blur(20px);
+  border:1.5px solid rgba(255,255,255,.2);
+  box-shadow:0 10px 40px rgba(0,0,0,.5), 0 0 24px color-mix(in srgb, var(--water-bright) 25%, transparent); }
+.navSheet.open{ display:block; animation:navIn .22s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes navIn{ from{ opacity:0; transform:translateY(-8px) scale(.96); } to{ opacity:1; transform:none; } }
+.navTitle{ font-size:.68rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--juicy-blue); padding:6px 10px 4px; }
+.navRow{ display:flex; width:100%; align-items:center; gap:10px; padding:11px 10px; border-radius:12px; cursor:pointer;
+  background:transparent; border:none; color:#fff; text-align:left; font-family:inherit; }
+.navRow:hover{ background:rgba(255,255,255,.08); }
+.navRow:active{ transform:scale(.98); }
+.navRowIcon{ flex:0 0 auto; font-size:1.25rem; line-height:1; }
+.navRowText{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:1px; }
+.navRowText strong{ font-size:.95rem; font-weight:900; letter-spacing:.02em; }
+.navRowText small{ font-size:.72rem; font-weight:700; color:var(--foam); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.navRowChevron{ flex:0 0 auto; opacity:.55; font-size:1rem; }
+.navRow.dmRow{ margin-top:4px; border:1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background:color-mix(in srgb, var(--gold) 10%, transparent); }
+.navRow.dmRow .navRowText strong{ color:var(--gold); }
+.navSheet button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.navMenuBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.dmClose:focus-visible, .dmSpinBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 @media (max-width:380px){
   .dmPipe{ flex:0 0 12px; }
   .dmReels{ gap:5px; padding:7px; }
@@ -1305,11 +1317,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <div class="hudTop">
         <div class="logo" id="gameLogo">Let There Be Liters</div>
         <div class="hudRight">
+          <button class="iconBtn navMenuBtn" id="navMenuBtn" aria-label="Game menu" aria-expanded="false" aria-controls="navSheet" title="Game menu">☰</button>
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
-          <button class="iconBtn" id="profileBtn" title="Player profile" aria-label="Player profile">👤</button>
-          <button class="iconBtn" id="tribesBtn" aria-label="Tribes discovered">🚢</button>
-          <button class="iconBtn" id="radioBtn" aria-label="Radio — unlocked songs">🎵</button>
-          <button class="iconBtn" id="storeBtn" aria-label="FL OZ store">🛒</button>
         </div>
       </div>
       <div class="econRow">
@@ -1328,6 +1337,37 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <div class="loopBadge">Loops completed: <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
     </div>
 
+    <!-- v2.6.2: CONSOLIDATED NAVIGATION — one ☰ menu, five destinations.
+         Rows only call the existing togglePanel()/openDamMachine() entry functions;
+         the panels themselves are unchanged. No state is saved. -->
+    <nav class="navSheet" id="navSheet" aria-label="Game navigation">
+      <div class="navTitle" aria-hidden="true">Navigation</div>
+      <button class="navRow" id="navProfileBtn" aria-label="Open player profile">
+        <span class="navRowIcon" aria-hidden="true">👤</span>
+        <span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span>
+        <span class="navRowChevron" aria-hidden="true">›</span>
+      </button>
+      <button class="navRow" id="navTribesBtn" aria-label="Open tribes list">
+        <span class="navRowIcon" aria-hidden="true">🚢</span>
+        <span class="navRowText"><strong>Tribes</strong><small>-ites preserved</small></span>
+        <span class="navRowChevron" aria-hidden="true">›</span>
+      </button>
+      <button class="navRow" id="navRadioBtn" aria-label="Open radio">
+        <span class="navRowIcon" aria-hidden="true">🎵</span>
+        <span class="navRowText"><strong>Radio</strong><small>Unlocked songs</small></span>
+        <span class="navRowChevron" aria-hidden="true">›</span>
+      </button>
+      <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store">
+        <span class="navRowIcon" aria-hidden="true">🛒</span>
+        <span class="navRowText"><strong>Store</strong><small>FL OZ unlocks</small></span>
+        <span class="navRowChevron" aria-hidden="true">›</span>
+      </button>
+      <button class="navRow dmRow" id="dmOpenBtn" aria-label="Open the Dam Machine — free hydraulic bonus arcade">
+        <span class="navRowIcon" aria-hidden="true">🎰</span>
+        <span class="navRowText"><strong>DAM MACHINE</strong><small id="dmEntrySub">Free plays ready: 0</small></span>
+        <span class="navRowChevron" aria-hidden="true">›</span>
+      </button>
+    </nav>
 
     <div class="world" id="world">
       <div class="layer" id="mistLayer"></div>
@@ -1464,16 +1504,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         </div>
         <div class="profileGrid" id="profileStats"></div>
 
-        <!-- v2.6: Dam Machine entry (bonus arcade; spins never cost FL OZ) -->
-        <div class="panelGroup">🎰 Bonus arcade</div>
-        <button class="dmEntryBtn" id="dmOpenBtn" aria-label="Open the Dam Machine — free hydraulic bonus arcade">
-          <span class="dmEntryIcon" aria-hidden="true">🎰</span>
-          <span class="dmEntryText">
-            <strong>DAM MACHINE</strong>
-            <small id="dmEntrySub">Free plays ready: 0</small>
-          </span>
-        </button>
-        <div class="emptyNote dmEntryNote">Never costs FL OZ. Earn plays from bonus activities.</div>
+        <!-- v2.6.2: the Dam Machine entry moved to the consolidated ☰ navigation menu. -->
 
         <div class="panelGroup">💧 How FL OZ works</div>
         <div class="profileEconomy" id="profileEconomy"></div>
@@ -2698,7 +2729,8 @@ CENTERS.forEach((startY, i)=>{
 world.addEventListener("click", (e)=>{
   // composedPath() is fixed at dispatch time, so it still sees the panel even if a panel button
   // re-rendered itself (and detached e.target) before the click bubbled up to the world.
-  if(e.composedPath().some(n => n instanceof Element && n.matches(".sidePanel, .tribeCard, .gameOverCard, .hud"))) return;
+  if(e.composedPath().some(n => n instanceof Element && n.matches(".sidePanel, .tribeCard, .gameOverCard, .hud, .navSheet"))) return;
+  if(navOpen){ closeNavMenu(); return; }                // v2.6.2: tapping the board dismisses the menu
   if(anyPanelOpen()){ closePanels(); return; }          // tapping the board closes an open panel
   if(state.busy) return;
   if(state.phase === "ready"){ beginDay(state.currentStep); return; }  // first tap starts the clock
@@ -3481,6 +3513,7 @@ function renderDamMachineHeader(){
 function openDamMachine(){
   if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
   closePanels();
+  closeNavMenu();                                       // v2.6.2: dismiss the consolidated menu
   damMachine.open = true; damMachine.revealed = false;
   // note: a forced test result set before opening is intentionally kept — it is consumed by the next spin only.
   const card = dmCard();
@@ -3658,7 +3691,10 @@ $("dmOpenBtn").addEventListener("click", openDamMachine);
 $("dmCloseBtn").addEventListener("click", closeDamMachine);
 $("dmSpinBtn").addEventListener("click", () => spinDamMachine());
 document.addEventListener("keydown", e => {
-  if(e.key === "Escape" && damMachine.open) closeDamMachine();
+  if(e.key === "Escape"){
+    if(damMachine.open) closeDamMachine();
+    else if(navOpen) closeNavMenu();
+  }
 });
 document.addEventListener("visibilitychange", () => { if(damMachine.open) syncTimerPause(); });
 
@@ -3701,6 +3737,21 @@ function runDamMachineSelfTest(){
   t("waterwheel: dam-play prize present, weights still 100", BONUS_WATERWHEEL_PRIZES.some(p => p.kind === "damPlay") && BONUS_WATERWHEEL_PRIZES.reduce((a, p) => a + p.weight, 0) === 100);
   const pass = results.filter(r => r.ok).length;
   return { pass, fail:results.length - pass, results };
+}
+
+/* ---------- v2.6.2 navigation self-test (console only; touches no state).
+   runNavSelfTest() → { pass, fail, results:[…] } ---------- */
+function runNavSelfTest(){
+  const results = [];
+  const t = (name, ok) => results.push({ name, ok:!!ok });
+  t("menu button exists and controls the sheet", !!$("navMenuBtn") && !!navSheet && $("navMenuBtn").getAttribute("aria-controls") === "navSheet");
+  t("sheet holds all five destinations", ["navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn","dmOpenBtn"].every(id => !!$(id)));
+  t("HUD consolidated: old per-panel buttons removed", !$("#profileBtn") && !$("#tribesBtn") && !$("#radioBtn") && !$("#storeBtn"));
+  t("fullscreen stays a direct HUD button", !!$("fullscreenBtn"));
+  t("Dam Machine entry lives inside the consolidated menu", $("dmOpenBtn") && $("dmOpenBtn").closest("#navSheet") !== null);
+  t("machine entry shows the free-play count line", ($("dmEntrySub").textContent || "").length > 0);
+  const pass = results.filter(r => r.ok).length;
+  return { pass, fail: results.length - pass, results };
 }
 
 function preloadCharacter(c){
@@ -4023,11 +4074,35 @@ function togglePanel(name){
   }
   syncTimerPause();                                  // open panel pauses the day clock
 }
-document.getElementById("tribesBtn").addEventListener("click", ()=> togglePanel("tribes"));
+/* =========================================================
+   v2.6.2 — CONSOLIDATED NAVIGATION (entry points only)
+   One ☰ menu holds every destination. Rows call the EXISTING togglePanel()/
+   openDamMachine() functions, so panel behavior, quips and timer pausing are
+   untouched. Runtime-only UI state — nothing here is saved or tied to economy.
+========================================================= */
+const navMenuBtn = $("navMenuBtn"), navSheet = $("navSheet");
+var navOpen = false;
+function openNavMenu(){
+  if(damMachine.open || damMachine.spinning) return;      // the machine always stays on top
+  navOpen = true;
+  navSheet.classList.add("open");
+  navMenuBtn.setAttribute("aria-expanded", "true");
+  renderDamMachineHeader();                               // keep the free-plays line fresh
+  const first = navSheet.querySelector("button");
+  try { if(first) first.focus({ preventScroll:true }); } catch(e){}
+}
+function closeNavMenu(){
+  if(!navOpen) return;
+  navOpen = false;
+  navSheet.classList.remove("open");
+  navMenuBtn.setAttribute("aria-expanded", "false");
+}
+navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMenu(); });
+[["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navStoreBtn","store"]].forEach(([rowId, panelName])=>{
+  $(rowId).addEventListener("click", ()=>{ closeNavMenu(); togglePanel(panelName); });
+});
+/* (the Dam Machine row keeps id dmOpenBtn; its openDamMachine() wiring lives in the v2.6 block) */
 $("bonusBtn").addEventListener("click", ()=>{ if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
-$("profileBtn").addEventListener("click", ()=> togglePanel("profile"));
-$("radioBtn").addEventListener("click", ()=> togglePanel("radio"));
-$("storeBtn").addEventListener("click", ()=> togglePanel("store"));
 document.querySelectorAll("[data-close-panel]").forEach(b => b.addEventListener("click", closePanels));
 
 /* =========================================================
@@ -4389,6 +4464,7 @@ restoreVisualProgress();
 renderTribesList();
 renderRadio();
 renderStore();
+renderDamMachineHeader();                               // v2.6.2: menu free-play line reflects the save
 if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
   // Refreshed while the level card was waiting: the reward is still unredeemed.
   oceanGroup.classList.add("reached");
