@@ -959,6 +959,16 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .pValue{ font-size:1.3rem; font-weight:900; line-height:1.2; color:#fff; overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
 .pSub{ font-size:.76rem; font-weight:700; color:rgba(255,255,255,.75); }
 
+.dmHistoryGrid{ margin-bottom:2px; }
+.dmLastResult{
+  margin-top:8px; padding:11px 12px; border-radius:14px;
+  background:linear-gradient(135deg,rgba(47,210,255,.09),rgba(255,45,196,.08));
+  border:1px solid rgba(255,255,255,.13);
+}
+.dmLastResultTitle{ font-size:.82rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--juicy-blue); }
+.dmLastResultMain{ margin-top:3px; font-size:1rem; font-weight:900; line-height:1.2; color:#fff; }
+.dmLastResultSub{ margin-top:4px; font-size:.78rem; font-weight:700; line-height:1.35; color:rgba(255,255,255,.78); overflow-wrap:anywhere; }
+
 .radioPlayer{ padding:14px; margin-bottom:6px; border-radius:18px; text-align:center;
   background:linear-gradient(160deg, color-mix(in srgb, var(--juicy-blue) 25%, transparent), color-mix(in srgb, var(--juicy-violet) 30%, transparent)); border:1.5px solid rgba(255,255,255,.25); }
 .rpLabel{ font-size:.76rem; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--foam); opacity:.85; }
@@ -1526,6 +1536,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
           <div class="profileRank" id="profileRank"></div>
         </div>
         <div class="profileGrid" id="profileStats"></div>
+
+        <!-- v2.6.4: persistent Dam Machine play history. -->
+        <div class="panelGroup">🎰 Dam Machine Record</div>
+        <div class="profileGrid dmHistoryGrid" id="dmHistoryStats"></div>
+        <div class="dmLastResult" id="dmLastResult" aria-live="polite"></div>
 
         <!-- v2.6.2: the Dam Machine entry moved to the consolidated ☰ navigation menu. -->
 
@@ -2439,20 +2454,25 @@ const state = {
   busy:false, millStage:0,
   /* v2 */
   level:1,
-  levelFlOz:0,            // FL OZ earned inside the current level (0..666, multiples of 111)
-  totalFlOz:0,            // wallet
-  completedLevels:0,      // shown as "Loops completed" (replaces the old `loop` counter)
+  levelFlOz:0,
+  totalFlOz:0,
+  completedLevels:0,
   unlockedSongs:[SONGS[0].id],
   unlockedSkins:[],
   unlockedCharacters:[DEFAULT_CHARACTER_ID],
   activeCharacter:DEFAULT_CHARACTER_ID,
-  processedReceipts:[],   // payment receipts already credited (prevents double credit)
+  processedReceipts:[],
   lastTribe:null,
-  /* v2.6 — Dam Machine (free bonus arcade; a spin NEVER subtracts FL OZ) */
-  damMachineFreePlays:0,  // available free plays (spin consumes exactly one, never below 0)
-  damMachineWins:0,       // winning combinations hit
-  damMachineJackpots:0,   // 6,660 FL OZ jackpots hit
-  phase:"ready"           // ready | playing | timeout | levelComplete | redeemed  (not persisted)
+  /* v2.6.4 — Dam Machine history (free arcade; spins NEVER subtract FL OZ) */
+  damMachineFreePlays:0,
+  damMachineSpins:0,
+  damMachineWins:0,
+  damMachineJackpots:0,
+  damMachineSongsWon:0,
+  damMachineCharactersWon:0,
+  damMachineBestReward:0,
+  damMachineLastResult:null,
+  phase:"ready"
 };
 
 /* =========================================================
@@ -2499,10 +2519,15 @@ function saveGame(){
     tribesFound: state.tribesFound.slice(-300).map(t=>t.name),
     lastTribe: state.lastTribe ? state.lastTribe.name : null,
     millStage: state.millStage,
-    /* v2.6 — Dam Machine (additive; old saves simply lack these and get safe defaults on load) */
+    /* v2.6.4 — Dam Machine history (additive; older saves get safe defaults on load) */
     damMachineFreePlays: state.damMachineFreePlays,
+    damMachineSpins: state.damMachineSpins,
     damMachineWins: state.damMachineWins,
-    damMachineJackpots: state.damMachineJackpots
+    damMachineJackpots: state.damMachineJackpots,
+    damMachineSongsWon: state.damMachineSongsWon,
+    damMachineCharactersWon: state.damMachineCharactersWon,
+    damMachineBestReward: state.damMachineBestReward,
+    damMachineLastResult: state.damMachineLastResult
   };
   storageSet(SAVE_KEY, JSON.stringify(data));
   broadcastUnlocks();
@@ -2537,10 +2562,15 @@ function loadGame(){
   state.processedReceipts = Array.isArray(d.processedReceipts) ? d.processedReceipts.filter(r=>typeof r === "string") : [];
   state.tribesFound     = Array.isArray(d.tribesFound) ? d.tribesFound.map(tribeByName).filter(Boolean) : [];
   state.lastTribe       = tribeByName(d.lastTribe);
-  /* v2.6 — Dam Machine migration: missing fields get safe defaults; nothing existing is overwritten. */
-  state.damMachineFreePlays = toInt(d.damMachineFreePlays, 0, 999, 0);
-  state.damMachineWins      = toInt(d.damMachineWins, 0, 1e6, 0);
-  state.damMachineJackpots  = toInt(d.damMachineJackpots, 0, 1e6, 0);
+  /* v2.6.4 — Dam Machine history migration: missing/malformed fields get safe defaults. */
+  state.damMachineFreePlays      = toInt(d.damMachineFreePlays, 0, 999, 0);
+  state.damMachineSpins          = toInt(d.damMachineSpins, 0, 1e9, 0);
+  state.damMachineWins           = toInt(d.damMachineWins, 0, 1e6, 0);
+  state.damMachineJackpots       = toInt(d.damMachineJackpots, 0, 1e6, 0);
+  state.damMachineSongsWon       = toInt(d.damMachineSongsWon, 0, 1e6, 0);
+  state.damMachineCharactersWon  = toInt(d.damMachineCharactersWon, 0, 1e6, 0);
+  state.damMachineBestReward     = toInt(d.damMachineBestReward, 0, 1e9, 0);
+  state.damMachineLastResult     = sanitizeDamMachineLastResult(d.damMachineLastResult);
   return true;
 }
 
@@ -3472,32 +3502,39 @@ function evaluateDamCombination(ids){
 }
 
 /* ---------- Reward COMMIT: additive only, runs exactly once per spin, saves immediately. ---------- */
-function commitDamResult(combo){
+function commitDamResult(combo, ids=null){
   const before = state.totalFlOz;
   const res = { combo, kind:combo.kind, amount:0, title:"", detail:"", humor:"", jackpot:!!combo.jackpot, unlockedId:null, fallback:false };
   if(combo.kind === "flOz"){
     res.amount = combo.amount;
   } else if(combo.kind === "song" || combo.kind === "character"){
     const cat = combo.kind === "song" ? "songs" : "characters";
-    const next = nextLockedItem(cat);                   // next eligible, canonical order, never random
+    const next = nextLockedItem(cat);
     if(next && !state[UNLOCK_STATE_KEY[cat]].includes(next.id)){
-      state[UNLOCK_STATE_KEY[cat]].push(next.id);       // free: no FL OZ touched
+      state[UNLOCK_STATE_KEY[cat]].push(next.id);
       res.unlockedId = next.id;
-      res.detail = combo.kind === "song" ? `“${next.title}” has entered the radio.` : `${next.name} has joined the dam crew.`;
-    } else {                                            // everything already unlocked → FL OZ fallback
+      res.detail = combo.kind === "song" ? "“" + next.title + "” has entered the radio." : next.name + " has joined the dam crew.";
+    } else {
       res.fallback = true; res.amount = LEVEL_REWARD_FL_OZ;
       res.title = combo.kind === "song" ? "THE RADIO IS FULLY DAMMED!" : "THE WHOLE DAM CREW IS HERE!";
-      res.detail = `+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ instead.`;
+      res.detail = "+" + fmt(LEVEL_REWARD_FL_OZ) + " FL OZ instead.";
     }
   } else if(combo.kind === "play"){
     state.damMachineFreePlays = Math.min(DAM_MACHINE_MAX_PLAYS, state.damMachineFreePlays + 1);
   }
   if(!res.title) res.title = combo.title;
-  state.totalFlOz += res.amount;                        // amount ≥ 0 always — the machine never takes
+  state.totalFlOz += res.amount;
   if(state.totalFlOz < before) state.totalFlOz = before;
+
+  /* v2.6.4 — history commits with the reward, before presentation begins. */
+  state.damMachineSpins++;
   state.damMachineWins++;
   if(res.jackpot) state.damMachineJackpots++;
+  if(combo.kind === "song" && res.unlockedId) state.damMachineSongsWon++;
+  if(combo.kind === "character" && res.unlockedId) state.damMachineCharactersWon++;
+  if(res.amount > state.damMachineBestReward) state.damMachineBestReward = res.amount;
   res.humor = getDamHumor(combo.humorKey || "machineWin");
+  state.damMachineLastResult = makeDamMachineLastResult(res, ids);
   saveGame();
   renderRadio(); renderStore(); renderHud(); renderProfile();
   if(damMachine.open) renderDamMachineHeader();
@@ -3641,7 +3678,8 @@ function revealDamResult(token, ids){
   if(token !== damMachine.spinToken || !damMachine.spinning) return;   // stale / duplicate callback
   const combo = evaluateDamCombination(ids);            // evaluation is separate from animation
   const won = !!combo;
-  const res = won ? commitDamResult(combo) : null;      // commit runs once, before any presentation
+  const res = won ? commitDamResult(combo, ids) : null; // commit runs once, before any presentation
+  if(!res) recordDamMachineNoFlow(ids);
   damMachine.spinning = false;
   damMachine.revealed = true;
   damMachine.timers = [];                               // all spin timers have fired; release them
@@ -3968,6 +4006,22 @@ function runDamMachineSelfTest(){
   const pf = P({ kind:"song", amount:LEVEL_REWARD_FL_OZ, title:"THE RADIO IS FULLY DAMMED!", detail:"+666 FL OZ instead.", humor:"h", jackpot:false, fallback:true, combo:null, unlockedId:null });
   t("presentation: fallback preserved verbatim (no invented rewards)", pf.title === "THE RADIO IS FULLY DAMMED!" && pf.detail === "+666 FL OZ instead." && pf.rarity === "rare");
   t("presentation: hydraulic combo flag surfaced", P({ kind:"flOz", amount:DAY_REWARD_FL_OZ, title:"THE DAM IS HOLDING!", detail:"d", humor:"h", jackpot:false, fallback:false, combo:{ special:true }, unlockedId:null }).special === true);
+  t("history: state counters exist", ["damMachineSpins","damMachineSongsWon","damMachineCharactersWon","damMachineBestReward"].every(k => Number.isInteger(state[k]) && state[k] >= 0));
+  t("history: malformed snapshot rejected", sanitizeDamMachineLastResult(null) === null && sanitizeDamMachineLastResult([]) === null);
+  t("history: canonical symbol filtering", (() => {
+    const x = sanitizeDamMachineLastResult({type:"flOz",title:"WATER RELEASED",detail:"+111 FL OZ",humor:"h",amount:DAY_REWARD_FL_OZ,symbolIds:["water","bogus","dam","millpond","extra"]});
+    return x && JSON.stringify(x.symbolIds) === JSON.stringify(["water","dam","millpond"]);
+  })());
+  t("history: jackpot snapshot", (() => {
+    const x = makeDamMachineLastResult({kind:"flOz",title:"DAM PRESSURE MAXIMUM",detail:"+6660 FL OZ",humor:"h",amount:UNLOCK_COST_FL_OZ,jackpot:true,fallback:false,unlockedId:null},["fl-6660","fl-6660","fl-6660"]);
+    return x && x.jackpot === true && x.amount === UNLOCK_COST_FL_OZ && x.symbolIds.length === 3;
+  })());
+  t("history: song + character unlock ids", (() => {
+    const s = makeDamMachineLastResult({kind:"song",title:"NEW SONG DAMMED",detail:"",humor:"h",amount:0,jackpot:false,fallback:false,unlockedId:SONGS[1].id},["song","song","song"]);
+    const ch = makeDamMachineLastResult({kind:"character",title:"NEW OPERATOR",detail:"",humor:"h",amount:0,jackpot:false,fallback:false,unlockedId:CHARACTERS[1].id},["character","character","character"]);
+    return s && s.songId === SONGS[1].id && ch && ch.characterId === CHARACTERS[1].id;
+  })());
+  t("history: profile wiring exists", typeof renderDamMachineHistory === "function" && !!$("dmHistoryStats") && !!$("dmLastResult"));
   const pass = results.filter(r => r.ok).length;
   return { pass, fail:results.length - pass, results };
 }
@@ -4365,6 +4419,97 @@ function onRadioProgress(){
 let radioFinished = false;
 
 let profileQuipText = "";
+/* =========================================================
+   v2.6.4 — DAM MACHINE HISTORY / PROFILE
+========================================================= */
+function sanitizeDamMachineLastResult(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const allowedTypes = new Set(["none","flOz","song","character","pun","play"]);
+  const type = typeof raw.type === "string" && allowedTypes.has(raw.type) ? raw.type : "none";
+  const title = typeof raw.title === "string" ? raw.title.slice(0,160) : "";
+  const detail = typeof raw.detail === "string" ? raw.detail.slice(0,240) : "";
+  const humor = typeof raw.humor === "string" ? raw.humor.slice(0,240) : "";
+  const amount = toInt(raw.amount, 0, 1e9, 0);
+  const symbolIds = Array.isArray(raw.symbolIds)
+    ? raw.symbolIds.filter(id => typeof id === "string" && DAM_SYMBOL_BY_ID[id]).slice(0,3)
+    : [];
+  const out = { type, title, detail, humor, amount, symbolIds };
+  if(typeof raw.songId === "string" && SONGS.some(s=>s.id === raw.songId)) out.songId = raw.songId;
+  if(typeof raw.characterId === "string" && CHARACTERS.some(c=>c.id === raw.characterId)) out.characterId = raw.characterId;
+  if(raw.jackpot === true) out.jackpot = true;
+  if(raw.fallback === true) out.fallback = true;
+  return out;
+}
+
+function makeDamMachineLastResult(res, ids){
+  return sanitizeDamMachineLastResult({
+    type:res.kind,
+    title:res.title || "",
+    detail:res.detail || "",
+    humor:res.humor || "",
+    amount:res.amount || 0,
+    symbolIds:Array.isArray(ids) ? ids.slice(0,3) : [],
+    songId:res.kind === "song" ? res.unlockedId : undefined,
+    characterId:res.kind === "character" ? res.unlockedId : undefined,
+    jackpot:!!res.jackpot,
+    fallback:!!res.fallback
+  });
+}
+
+function recordDamMachineNoFlow(ids){
+  state.damMachineSpins++;
+  state.damMachineLastResult = {
+    type:"none",
+    title:"NO FLOW",
+    detail:"No combination this time. The reservoir keeps its water.",
+    humor:getDamHumor("machineLose"),
+    amount:0,
+    symbolIds:Array.isArray(ids) ? ids.slice(0,3).filter(id => DAM_SYMBOL_BY_ID[id]) : []
+  };
+  saveGame();
+  renderProfile();
+}
+
+function renderDamMachineHistory(){
+  const grid = $("dmHistoryStats"), last = $("dmLastResult");
+  if(!grid || !last) return;
+  const stats = [
+    ["Free plays", fmt(state.damMachineFreePlays), "ready"],
+    ["Spins", fmt(state.damMachineSpins), "completed"],
+    ["Wins", fmt(state.damMachineWins), "winning combos"],
+    ["Jackpots", fmt(state.damMachineJackpots), "6,660 FL OZ hits"],
+    ["Songs won", fmt(state.damMachineSongsWon), "machine unlocks"],
+    ["Characters won", fmt(state.damMachineCharactersWon), "machine unlocks"],
+    ["Best reward", fmt(state.damMachineBestReward) + " FL OZ", "single result"]
+  ];
+  grid.innerHTML = stats.map(([label,value,sub]) =>
+    '<div class="pStat"><div class="pLabel">' + esc(label) + '</div><div class="pValue">' + esc(value) + '</div><div class="pSub">' + esc(sub) + '</div></div>'
+  ).join("");
+  const r = state.damMachineLastResult;
+  if(!r){
+    last.innerHTML = '<div class="dmLastResultTitle">Last result</div><div class="dmLastResultMain">No spins recorded yet.</div><div class="dmLastResultSub">Your Dam Machine record will appear here after the first completed spin.</div>';
+    return;
+  }
+  const symLine = r.symbolIds && r.symbolIds.length
+    ? r.symbolIds.map(id => (DAM_SYMBOL_BY_ID[id] || {}).fallback || "💧").join("  ")
+    : "";
+  const unlockName = r.type === "song" && r.songId
+    ? ((SONGS.find(s=>s.id===r.songId) || {}).title || "")
+    : r.type === "character" && r.characterId
+      ? ((CHARACTERS.find(c=>c.id===r.characterId) || {}).name || "")
+      : "";
+  const headline = r.jackpot ? "🎰 " + (r.title || "JACKPOT") : (r.title || r.type.toUpperCase());
+  const detailBits = [];
+  if(r.amount > 0) detailBits.push("+" + fmt(r.amount) + " FL OZ");
+  if(unlockName) detailBits.push(unlockName);
+  if(r.detail) detailBits.push(r.detail);
+  if(r.humor) detailBits.push(r.humor);
+  last.innerHTML =
+    '<div class="dmLastResultTitle">Last result</div>' +
+    '<div class="dmLastResultMain">' + esc(headline) + '</div>' +
+    '<div class="dmLastResultSub">' + esc(symLine) + (symLine && detailBits.length ? " · " : "") + esc(detailBits.join(" · ")) + '</div>';
+}
+
 function renderProfile(){
   const c = getActiveCharacter();
   $("profileQuip").textContent = profileQuipText;
@@ -4401,7 +4546,7 @@ function renderProfile(){
   ];
   $("profileEconomy").innerHTML = econ.map(([k, v]) => `<div class="peRow"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join("");
   $("profileStats").innerHTML = stats.map(([label, value, sub]) =>
-    `<div class="pStat"><div class="pLabel">${esc(label)}</div><div class="pValue">${esc(value)}</div><div class="pSub">${esc(sub)}</div></div>`).join("");
+    `<div class="pStat"><div class="pLabel">${esc(label)}</div><div class="pValue">${esc(value)}</div><div class="pSub">${esc(sub)}</div></div>`).join("");  renderDamMachineHistory();
 }
 
 let radioQuipText = "";
