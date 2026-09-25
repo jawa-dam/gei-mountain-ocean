@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>The Nite Lite | YALLTOO</title>
+<title>DAM NATION | YALLTOO</title>
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
 <script>
 (function(){
@@ -1326,6 +1326,68 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   100%{ transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(.3); opacity:0; }
 }
 
+/* =====================================================================
+   DAM NATION V1.0 — BRAND + -ITE RESCUE FOUNDATION
+   Uses only existing skin tokens so all 7 skins style it automatically.
+===================================================================== */
+.brand{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+.brand .logo{ font-size:clamp(1.05rem,5vw,1.3rem); letter-spacing:.06em; line-height:1.05; }
+.brandTag{ font-size:.7rem; font-weight:900; letter-spacing:.04em; line-height:1.2; color:var(--foam); opacity:.9; }
+.iteHud{ display:flex; align-items:center; gap:10px; margin-top:8px; padding:6px 10px; border-radius:14px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); }
+.iteHud[data-status="saved"], .iteHud[data-status="complete"]{ border-color:color-mix(in srgb, var(--gold) 60%, transparent); }
+.iteHudAvatar{ flex:0 0 auto; display:flex; }
+.iteHudText{ flex:1 1 auto; min-width:0; }
+.iteHudLine{ font-size:.78rem; font-weight:900; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.iteHudLine strong{ color:var(--gold); }
+.iteHudSub{ font-size:.74rem; font-weight:700; color:rgba(255,255,255,.82); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.iteState{ margin-left:4px; font-weight:900; }
+.iteState.is-trapped{ color:rgba(255,255,255,.78); }
+.iteState.is-inFlow{ color:var(--foam); }
+.iteState.is-saved{ color:var(--gold); }
+
+/* One avatar component for every -ite everywhere: image → water-drop fallback → text. */
+.iteAvatar{ --iteSize:40px; position:relative; flex:0 0 auto; width:var(--iteSize); height:var(--iteSize);
+  display:inline-flex; align-items:center; justify-content:center; }
+.iteImg{ width:100%; height:100%; object-fit:contain; display:block; }
+.iteDrop{ width:88%; height:88%; display:flex; align-items:center; justify-content:center;
+  border-radius:50% 50% 50% 50% / 58% 58% 42% 42%;
+  background:radial-gradient(circle at 34% 28%, var(--foam), var(--water-bright) 42%, var(--water-deep) 100%);
+  color:var(--juicy-navy); font-weight:900; font-size:calc(var(--iteSize) * .4); line-height:1;
+  box-shadow:0 0 10px color-mix(in srgb, var(--water-bright) 45%, transparent); }
+.iteText{ font-size:.72rem; font-weight:900; text-align:center; line-height:1.1; overflow-wrap:anywhere; }
+.iteBadge{ position:absolute; right:-3px; bottom:-3px; z-index:2; font-size:calc(var(--iteSize) * .34); line-height:1;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+.iteAvatar.is-trapped .iteDrop, .iteAvatar.is-trapped .iteImg{ filter:grayscale(.7) brightness(.7); }
+.iteAvatar.is-trapped::after{ content:""; position:absolute; inset:0; z-index:1; border-radius:10px; pointer-events:none;
+  background:repeating-linear-gradient(90deg, transparent 0 20%, rgba(255,255,255,.5) 20% 27%); }   /* cage bars */
+.iteAvatar.is-inFlow .iteDrop, .iteAvatar.is-inFlow .iteImg{ animation:iteFlowBob 2.4s ease-in-out infinite; }
+.iteAvatar.is-inFlow .iteDrop{ box-shadow:0 0 16px var(--water-bright); }
+@keyframes iteFlowBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+.iteAvatar.is-saved .iteDrop{ box-shadow:0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold) 55%, transparent); }
+.iteAvatar.is-saved .iteImg{ filter:drop-shadow(0 0 8px var(--gold)); }
+
+.lcRescue{ display:flex; align-items:center; gap:12px; text-align:left; margin:2px 0 10px; padding:10px 12px; border-radius:16px;
+  background:rgba(0,0,0,.25); border:1.5px solid var(--gold); box-shadow:0 0 18px color-mix(in srgb, var(--gold) 30%, transparent); }
+.lcRescue[hidden]{ display:none; }
+.lcRescueAvatar{ flex:0 0 auto; display:flex; }
+.lcRescueText{ min-width:0; }
+.lcRescueTitle{ font-size:.8rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); }
+.lcRescueName{ font-size:1.1rem; font-weight:900; text-transform:uppercase; line-height:1.2; }
+.lcRescueWater{ font-size:.84rem; font-weight:800; text-transform:uppercase; color:var(--foam); }
+.lcRescueWater strong{ color:var(--gold); }
+.lcRescueNote{ font-size:.74rem; font-weight:700; color:rgba(255,255,255,.75); margin-top:2px; }
+
+.pStat.wide{ grid-column:1 / -1; }
+.iteGallery{ display:grid; grid-template-columns:repeat(auto-fill, minmax(88px, 1fr)); gap:8px; margin-top:8px; }
+.iteTile{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; padding:10px 6px; border-radius:14px; text-align:center;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); }
+.iteTile.is-inFlow{ border-color:var(--water-bright); }
+.iteTile.is-saved{ border-color:var(--gold); box-shadow:0 0 12px color-mix(in srgb, var(--gold) 25%, transparent); }
+.iteTileName{ font-size:.8rem; font-weight:900; overflow-wrap:anywhere; }
+.iteTileStatus{ font-size:.72rem; font-weight:800; letter-spacing:.04em; }
+.iteTile.is-saved .iteTileStatus{ color:var(--gold); }
+
 </style>
 </head>
 <body>
@@ -1348,7 +1410,10 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
     <div class="hud">
       <div class="hudTop">
-        <div class="logo" id="gameLogo">Let There Be Liters</div>
+        <div class="brand">
+          <div class="logo" id="gameLogo">DAM NATION</div>
+          <div class="brandTag">SAVE THE -ITES. SAVE THE WATER.</div>
+        </div>
         <div class="hudRight">
           <button class="iconBtn navMenuBtn" id="navMenuBtn" aria-label="Game menu" aria-expanded="false" aria-controls="navSheet" title="Game menu">☰</button>
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
@@ -1367,6 +1432,12 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       </div>
       <div class="timerBar" id="timerBar"><i id="timerFill"></i></div>
       <div class="progressRow" id="progressRow"></div>
+      <!-- DAM NATION V1.0: current -ite rescue (rendered by renderIteRescue) -->
+      <div class="iteHud" id="iteHud">
+        <div class="iteHudAvatar" id="iteHudAvatar"></div>
+        <div class="iteHudText"><div class="iteHudLine" id="iteHudLine"></div><div class="iteHudSub" id="iteHudSub"></div></div>
+      </div>
+      <div class="srOnly" id="iteStatus" role="status" aria-live="polite"></div>
       <div class="loopBadge">Loops completed: <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
     </div>
 
@@ -1537,6 +1608,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         </div>
         <div class="profileGrid" id="profileStats"></div>
 
+        <!-- DAM NATION V1.0: -ite rescue record + gallery foundation (rendered by renderIteRescueRecord). -->
+        <div class="panelGroup">🌊 -ITE RESCUE RECORD</div>
+        <div class="profileGrid" id="iteRescueStats"></div>
+        <div class="iteGallery" id="iteGallery" role="list" aria-label="-ite gallery"></div>
+
         <!-- v2.6.4: persistent Dam Machine play history. -->
         <div class="panelGroup">🎰 Dam Machine Record</div>
         <div class="profileGrid dmHistoryGrid" id="dmHistoryStats"></div>
@@ -1660,6 +1736,16 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="lcCharTitle" id="lcCharTitle"></div>
         <div class="lcCongrats">Congratulations!</div>
         <div class="lcOz"><span class="lcOzNum">666</span> FL OZ EARNED</div>
+        <!-- DAM NATION V1.0: rescue completion (rendered by renderLevelRescue) -->
+        <div class="lcRescue" id="lcRescue" hidden>
+          <div class="lcRescueAvatar" id="lcRescueAvatar"></div>
+          <div class="lcRescueText">
+            <div class="lcRescueTitle">-ITE RESCUE COMPLETE!</div>
+            <div class="lcRescueName" id="lcRescueName"></div>
+            <div class="lcRescueWater" id="lcRescueWater"></div>
+            <div class="lcRescueNote">Carried home by this cycle's flow. No extra FL OZ.</div>
+          </div>
+        </div>
         <div class="damQuip lcQuip" id="lcQuip"></div>
         <div class="lcChain" id="lcChain"></div>
         <div class="lcSong" id="lcSong"></div>
@@ -1674,6 +1760,12 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 </div>
 
 <script>
+
+/* =========================================================
+   DAM NATION V1.0 — -ITE RESCUE FOUNDATION
+   "SAVE THE -ITES. SAVE THE WATER."
+   Built on top of the V2.6.x game (history notes below are kept as-is).
+========================================================= */
 
 /* =========================================================
    CONFIGURE THE 6 STEPS
@@ -2298,6 +2390,378 @@ const ALL_TRIBES = Object.entries(TRIBE_GROUPS).flatMap(([category, names])=>
   names.map(name=>({ name, category }))
 );
 
+/* =========================================================
+   DAM NATION V1.0 — -ITE RESCUE FOUNDATION
+   Game rule (GEI symbolic fiction): within this game, each -ite is represented as a body of
+   water the player rescues by running the six-day hydraulic cycle. This is the game's internal
+   story device, not a linguistic or scientific claim.
+
+   • ITES is the ONLY -ite catalog for the rescue layer. TRIBE_GROUPS above is the separate,
+     unchanged "A People Revealed" roster.
+   • ARTWORK: set an entry's imageUrl to a transparent image URL. Nothing else needs to change;
+     renderIte() handles image → water-drop fallback → text fallback everywhere.
+   • `status` / `rescued` on each entry are LIVE MIRRORS written by syncIteStatuses(). The
+     authoritative record is state.iteRescueStats, saved by the existing saveGame().
+   • Rescue never adds or costs FL OZ. waterReward is the rescue record's figure; it equals the
+     Day 6 reward that awardDay() already credits, so the economy is unchanged.
+========================================================= */
+const ITE_STATUSES = ["trapped", "inFlow", "saved"];
+const ITE_STATUS_META = {
+  trapped: { icon:"🔒", label:"TRAPPED", sr:"trapped" },
+  inFlow:  { icon:"💧", label:"IN FLOW", sr:"in the flow" },
+  saved:   { icon:"✅", label:"SAVED",   sr:"saved" }
+};
+const ITES = [
+  { id:"danite",     name:"Danite",     imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"levite",     name:"Levite",     imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"israelite",  name:"Israelite",  imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"amorite",    name:"Amorite",    imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"jebusite",   name:"Jebusite",   imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"hittite",    name:"Hittite",    imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"hivite",     name:"Hivite",     imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"ammonite",   name:"Ammonite",   imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"benjamite",  name:"Benjamite",  imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"ephraimite", name:"Ephraimite", imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ }
+];
+const ITE_BY_ID = {};
+ITES.forEach(i => { ITE_BY_ID[i.id] = i; });
+
+/* Rescue narrative for each hydraulic day (presentation only; DAM_DAYS stays authoritative). */
+const RESCUE_DAY_STEPS = [
+  "Find the trapped water",
+  "Stabilize the dam",
+  "Build the reservoir",
+  "Control the sluice release",
+  "Turn the waterwheel",
+  "Complete the cycle and save the -ite"
+];
+
+/* ---------- Pure record functions (no DOM, no saving) ---------- */
+function defaultIteRescueStats(){
+  return { savedCount:0, rescuedWater:0, currentIteId:null, savedIteIds:[], lastSavedIteId:null, lastRescueLevel:0 };
+}
+/* Accepts anything (legacy save, corrupt JSON, wrong types) and returns a valid record.
+   savedIteIds is authoritative; savedCount and rescuedWater are re-derived from it so they can
+   never disagree with the list. */
+function sanitizeIteRescueStats(raw){
+  const out = defaultIteRescueStats();
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
+  if(Array.isArray(raw.savedIteIds)){
+    out.savedIteIds = [...new Set(raw.savedIteIds.filter(id => typeof id === "string" && ITE_BY_ID[id]))];
+  }
+  out.savedCount = out.savedIteIds.length;
+  out.rescuedWater = out.savedIteIds.reduce((sum, id) => sum + ITE_BY_ID[id].waterReward, 0);
+  if(typeof raw.currentIteId === "string" && ITE_BY_ID[raw.currentIteId] && !out.savedIteIds.includes(raw.currentIteId)){
+    out.currentIteId = raw.currentIteId;
+  }
+  if(typeof raw.lastSavedIteId === "string" && out.savedIteIds.includes(raw.lastSavedIteId)){
+    out.lastSavedIteId = raw.lastSavedIteId;
+    out.lastRescueLevel = toInt(raw.lastRescueLevel, 0, 1e6, 0);
+  }
+  return out;
+}
+/* Next rescue target: first unsaved -ite in catalog order, or null once every -ite is saved. */
+function pickNextIteId(savedIds){
+  const saved = new Set(Array.isArray(savedIds) ? savedIds : []);
+  const next = ITES.find(i => !saved.has(i.id));
+  return next ? next.id : null;
+}
+/* Returns a NEW record with `iteId` saved, or null if the id is unknown / already saved. */
+function applyIteRescue(stats, iteId, level){
+  const s = sanitizeIteRescueStats(stats);
+  if(!ITE_BY_ID[iteId] || s.savedIteIds.includes(iteId)) return null;
+  s.savedIteIds.push(iteId);
+  s.savedCount = s.savedIteIds.length;
+  s.rescuedWater += ITE_BY_ID[iteId].waterReward;
+  s.lastSavedIteId = iteId;
+  s.lastRescueLevel = toInt(level, 0, 1e6, 0);
+  if(s.currentIteId === iteId) s.currentIteId = null;
+  return s;
+}
+/* The state machine, derived from the record + the existing level ledger:
+   saved   → id is in savedIteIds
+   inFlow  → the current rescue, and Day 1 of this cycle is already banked
+   trapped → everything else */
+function getIteStatus(id, stats, daysDone){
+  const st = stats || state.iteRescueStats;
+  const done = typeof daysDone === "number" ? daysDone : daysDoneThisLevel();
+  if(st.savedIteIds.includes(id)) return "saved";
+  if(id === st.currentIteId && done >= 1) return "inFlow";
+  return "trapped";
+}
+
+/* ---------- Event hooks: onIteEvent(ITE_EVENTS.rescued, fn). Also dispatched on window as
+   "damnation:<name>" CustomEvents for code outside this file. A failing listener never
+   breaks the game. ---------- */
+const ITE_EVENTS = { selected:"ite-selected", inFlow:"ite-in-flow", rescued:"ite-rescued", rescueCompleted:"rescue-completed" };
+const iteListeners = {};
+function onIteEvent(name, fn){
+  if(typeof fn !== "function") return () => {};
+  (iteListeners[name] = iteListeners[name] || []).push(fn);
+  return () => { iteListeners[name] = (iteListeners[name] || []).filter(f => f !== fn); };
+}
+function emitIteEvent(name, detail){
+  (iteListeners[name] || []).forEach(fn => { try { fn(detail); } catch(e){ safeWarn("-ite listener failed: " + e); } });
+  try { window.dispatchEvent(new CustomEvent("damnation:" + name, { detail })); } catch(e){}
+}
+
+/* ---------- Stateful rescue actions ---------- */
+function currentIte(){
+  const id = state.iteRescueStats.currentIteId;
+  return id ? ITE_BY_ID[id] || null : null;
+}
+function syncIteStatuses(){
+  ITES.forEach(ite => { const s = getIteStatus(ite.id); ite.status = s; ite.rescued = s === "saved"; });
+}
+function announceIte(text){ const el = document.getElementById("iteStatus"); if(el) el.textContent = text; }
+
+/* Start of a rescue cycle: keep the current -ite, or pick the next trapped one. Never re-selects
+   a saved -ite; returns null once every -ite has been saved. */
+function selectCurrentIte(opts = {}){
+  const st = state.iteRescueStats;
+  if(st.currentIteId && ITE_BY_ID[st.currentIteId] && !st.savedIteIds.includes(st.currentIteId)) return currentIte();
+  const id = pickNextIteId(st.savedIteIds);
+  st.currentIteId = id;
+  syncIteStatuses();
+  if(!id) return null;
+  saveGame();
+  const ite = ITE_BY_ID[id];
+  if(!opts.quiet) announceIte(`Now rescuing the ${ite.name}. Status: trapped.`);
+  emitIteEvent(ITE_EVENTS.selected, { iteId:id, ite });
+  renderIteRescue();
+  return ite;
+}
+/* Day 1 banked → the current -ite enters the flow. */
+function setIteInFlow(){
+  const ite = currentIte();
+  if(!ite) return null;
+  syncIteStatuses();
+  if(ite.status !== "inFlow") return null;
+  announceIte(`The ${ite.name} is in the flow.`);
+  emitIteEvent(ITE_EVENTS.inFlow, { iteId:ite.id, ite });
+  return ite;
+}
+/* Day 6 banked → the current -ite is saved. Exactly once: applyIteRescue refuses repeats, and
+   awardDay (the only caller) is itself exactly-once. Adds NO FL OZ. */
+function saveCurrentIte(){
+  const ite = currentIte();
+  if(!ite) return null;
+  const next = applyIteRescue(state.iteRescueStats, ite.id, state.level);
+  if(!next) return null;
+  state.iteRescueStats = next;
+  syncIteStatuses();
+  saveGame();
+  const detail = { iteId:ite.id, ite, waterRescued:ite.waterReward, savedCount:next.savedCount, rescuedWater:next.rescuedWater, level:state.level };
+  announceIte(`-ite rescue complete. The ${ite.name} is saved. Water rescued: ${fmt(ite.waterReward)} fluid ounces.`);
+  emitIteEvent(ITE_EVENTS.rescued, detail);
+  emitIteEvent(ITE_EVENTS.rescueCompleted, detail);
+  return ite;
+}
+
+/* ---------- ONE renderer for every -ite: custom image → water-drop fallback → text fallback.
+   Status is shown by an icon badge + visual treatment + aria-label (never color alone). ---------- */
+function renderIte(ite, status, opts = {}){
+  const st = ITE_STATUSES.includes(status) ? status : "trapped";
+  const meta = ITE_STATUS_META[st];
+  const name = ite && typeof ite.name === "string" && ite.name ? ite.name : "Unknown -ite";
+  try {
+    const wrap = document.createElement("span");
+    wrap.className = "iteAvatar is-" + st;
+    if(opts.size) wrap.style.setProperty("--iteSize", Math.round(opts.size) + "px");
+    wrap.setAttribute("role", "img");
+    wrap.setAttribute("aria-label", `${name}, ${meta.sr}`);
+    wrap.dataset.status = st;
+    if(ite && ite.id) wrap.dataset.iteId = ite.id;
+    const makeDrop = () => {
+      const d = document.createElement("span");
+      d.className = "iteDrop";
+      d.setAttribute("aria-hidden", "true");
+      d.textContent = name.charAt(0).toUpperCase() || "?";
+      return d;
+    };
+    if(ite && typeof ite.imageUrl === "string" && ite.imageUrl){
+      const img = document.createElement("img");
+      img.className = "iteImg";
+      img.alt = "";                                   // the wrapper carries the accessible name
+      img.decoding = "async";
+      img.addEventListener("error", () => {
+        safeWarn("-ite image failed to load: " + img.src);
+        if(img.parentNode) img.parentNode.replaceChild(makeDrop(), img);
+      }, { once:true });
+      img.src = ite.imageUrl;
+      wrap.appendChild(img);
+    } else {
+      wrap.appendChild(makeDrop());
+    }
+    const badge = document.createElement("span");
+    badge.className = "iteBadge";
+    badge.setAttribute("aria-hidden", "true");
+    badge.textContent = meta.icon;
+    wrap.appendChild(badge);
+    return wrap;
+  } catch(e){
+    const t = document.createElement("span");
+    t.className = "iteText";
+    t.textContent = `${name} — ${meta.icon} ${meta.label}`;
+    return t;
+  }
+}
+
+/* HUD rescue row. */
+function renderIteRescue(){
+  const box = document.getElementById("iteHud");
+  if(!box) return;
+  syncIteStatuses();
+  const st = state.iteRescueStats, ite = currentIte();
+  const avatar = $("iteHudAvatar"), line = $("iteHudLine"), sub = $("iteHudSub");
+  avatar.innerHTML = "";
+  if(ite){
+    const meta = ITE_STATUS_META[ite.status];
+    const step = Math.min(state.currentStep, DAYS_PER_LEVEL - 1);
+    avatar.appendChild(renderIte(ite, ite.status, { size:34 }));
+    line.innerHTML = `Rescuing <strong>${esc(ite.name)}</strong><span class="iteState is-${ite.status}">${meta.icon} ${meta.label}</span>`;
+    sub.textContent = `Day ${step + 1}: ${RESCUE_DAY_STEPS[step]}`;
+    box.dataset.status = ite.status;
+    return;
+  }
+  const last = st.lastSavedIteId ? ITE_BY_ID[st.lastSavedIteId] : null;
+  if(last && st.lastRescueLevel === state.level){
+    avatar.appendChild(renderIte(last, "saved", { size:34 }));
+    line.innerHTML = `<strong>${esc(last.name)}</strong><span class="iteState is-saved">✅ SAVED</span>`;
+    sub.textContent = `Water rescued: +${fmt(last.waterReward)} FL OZ`;
+    box.dataset.status = "saved";
+  } else if(st.savedCount >= ITES.length){
+    avatar.appendChild(renderIte({ name:"All" }, "saved", { size:34 }));
+    line.innerHTML = `<strong>All -ites saved</strong><span class="iteState is-saved">✅</span>`;
+    sub.textContent = "Keep the water flowing.";
+    box.dataset.status = "complete";
+  } else {
+    line.textContent = "Next -ite rescue";
+    sub.textContent = "Begins on Day 1";
+    box.dataset.status = "idle";
+  }
+}
+
+/* Profile: 🌊 -ITE RESCUE RECORD + gallery foundation. */
+function renderIteRescueRecord(){
+  const grid = document.getElementById("iteRescueStats"), gallery = document.getElementById("iteGallery");
+  if(!grid || !gallery) return;
+  syncIteStatuses();
+  const st = state.iteRescueStats, ite = currentIte();
+  const curSub = ite
+    ? `${ITE_STATUS_META[ite.status].icon} ${ITE_STATUS_META[ite.status].label}`
+    : (st.savedCount >= ITES.length ? "✅ All -ites saved" : "Starts on Day 1");
+  const stats = [
+    ["-ites saved", fmt(st.savedCount), `of ${ITES.length}`, false],
+    ["Water rescued", `${fmt(st.rescuedWater)} FL OZ`, "across all rescues", false],
+    ["Current rescue", ite ? ite.name : "—", curSub, true]
+  ];
+  grid.innerHTML = stats.map(([label, value, sub, wide]) =>
+    `<div class="pStat${wide ? " wide" : ""}"><div class="pLabel">${esc(label)}</div><div class="pValue">${esc(value)}</div><div class="pSub">${esc(sub)}</div></div>`).join("");
+  gallery.innerHTML = "";
+  ITES.forEach(it => {
+    const meta = ITE_STATUS_META[it.status];
+    const tile = document.createElement("div");
+    tile.className = "iteTile is-" + it.status;
+    tile.setAttribute("role", "listitem");
+    tile.appendChild(renderIte(it, it.status, { size:52 }));
+    const n = document.createElement("div"); n.className = "iteTileName"; n.textContent = it.name;
+    const s = document.createElement("div"); s.className = "iteTileStatus"; s.textContent = `${meta.icon} ${meta.label}`;
+    tile.appendChild(n); tile.appendChild(s);
+    gallery.appendChild(tile);
+  });
+}
+
+/* Level card: rescue completion, shown only for the -ite saved in THIS level's cycle
+   (also correct after a refresh while the card is waiting). */
+function renderLevelRescue(){
+  const box = document.getElementById("lcRescue");
+  if(!box) return;
+  const st = state.iteRescueStats, ite = st.lastSavedIteId ? ITE_BY_ID[st.lastSavedIteId] : null;
+  const show = !!ite && st.lastRescueLevel === state.level;
+  box.hidden = !show;
+  if(!show) return;
+  const av = $("lcRescueAvatar");
+  av.innerHTML = "";
+  av.appendChild(renderIte(ite, "saved", { size:56 }));
+  $("lcRescueName").textContent = `${ite.name} saved ✅`;
+  $("lcRescueWater").innerHTML = `Water rescued <strong>+${fmt(ite.waterReward)} FL OZ</strong>`;
+}
+
+/* ---------- Self-test (console only; invisible to players; leaves live state untouched).
+   runIteRescueSelfTest() → { pass, fail, results:[…] } ---------- */
+function runIteRescueSelfTest(){
+  const results = [];
+  const t = (name, fn) => { let ok = false; try { ok = !!fn(); } catch(e){ ok = false; } results.push({ name, ok }); };
+  const before = JSON.stringify(state.iteRescueStats);
+  const required = ["danite","levite","israelite","amorite","jebusite","hittite","hivite","ammonite","benjamite","ephraimite"];
+  const D = defaultIteRescueStats;
+
+  t("catalog: ITES exists", () => Array.isArray(ITES) && ITES.length >= required.length);
+  t("catalog: required -ites present", () => required.every(id => ITE_BY_ID[id]));
+  t("catalog: ids unique", () => new Set(ITES.map(i => i.id)).size === ITES.length);
+  t("catalog: every entry has imageUrl field (null allowed)", () => ITES.every(i => "imageUrl" in i && (i.imageUrl === null || typeof i.imageUrl === "string")));
+  t("catalog: waterReward equals the Day reward", () => ITES.every(i => i.waterReward === DAY_REWARD_FL_OZ));
+  t("states: live statuses are valid", () => ITES.every(i => ITE_STATUSES.includes(i.status)));
+  t("states: default status is trapped", () => ITES.every(i => getIteStatus(i.id, D(), 0) === "trapped"));
+  t("states: current -ite enters flow after Day 1", () => {
+    const s = D(); s.currentIteId = "danite";
+    return getIteStatus("danite", s, 0) === "trapped" && getIteStatus("danite", s, 1) === "inFlow" && getIteStatus("levite", s, 3) === "trapped";
+  });
+  t("record: currentIteId can be assigned", () => { const s = D(); s.currentIteId = "levite"; return sanitizeIteRescueStats(s).currentIteId === "levite"; });
+  t("record: live fields exist", () => ["savedCount","rescuedWater","currentIteId","savedIteIds"].every(k => k in state.iteRescueStats));
+  t("legacy: missing/garbage data → safe defaults", () => [undefined, null, "x", 42, [], { savedIteIds:"no", currentIteId:7 }]
+    .every(raw => JSON.stringify(sanitizeIteRescueStats(raw)) === JSON.stringify(D())));
+  t("legacy: bogus + duplicate ids filtered, counts re-derived", () => {
+    const s = sanitizeIteRescueStats({ savedIteIds:["danite","bogus","danite",5], savedCount:99, rescuedWater:-4, currentIteId:"danite" });
+    return JSON.stringify(s.savedIteIds) === '["danite"]' && s.savedCount === 1 && s.rescuedWater === DAY_REWARD_FL_OZ && s.currentIteId === null;
+  });
+  t("rescue: saving updates savedIteIds + clears current", () => {
+    const s = D(); s.currentIteId = "danite";
+    const n = applyIteRescue(s, "danite", 3);
+    return n && n.savedIteIds.includes("danite") && n.savedCount === 1 && n.currentIteId === null && n.lastSavedIteId === "danite" && n.lastRescueLevel === 3;
+  });
+  t("rescue: water rescued increments by waterReward", () => {
+    const a = applyIteRescue(D(), "danite", 1), b = applyIteRescue(a, "levite", 2);
+    return a.rescuedWater === DAY_REWARD_FL_OZ && b.rescuedWater === 2 * DAY_REWARD_FL_OZ;
+  });
+  t("rescue: same -ite cannot be saved twice", () => applyIteRescue(applyIteRescue(D(), "danite", 1), "danite", 2) === null);
+  t("rescue: unknown id refused", () => applyIteRescue(D(), "nope", 1) === null);
+  t("rescue: input record not mutated", () => { const s = D(); applyIteRescue(s, "danite", 1); return s.savedIteIds.length === 0; });
+  t("selection: saved -ite not selected again", () => pickNextIteId(["danite"]) === "levite" && pickNextIteId([]) === "danite");
+  t("selection: all saved → no target (no infinite cycling)", () => pickNextIteId(ITES.map(i => i.id)) === null);
+  t("render: fallback drop when imageUrl is null", () => {
+    const el = renderIte({ id:"testite", name:"Testite", imageUrl:null }, "trapped");
+    return !!el.querySelector(".iteDrop") && !el.querySelector("img") && /trapped/.test(el.getAttribute("aria-label"));
+  });
+  t("render: broken image falls back to drop", () => {
+    const el = renderIte({ id:"testite", name:"Testite", imageUrl:"data:image/gif,BROKEN" }, "saved");
+    el.querySelector("img").dispatchEvent(new window.Event("error"));
+    return !!el.querySelector(".iteDrop") && !el.querySelector("img");
+  });
+  t("render: status shown by text/icon, not color alone", () => {
+    const el = renderIte(ITES[0], "inFlow");
+    return el.querySelector(".iteBadge").textContent === "💧" && /in the flow/.test(el.getAttribute("aria-label"));
+  });
+  t("render: bad input never throws", () => { renderIte(null, "bogus"); renderIte(undefined); return true; });
+  t("economy: six-day reward values unchanged", () =>
+    DAY_REWARD_FL_OZ === 111 && DAYS_PER_LEVEL === 6 && LEVEL_REWARD_FL_OZ === 666 && UNLOCK_COST_FL_OZ === 6660 &&
+    DAM_DAYS.length === 6 && DAM_DAYS.every(d => d.reward === 111));
+  t("nav: all five destinations still present", () => ["navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn","dmOpenBtn"].every(id => !!document.getElementById(id)));
+  t("hooks: event + action functions exist", () => [selectCurrentIte, setIteInFlow, saveCurrentIte, renderIteRescue, renderIteRescueRecord, onIteEvent].every(f => typeof f === "function"));
+  t("hooks: listeners receive events; failures are contained", () => {
+    let got = null;
+    const off1 = onIteEvent("selftest", d => { got = d; }), off2 = onIteEvent("selftest", () => { throw new Error("x"); });
+    emitIteEvent("selftest", { ok:1 }); off1(); off2();
+    return got && got.ok === 1;
+  });
+  t("ui: rescue mounts present", () => ["iteHud","iteStatus","iteRescueStats","iteGallery","lcRescue"].every(id => !!document.getElementById(id)));
+  t("self-test left live state untouched", () => JSON.stringify(state.iteRescueStats) === before);
+
+  const pass = results.filter(r => r.ok).length;
+  return { pass, fail: results.length - pass, results };
+}
+
 /* Genesis day themes. Retained data (the badge UI that displayed it was removed in v2.4). */
 const DAY_LABELS = [
   { left:"Day 1", right:"Light" },
@@ -2472,6 +2936,8 @@ const state = {
   damMachineCharactersWon:0,
   damMachineBestReward:0,
   damMachineLastResult:null,
+  /* DAM NATION V1.0 — -ite rescue record (see sanitizeIteRescueStats) */
+  iteRescueStats: defaultIteRescueStats(),
   phase:"ready"
 };
 
@@ -2527,7 +2993,9 @@ function saveGame(){
     damMachineSongsWon: state.damMachineSongsWon,
     damMachineCharactersWon: state.damMachineCharactersWon,
     damMachineBestReward: state.damMachineBestReward,
-    damMachineLastResult: state.damMachineLastResult
+    damMachineLastResult: state.damMachineLastResult,
+    /* DAM NATION V1.0 — additive; legacy saves without it load safe defaults */
+    iteRescueStats: state.iteRescueStats
   };
   storageSet(SAVE_KEY, JSON.stringify(data));
   broadcastUnlocks();
@@ -2571,6 +3039,8 @@ function loadGame(){
   state.damMachineCharactersWon  = toInt(d.damMachineCharactersWon, 0, 1e6, 0);
   state.damMachineBestReward     = toInt(d.damMachineBestReward, 0, 1e9, 0);
   state.damMachineLastResult     = sanitizeDamMachineLastResult(d.damMachineLastResult);
+  /* DAM NATION V1.0 — missing/malformed rescue data becomes safe defaults; nothing else is reset. */
+  state.iteRescueStats           = sanitizeIteRescueStats(d.iteRescueStats);
   return true;
 }
 
@@ -2861,6 +3331,7 @@ function flowSegment(index){
 ========================================================= */
 /* Starts (or restarts) the day at `index` with a fresh 10-second clock. */
 function beginDay(index){
+  if(index === 0 && !state.iteRescueStats.currentIteId) selectCurrentIte();   // DAM NATION V1.0: new cycle → next trapped -ite
   state.currentStep = index;
   state.tapCount = 0;
   state.phase = "playing";
@@ -2887,6 +3358,9 @@ function awardDay(index){
     state.phase = "levelComplete";
   }
   saveGame();
+  /* DAM NATION V1.0 — the rescue layer rides on this exactly-once award. It adds NO FL OZ. */
+  if(index === 0) setIteInFlow();
+  if(index === DAYS_PER_LEVEL - 1) saveCurrentIte();   // persists itself (synchronous, same tick)
   renderHud();
   showDayReward(index);
   setTimeout(playDayRewardSound, 220);
@@ -3045,6 +3519,7 @@ function renderHud(){
   hudOz.innerHTML = `💧 <strong>${fmt(state.levelFlOz)}</strong> / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ`;
   hudReward.innerHTML = `${d.title} reward: ${esc(d.displayAmount)} = <strong>+${DAY_REWARD_FL_OZ} FL OZ</strong>`;
   loopCountEl.textContent = fmt(state.completedLevels);
+  renderIteRescue();                                     // DAM NATION V1.0
   renderTimer();
 }
 
@@ -4088,6 +4563,7 @@ function showLevelComplete(opts = {}){
   renderCharacter();
   renderLevelBackdrop();
   renderChain();
+  renderLevelRescue();                                   // DAM NATION V1.0
 
   // The level's 666 FL OZ (6 × 111, credited day by day in awardDay) is already in the wallet.
   // Nothing is spent here: the player chooses what to unlock in the Store.
@@ -4547,6 +5023,7 @@ function renderProfile(){
   $("profileEconomy").innerHTML = econ.map(([k, v]) => `<div class="peRow"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join("");
   $("profileStats").innerHTML = stats.map(([label, value, sub]) =>
     `<div class="pStat"><div class="pLabel">${esc(label)}</div><div class="pValue">${esc(value)}</div><div class="pSub">${esc(sub)}</div></div>`).join("");  renderDamMachineHistory();
+  renderIteRescueRecord();                               // DAM NATION V1.0
 }
 
 let radioQuipText = "";
@@ -4838,6 +5315,7 @@ window.addEventListener("load", reportHeight);
 document.querySelectorAll(".costText").forEach(el => { el.textContent = `${fmt(UNLOCK_COST_FL_OZ)} FL OZ`; });
 document.querySelectorAll(".groupPrice").forEach(el => { el.innerHTML = el.innerHTML.replace("${DAY_REWARD}", `${DAY_REWARD_FL_OZ} FL OZ`); });
 loadGame();
+syncIteStatuses();                                      // DAM NATION V1.0: catalog mirrors the loaded record
 restoreVisualProgress();
 renderTribesList();
 renderRadio();
@@ -4850,6 +5328,7 @@ if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
 } else {
   // Resume on the saved day with a FRESH clock that starts on the first tap (no stale countdowns).
   state.phase = "ready";
+  if(!state.iteRescueStats.currentIteId) selectCurrentIte({ quiet:true });   // DAM NATION V1.0
   activateStation(state.currentStep);
   updateProgressDots();
   renderHud();
