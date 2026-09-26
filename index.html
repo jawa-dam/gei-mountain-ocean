@@ -5433,6 +5433,55 @@ function restoreVisualProgress(){
   setTimeout(finish,10000);
 })();
 
+/* GEI SPLASH AUDIO V1.0 — synthesized hydraulic crescendo */
+(function(){
+  var splash=document.getElementById("geiSplash");
+  if(!splash)return;
+  var ctx=null, started=false, timers=[];
+  function audio(){
+    if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==="suspended") ctx.resume();
+    return ctx;
+  }
+  function tone(freq,dur,type,when,gain){
+    var c=audio(),o=c.createOscillator(),g=c.createGain();
+    o.type=type||"sine"; o.frequency.setValueAtTime(freq,c.currentTime+when);
+    g.gain.setValueAtTime(.0001,c.currentTime+when);
+    g.gain.exponentialRampToValueAtTime(gain||.045,c.currentTime+when+.025);
+    g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
+    o.connect(g);g.connect(c.destination);o.start(c.currentTime+when);o.stop(c.currentTime+when+dur+.03);
+  }
+  function noise(dur,low,high,gain,when){
+    var c=audio(),n=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
+    for(var i=0;i<n;i++)d[i]=Math.random()*2-1;
+    var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+    s.buffer=b;f.type="bandpass";f.frequency.setValueAtTime(low,c.currentTime+when);f.frequency.exponentialRampToValueAtTime(high,c.currentTime+when+dur);f.Q.value=.8;
+    g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(gain,c.currentTime+when+dur*.22);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
+    s.connect(f);f.connect(g);g.connect(c.destination);s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.02);
+  }
+  function start(){
+    if(started)return; started=true;
+    /* 0–2s: mountain wakes */
+    tone(72,1.8,"sine",0,.035); tone(108,1.5,"triangle",.15,.025);
+    /* 2–4s: water travels */
+    noise(1.8,180,1100,.075,1.8); tone(330,.8,"sine",2.0,.025); tone(440,.7,"sine",2.45,.025);
+    /* 4–6s: dam locks into place */
+    tone(92,.55,"square",3.15,.035); tone(138,.45,"triangle",3.5,.03); noise(.7,300,850,.055,3.2);
+    /* 6–8s: mill engages */
+    noise(1.6,260,1450,.105,5.4); tone(196,.9,"triangle",5.7,.03); tone(294,.8,"triangle",6.05,.03);
+    /* 8–10s: ocean + brand crescendo */
+    noise(1.8,120,650,.14,7.2); [523,659,784,1046].forEach(function(f,i){tone(f,.7,"triangle",7.7+i*.16,.035);});
+    tone(1318,1.1,"sine",8.55,.045); noise(1.0,450,1800,.065,8.8);
+  }
+  ["pointerdown","touchstart","keydown"].forEach(function(ev){window.addEventListener(ev,start,{once:true,passive:true});});
+  /* Browsers require a user gesture for reliable audio. The visual splash still runs normally if none occurs. */
+  var oldRemove=splash.remove.bind(splash);
+  splash.remove=function(){timers.forEach(clearTimeout);try{if(ctx)ctx.close();}catch(e){}oldRemove();};
+  /* If the player has already interacted before the splash, begin immediately. */
+  if(document.hasFocus())setTimeout(function(){try{start();}catch(e){}},120);
+})();
+
+
 </script>
 
 </body>
