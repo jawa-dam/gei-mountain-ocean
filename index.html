@@ -5460,7 +5460,7 @@ function restoreVisualProgress(){
   setTimeout(finish,10000);
 })();
 
-/* GEI SPLASH AUDIO V1.0 — synthesized hydraulic crescendo */
+/* GEI SPLASH AUDIO V1.3 — synthesized hydraulic + randomized natural crescendo */
 (function(){
   var splash=document.getElementById("geiSplash");
   if(!splash)return;
@@ -5486,8 +5486,50 @@ function restoreVisualProgress(){
     g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(gain,c.currentTime+when+dur*.22);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
     s.connect(f);f.connect(g);g.connect(c.destination);s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.02);
   }
+  /* GEI SPLASH V1.3 — randomized natural hydraulic soundscape */
+  var natureSeed=Math.floor(Math.random()*5);
+  function natureNoise(dur,low,high,gain,when,pan){
+    var c=audio(),n=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(2,n,c.sampleRate),l=b.getChannelData(0),r=b.getChannelData(1);
+    for(var i=0;i<n;i++){var v=(Math.random()*2-1);var shaped=v*.72+Math.sin(i*.017)*.04;l[i]=shaped*(pan<0?1:0.82);r[i]=shaped*(pan>0?1:0.82);}
+    var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),p=c.createStereoPanner();
+    s.buffer=b;f.type="bandpass";f.frequency.setValueAtTime(low,c.currentTime+when);f.frequency.exponentialRampToValueAtTime(high,c.currentTime+when+dur);f.Q.value=.55;
+    g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(gain,c.currentTime+when+dur*.28);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
+    p.pan.value=pan||0;s.connect(f);f.connect(g);g.connect(p);p.connect(c.destination);s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.03);
+  }
+  function birdChirp(when,pan){
+    var c=audio(),o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner();
+    o.type="sine";o.frequency.setValueAtTime(1900,c.currentTime+when);o.frequency.exponentialRampToValueAtTime(3100,c.currentTime+when+.09);o.frequency.exponentialRampToValueAtTime(2200,c.currentTime+when+.18);
+    g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(.018,c.currentTime+when+.025);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+.2);
+    p.pan.value=pan;o.connect(g);g.connect(p);p.connect(c.destination);o.start(c.currentTime+when);o.stop(c.currentTime+when+.23);
+  }
+  function natureSplash(){
+    if(natureSeed===0){
+      natureNoise(2.2,90,420,.025,.15,-.25); natureNoise(2.8,650,2100,.018,1.0,.25);
+      birdChirp(.85,-.55); birdChirp(1.25,.45); birdChirp(2.0,-.2);
+      natureNoise(3.8,180,1050,.065,2.0,0); natureNoise(2.8,260,1500,.10,5.1,.1);
+    }else if(natureSeed===1){
+      natureNoise(4.0,1800,4200,.018,.2,-.45); natureNoise(3.5,1000,2600,.014,.7,.5);
+      birdChirp(1.0,.55); birdChirp(1.7,-.65); birdChirp(2.35,.2);
+      natureNoise(3.6,240,1250,.075,2.1,-.1); natureNoise(3.0,300,1700,.105,5.0,.15);
+    }else if(natureSeed===2){
+      natureNoise(3.5,120,650,.028,.1,.35); natureNoise(2.8,700,1700,.012,.5,-.4);
+      birdChirp(.72,.35); birdChirp(1.5,-.35);
+      natureNoise(4.1,150,900,.085,1.9,0); natureNoise(2.9,260,1350,.115,5.2,-.1);
+      tone(420,.08,"sine",2.75,.012); tone(510,.07,"sine",3.0,.01);
+    }else if(natureSeed===3){
+      natureNoise(4.5,55,230,.038,.0,0); natureNoise(2.8,900,3200,.018,1.5,-.2);
+      tone(58,2.2,"sine",.2,.018); tone(73,1.7,"triangle",1.0,.014);
+      natureNoise(3.4,1100,4200,.035,2.4,.15); natureNoise(2.8,240,1200,.10,5.1,0);
+    }else{
+      natureNoise(3.8,120,520,.035,.0,-.15); natureNoise(3.0,500,1800,.018,.8,.3);
+      birdChirp(1.15,-.5); birdChirp(2.0,.45);
+      natureNoise(4.0,130,760,.09,1.9,0); natureNoise(2.7,180,1100,.13,5.0,.1);
+    }
+  }
+
   function start(){
     if(started)return; started=true;
+    natureSplash();
     /* 0–2s: mountain wakes */
     tone(72,1.8,"sine",0,.035); tone(108,1.5,"triangle",.15,.025);
     /* 2–4s: water travels */
