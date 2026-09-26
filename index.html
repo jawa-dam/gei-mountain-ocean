@@ -1417,6 +1417,10 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .geiSplashWheel::before,.geiSplashWheel::after{content:"";position:absolute;left:50%;top:0;width:4px;height:100%;background:#6b4423;transform:translateX(-50%)}
 .geiSplashWheel::after{transform:translateX(-50%) rotate(90deg)}
 .geiSplashOcean{position:absolute;right:2%;bottom:18%;width:31%;height:24%;border-radius:50% 50% 0 0;background:radial-gradient(ellipse at 50% 40%,#eafcff 0 3%,#2fd2ff 16%,#0d4e83 62%,transparent 63%);opacity:0;animation:geiOceanIn .9s ease-out 6.8s forwards}
+.geiSplashDam::before{content:"";position:absolute;left:29%;top:50%;width:42%;height:30%;border:2px solid rgba(47,210,255,.85);background:linear-gradient(180deg,#d9f7ff,#4c7898);box-shadow:0 0 12px rgba(47,210,255,.55);transform-origin:50% 100%;animation:geiGateOpen .62s cubic-bezier(.2,.9,.2,1) 6.92s forwards}
+.geiSplashIte{position:absolute;z-index:2;left:50%;top:50%;width:min(62vw,360px);height:min(42vh,280px);transform:translate(-50%,-50%) scale(.84) rotate(-2deg);object-fit:contain;object-position:center;opacity:0;filter:drop-shadow(0 0 24px rgba(47,210,255,.28)) drop-shadow(0 0 42px rgba(243,16,186,.12));mix-blend-mode:screen;animation:geiIteIn 1s cubic-bezier(.2,.8,.2,1) .8s forwards,geiIteDrift 6.2s ease-in-out 1.8s infinite}
+.geiSplashIteFrame{position:absolute;z-index:1;left:50%;top:50%;width:min(70vw,410px);height:min(48vh,320px);transform:translate(-50%,-50%);border-radius:32px;background:radial-gradient(ellipse,rgba(47,210,255,.11),transparent 64%);box-shadow:0 0 55px rgba(47,210,255,.12),inset 0 0 35px rgba(255,255,255,.03);opacity:0;animation:geiIteFrameIn .8s ease-out .55s forwards}
+.geiSplashFlash{position:absolute;z-index:3;inset:-10%;pointer-events:none;opacity:0;background:radial-gradient(circle at 52% 58%,rgba(234,252,255,.98) 0 5%,rgba(47,210,255,.72) 16%,rgba(47,210,255,.22) 34%,transparent 62%);animation:geiHydraulicFlash .62s ease-out 7.02s forwards}
 .geiSplashPath{position:absolute;left:18%;top:28%;width:63%;height:43%;fill:none;stroke:#2fd2ff;stroke-width:7;stroke-linecap:round;stroke-dasharray:8 15;filter:drop-shadow(0 0 7px #2fd2ff);opacity:.9;animation:geiFlowDash 1s linear infinite}
 .geiSplashLabel{position:absolute;font-weight:900;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 0 14px rgba(47,210,255,.45);opacity:0}
 .geiSplashLabel.mountain{left:7%;bottom:17%;animation:geiLabelIn .55s ease-out 1.2s forwards}
@@ -1439,18 +1443,26 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes geiWheelIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
 @keyframes geiWheelSpin{to{transform:rotate(360deg)}}
 @keyframes geiOceanIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+@keyframes geiGateOpen{0%{transform:rotateX(0deg) translateY(0);filter:brightness(1)}55%{transform:rotateX(72deg) translateY(4px);filter:brightness(1.6)}100%{transform:rotateX(92deg) translateY(10px);filter:brightness(1.15);opacity:.18}}
+@keyframes geiIteIn{from{opacity:0;transform:translate(-50%,-44%) scale(.62) rotate(-8deg)}to{opacity:.9;transform:translate(-50%,-50%) scale(.84) rotate(-2deg)}}
+@keyframes geiIteFrameIn{to{opacity:1}}
+@keyframes geiIteDrift{0%,100%{margin-left:-1%;transform:translate(-50%,-50%) scale(.84) rotate(-2deg)}50%{margin-left:4%;transform:translate(-50%,-48%) scale(.88) rotate(2deg)}}
+@keyframes geiHydraulicFlash{0%{opacity:0;transform:scale(.72)}18%{opacity:1;transform:scale(1.05)}100%{opacity:0;transform:scale(1.18)}}
 @keyframes geiFlowDash{to{stroke-dashoffset:-23}}
 @keyframes geiLabelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes geiBrandIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes geiEnterIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes geiProgress{to{width:100%}}
-@media (max-width:520px){.geiSplashWorld{height:52vh}.geiSplashLabel{font-size:.62rem;letter-spacing:.1em}.geiSplashBrand{top:12%}.geiSplashMountain{bottom:23%}.geiSplashDam{bottom:22%}.geiSplashMill{bottom:23%}.geiSplashWheel{bottom:24%}.geiSplashOcean{bottom:15%}}
+@media (max-width:520px){.geiSplashWorld{height:52vh}.geiSplashLabel{font-size:.62rem;letter-spacing:.1em}.geiSplashBrand{top:12%}.geiSplashMountain{bottom:23%}.geiSplashDam{bottom:22%}.geiSplashMill{bottom:23%}.geiSplashWheel{bottom:24%}.geiSplashOcean{bottom:15%}.geiSplashIte{width:min(78vw,330px);height:min(36vh,235px)}.geiSplashIteFrame{width:min(84vw,365px);height:min(42vh,270px)}}
 @media (prefers-reduced-motion:reduce){#geiSplash *{animation-duration:.001ms!important;animation-delay:0ms!important;animation-iteration-count:1!important}.geiSplashProgress i{width:100%}}
 </style>
 </head>
 <body>
 <div id="geiSplash" aria-label="Genesis Engineered opening sequence">
   <div class="geiSplashNoise"></div><div class="geiSplashGlow"></div><div class="geiSplashWater"></div>
+  <div class="geiSplashIteFrame" aria-hidden="true"></div>
+  <img class="geiSplashIte" id="geiSplashIte" alt="" aria-hidden="true">
+  <div class="geiSplashFlash" aria-hidden="true"></div>
   <div class="geiSplashWorld" aria-hidden="true">
     <div class="geiSplashMountain"></div><div class="geiSplashDam"></div><div class="geiSplashMill"></div><div class="geiSplashWheel"></div><div class="geiSplashOcean"></div>
     <svg class="geiSplashPath" viewBox="0 0 760 360" preserveAspectRatio="none"><path d="M105 75 C175 100 190 155 285 165 C350 175 360 235 425 238 C510 240 560 292 650 278"/></svg>
@@ -5423,6 +5435,21 @@ function restoreVisualProgress(){
 }
 
 
+/* GEI SPLASH V1.2 — randomized ITES visual */
+(function(){
+  var splash=document.getElementById("geiSplash");
+  var ite=document.getElementById("geiSplashIte");
+  if(!splash||!ite)return;
+  var images=[
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-y-all-too-2QrVO6tdd9IKOTXW.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/yalltoo-ites-T02oTGfDO94M9QFy.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/yall-too-ites-JINUQgBwFh7T4087.png"
+  ];
+  var pick=images[Math.floor(Math.random()*images.length)];
+  ite.src=pick;
+  ite.onerror=function(){ite.style.display="none";};
+})();
+
 /* GEI SPLASH V1.0 — reveal the game after exactly 10 seconds. */
 (function(){
   var splash=document.getElementById("geiSplash");
@@ -5469,6 +5496,8 @@ function restoreVisualProgress(){
     tone(92,.55,"square",3.15,.035); tone(138,.45,"triangle",3.5,.03); noise(.7,300,850,.055,3.2);
     /* 6–8s: mill engages */
     noise(1.6,260,1450,.105,5.4); tone(196,.9,"triangle",5.7,.03); tone(294,.8,"triangle",6.05,.03);
+    /* 6.92s: sluice gate release — synchronized with the visual slam */
+    tone(68,.28,"square",6.92,.055); tone(118,.22,"sawtooth",6.95,.028); noise(.58,150,1100,.16,6.94);
     /* 8–10s: ocean + brand crescendo */
     noise(1.8,120,650,.14,7.2); [523,659,784,1046].forEach(function(f,i){tone(f,.7,"triangle",7.7+i*.16,.035);});
     tone(1318,1.1,"sine",8.55,.045); noise(1.0,450,1800,.065,8.8);
