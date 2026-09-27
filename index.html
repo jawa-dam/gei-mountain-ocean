@@ -1267,6 +1267,48 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 }
 .levelCard.show{ opacity:1; pointer-events:auto; }
 .levelCard.show.flashIn{ animation:lcFlash .6s ease-out; }
+.levelCard.milestone .lcEyebrow,
+.levelCard.milestone .lcLevel,
+.levelCard.milestone .lcStage,
+.levelCard.milestone .lcCongrats,
+.levelCard.milestone .lcOz,
+.levelCard.milestone .lcRescue,
+.levelCard.milestone .lcQuip,
+.levelCard.milestone .lcChain,
+.levelCard.milestone .lcSong,
+.levelCard.milestone .lcNote{ }
+.milestoneCelebration{
+  display:none; position:relative; text-align:center; margin:4px auto 10px;
+  padding:10px 8px 12px; border-radius:22px;
+  background:linear-gradient(145deg,rgba(0,0,0,.18),rgba(255,255,255,.08));
+  border:1.5px solid rgba(255,255,255,.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 28px color-mix(in srgb,var(--water-bright) 25%,transparent);
+  overflow:hidden;
+}
+.levelCard.milestone .milestoneCelebration{ display:block; }
+.levelCard.milestone .lcStage{ display:none; }
+.levelCard.milestone .lcEyebrow{ font-size:.82rem; color:var(--gold); opacity:1; }
+.levelCard.milestone .lcLevel{ font-size:clamp(1.7rem,8vw,2.45rem); margin-top:6px; }
+.levelCard.milestone .lcCongrats{ display:none; }
+.levelCard.milestone .lcOz{ margin-top:8px; font-size:.82rem; }
+.levelCard.milestone .lcOzNum{ font-size:1.15rem; }
+.levelCard.milestone .lcRescue,
+.levelCard.milestone .lcQuip,
+.levelCard.milestone .lcChain,
+.levelCard.milestone .lcSong,
+.levelCard.milestone .lcNote{ display:none; }
+.milestoneTitle{ font-size:clamp(1.35rem,6vw,1.9rem); font-weight:1000; letter-spacing:.03em; text-transform:uppercase; text-shadow:0 0 18px var(--water-bright); }
+.milestoneSub{ margin-top:4px; font-size:.82rem; font-weight:850; color:rgba(255,255,255,.86); }
+.milestoneArt{ position:relative; height:170px; max-width:390px; margin:8px auto 2px; }
+.milestoneArt img{
+  position:absolute; left:50%; top:50%; width:min(58%,190px); height:135px; object-fit:contain;
+  transform:translate(-50%,-50%) rotate(var(--rot)) scale(var(--scale));
+  filter:drop-shadow(0 0 14px color-mix(in srgb,var(--water-bright) 60%,transparent));
+  animation:milestonePop .7s cubic-bezier(.34,1.56,.64,1) var(--delay) both, milestoneFloat 2.8s ease-in-out calc(var(--delay) + .7s) infinite;
+}
+@keyframes milestonePop{ from{opacity:0;transform:translate(-50%,-50%) rotate(var(--rot)) scale(.25);} to{opacity:1;transform:translate(-50%,-50%) rotate(var(--rot)) scale(var(--scale));} }
+@keyframes milestoneFloat{ 0%,100%{margin-top:0;} 50%{margin-top:-7px;} }
+@media (max-width:380px){ .milestoneArt{height:145px;} .milestoneArt img{height:112px;} }
 @keyframes lcFlash{ 0%{ background:color-mix(in srgb, var(--water-bright) 55%, transparent); } 100%{ background:rgba(2,6,14,.8); } }
 .levelInner{
   position:relative; width:100%; max-width:430px; max-height:100%; overflow:auto;
@@ -1827,6 +1869,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <div class="levelInner" id="levelInner">
         <div class="lcEyebrow">💧 Hydraulic cycle complete</div>
         <div class="lcLevel" id="lcLevel">LEVEL 1 COMPLETE</div>
+        <div class="milestoneCelebration" id="milestoneCelebration" aria-live="polite"></div>
         <div class="lcStage">
           <div class="lcGlow"></div>
           <svg class="lcBackdrop" id="lcBackdrop" viewBox="-120 -62 240 120" aria-hidden="true"></svg>
@@ -1887,7 +1930,11 @@ const DAY_REWARD_FL_OZ   = 111;
 const DAYS_PER_LEVEL     = 6;
 const LEVEL_REWARD_FL_OZ = DAY_REWARD_FL_OZ * DAYS_PER_LEVEL; // 666
 const UNLOCK_COST_FL_OZ  = 6660;                              // THE unlock price: any song, paid character or skin (10 levels)
-const DAY_TIME_LIMIT_MS  = 6000;                              // the ONE day-time constant
+const DAY_TIME_LIMIT_MS  = 6000;                              // Levels 1–60
+const ADVANCED_DAY_TIME_LIMIT_MS = 10000;                     // Level 61+ after Level 60 is mastered
+function getRequiredTaps(level){ return Math.ceil(Math.max(1, level) / 6) * 6; }
+function getDayTimeLimitMs(level){ return level > 60 ? ADVANCED_DAY_TIME_LIMIT_MS : DAY_TIME_LIMIT_MS; }
+function isMajorMilestone(level){ return level >= 6 && (level - 6) % 30 === 0; }
 /* Pressure phases are presentation of the same clock (no second timer). */
 const PRESSURE_PHASES = [
   { key:"normal",   label:"Normal flow",          aboveMs:4000 },
@@ -3199,7 +3246,7 @@ function updateProgressDots(){
   const dots = progressRow.querySelectorAll(".dot i");
   dots.forEach((fillEl, i)=>{
     if(i < state.currentStep) fillEl.style.width = "100%";
-    else if(i === state.currentStep) fillEl.style.width = (state.tapCount/3*100) + "%";
+    else if(i === state.currentStep) fillEl.style.width = (state.tapCount / getRequiredTaps(state.level) * 100) + "%";
     else fillEl.style.width = "0%";
   });
 }
@@ -3375,8 +3422,10 @@ world.addEventListener("click", (e)=>{
   const tapY = e.clientY - worldRect.top;
 
   state.tapCount++;
+  const requiredTaps = getRequiredTaps(state.level);
+  const tapRatio = state.tapCount / requiredTaps;
   spawnRippleAt(tapX, tapY);
-  spawnFoamAt(tapX, tapY, state.tapCount === 3);
+  spawnFoamAt(tapX, tapY, state.tapCount === requiredTaps);
   playWaterTap(state.tapCount);
 
   if(state.tapCount === 1){
@@ -3384,7 +3433,11 @@ world.addEventListener("click", (e)=>{
   } else if(state.tapCount === 2){
     g.classList.add("showName");
     showToast(step.name);
-  } else if(state.tapCount === 3){
+  } else if(state.tapCount < requiredTaps){
+    if(tapRatio >= .5) g.classList.add("showName");
+    if(tapRatio >= .75) g.classList.add("highlight");
+    showToast(`TAPS ${state.tapCount} / ${requiredTaps}`);
+  } else if(state.tapCount === requiredTaps){
     stopDayTimer();                                   // success cancels the clock first
     g.classList.remove("active","highlight");
     g.classList.add("done");
@@ -3429,7 +3482,7 @@ function flowSegment(index){
 /* =========================================================
    v2 — DAYS, REWARDS, TIMER
 ========================================================= */
-/* Starts (or restarts) the day at `index` with a fresh 10-second clock. */
+/* Starts (or restarts) the day with a fresh tier-based clock. */
 function beginDay(index){
   if(index === 0 && !state.iteRescueStats.currentIteId) selectCurrentIte();   // DAM NATION V1.0: new cycle → next trapped -ite
   state.currentStep = index;
@@ -3481,8 +3534,8 @@ function showDayReward(index){
 
 let dayTimerId = null;
 let dayTimerStartedAt = 0;
-let dayTimerBudgetMs = DAY_TIME_LIMIT_MS;
-let dayTimerRemainingMs = DAY_TIME_LIMIT_MS;
+let dayTimerBudgetMs = getDayTimeLimitMs(state.level);
+let dayTimerRemainingMs = getDayTimeLimitMs(state.level);
 let timerPaused = false;
 let lastWarnSecond = null;
 
@@ -3490,7 +3543,7 @@ function currentRemainingMs(){
   if(dayTimerId === null) return dayTimerRemainingMs;
   return Math.max(0, dayTimerBudgetMs - (performance.now() - dayTimerStartedAt));
 }
-function startDayTimer(budgetMs = DAY_TIME_LIMIT_MS){
+function startDayTimer(budgetMs = getDayTimeLimitMs(state.level)){
   stopDayTimer();                                    // never more than one interval alive
   timerPaused = false;
   dayTimerBudgetMs = budgetMs;
@@ -3510,7 +3563,7 @@ function resetDayTimer(){
   stopDayTimer();
   timerPaused = false;
   lastWarnSecond = null;
-  dayTimerRemainingMs = DAY_TIME_LIMIT_MS;
+  dayTimerRemainingMs = getDayTimeLimitMs(state.level);
   renderTimer();
 }
 function pauseDayTimer(){
@@ -3561,7 +3614,7 @@ function renderTimer(){
   world.classList.toggle("pressureImminent", live && ph.key === "imminent");
   timerBox.classList.toggle("idle", phase === "ready" || timerPaused);
   timerBox.classList.toggle("expired", phase === "timeout");
-  timerFill.style.width = (rem / DAY_TIME_LIMIT_MS * 100) + "%";
+  timerFill.style.width = (rem / getDayTimeLimitMs(state.level) * 100) + "%";
 }
 
 function handleDayTimeout(){
@@ -3615,7 +3668,7 @@ function renderHud(){
   const d = DAM_DAYS[Math.min(state.currentStep, DAYS_PER_LEVEL - 1)];
   hudLevel.textContent = `Level ${fmt(state.level)}`;
   hudDay.textContent = `Day ${d.day} / ${DAYS_PER_LEVEL}`;
-  hudStation.textContent = d.station;
+  hudStation.textContent = `${d.station} · TAPS ${state.tapCount} / ${getRequiredTaps(state.level)}`;
   hudOz.innerHTML = `💧 <strong>${fmt(state.levelFlOz)}</strong> / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ`;
   hudReward.innerHTML = `${d.title} reward: ${esc(d.displayAmount)} = <strong>+${DAY_REWARD_FL_OZ} FL OZ</strong>`;
   loopCountEl.textContent = fmt(state.completedLevels);
@@ -4658,12 +4711,35 @@ function renderChain(){
     + '<span class="lcArrow">→</span><span class="lcChip ocean">🌊 Ocean</span>';
 }
 
+const MILESTONE_ART = [
+  "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/save-the-ites-dam-nation-x844iIM6Fy5edJP9.png",
+  "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-dam-nation-EH8AMIEkwROPBy6b.png",
+  "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-nation-save-the-ites-afampx1KT3CCCrxm.png",
+  "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-nation-LrrY5wOrbepiUXU3.png"
+];
+function renderMilestoneCelebration(level){
+  const box = $(\"milestoneCelebration\");
+  if(!box) return;
+  if(!isMajorMilestone(level)){ box.innerHTML = \"\"; return; }
+  const chapter = level === 6 ? "FOUNDATION MASTERED" : level === 36 ? "DAM NATION MASTERED" : level === 66 ? "MASTER CONTROL UNLOCKED" : "HYDRAULIC MILESTONE";
+  const nextTaps = getRequiredTaps(level + 1);
+  const totalDays = level * DAYS_PER_LEVEL;
+  const images = [...MILESTONE_ART].sort(()=>Math.random()-.5);
+  box.innerHTML = `<div class="milestoneTitle">🏆 ${chapter}</div>
+    <div class="milestoneSub">${fmt(level)} LEVELS · ${fmt(totalDays)} HYDRAULIC DAYS · ${fmt(getRequiredTaps(level))} TAPS / DAY</div>
+    <div class="milestoneArt">${images.map((src,i)=>`<img src="${src}" alt="DAM NATION milestone artwork" style="--rot:${[-11,7,-5,12][i]}deg;--scale:${[.92,1.02,.88,.98][i]};--delay:${i*.11}s" loading="eager">`).join("")}</div>
+    <div class="milestoneSub">NEXT ERA: ${fmt(nextTaps)} TAPS / DAY</div>`;
+}
+
 function showLevelComplete(opts = {}){
   stopDayTimer();
   state.phase = "levelComplete";
   state.busy = false;
 
-  lcLevel.textContent = `LEVEL ${fmt(state.level)} COMPLETE`;
+  const milestone = isMajorMilestone(state.level);
+  lcLevel.textContent = milestone ? `LEVEL ${fmt(state.level)} COMPLETE` : `LEVEL ${fmt(state.level)} COMPLETE`;
+  levelCard.classList.toggle("milestone", milestone);
+  renderMilestoneCelebration(state.level);
   renderCharacter();
   renderLevelBackdrop();
   renderChain();
@@ -4675,7 +4751,7 @@ function showLevelComplete(opts = {}){
   lcSong.innerHTML = `<div class="lcSongLabel">💧 +${fmt(LEVEL_REWARD_FL_OZ)} FL OZ BANKED</div>
     <div class="lcSongTitle">Wallet: ${fmt(state.totalFlOz)} FL OZ</div>
     <div class="lcSongArtist">Spend it in the 🛒 Store whenever you choose — songs, characters or skins.</div>`;
-  lcBtn.textContent = `CONTINUE TO LEVEL ${fmt(state.level + 1)}`;
+  lcBtn.textContent = milestone ? "SPIN BONUS WATERWHEEL" : `CONTINUE TO LEVEL ${fmt(state.level + 1)}`;
   lcBtn.disabled = false;
   $("lcQuip").textContent = getDamHumor("levelComplete");
   lcNote.textContent = getDamHumor(state.totalFlOz >= 3 * UNLOCK_COST_FL_OZ ? "bigWallet" : "earn");
