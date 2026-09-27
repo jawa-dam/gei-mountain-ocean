@@ -5202,55 +5202,173 @@ function creditPack(packId, receiptId){
 }
 
 let paypalSdkPromise = null;
-function loadPayPalSdk(){
+let paypalSdkLoadAttempt = 0;
+
+function paypalDiagnosticMessage(code, detail){
+  const map = {
+    config_http: "PayPal configuration endpoint failed",
+    config_missing: "PayPal configuration did not return a client ID",
+    sdk_timeout: "PayPal SDK load timed out",
+    sdk_error: "PayPal SDK script was rejected by the browser",
+    sdk_init: "PayPal SDK loaded but did not initialize",
+    sdk_ineligible: "PayPal loaded but this browser is not eligible for PayPal Buttons"
+  };
+  const label = map[code] || "PayPal checkout could not initialize";
+  return detail ? label + ": " + detail : label + ".";
+}
+
+function ensurePayPalRetryButton(status, retryFn){
+  let btn = document.getElementById("paypalRetryBtn");
+  if(!btn){
+    btn = document.createElement("button");
+    btn.id = "paypalRetryBtn";
+    btn.type = "button";
+    btn.className = "storeBtn paypalCancel";
+    btn.textContent = "RETRY PAYPAL";
+    btn.style.marginTop = "8px";
+    status.parentNode.insertBefore(btn, status.nextSibling);
+  }
+  btn.disabled = false;
+  btn.onclick = retryFn;
+  return btn;
+}
+
+function clearPayPalRetryButton(){
+  const btn = document.getElementById("paypalRetryBtn");
+  if(btn) btn.remove();
+}
+
+function loadPayPalSdk(forceRetry){
   if(window.paypal && typeof window.paypal.Buttons === "function") return Promise.resolve(window.paypal);
-  if(paypalSdkPromise) return paypalSdkPromise;
+  if(paypalSdkPromise && !forceRetry) return paypalSdkPromise;
+
+  paypalSdkLoadAttempt++;
+  const attempt = paypalSdkLoadAttempt;
+
   paypalSdkPromise = fetch("/api/paypal/config", { cache:"no-store" })
-    .then(r => r.ok ? r.json() : r.json().catch(()=>({})).then(x => Promise.reject(new Error(x.error || "PayPal configuration unavailable."))))
-    .then(cfg => new Promise((resolve,reject)=>{
-      const existing = document.querySelector('script[data-yalltoo-paypal]');
-      if(existing){
-        existing.addEventListener("load",()=>resolve(window.paypal),{once:true});
-        existing.addEventListener("error",()=>reject(new Error("PayPal SDK failed to load.")),{once:true});
-        return;
+    .then(async r => {
+      let cfg = {};
+      try { cfg = await r.json(); } catch(e) {}
+      if(!r.ok){
+        throw new Error(paypalDiagnosticMessage(
+          "config_http",
+          (cfg && cfg.error) ? cfg.error : ("HTTP " + r.status)
+        ));
       }
-      const s=document.createElement("script");
-      s.src="https://www.paypal.com/sdk/js?client-id="+encodeURIComponent(cfg.clientId)+"&currency=USD&intent=capture&components=buttons";
-      s.async=true; s.dataset.yalltooPaypal="1";
-      s.onload=()=>window.paypal ? resolve(window.paypal) : reject(new Error("PayPal SDK did not initialize."));
-      s.onerror=()=>reject(new Error("PayPal SDK failed to load."));
+      if(!cfg || typeof cfg.clientId !== "string" || !cfg.clientId.trim()){
+        throw new Error(paypalDiagnosticMessage("config_missing"));
+      }
+      return cfg;
+    })
+    .then(cfg => new Promise((resolve,reject)=>{
+      const old = document.querySelector('script[data-yalltoo-paypal]');
+      if(old) old.remove();
+
+      const s = document.createElement("script");
+      const sdkUrl =
+        "https://www.paypal.com/sdk/js?client-id=" +
+        encodeURIComponent(cfg.clientId.trim()) +
+        "&currency=USD&intent=capture&components=buttons";
+
+      let settled = false;
+      const timeout = setTimeout(()=>{
+        if(settled) return;
+        settled = true;
+        try { s.remove(); } catch(e) {}
+        reject(new Error(paypalDiagnosticMessage("sdk_timeout", "attempt " + attempt)));
+      }, 15000);
+
+      s.src = sdkUrl;
+      s.async = true;
+      s.dataset.yalltooPaypal = "1";
+      s.dataset.yalltooPaypalAttempt = String(attempt);
+      s.onload = ()=>{
+        if(settled) return;
+        clearTimeout(timeout);
+        if(window.paypal && typeof window.paypal.Buttons === "function"){
+          settled = true;
+          resolve(window.paypal);
+        }else{
+          settled = true;
+          reject(new Error(paypalDiagnosticMessage("sdk_init")));
+        }
+      };
+      s.onerror = ()=>{
+        if(settled) return;
+        clearTimeout(timeout);
+        settled = true;
+        try { s.remove(); } catch(e) {}
+        reject(new Error(paypalDiagnosticMessage("sdk_error", "attempt " + attempt)));
+      };
       document.head.appendChild(s);
-    }));
+    }))
+    .catch(err => {
+      paypalSdkPromise = null;
+      throw err;
+    });
+
   return paypalSdkPromise;
 }
+
 function closePayPalCheckout(){
   const box=$("storeCheckout"); if(!box) return;
   box.hidden=true;
   const buttons=$("paypalButtons"); if(buttons) buttons.innerHTML="";
   const status=$("paypalCheckoutStatus"); if(status) status.textContent="";
+  clearPayPalRetryButton();
 }
+
 async function startCheckout(packId){
   const pack = STORE_PACKS.find(p => p.id === packId);
   if(!pack) return;
+
   const box=$("storeCheckout"), item=$("paypalCheckoutItem"), status=$("paypalCheckoutStatus"), buttons=$("paypalButtons");
   if(!box || !item || !status || !buttons) return;
-  box.hidden=false; item.textContent=pack.label+" — $"+Number(pack.priceUsd).toFixed(2)+" USD"; buttons.innerHTML="";
-  status.textContent="Loading secure PayPal checkout…";
-  try{
-    const paypal=await loadPayPalSdk();
+
+  box.hidden=false;
+  item.textContent=pack.label+" — $"+Number(pack.priceUsd).toFixed(2)+" USD";
+  buttons.innerHTML="";
+  clearPayPalRetryButton();
+  status.textContent="Connecting securely to PayPal…";
+
+  const retry = ()=>{
+    clearPayPalRetryButton();
+    buttons.innerHTML="";
+    status.textContent="Retrying PayPal connection…";
+    loadPayPalSdk(true)
+      .then(()=>renderPayPalButtons())
+      .catch(err=>{
+        console.error("[PayPal SDK diagnostic]", err);
+        status.textContent=(err && err.message) || "PayPal checkout could not initialize.";
+        ensurePayPalRetryButton(status, retry);
+      });
+  };
+
+  const renderPayPalButtons = async ()=>{
+    const paypal=await loadPayPalSdk(false);
     status.textContent="";
+    clearPayPalRetryButton();
+
     const instance=paypal.Buttons({
       style:{layout:"vertical",shape:"rect",label:"paypal",height:48},
       createOrder:async()=>{
-        const r=await fetch("/api/paypal/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({packId})});
-        const data=await r.json();
+        const r=await fetch("/api/paypal/create-order",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({packId})
+        });
+        const data=await r.json().catch(()=>({}));
         if(!r.ok || !data.id) throw new Error(data.error || "Unable to start PayPal checkout.");
         return data.id;
       },
       onApprove:async(data)=>{
         status.textContent="Confirming your payment…";
-        const r=await fetch("/api/paypal/capture-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderID:data.orderID,packId})});
-        const result=await r.json();
+        const r=await fetch("/api/paypal/capture-order",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({orderID:data.orderID,packId})
+        });
+        const result=await r.json().catch(()=>({}));
         if(!r.ok || !result.ok || result.status!=="COMPLETED" || !result.claimToken){
           throw new Error(result.error || "Payment could not be confirmed.");
         }
@@ -5259,9 +5377,13 @@ async function startCheckout(packId){
         const claimResponse=await fetch("/api/paypal/claim-entitlement",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({claimToken:result.claimToken,captureID:result.captureID,claimId})
+          body:JSON.stringify({
+            claimToken:result.claimToken,
+            captureID:result.captureID,
+            claimId
+          })
         });
-        const claim=await claimResponse.json();
+        const claim=await claimResponse.json().catch(()=>({}));
         if(!claimResponse.ok || !claim.ok || !claim.entitlement){
           throw new Error(claim.error || "Payment was confirmed but the durable entitlement could not be claimed.");
         }
@@ -5277,14 +5399,28 @@ async function startCheckout(packId){
         renderStore();
         setTimeout(closePayPalCheckout,1800);
       },
-      onCancel:()=>{ status.textContent="Checkout canceled. Your payment was not captured."; },
-      onError:(err)=>{ console.error("[PayPal Checkout]",err); status.textContent="PayPal checkout hit an error. No game credit was added."; }
+      onCancel:()=>{
+        status.textContent="Checkout canceled. Your payment was not captured.";
+      },
+      onError:(err)=>{
+        console.error("[PayPal Checkout]",err);
+        status.textContent="PayPal checkout hit an error. No game credit was added.";
+      }
     });
-    if(!instance.isEligible()) throw new Error("PayPal is not available for this checkout.");
+
+    if(!instance.isEligible()){
+      throw new Error(paypalDiagnosticMessage("sdk_ineligible"));
+    }
+
     await instance.render("#paypalButtons");
+  };
+
+  try{
+    await renderPayPalButtons();
   }catch(err){
-    console.error("[PayPal]",err);
-    status.textContent=err.message || "PayPal checkout is unavailable right now.";
+    console.error("[PayPal diagnostic]", err);
+    status.textContent=(err && err.message) || "PayPal checkout is unavailable right now.";
+    ensurePayPalRetryButton(status, retry);
   }
 }
 
