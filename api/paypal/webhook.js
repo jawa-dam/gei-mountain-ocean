@@ -1,3 +1,5 @@
+import { recordEntitlement } from "../_lib/paypal-ledger.js";
+
 const PACKS = {
   single: { label: "1 Song", price: "1.00", flOz: 6660 },
   ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
@@ -99,9 +101,13 @@ async function validateCompletedCapture(token, event) {
     throw new Error("PayPal capture validation failed.");
   }
 
+  const invoiceId = unit?.invoice_id;
+  if (!invoiceId) throw new Error("PayPal order is missing the entitlement token.");
+
   return {
     orderID: orderId,
     captureID: captureId,
+    invoiceId,
     packId,
     flOz: pack.flOz,
     amount: pack.price,
@@ -133,16 +139,22 @@ export default async function handler(req, res) {
 
     if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const fulfillment = await validateCompletedCapture(token, event);
+      const ledger = await recordEntitlement({
+        eventId: eventId || "capture:" + fulfillment.captureID,
+        ...fulfillment
+      });
 
-      // The browser capture endpoint is still the immediate fulfillment path.
-      // This webhook response provides a server-verified fulfillment record.
-      // Durable cross-device entitlement storage requires a persistent datastore.
       return res.status(200).json({
         received: true,
         verified: true,
         eventType,
         eventId,
-        fulfillment: { ...fulfillment, status: "FULFILLABLE" }
+        fulfillment: {
+          ...fulfillment,
+          status: "FULFILLABLE",
+          durable: true,
+          created: ledger.created
+        }
       });
     }
 
