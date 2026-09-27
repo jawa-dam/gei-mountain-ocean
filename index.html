@@ -4127,7 +4127,7 @@ function commitBonusPrize(prize){
   } else if(prize.kind === "damPlay"){
     state.damMachineFreePlays = Math.min(999, state.damMachineFreePlays + 1);   // free play only; FL OZ untouched
     res.title = "🎰 DAM MACHINE PLAY!";
-    res.detail = "One free Dam Machine spin is waiting in your 👤 Profile.";
+    res.detail = "🎰 A free DAM MACHINE spin is ready on the left side of the game.";
   } else {
     res.title = "😂 DAM PUN!"; res.detail = "";
   }
@@ -4136,7 +4136,7 @@ function commitBonusPrize(prize){
   res.humor = getDamHumor(prize.humor);
   if(prize.kind !== "freeSpin"){ advanceLevel(); res.final = true; }
   saveGame();
-  renderRadio(); renderStore(); renderHud();
+  renderRadio(); renderStore(); renderHud(); renderDamMachineHeader();
   return res;
 }
 
