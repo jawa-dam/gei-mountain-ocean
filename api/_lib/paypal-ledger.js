@@ -97,7 +97,7 @@ export async function claimEntitlement(invoiceId, captureID, claimId) {
     obj.claimedAt = ARGV[2]
     obj.claimId = ARGV[3]
     local updated = cjson.encode(obj)
-    redis.call("SET", KEYS[1], updated, "EX", ARGV[3])
+    redis.call("SET", KEYS[1], updated, "EX", ARGV[4])
     return {1, updated}
   `;
 
