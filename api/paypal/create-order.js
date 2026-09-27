@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     const pack = PACKS[packId];
     if (!pack) return res.status(400).json({ error: "Unknown FL OZ pack." });
 
+    const invoiceId = "GEI-" + crypto.randomUUID();
     const token = await paypalToken();
     const response = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
       method: "POST",
@@ -44,6 +45,7 @@ export default async function handler(req, res) {
         purchase_units: [{
           custom_id: packId,
           description: "DAM NATION " + pack.label + " — FL OZ water points",
+          invoice_id: invoiceId,
           amount: { currency_code: "USD", value: pack.price }
         }],
         application_context: {
@@ -57,7 +59,13 @@ export default async function handler(req, res) {
     if (!response.ok || !data.id) {
       return res.status(response.status || 502).json({ error: data.message || "Unable to create PayPal order." });
     }
-    return res.status(200).json({ id: data.id, packId, amount: pack.price, currency: "USD" });
+    return res.status(200).json({
+      id: data.id,
+      packId,
+      amount: pack.price,
+      currency: "USD",
+      claimToken: invoiceId
+    });
   } catch (err) {
     console.error("[PayPal create-order]", err);
     return res.status(500).json({ error: err.message || "Unable to create PayPal order." });
