@@ -5251,11 +5251,28 @@ async function startCheckout(packId){
         status.textContent="Confirming your payment…";
         const r=await fetch("/api/paypal/capture-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orderID:data.orderID,packId})});
         const result=await r.json();
-        if(!r.ok || !result.ok || result.status!=="COMPLETED") throw new Error(result.error || "Payment could not be confirmed.");
-        const credited=creditPack(packId,result.captureID);
-        if(!credited.ok) throw new Error(credited.message || "Payment was confirmed but the reward was already credited.");
-        status.textContent="✅ Payment complete — your FL OZ has been added!";
-        showToast("💧 +"+fmt(credited.credited)+" FL OZ added");
+        if(!r.ok || !result.ok || result.status!=="COMPLETED" || !result.claimToken){
+          throw new Error(result.error || "Payment could not be confirmed.");
+        }
+
+        const claimResponse=await fetch("/api/paypal/claim-entitlement",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({claimToken:result.claimToken,captureID:result.captureID})
+        });
+        const claim=await claimResponse.json();
+        if(!claimResponse.ok || !claim.ok || !claim.entitlement){
+          throw new Error(claim.error || "Payment was confirmed but the durable entitlement could not be claimed.");
+        }
+
+        const credited=creditPack(claim.entitlement.packId,claim.entitlement.captureID);
+        if(!credited.ok && credited.message!=="Receipt already credited."){
+          throw new Error(credited.message || "Payment was confirmed but the reward could not be added.");
+        }
+
+        status.textContent="✅ Payment complete — your FL OZ entitlement is secured!";
+        if(credited.ok) showToast("💧 +"+fmt(credited.credited)+" FL OZ added");
+        else showToast("💧 Your FL OZ entitlement is already in this game.");
         renderStore();
         setTimeout(closePayPalCheckout,1800);
       },
