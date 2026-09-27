@@ -1,0 +1,65 @@
+const PACKS = {
+  single: { label: "1 Song", price: "1.00", flOz: 6660 },
+  ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
+  twentyfive: { label: "25 Songs", price: "6.00", flOz: 166500 }
+};
+
+async function paypalToken() {
+  const id = process.env.PAYPAL_CLIENT_ID;
+  const secret = process.env.PAYPAL_CLIENT_SECRET;
+  const env = (process.env.PAYPAL_ENV || "live").toLowerCase();
+  if (!id || !secret) throw new Error("PayPal credentials are not configured.");
+  if (env !== "live") throw new Error("PayPal Live checkout is not enabled.");
+  const auth = Buffer.from(id + ":" + secret).toString("base64");
+  const r = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
+    method: "POST",
+    headers: { Authorization: "Basic " + auth, "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=client_credentials"
+  });
+  const data = await r.json();
+  if (!r.ok || !data.access_token) throw new Error(data.error_description || "PayPal authentication failed.");
+  return data.access_token;
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+  try {
+    const packId = req.body && req.body.packId;
+    const pack = PACKS[packId];
+    if (!pack) return res.status(400).json({ error: "Unknown FL OZ pack." });
+
+    const token = await paypalToken();
+    const response = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+        Prefer: "return=representation"
+      },
+      body: JSON.stringify({
+        intent: "CAPTURE",
+        purchase_units: [{
+          custom_id: packId,
+          description: "DAM NATION " + pack.label + " — FL OZ water points",
+          amount: { currency_code: "USD", value: pack.price }
+        }],
+        application_context: {
+          brand_name: "Y'all Too — DAM NATION",
+          user_action: "PAY_NOW",
+          shipping_preference: "NO_SHIPPING"
+        }
+      })
+    });
+    const data = await response.json();
+    if (!response.ok || !data.id) {
+      return res.status(response.status || 502).json({ error: data.message || "Unable to create PayPal order." });
+    }
+    return res.status(200).json({ id: data.id, packId, amount: pack.price, currency: "USD" });
+  } catch (err) {
+    console.error("[PayPal create-order]", err);
+    return res.status(500).json({ error: err.message || "Unable to create PayPal order." });
+  }
+}
