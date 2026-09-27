@@ -79,8 +79,8 @@ export async function recordEntitlement({
   };
 }
 
-export async function claimEntitlement(invoiceId, captureID) {
-  if (!invoiceId || !captureID) throw new Error("Missing entitlement claim information.");
+export async function claimEntitlement(invoiceId, captureID, claimId) {
+  if (!invoiceId || !captureID || !claimId) throw new Error("Missing entitlement claim information.");
 
   const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
   const now = new Date().toISOString();
@@ -90,8 +90,12 @@ export async function claimEntitlement(invoiceId, captureID) {
     if not raw then return {0, "NOT_FOUND"} end
     local obj = cjson.decode(raw)
     if obj.captureID ~= ARGV[1] then return {0, "CAPTURE_MISMATCH"} end
-    if obj.claimedAt then return {0, raw} end
+    if obj.claimedAt then
+      if obj.claimId == ARGV[3] then return {2, raw} end
+      return {0, "ALREADY_CLAIMED"}
+    end
     obj.claimedAt = ARGV[2]
+    obj.claimId = ARGV[3]
     local updated = cjson.encode(obj)
     redis.call("SET", KEYS[1], updated, "EX", ARGV[3])
     return {1, updated}
@@ -104,6 +108,7 @@ export async function claimEntitlement(invoiceId, captureID) {
     entitlementKey,
     captureID,
     now,
+    claimId,
     String(LEDGER_TTL_SECONDS)
   ]);
 
@@ -111,7 +116,7 @@ export async function claimEntitlement(invoiceId, captureID) {
     return { ok: true, alreadyClaimed: false, record: JSON.parse(result[1]) };
   }
 
-  if (result?.[1] && result[1] !== "NOT_FOUND" && result[1] !== "CAPTURE_MISMATCH") {
+  if (Number(result?.[0]) === 2) {
     return { ok: true, alreadyClaimed: true, record: JSON.parse(result[1]) };
   }
 
