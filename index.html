@@ -5450,7 +5450,35 @@ async function startCheckout(packId){
       },
       onError:(err)=>{
         console.error("[PayPal Checkout]",err);
-        status.textContent="PayPal checkout hit an error. No game credit was added.";
+        const detail = (() => {
+          try{
+            if(!err) return "Unknown PayPal error.";
+            if(typeof err === "string") return err;
+            const parts = [];
+            if(err.name) parts.push(String(err.name));
+            if(err.message) parts.push(String(err.message));
+            if(err.debug_id) parts.push("debug_id " + String(err.debug_id));
+            if(err.details && Array.isArray(err.details)){
+              err.details.forEach(d=>{
+                if(!d) return;
+                const code = d.issue || d.name || "";
+                const msg = d.description || d.message || "";
+                if(code || msg) parts.push([code,msg].filter(Boolean).join(": "));
+              });
+            }
+            if(!parts.length){
+              const safe = {};
+              ["status","error","error_description","reason"].forEach(k=>{
+                if(err[k] != null) safe[k] = err[k];
+              });
+              return Object.keys(safe).length ? JSON.stringify(safe) : "PayPal returned an unspecified checkout error.";
+            }
+            return parts.join(" · ");
+          }catch(e){
+            return "PayPal returned an unreadable checkout error.";
+          }
+        })();
+        status.textContent="PayPal checkout error: " + detail + " · No game credit was added.";
       }
     });
 
