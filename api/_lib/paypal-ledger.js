@@ -1,8 +1,10 @@
 const LEDGER_TTL_SECONDS = 60 * 60 * 24 * 365;
 
 function ledgerConfig() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Support both the explicit Upstash names and the Vercel/Upstash
+  // integration names already provisioned on this project.
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   if (!url || !token) throw new Error("Durable entitlement storage is not configured.");
   return { url: url.replace(/\/$/, ""), token };
 }
