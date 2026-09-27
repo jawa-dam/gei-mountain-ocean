@@ -3794,7 +3794,7 @@ function resumeDayTimer(){
   if(!timerPaused || state.phase !== "playing" || state.busy) return;
   startDayTimer(dayTimerRemainingMs);
 }
-function isTimerBlocked(){ return anyPanelOpen() || document.hidden || (typeof damMachine === "object" && damMachine.open); }
+function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || document.hidden || (typeof damMachine === "object" && damMachine.open); }
 function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayTimer(); }
 
 function tickDayTimer(){
@@ -4464,8 +4464,12 @@ function renderDamMachineHeader(){
   const pill = $("dmPlays");
   pill.textContent = plays > 0 ? `DAM MACHINE PLAYS: ${fmt(plays)}` : "NO FREE PLAYS";
   pill.classList.toggle("none", plays <= 0);
-  const sub = $("dmEntrySub");
-  if(sub) sub.textContent = `Free plays ready: ${fmt(plays)}`;
+  const float = $("dmFloatBtn");
+  if(float){
+    float.hidden=plays<=0;
+    float.classList.toggle("ready",plays>0);
+    float.setAttribute("aria-label",plays>0?`Open DAM MACHINE — ${fmt(plays)} free play${plays===1?"":"s"} ready`:"DAM MACHINE not ready");
+  }
   const btn = $("dmSpinBtn");
   const busy = damMachine.spinning || damMachine.presenting;   // v2.6.3: no spin while a result is being presented
   btn.disabled = busy || plays <= 0;
@@ -4931,11 +4935,11 @@ function runNavSelfTest(){
   const results = [];
   const t = (name, ok) => results.push({ name, ok:!!ok });
   t("menu button exists and controls the sheet", !!$("navMenuBtn") && !!navSheet && $("navMenuBtn").getAttribute("aria-controls") === "navSheet");
-  t("sheet holds all five destinations", ["navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn","dmOpenBtn"].every(id => !!$(id)));
+  t("sheet holds command destinations", ["navHowBtn","navCharactersBtn","navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn"].every(id => !!$(id)));
   t("HUD consolidated: old per-panel buttons removed", !$("#profileBtn") && !$("#tribesBtn") && !$("#radioBtn") && !$("#storeBtn"));
   t("fullscreen stays a direct HUD button", !!$("fullscreenBtn"));
-  t("Dam Machine entry lives inside the consolidated menu", $("dmOpenBtn") && $("dmOpenBtn").closest("#navSheet") !== null);
-  t("machine entry shows the free-play count line", ($("dmEntrySub").textContent || "").length > 0);
+  t("DAM MACHINE removed from menu; floating entry exists", !$("dmOpenBtn") && !!$("dmFloatBtn"));
+  t("character panel exists", !!$("charactersPanel") && !!$("charactersGrid"));
   const pass = results.filter(r => r.ok).length;
   return { pass, fail: results.length - pass, results };
 }
@@ -5332,6 +5336,7 @@ function togglePanel(name){
 ========================================================= */
 const navMenuBtn = $("navMenuBtn"), navSheet = $("navSheet");
 var navOpen = false;
+var preGameOpen = false;
 function openNavMenu(){
   if(damMachine.open || damMachine.spinning) return;      // the machine always stays on top
   navOpen = true;
@@ -5348,11 +5353,72 @@ function closeNavMenu(){
   navMenuBtn.setAttribute("aria-expanded", "false");
 }
 navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMenu(); });
-[["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navStoreBtn","store"]].forEach(([rowId, panelName])=>{
+[["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navStoreBtn","store"],["navCharactersBtn","characters"]].forEach(([rowId, panelName])=>{
   $(rowId).addEventListener("click", ()=>{ closeNavMenu(); togglePanel(panelName); });
 });
-/* (the Dam Machine row keeps id dmOpenBtn; its openDamMachine() wiring lives in the v2.6 block) */
+$("navHowBtn").addEventListener("click", ()=>{ closeNavMenu(); openGameGuide(true); });
+$("dmFloatBtn").addEventListener("click", ()=>openDamMachine());
 $("bonusBtn").addEventListener("click", ()=>{ if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
+
+function renderPreGameCharacters(){
+  const grid=$("preGameAvatarGrid"); if(!grid)return;
+  grid.innerHTML="";
+  CHARACTERS.forEach(c=>{
+    const owned=isUnlocked("characters",c.id), active=state.activeCharacter===c.id;
+    const card=document.createElement("div");
+    card.className="preGameAvatar"+(active?" selected":"")+(owned?"":" locked");
+    card.appendChild(characterImage(c,"preGameAvatarImg"));
+    const name=document.createElement("div"); name.className="preGameAvatarName"; name.textContent=c.name; card.appendChild(name);
+    const status=document.createElement("div"); status.className="preGameAvatarStatus";
+    status.textContent=owned ? ((c.isStarter||c.id===DEFAULT_CHARACTER_ID)?"STARTER · UNLOCKED":"UNLOCKED") : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+    card.appendChild(status);
+    if(owned){
+      card.addEventListener("click",()=>{setActiveCharacter(c.id);renderPreGameCharacters();$("preGameMsg").textContent=`✅ ${c.name} selected.`;});
+    }else{
+      const b=document.createElement("button"); b.className="storeBtn"; b.type="button";
+      b.textContent=state.totalFlOz>=c.cost?`PURCHASE · ${fmt(c.cost)} FL OZ`:`NEED ${fmt(c.cost)} FL OZ`;
+      b.addEventListener("click",ev=>{
+        ev.stopPropagation();
+        if(state.totalFlOz<c.cost){$("preGameMsg").textContent=`💧 Earn ${fmt(c.cost)} FL OZ to purchase ${c.name}.`;return;}
+        const res=purchaseItem("characters",c.id);
+        $("preGameMsg").textContent=res.ok?`🎉 ${c.name} unlocked and selected!`:res.message;
+        if(res.ok){setActiveCharacter(c.id);renderPreGameCharacters();}
+      });
+      card.appendChild(b);
+    }
+    grid.appendChild(card);
+  });
+}
+function openGameGuide(fromMenu){
+  preGameOpen=true;
+  $("preGameCard").classList.add("show");
+  $("preGameClose").hidden=!fromMenu;
+  $("preGameMsg").textContent="";
+  renderPreGameCharacters();
+}
+function closeGameGuide(){
+  if(!preGameOpen)return;
+  preGameOpen=false;
+  $("preGameCard").classList.remove("show");
+  syncTimerPause();
+}
+function beginFromGuide(){
+  const c=getActiveCharacter();
+  if(!c||!isUnlocked("characters",c.id)){ $("preGameMsg").textContent="Choose an unlocked character first."; return; }
+  if($("preGameNever").checked)storageSet("yalltooDamGame.guideSeen","1");
+  preGameOpen=false;
+  $("preGameCard").classList.remove("show");
+  syncTimerPause();
+}
+$("preGameStart").addEventListener("click",beginFromGuide);
+$("preGameClose").addEventListener("click",closeGameGuide);
+$("preGameChooseBtn").addEventListener("click",()=>{document.querySelector('[data-guide-tab="avatar"]').click();$("preGameAvatarGrid").scrollIntoView({block:"nearest"});});
+document.querySelectorAll("[data-guide-tab]").forEach(tab=>{
+  tab.addEventListener("click",()=>{
+    document.querySelectorAll("[data-guide-tab]").forEach(t=>t.classList.toggle("active",t===tab));
+    document.querySelectorAll("[data-guide-pane]").forEach(p=>p.classList.toggle("active",p.dataset.guidePane===tab.dataset.guideTab));
+  });
+});
 document.querySelectorAll("[data-close-panel]").forEach(b => b.addEventListener("click", closePanels));
 
 /* =========================================================
@@ -5812,6 +5878,7 @@ restoreVisualProgress();
 renderTribesList();
 renderRadio();
 renderStore();
+renderCharactersPanel();
 renderDamMachineHeader();                               // v2.6.2: menu free-play line reflects the save
 if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
   // Refreshed while the level card was waiting: the reward is still unredeemed.
@@ -5828,6 +5895,11 @@ if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
 }
 broadcastUnlocks();
 preloadCharacter(getActiveCharacter());
+
+/* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
+if(state.level===1 && state.levelFlOz===0 && storageGet("yalltooDamGame.guideSeen")!=="1"){
+  setTimeout(()=>openGameGuide(false),120);
+}
 
 /* Redraw days already completed in this level (after a refresh) without sounds. */
 function restoreVisualProgress(){
