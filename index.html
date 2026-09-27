@@ -1225,6 +1225,38 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .navRow.dmRow .navRowText strong{ color:var(--gold); }
 .navSheet button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 .navMenuBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.preGameCard{position:absolute;inset:0;z-index:260;display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px);background:rgba(2,6,14,.88);backdrop-filter:blur(10px);opacity:0;pointer-events:none;visibility:hidden;transition:opacity .25s,visibility .25s}
+.preGameCard.show{opacity:1;pointer-events:auto;visibility:visible}
+.preGameInner{position:relative;width:100%;max-width:450px;max-height:92%;overflow:hidden auto;padding:18px 16px 16px;border-radius:26px;text-align:center;background:linear-gradient(165deg,var(--juicy-navy),color-mix(in srgb,var(--juicy-navy) 60%,var(--water-bright)));border:1.5px solid rgba(255,255,255,.42);box-shadow:0 0 55px color-mix(in srgb,var(--water-bright) 38%,transparent)}
+.preGameClose{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.3);color:#fff;font-size:1.05rem;font-weight:900;cursor:pointer}
+.preGameClose[hidden]{display:none}
+.preGameEyebrow{font-size:.78rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.preGameTitle{font-size:clamp(1.65rem,8vw,2.35rem);font-weight:1000;line-height:1.05;margin:4px 30px;text-shadow:0 0 18px var(--water-bright)}
+.preGameSub{font-size:.88rem;font-weight:800;color:var(--foam);margin-bottom:12px}
+.preGameTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.preGameTab{min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font:900 .72rem/1 Inter,system-ui,sans-serif;cursor:pointer}
+.preGameTab.active{background:linear-gradient(135deg,var(--gold),color-mix(in srgb,var(--gold) 55%,#fff));color:var(--juicy-navy);border-color:rgba(255,255,255,.7)}
+.preGamePane{display:none;text-align:left}.preGamePane.active{display:block}
+.preGameList{display:grid;gap:8px}
+.preGameRule{padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.14);font-size:.86rem;font-weight:750;line-height:1.35}
+.preGameRule strong{color:var(--gold)}
+.preGameAvatarGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.preGameAvatar{min-width:0;padding:8px;border-radius:16px;background:rgba(255,255,255,.055);border:1.5px solid rgba(255,255,255,.14);cursor:pointer;text-align:center;color:#fff}
+.preGameAvatar.selected{border-color:var(--gold);box-shadow:0 0 18px color-mix(in srgb,var(--gold) 35%,transparent)}
+.preGameAvatar.locked{opacity:.66}
+.preGameAvatar img{display:block;width:100%;height:105px;object-fit:contain;margin:auto}
+.preGameAvatarName{font-size:.86rem;font-weight:900;line-height:1.15}
+.preGameAvatarStatus{font-size:.68rem;font-weight:800;color:var(--foam);margin-top:3px;line-height:1.25}
+.preGameAvatar button{width:100%;margin-top:6px;min-height:40px;border-radius:10px}
+.preGameFoot{display:flex;align-items:center;gap:9px;margin-top:12px;padding:9px 10px;border-radius:13px;background:rgba(0,0,0,.2)}
+.preGameFoot label{font-size:.76rem;font-weight:800;text-align:left;line-height:1.2}
+.preGameStart{width:100%;margin-top:10px;min-height:54px}.preGameMsg{min-height:1.2em;margin-top:6px;font-size:.76rem;font-weight:800;color:var(--gold)}
+.preGameHowBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:900}
+.dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent)}
+.dmFloatBtn[hidden]{display:none}.dmFloatBtn.ready{animation:dmFloatReady 1.15s ease-in-out infinite}.dmFloatBtn span{position:absolute;left:58px;white-space:nowrap;padding:5px 8px;border-radius:999px;background:rgba(2,6,14,.86);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:.64rem;font-weight:900}
+@keyframes dmFloatReady{0%,100%{transform:scale(1)}50%{transform:scale(1.12);box-shadow:0 0 34px var(--gold)}}
+@media(max-width:380px){.preGameInner{padding:15px 12px 13px}.preGameAvatar img{height:86px}.preGameRule{font-size:.8rem}.dmFloatBtn{left:5px;width:48px;height:48px}.dmFloatBtn span{left:54px}}
+
 .dmClose:focus-visible, .dmSpinBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 @media (max-width:380px){
   .dmPipe{ flex:0 0 12px; }
@@ -1697,33 +1729,46 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
          Rows only call the existing togglePanel()/openDamMachine() entry functions;
          the panels themselves are unchanged. No state is saved. -->
     <nav class="navSheet" id="navSheet" aria-label="Game navigation">
-      <div class="navTitle" aria-hidden="true">Navigation</div>
-      <button class="navRow" id="navProfileBtn" aria-label="Open player profile">
-        <span class="navRowIcon" aria-hidden="true">👤</span>
-        <span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span>
-        <span class="navRowChevron" aria-hidden="true">›</span>
-      </button>
-      <button class="navRow" id="navTribesBtn" aria-label="Open tribes list">
-        <span class="navRowIcon" aria-hidden="true">🚢</span>
-        <span class="navRowText"><strong>Tribes</strong><small>-ites preserved</small></span>
-        <span class="navRowChevron" aria-hidden="true">›</span>
-      </button>
-      <button class="navRow" id="navRadioBtn" aria-label="Open radio">
-        <span class="navRowIcon" aria-hidden="true">🎵</span>
-        <span class="navRowText"><strong>Radio</strong><small>Unlocked songs</small></span>
-        <span class="navRowChevron" aria-hidden="true">›</span>
-      </button>
-      <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store">
-        <span class="navRowIcon" aria-hidden="true">🛒</span>
-        <span class="navRowText"><strong>Store</strong><small>FL OZ unlocks</small></span>
-        <span class="navRowChevron" aria-hidden="true">›</span>
-      </button>
-      <button class="navRow dmRow" id="dmOpenBtn" aria-label="Open the Dam Machine — free hydraulic bonus arcade">
-        <span class="navRowIcon" aria-hidden="true">🎰</span>
-        <span class="navRowText"><strong>DAM MACHINE</strong><small id="dmEntrySub">Free plays ready: 0</small></span>
-        <span class="navRowChevron" aria-hidden="true">›</span>
-      </button>
+      <div class="navTitle" aria-hidden="true">DAM NATION COMMAND MENU</div>
+      <button class="navRow" id="navHowBtn" aria-label="Open How to Play and Rules"><span class="navRowIcon" aria-hidden="true">📖</span><span class="navRowText"><strong>How to Play</strong><small>Rules · taps · levels · bonuses</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <button class="navRow" id="navCharactersBtn" aria-label="Open character roster"><span class="navRowIcon" aria-hidden="true">👤</span><span class="navRowText"><strong>Characters</strong><small>Choose · purchase · unlock</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <button class="navRow" id="navProfileBtn" aria-label="Open player profile"><span class="navRowIcon" aria-hidden="true">📊</span><span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <button class="navRow" id="navTribesBtn" aria-label="Open tribes list"><span class="navRowIcon" aria-hidden="true">🚢</span><span class="navRowText"><strong>-ites</strong><small>Rescue record · preserved names</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <button class="navRow" id="navRadioBtn" aria-label="Open radio"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Radio</strong><small>Unlocked songs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store"><span class="navRowIcon" aria-hidden="true">🛒</span><span class="navRowText"><strong>Store</strong><small>FL OZ · songs · skins · packs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
+    <button class="dmFloatBtn" id="dmFloatBtn" type="button" hidden aria-label="Open DAM MACHINE when a free play is ready">🎰<span id="dmFloatLabel">BONUS READY</span></button>
+
+    <div class="preGameCard" id="preGameCard" role="dialog" aria-modal="true" aria-labelledby="preGameTitle">
+      <div class="preGameInner">
+        <button class="preGameClose" id="preGameClose" type="button" aria-label="Close guide" hidden>✕</button>
+        <div class="preGameEyebrow">💧 DAM NATION COMMAND CENTER</div><div class="preGameTitle" id="preGameTitle">READY THE FLOW</div>
+        <div class="preGameSub">Learn the system, choose your operator, then enter the hydraulic world.</div>
+        <div class="preGameTabs" role="tablist">
+          <button class="preGameTab active" type="button" data-guide-tab="how">HOW TO PLAY</button>
+          <button class="preGameTab" type="button" data-guide-tab="rules">RULES</button>
+          <button class="preGameTab" type="button" data-guide-tab="avatar">AVATAR</button>
+        </div>
+        <section class="preGamePane active" data-guide-pane="how"><div class="preGameList">
+          <div class="preGameRule">🌊 <strong>Follow the flow:</strong> Mountain → Dam → Millpond → Sluice Gate → Waterwheel → Mill → Ocean.</div>
+          <div class="preGameRule">👆 <strong>Tap the glowing station.</strong> Your HUD shows TAPS current / required.</div>
+          <div class="preGameRule">🏆 <strong>Finish all 6 days</strong> to complete the level and earn FL OZ.</div>
+          <div class="preGameRule">🎡 <strong>Level complete?</strong> Spin the Bonus Waterwheel for FL OZ, songs, characters, or DAM MACHINE plays.</div>
+          <div class="preGameRule">🎰 <strong>Floating bonus:</strong> the flashing machine button appears on the left when a free play is ready.</div>
+        </div></section>
+        <section class="preGamePane" data-guide-pane="rules"><div class="preGameList">
+          <div class="preGameRule">💧 <strong>Tap tiers:</strong> 1–6 = 6 taps · 7–12 = 12 · 13–18 = 18 · then +6 taps every 6 levels.</div>
+          <div class="preGameRule">⏱️ <strong>Timer:</strong> 6 seconds per day through Level 60; 10 seconds after Level 60.</div>
+          <div class="preGameRule">🏆 <strong>Milestones:</strong> Levels 6, 36, 66, 96… trigger major celebrations.</div>
+          <div class="preGameRule">👤 <strong>Characters:</strong> Wilbert the DAM Guide and Y'all Too Beaver start unlocked. Everyone else must be earned by bonus play or purchased.</div>
+          <div class="preGameRule">💦 <strong>Character purchases:</strong> use FL OZ from your wallet; locked characters show their current cost.</div>
+        </div></section>
+        <section class="preGamePane" data-guide-pane="avatar"><div class="preGameAvatarGrid" id="preGameAvatarGrid"></div><div class="preGameMsg" id="preGameMsg" aria-live="polite"></div></section>
+        <div class="preGameFoot"><input id="preGameNever" type="checkbox"><label for="preGameNever">Never show this guide again on this device.</label></div>
+        <button class="lcBtn preGameStart" id="preGameStart" type="button">BEGIN GAME AS SELECTED OPERATOR</button>
+        <button class="preGameHowBtn" id="preGameChooseBtn" type="button">CHOOSE AVATAR</button>
+      </div>
+    </div>
 
     <div class="world" id="world">
       <div class="layer" id="mistLayer"></div>
@@ -1847,6 +1892,14 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div id="songList"></div>
       </div>
 
+      <div class="sidePanel" id="charactersPanel">
+        <button class="panelClose" data-close-panel aria-label="Close">✕</button>
+        <div class="panelTitle">👤 Characters</div>
+        <div class="groupPrice">Choose an unlocked operator, purchase a locked character, or earn one through the bonus games.</div>
+        <div class="walletBlock"><div class="wbLabel">💧 Character Wallet</div><div class="wbValue" id="charactersWallet"></div><div class="wbCost">Standard character cost: <strong class="costText"></strong></div></div>
+        <div class="charGrid" id="charactersGrid"></div><div class="storeMsg" id="charactersMsg"></div>
+      </div>
+
       <!-- v2.3: profile (read-only view of existing state) -->
       <div class="sidePanel" id="profilePanel">
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
@@ -1890,10 +1943,6 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="panelGroup">🎵 Songs</div>
         <div class="groupPrice"><span class="costText"></span> each</div>
         <div id="storeRedeem"></div>
-        <div class="panelGroup">👤 Characters</div>
-        <div class="groupPrice"><span class="costText"></span> each · Wilbert is free</div>
-        <div class="charGrid" id="storeCharacters"></div>
-        <div class="storeMsg" id="charMsg"></div>
         <div class="panelGroup">🎨 Skins</div>
         <div class="emptyNote">Premium skins will cost <span class="costText"></span> each. The 7 built-in skins stay free.</div>
         <div class="panelGroup">Get FL OZ</div>
