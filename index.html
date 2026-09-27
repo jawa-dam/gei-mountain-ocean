@@ -1264,6 +1264,22 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
 /* ============ v2: TIME'S UP (reuses game-over card look) ============ */
 .timeUpCard{ z-index:115; }
+/* GEI ART V1.6 — time-up + reveal artwork */
+.timeUpArt{ position:relative; height:150px; display:flex; align-items:center; justify-content:center; margin:-6px 0 2px; }
+.timeUpArt img{ height:100%; width:auto; max-width:100%; object-fit:contain; display:none;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.45)); }
+.timeUpArt.hasArt img{ display:block; }
+.timeUpArt.hasArt .timeUpArtFallback{ display:none; }
+.timeUpArtFallback{ font-size:2.4rem; }
+.timeUpCard.show .timeUpArt.hasArt img{ animation:timeUpArtIn .55s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes timeUpArtIn{ from{ transform:scale(.6) rotate(-4deg); opacity:0; } to{ transform:none; opacity:1; } }
+.tribeArt{ position:relative; height:140px; display:none; align-items:center; justify-content:center; margin:-8px 0 6px; }
+.tribeArt.hasArt{ display:flex; }
+.tribeArt img{ height:100%; width:auto; max-width:100%; object-fit:contain; display:block;
+  filter:drop-shadow(0 0 16px color-mix(in srgb, var(--juicy-blue) 55%, transparent)); }
+.tribeCard.show .tribeArt img{ animation:timeUpArtIn .6s cubic-bezier(.34,1.56,.64,1) both; }
+@media (max-width:380px){ .timeUpArt{ height:120px; } .tribeArt{ height:112px; } }
+@media (prefers-reduced-motion:reduce){ .timeUpCard.show .timeUpArt.hasArt img, .tribeCard.show .tribeArt img{ animation:none; } }
 
 /* ============ v2: PANELS ============ */
 .panelClose{
@@ -1760,6 +1776,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
       <div class="tribeCard" id="tribeCard">
         <div class="tribeInner">
+          <div class="tribeArt"><img id="tribeArt" alt="" aria-hidden="true" decoding="async"></div>
           <div class="tribeEyebrow">A People Revealed</div>
           <div class="tribeName" id="tribeName">—</div>
           <div class="tribeCategory" id="tribeCategory">Tribal</div>
@@ -1800,7 +1817,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <!-- v2: timer failure -->
       <div class="gameOverCard timeUpCard" id="timeUpCard" role="alertdialog" aria-labelledby="timeUpTitle">
         <div class="gameOverInner">
-          <div style="font-size:2.4rem;">💥</div>
+          <div class="timeUpArt"><img id="timeUpArt" alt="" aria-hidden="true" decoding="async"><span class="timeUpArtFallback" aria-hidden="true">💥</span></div>
           <div class="gameOverTitle" id="timeUpTitle">The Dam Broke!</div>
           <div class="damQuip timeUpQuip" id="timeUpQuip"></div>
           <div class="gameOverSub">The water escaped before the step was completed.<br><span id="timeUpDetail"></span><br><span class="timeUpTip" id="timeUpTip"></span></div>
@@ -2650,6 +2667,14 @@ const ALL_TRIBES = Object.entries(TRIBE_GROUPS).flatMap(([category, names])=>
    • Rescue never adds or costs FL OZ. waterReward is the rescue record's figure; it equals the
      Day 6 reward that awardDay() already credits, so the economy is unchanged.
 ========================================================= */
+/* GEI ART V1.6 — shared artwork. Individual -ites can still override imageUrl with their own art. */
+const GEI_ART_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
+const ITE_ICON_URL = GEI_ART_BASE + "ites-water-people-gu4hprvi5GmtS3vx.png";
+const ITE_REVEAL_ART_URL = GEI_ART_BASE + "water-ites-people-AvFUPRt4hQpwL5PZ.png";
+const TIMEUP_ART_URLS = [
+  GEI_ART_BASE + "dam-flood-LntFS6si2lCt3Nan.png",
+  GEI_ART_BASE + "broken-dam-system-Z6rTez37RWUnLftu.png"
+];
 const ITE_STATUSES = ["trapped", "inFlow", "saved"];
 const ITE_STATUS_META = {
   trapped: { icon:"🔒", label:"TRAPPED", sr:"trapped" },
@@ -2657,16 +2682,16 @@ const ITE_STATUS_META = {
   saved:   { icon:"✅", label:"SAVED",   sr:"saved" }
 };
 const ITES = [
-  { id:"danite",     name:"Danite",     imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"levite",     name:"Levite",     imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"israelite",  name:"Israelite",  imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"amorite",    name:"Amorite",    imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"jebusite",   name:"Jebusite",   imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"hittite",    name:"Hittite",    imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"hivite",     name:"Hivite",     imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"ammonite",   name:"Ammonite",   imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"benjamite",  name:"Benjamite",  imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"ephraimite", name:"Ephraimite", imageUrl:null, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ }
+  { id:"danite",     name:"Danite",     imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"levite",     name:"Levite",     imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"israelite",  name:"Israelite",  imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"amorite",    name:"Amorite",    imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"jebusite",   name:"Jebusite",   imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"hittite",    name:"Hittite",    imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"hivite",     name:"Hivite",     imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"ammonite",   name:"Ammonite",   imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"benjamite",  name:"Benjamite",  imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"ephraimite", name:"Ephraimite", imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ }
 ];
 const ITE_BY_ID = {};
 ITES.forEach(i => { ITE_BY_ID[i.id] = i; });
@@ -3730,9 +3755,38 @@ function handleDayTimeout(){
   timeUpDetail.textContent = `${d.title} (${d.station}) — you keep your ${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ.`;
   $("timeUpQuip").textContent = getDamHumor("timeout");
   $("timeUpTip").textContent = "💡 " + getDamHumor("figurative");
+  pickTimeUpArt();
   timeUpCard.classList.add("show");
   breakTheDam();
 }
+
+/* GEI ART V1.6 — artwork for the time-up + reveal cards. Preloaded so it is ready the moment it shows;
+   a failed image quietly falls back (💥 on time-up, no art on the reveal card). */
+const timeUpArtState = { last:-1, ok:TIMEUP_ART_URLS.map(()=>true) };
+TIMEUP_ART_URLS.forEach((url, i) => {
+  const pre = new Image();
+  pre.onerror = () => { timeUpArtState.ok[i] = false; };
+  pre.src = url;
+});
+function pickTimeUpArt(){
+  const box = document.querySelector(".timeUpArt"), img = $("timeUpArt");
+  if(!box || !img) return;
+  const choices = TIMEUP_ART_URLS.map((u, i) => i).filter(i => timeUpArtState.ok[i]);
+  if(!choices.length){ box.classList.remove("hasArt"); return; }
+  let pool = choices.length > 1 ? choices.filter(i => i !== timeUpArtState.last) : choices;
+  const i = pool[Math.floor(Math.random() * pool.length)];
+  timeUpArtState.last = i;
+  img.onerror = () => { timeUpArtState.ok[i] = false; box.classList.remove("hasArt"); };
+  img.src = TIMEUP_ART_URLS[i];
+  box.classList.add("hasArt");
+}
+(function setupTribeArt(){
+  const img = $("tribeArt"), box = img && img.parentNode;
+  if(!img) return;
+  img.onload = () => box.classList.add("hasArt");
+  img.onerror = () => box.classList.remove("hasArt");
+  img.src = ITE_REVEAL_ART_URL;
+})();
 
 /* Timer hit zero: the existing flood, shake and dam-break sound, now driven by the clock. */
 function breakTheDam(){
