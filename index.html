@@ -2129,7 +2129,7 @@ const CHARACTER_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
 const DEFAULT_CHARACTER_ID = "wilbert-dam-guide";
 const CHARACTERS = [
   { id:"wilbert-dam-guide",       name:"Wilbert the DAM Guide",   file:"wilbert-the-dam-guide-Jv8ovjc6i8PutsiP.png",   cost:0, isDefault:true },
-  { id:"yall-too-beaver",         name:"Y'all Too Beaver",        file:"yall-too-beaver-rhhiVplt1GMykxV8.png",         cost:UNLOCK_COST_FL_OZ },
+  { id:"yall-too-beaver",         name:"Y'all Too Beaver",        file:"yall-too-beaver-rhhiVplt1GMykxV8.png",         cost:0, isStarter:true },
   { id:"operator-fireman",        name:"Operator Fireman",        file:"operator-fireman-3hTPsSNuSI8dOo3K.png",        cost:UNLOCK_COST_FL_OZ },
   { id:"operator-moses",          name:"Operator Moses",          file:"operator-moses-NaoYxXNs8PIe8VAq.png",          cost:UNLOCK_COST_FL_OZ },
   { id:"operator-valentine",      name:"Operator Valentine",      file:"operator-valentine-qL9S3qnHVqfuQlf7.png",      cost:UNLOCK_COST_FL_OZ },
@@ -2836,7 +2836,6 @@ function saveCurrentIte(){
   if(!next) return null;
   state.iteRescueStats = next;
   syncIteStatuses();
-  syncIteCharacters();                                // V1.7: the saved -ite joins the crew (free)
   saveGame();
   const detail = { iteId:ite.id, ite, waterRescued:ite.waterReward, savedCount:next.savedCount, rescuedWater:next.rescuedWater, level:state.level };
   announceIte(`-ite rescue complete. The ${ite.name} is saved and has joined your crew. Water rescued: ${fmt(ite.waterReward)} fluid ounces.`);
@@ -2846,25 +2845,14 @@ function saveCurrentIte(){
   return ite;
 }
 
-/* GEI ART V1.7 — every rescued -ite joins the character roster for free.
-   rescueOnly characters can't be bought or won; saving the -ite is the only way in. */
+/* GEI ART V2.0 — rescued -ites are character entries, but rescue does not unlock them.
+   They remain locked until the Bonus Wheel / Dam Machine awards them or the player purchases them. */
 ITES.forEach(ite => {
   CHARACTERS.push({ id:"ite-" + ite.id, name:"The " + ite.name, img:ite.imageUrl || ITE_ICON_URL,
-                    fallbackImg:ITE_ICON_URL, cost:0, rescueOnly:true, iteId:ite.id });
+                    fallbackImg:ITE_ICON_URL, cost:UNLOCK_COST_FL_OZ, rescueOnly:false, iteId:ite.id });
 });
 function iteCharacterId(iteId){ return "ite-" + iteId; }
-/* Mirrors savedIteIds into unlockedCharacters. Safe to call any time; never removes anything. */
-function syncIteCharacters(){
-  const saved = (state.iteRescueStats && state.iteRescueStats.savedIteIds) || [];
-  let added = false;
-  saved.forEach(id => {
-    const cid = iteCharacterId(id);
-    if(CHARACTERS.some(c => c.id === cid) && !state.unlockedCharacters.includes(cid)){
-      state.unlockedCharacters.push(cid); added = true;
-    }
-  });
-  return added;
-}
+function syncIteCharacters(){ return false; }
 
 /* ---------- ONE renderer for every -ite: custom image → water-drop fallback → text fallback.
    Status is shown by an icon badge + visual treatment + aria-label (never color alone). ---------- */
@@ -3239,7 +3227,7 @@ const state = {
   completedLevels:0,
   unlockedSongs:[SONGS[0].id],
   unlockedSkins:[],
-  unlockedCharacters:[DEFAULT_CHARACTER_ID],
+  unlockedCharacters:[DEFAULT_CHARACTER_ID, "yall-too-beaver"],
   activeCharacter:DEFAULT_CHARACTER_ID,
   processedReceipts:[],
   lastTribe:null,
@@ -3341,8 +3329,10 @@ function loadGame(){
   state.unlockedSongs   = sanitizeIds(d.unlockedSongs, SONGS);
   if(!state.unlockedSongs.includes(SONGS[0].id)) state.unlockedSongs.unshift(SONGS[0].id);
   state.unlockedSkins   = sanitizeIds(d.unlockedSkins, PREMIUM_SKINS);
-  state.unlockedCharacters = sanitizeIds(d.unlockedCharacters, CHARACTERS);   // drops legacy "droplet"
+  state.unlockedCharacters = sanitizeIds(d.unlockedCharacters, CHARACTERS);   // drops unknown / legacy ids
+  state.unlockedCharacters = state.unlockedCharacters.filter(id => !String(id).startsWith("ite-"));
   if(!state.unlockedCharacters.includes(DEFAULT_CHARACTER_ID)) state.unlockedCharacters.unshift(DEFAULT_CHARACTER_ID);
+  if(!state.unlockedCharacters.includes("yall-too-beaver")) state.unlockedCharacters.push("yall-too-beaver");
   state.activeCharacter = (typeof d.activeCharacter === "string" && state.unlockedCharacters.includes(d.activeCharacter))
     ? d.activeCharacter : DEFAULT_CHARACTER_ID;
   state.processedReceipts = Array.isArray(d.processedReceipts) ? d.processedReceipts.filter(r=>typeof r === "string") : [];
@@ -3359,13 +3349,10 @@ function loadGame(){
   state.damMachineLastResult     = sanitizeDamMachineLastResult(d.damMachineLastResult);
   /* DAM NATION V1.0 — missing/malformed rescue data becomes safe defaults; nothing else is reset. */
   state.iteRescueStats           = sanitizeIteRescueStats(d.iteRescueStats);
-  /* V1.7 — rescued -ite characters follow savedIteIds (older saves unlock them on first load);
-     a rescue-only character with no matching rescue is dropped. */
-  state.unlockedCharacters = state.unlockedCharacters.filter(id => {
-    const c = CHARACTERS.find(x => x.id === id);
-    return c && (!c.rescueOnly || state.iteRescueStats.savedIteIds.includes(c.iteId));
-  });
-  syncIteCharacters();
+  /* V2.0 — rescued -ites stay visible in the roster but remain locked. */
+  state.unlockedCharacters = state.unlockedCharacters.filter(id => !String(id).startsWith("ite-"));
+  if(!state.unlockedCharacters.includes(DEFAULT_CHARACTER_ID)) state.unlockedCharacters.unshift(DEFAULT_CHARACTER_ID);
+  if(!state.unlockedCharacters.includes("yall-too-beaver")) state.unlockedCharacters.push("yall-too-beaver");
   if(!state.unlockedCharacters.includes(state.activeCharacter)) state.activeCharacter = DEFAULT_CHARACTER_ID;
   state.tribePortraits = sanitizeTribePortraits(d.tribePortraits);
   return true;
