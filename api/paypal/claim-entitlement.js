@@ -7,12 +7,12 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { claimToken, captureID } = req.body || {};
-    if (!claimToken || !captureID) {
+    const { claimToken, captureID, claimId } = req.body || {};
+    if (!claimToken || !captureID || !claimId) {
       return res.status(400).json({ error: "Missing entitlement claim information." });
     }
 
-    const result = await claimEntitlement(claimToken, captureID);
+    const result = await claimEntitlement(claimToken, captureID, claimId);
 
     if (!result.ok) {
       if (result.reason === "NOT_FOUND") {
@@ -20,6 +20,9 @@ export default async function handler(req, res) {
       }
       if (result.reason === "CAPTURE_MISMATCH") {
         return res.status(403).json({ error: "Entitlement does not match this payment." });
+      }
+      if (result.reason === "ALREADY_CLAIMED") {
+        return res.status(409).json({ error: "This entitlement has already been claimed." });
       }
       return res.status(409).json({ error: "Entitlement could not be claimed." });
     }
