@@ -1,3 +1,5 @@
+import { recordEntitlement } from "../_lib/paypal-ledger.js";
+
 const PACKS = {
   single: { label: "1 Song", price: "1.00", flOz: 6660 },
   ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
@@ -63,7 +65,19 @@ export default async function handler(req, res) {
     }
 
     const existing = completedCapture(order);
-    if (order.status === "COMPLETED" && existing) {
+    const invoiceId = order.purchase_units?.[0]?.invoice_id;
+
+    if (order.status === "COMPLETED" && existing && invoiceId) {
+      await recordEntitlement({
+        eventId: "capture:" + existing.id,
+        orderID,
+        captureID: existing.id,
+        invoiceId,
+        packId,
+        flOz: PACKS[packId].flOz,
+        amount: PACKS[packId].price,
+        currency: "USD"
+      });
       return res.status(200).json({
         ok: true,
         orderID,
@@ -71,6 +85,7 @@ export default async function handler(req, res) {
         status: existing.status,
         packId,
         flOz: PACKS[packId].flOz,
+        claimToken: invoiceId,
         fulfillmentStatus: "FULFILLABLE"
       });
     }
@@ -99,7 +114,18 @@ export default async function handler(req, res) {
       const retryOrder = await retryCheck.json();
       const retryCapture = completedCapture(retryOrder);
 
-      if (retryCheck.ok && retryOrder.status === "COMPLETED" && retryCapture) {
+      const retryInvoiceId = retryOrder.purchase_units?.[0]?.invoice_id;
+      if (retryCheck.ok && retryOrder.status === "COMPLETED" && retryCapture && retryInvoiceId) {
+        await recordEntitlement({
+          eventId: "capture:" + retryCapture.id,
+          orderID,
+          captureID: retryCapture.id,
+          invoiceId: retryInvoiceId,
+          packId,
+          flOz: PACKS[packId].flOz,
+          amount: PACKS[packId].price,
+          currency: "USD"
+        });
         return res.status(200).json({
           ok: true,
           orderID,
@@ -107,6 +133,7 @@ export default async function handler(req, res) {
           status: retryCapture.status,
           packId,
           flOz: PACKS[packId].flOz,
+          claimToken: retryInvoiceId,
           fulfillmentStatus: "FULFILLABLE"
         });
       }
@@ -125,6 +152,22 @@ export default async function handler(req, res) {
       });
     }
 
+    const finalInvoiceId = capture.purchase_units?.[0]?.invoice_id || invoiceId;
+    if (!finalInvoiceId) {
+      return res.status(502).json({ error: "Payment completed but entitlement token was missing." });
+    }
+
+    await recordEntitlement({
+      eventId: "capture:" + payment.id,
+      orderID,
+      captureID: payment.id,
+      invoiceId: finalInvoiceId,
+      packId,
+      flOz: PACKS[packId].flOz,
+      amount: PACKS[packId].price,
+      currency: "USD"
+    });
+
     return res.status(200).json({
       ok: true,
       orderID,
@@ -132,6 +175,7 @@ export default async function handler(req, res) {
       status: payment.status,
       packId,
       flOz: PACKS[packId].flOz,
+      claimToken: finalInvoiceId,
       fulfillmentStatus: "FULFILLABLE"
     });
   } catch (err) {
