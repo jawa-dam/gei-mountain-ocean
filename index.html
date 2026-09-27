@@ -5217,6 +5217,35 @@ function paypalDiagnosticMessage(code, detail){
   return detail ? label + ": " + detail : label + ".";
 }
 
+async function paypalServerProbe(){
+  try{
+    const r = await fetch("/api/paypal/sdk-probe", { cache:"no-store" });
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok) return { ok:false, summary:"server probe HTTP " + r.status };
+    if(data.ok && data.paypalHttpStatus === 200){
+      return {
+        ok:true,
+        summary:"PayPal CDN returned HTTP 200 for the configured Live client ID (fingerprint " +
+          String(data.clientIdFingerprint || "unknown") + ")."
+      };
+    }
+    if(data.paypalHttpStatus){
+      return {
+        ok:false,
+        summary:"PayPal CDN returned HTTP " + data.paypalHttpStatus +
+          " for the configured Live client ID (fingerprint " +
+          String(data.clientIdFingerprint || "unknown") + ")."
+      };
+    }
+    return {
+      ok:false,
+      summary:data.error || "The server could not reach the PayPal SDK."
+    };
+  }catch(err){
+    return { ok:false, summary:"Browser could not reach the server diagnostic endpoint." };
+  }
+}
+
 function ensurePayPalRetryButton(status, retryFn){
   let btn = document.getElementById("paypalRetryBtn");
   if(!btn){
@@ -5337,9 +5366,11 @@ async function startCheckout(packId){
     status.textContent="Retrying PayPal connection…";
     loadPayPalSdk(true)
       .then(()=>renderPayPalButtons())
-      .catch(err=>{
+      .catch(async err=>{
         console.error("[PayPal SDK diagnostic]", err);
-        status.textContent=(err && err.message) || "PayPal checkout could not initialize.";
+        const probe=await paypalServerProbe();
+        status.textContent=((err && err.message) || "PayPal checkout could not initialize.") +
+          " · " + probe.summary;
         ensurePayPalRetryButton(status, retry);
       });
   };
@@ -5419,7 +5450,9 @@ async function startCheckout(packId){
     await renderPayPalButtons();
   }catch(err){
     console.error("[PayPal diagnostic]", err);
-    status.textContent=(err && err.message) || "PayPal checkout is unavailable right now.";
+    const probe=await paypalServerProbe();
+    status.textContent=((err && err.message) || "PayPal checkout is unavailable right now.") +
+      " · " + probe.summary;
     ensurePayPalRetryButton(status, retry);
   }
 }
