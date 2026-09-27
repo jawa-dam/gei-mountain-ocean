@@ -714,7 +714,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   background:linear-gradient(135deg, color-mix(in srgb, var(--juicy-navy) 92%, transparent), color-mix(in srgb, var(--juicy-violet) 35%, transparent));
   border:1px solid rgba(255,255,255,.3);
   font-weight:800; font-size:.82rem;
-  white-space:nowrap; opacity:0; pointer-events:none;
+  white-space:normal; width:max-content; max-width:calc(100% - 24px); text-align:center; line-height:1.3; opacity:0; pointer-events:none;
   transition:opacity .25s, transform .25s;
   z-index:40; box-shadow:0 0 20px color-mix(in srgb, var(--juicy-blue) 30%, transparent);
   max-width:88%; text-align:center;
@@ -1231,10 +1231,10 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .preGameClose{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.3);color:#fff;font-size:1.05rem;font-weight:900;cursor:pointer}
 .preGameClose[hidden]{display:none}
 .preGameEyebrow{font-size:.78rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
-.preGameTitle{font-size:clamp(1.65rem,8vw,2.35rem);font-weight:1000;line-height:1.05;margin:4px 30px;text-shadow:0 0 18px var(--water-bright)}
+.preGameTitle{font-size:clamp(1.3rem,6.2vw,1.95rem);font-weight:1000;line-height:1.1;margin:4px 34px 6px;text-shadow:0 0 18px var(--water-bright)}
 .preGameSub{font-size:.88rem;font-weight:800;color:var(--foam);margin-bottom:12px}
 .preGameTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
-.preGameTab{min-height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font:900 .72rem/1 Inter,system-ui,sans-serif;cursor:pointer}
+.preGameTab{min-height:48px;padding:6px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font:900 .8rem/1.15 Inter,system-ui,sans-serif;cursor:pointer;overflow-wrap:anywhere}
 .preGameTab.active{background:linear-gradient(135deg,var(--gold),color-mix(in srgb,var(--gold) 55%,#fff));color:var(--juicy-navy);border-color:rgba(255,255,255,.7)}
 .preGamePane{display:none;text-align:left}.preGamePane.active{display:block}
 .preGameList{display:grid;gap:8px}
@@ -1245,17 +1245,30 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .preGameAvatar.selected{border-color:var(--gold);box-shadow:0 0 18px color-mix(in srgb,var(--gold) 35%,transparent)}
 .preGameAvatar.locked{opacity:.66}
 .preGameAvatar img{display:block;width:100%;height:105px;object-fit:contain;margin:auto}
-.preGameAvatarName{font-size:.86rem;font-weight:900;line-height:1.15}
-.preGameAvatarStatus{font-size:.68rem;font-weight:800;color:var(--foam);margin-top:3px;line-height:1.25}
+.preGameAvatarName{font-size:.92rem;font-weight:900;line-height:1.15;overflow-wrap:anywhere}
+.preGameAvatarStatus{font-size:.8rem;font-weight:800;color:var(--foam);margin-top:3px;line-height:1.25}
 .preGameAvatar button{width:100%;margin-top:6px;min-height:40px;border-radius:10px}
 .preGameFoot{display:flex;align-items:center;gap:9px;margin-top:12px;padding:9px 10px;border-radius:13px;background:rgba(0,0,0,.2)}
-.preGameFoot label{font-size:.76rem;font-weight:800;text-align:left;line-height:1.2}
-.preGameStart{width:100%;margin-top:10px;min-height:54px}.preGameMsg{min-height:1.2em;margin-top:6px;font-size:.76rem;font-weight:800;color:var(--gold)}
+.preGameFoot label{font-size:.9rem;font-weight:800;text-align:left;line-height:1.2;cursor:pointer}
+.preGameStart{width:100%;margin-top:10px;min-height:56px;font-size:1.1rem}.preGameMsg{min-height:1.2em;margin-top:8px;font-size:.9rem;font-weight:800;color:var(--gold)}
 .preGameHowBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:900}
 .dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent)}
-.dmFloatBtn[hidden]{display:none}.dmFloatBtn.ready{animation:dmFloatReady 1.15s ease-in-out infinite}.dmFloatBtn span{position:absolute;left:58px;white-space:nowrap;padding:5px 8px;border-radius:999px;background:rgba(2,6,14,.86);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:.64rem;font-weight:900}
+.dmFloatBtn[hidden]{display:none}.dmFloatBtn.ready{animation:dmFloatReady 1.15s ease-in-out infinite}.dmFloatBtn span{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);width:62px;white-space:normal;text-align:center;line-height:1.05;padding:4px 3px;border-radius:10px;background:rgba(2,6,14,.92);border:1px solid var(--gold);color:var(--gold);font-size:.72rem;font-weight:900;letter-spacing:.02em}
+.dmFloatBtn.ready span{animation:dmFloatBlink 1.15s ease-in-out infinite}
+@keyframes dmFloatBlink{0%,100%{opacity:1}50%{opacity:.55}}
+.preGameFoot input{width:24px;height:24px;flex:0 0 24px;accent-color:var(--gold)}
+.preGameChain{text-align:center;font-weight:900;font-size:.92rem;line-height:1.5}
+.preGameWallet{margin:0 0 8px;font-size:.9rem;font-weight:900;color:var(--foam);text-align:center}
+.preGameAvatar.selected::after{content:"✓ SELECTED";display:block;margin-top:4px;font-size:.78rem;font-weight:900;color:var(--gold)}
+.preGameAvatar:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.preGameRule{font-size:.92rem}
+.itesSavedBanner{display:block;margin:0 0 12px;padding:10px;border-radius:18px;text-align:center;background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 30%,transparent),rgba(255,255,255,.05));border:1.5px solid color-mix(in srgb,var(--gold) 65%,transparent);box-shadow:0 0 22px color-mix(in srgb,var(--gold) 25%,transparent);overflow:hidden}
+.itesSavedBanner img{display:block;width:100%;max-width:100%;height:auto;max-height:190px;object-fit:contain;margin:0 auto}
+.itesSavedBanner strong{display:block;margin-top:6px;font-size:1.05rem;font-weight:1000;letter-spacing:.06em;color:var(--gold)}
+.iteHud[data-status="complete"] .iteHudAvatar{flex:0 0 auto;max-width:42%}
+.iteHudCompleteArt{width:auto!important;max-width:100%;height:58px!important}
 @keyframes dmFloatReady{0%,100%{transform:scale(1)}50%{transform:scale(1.12);box-shadow:0 0 34px var(--gold)}}
-@media(max-width:380px){.preGameInner{padding:15px 12px 13px}.preGameAvatar img{height:86px}.preGameRule{font-size:.8rem}.dmFloatBtn{left:5px;width:48px;height:48px}.dmFloatBtn span{left:54px}}
+@media(max-width:380px){.preGameInner{padding:15px 12px 13px}.preGameAvatar img{height:86px}.preGameRule{font-size:.86rem}.preGameTab{font-size:.74rem}.dmFloatBtn{left:5px;width:48px;height:48px}.dmFloatBtn span{width:58px;font-size:.7rem}}
 
 .dmClose:focus-visible, .dmSpinBtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 @media (max-width:380px){
@@ -1743,31 +1756,30 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
     <div class="preGameCard" id="preGameCard" role="dialog" aria-modal="true" aria-labelledby="preGameTitle">
       <div class="preGameInner">
         <button class="preGameClose" id="preGameClose" type="button" aria-label="Close guide" hidden>✕</button>
-        <div class="preGameEyebrow">💧 DAM NATION COMMAND CENTER</div><div class="preGameTitle" id="preGameTitle">READY THE FLOW</div>
-        <div class="preGameSub">Learn the system, choose your operator, then enter the hydraulic world.</div>
-        <div class="preGameTabs" role="tablist">
-          <button class="preGameTab active" type="button" data-guide-tab="how">HOW TO PLAY</button>
-          <button class="preGameTab" type="button" data-guide-tab="rules">RULES</button>
-          <button class="preGameTab" type="button" data-guide-tab="avatar">AVATAR</button>
+        <div class="preGameTitle" id="preGameTitle">💧 DAM NATION COMMAND GUIDE</div>
+        <div class="preGameSub">Learn the flow, choose your avatar, then start the hydraulic system.</div>
+        <div class="preGameTabs" role="tablist" aria-label="Command guide sections">
+          <button class="preGameTab active" type="button" role="tab" data-guide-tab="how">📖 HOW TO PLAY</button>
+          <button class="preGameTab" type="button" role="tab" data-guide-tab="rules">📜 RULES</button>
+          <button class="preGameTab" type="button" role="tab" data-guide-tab="avatar">👤 CHOOSE YOUR AVATAR</button>
         </div>
         <section class="preGamePane active" data-guide-pane="how"><div class="preGameList">
-          <div class="preGameRule">🌊 <strong>Follow the flow:</strong> Mountain → Dam → Millpond → Sluice Gate → Waterwheel → Mill → Ocean.</div>
-          <div class="preGameRule">👆 <strong>Tap the glowing station.</strong> Your HUD shows TAPS current / required.</div>
-          <div class="preGameRule">🏆 <strong>Finish all 6 days</strong> to complete the level and earn FL OZ.</div>
-          <div class="preGameRule">🎡 <strong>Level complete?</strong> Spin the Bonus Waterwheel for FL OZ, songs, characters, or DAM MACHINE plays.</div>
-          <div class="preGameRule">🎰 <strong>Floating bonus:</strong> the flashing machine button appears on the left when a free play is ready.</div>
+          <div class="preGameRule preGameChain">⛰️ Mountain → 🧱 Dam → 💧 Millpond → 🚪 Sluice Gate → ⚙️ Waterwheel → 🏭 Mill → 🌊 Ocean</div>
+          <div class="preGameRule">👆 <strong>Tap the glowing station.</strong> The active station glows. Tap anywhere on the board to work it — your first tap starts the day's clock.</div>
+          <div class="preGameRule">📊 <strong>Watch the HUD.</strong> It shows your level, day, FL OZ, the countdown timer, and the -ite you're rescuing.</div>
+          <div class="preGameRule">🏆 <strong>Complete all six days.</strong> Finish each station before the timer runs out to move the water from the Mountain to the Ocean.</div>
+          <div class="preGameRule">💧 <strong>Earn FL OZ.</strong> Every finished day adds 111 FL OZ to your wallet — 666 FL OZ for a full level.</div>
+          <div class="preGameRule">🎡 <strong>Bonus Waterwheel.</strong> Complete a level to spin it for FL OZ, songs, characters, or free DAM MACHINE plays.</div>
+          <div class="preGameRule">🎰 <strong>DAM MACHINE.</strong> When you win a free play, the 🎰 button flashes <strong>BONUS READY</strong> on the left side of the game. Tap it to play.</div>
+          <div class="preGameRule">👤 <strong>Characters.</strong> Two starters are free. Buy the rest with FL OZ in 👤 Characters, or win them in the bonus games.</div>
+          <div class="preGameRule">📈 <strong>Progression.</strong> Each level asks for more taps, saves another -ite, and grows your mill. Big celebrations wait at milestone levels.</div>
         </div></section>
-        <section class="preGamePane" data-guide-pane="rules"><div class="preGameList">
-          <div class="preGameRule">💧 <strong>Tap tiers:</strong> 1–6 = 6 taps · 7–12 = 12 · 13–18 = 18 · then +6 taps every 6 levels.</div>
-          <div class="preGameRule">⏱️ <strong>Timer:</strong> 6 seconds per day through Level 60; 10 seconds after Level 60.</div>
-          <div class="preGameRule">🏆 <strong>Milestones:</strong> Levels 6, 36, 66, 96… trigger major celebrations.</div>
-          <div class="preGameRule">👤 <strong>Characters:</strong> Wilbert the DAM Guide and Y'all Too Beaver start unlocked. Everyone else must be earned by bonus play or purchased.</div>
-          <div class="preGameRule">💦 <strong>Character purchases:</strong> use FL OZ from your wallet; locked characters show their current cost.</div>
-        </div></section>
-        <section class="preGamePane" data-guide-pane="avatar"><div class="preGameAvatarGrid" id="preGameAvatarGrid"></div><div class="preGameMsg" id="preGameMsg" aria-live="polite"></div></section>
-        <div class="preGameFoot"><input id="preGameNever" type="checkbox"><label for="preGameNever">Never show this guide again on this device.</label></div>
-        <button class="lcBtn preGameStart" id="preGameStart" type="button">BEGIN GAME AS SELECTED OPERATOR</button>
-        <button class="preGameHowBtn" id="preGameChooseBtn" type="button">CHOOSE AVATAR</button>
+        <section class="preGamePane" data-guide-pane="rules"><div class="preGameList" id="guideRulesList"></div></section>
+        <section class="preGamePane" data-guide-pane="avatar"><div class="preGameWallet" id="preGameWallet"></div><div class="preGameAvatarGrid" id="preGameAvatarGrid"></div></section>
+        <div class="preGameMsg" id="preGameMsg" aria-live="polite"></div>
+        <div class="preGameFoot"><input id="preGameNever" type="checkbox"><label for="preGameNever">Never show again</label></div>
+        <button class="lcBtn preGameStart" id="preGameStart" type="button">🚀 START GAME</button>
+        <button class="preGameHowBtn" id="preGameChooseBtn" type="button">👤 CHOOSE YOUR AVATAR</button>
       </div>
     </div>
 
@@ -2724,6 +2736,7 @@ const ALL_TRIBES = Object.entries(TRIBE_GROUPS).flatMap(([category, names])=>
 /* GEI ART V1.6 — shared artwork. Individual -ites can still override imageUrl with their own art. */
 const GEI_ART_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
 const ITE_ICON_URL = GEI_ART_BASE + "ites-water-people-gu4hprvi5GmtS3vx.png";
+const ALL_ITES_SAVED_ART_URL = GEI_ART_BASE + "save-the-ites-dam-nation-x844iIM6Fy5edJP9.png";   // V2.0.7
 const ITE_REVEAL_ART_URL = GEI_ART_BASE + "water-ites-people-AvFUPRt4hQpwL5PZ.png";
 const TIMEUP_ART_URLS = [
   GEI_ART_BASE + "dam-flood-LntFS6si2lCt3Nan.png",
@@ -2888,8 +2901,9 @@ function saveCurrentIte(){
   syncIteStatuses();
   saveGame();
   const detail = { iteId:ite.id, ite, waterRescued:ite.waterReward, savedCount:next.savedCount, rescuedWater:next.rescuedWater, level:state.level };
-  announceIte(`-ite rescue complete. The ${ite.name} is saved and has joined your crew. Water rescued: ${fmt(ite.waterReward)} fluid ounces.`);
+  announceIte(`-ite rescue complete. The ${ite.name} is saved. Water rescued: ${fmt(ite.waterReward)} fluid ounces.`);
   try { if(typeof renderStore === "function") renderStore(); } catch(e){}
+  try { if(state.iteRescueStats.savedCount >= ITES.length) renderTribesList(); } catch(e){}   // V2.0.7 banner
   emitIteEvent(ITE_EVENTS.rescued, detail);
   emitIteEvent(ITE_EVENTS.rescueCompleted, detail);
   return ite;
@@ -2985,9 +2999,12 @@ function renderIteRescue(){
     sub.textContent = `Water rescued: +${fmt(last.waterReward)} FL OZ`;
     box.dataset.status = "saved";
   } else if(st.savedCount >= ITES.length){
-    avatar.appendChild(renderIte({ name:"All" }, "saved", { size:34 }));
-    avatar.innerHTML = `<img class="iteHudCompleteArt" src="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/save-the-ites-dam-nation-x844iIM6Fy5edJP9.png" alt="Save the -ites — DAM NATION celebration">`;
-    line.innerHTML = `<strong>All -ites saved</strong><span class="iteState is-saved">✅</span>`;
+    const art = document.createElement("img");
+    art.className = "iteHudCompleteArt"; art.alt = "Save the -ites — DAM NATION celebration"; art.decoding = "async";
+    art.addEventListener("error", () => { avatar.innerHTML = ""; avatar.appendChild(renderIte({ name:"All" }, "saved", { size:34 })); }, { once:true });
+    art.src = ALL_ITES_SAVED_ART_URL;
+    avatar.appendChild(art);
+    line.innerHTML = `<strong>ALL -ITES SAVED!</strong><span class="iteState is-saved">✅</span>`;
     sub.textContent = "Keep the water flowing.";
     box.dataset.status = "complete";
   } else {
@@ -3102,7 +3119,7 @@ function runIteRescueSelfTest(){
   t("economy: six-day reward values unchanged", () =>
     DAY_REWARD_FL_OZ === 111 && DAYS_PER_LEVEL === 6 && LEVEL_REWARD_FL_OZ === 666 && UNLOCK_COST_FL_OZ === 6660 &&
     DAM_DAYS.length === 6 && DAM_DAYS.every(d => d.reward === 111));
-  t("nav: all five destinations still present", () => ["navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn","dmOpenBtn"].every(id => !!document.getElementById(id)));
+  t("nav: command destinations present, machine is a floating button", () => ["navHowBtn","navCharactersBtn","navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn","dmFloatBtn"].every(id => !!document.getElementById(id)) && !document.getElementById("dmOpenBtn"));
   t("hooks: event + action functions exist", () => [selectCurrentIte, setIteInFlow, saveCurrentIte, renderIteRescue, renderIteRescueRecord, onIteEvent].every(f => typeof f === "function"));
   t("hooks: listeners receive events; failures are contained", () => {
     let got = null;
@@ -3341,6 +3358,7 @@ function saveGame(){
     tribesFound: state.tribesFound.slice(-300).map(t=>t.name),
     lastTribe: state.lastTribe ? state.lastTribe.name : null,
     tribePortraits: state.tribePortraits,
+    charRulesV2: true,
     millStage: state.millStage,
     /* v2.6.4 — Dam Machine history (additive; older saves get safe defaults on load) */
     damMachineFreePlays: state.damMachineFreePlays,
@@ -3381,7 +3399,6 @@ function loadGame(){
   if(!state.unlockedSongs.includes(SONGS[0].id)) state.unlockedSongs.unshift(SONGS[0].id);
   state.unlockedSkins   = sanitizeIds(d.unlockedSkins, PREMIUM_SKINS);
   state.unlockedCharacters = sanitizeIds(d.unlockedCharacters, CHARACTERS);   // drops unknown / legacy ids
-  state.unlockedCharacters = state.unlockedCharacters.filter(id => !String(id).startsWith("ite-"));
   if(!state.unlockedCharacters.includes(DEFAULT_CHARACTER_ID)) state.unlockedCharacters.unshift(DEFAULT_CHARACTER_ID);
   if(!state.unlockedCharacters.includes("yall-too-beaver")) state.unlockedCharacters.push("yall-too-beaver");
   state.activeCharacter = (typeof d.activeCharacter === "string" && state.unlockedCharacters.includes(d.activeCharacter))
@@ -3400,8 +3417,10 @@ function loadGame(){
   state.damMachineLastResult     = sanitizeDamMachineLastResult(d.damMachineLastResult);
   /* DAM NATION V1.0 — missing/malformed rescue data becomes safe defaults; nothing else is reset. */
   state.iteRescueStats           = sanitizeIteRescueStats(d.iteRescueStats);
-  /* V2.0 — rescued -ites stay visible in the roster but remain locked. */
-  state.unlockedCharacters = state.unlockedCharacters.filter(id => !String(id).startsWith("ite-"));
+  /* V2.0.7 — one-time migration. Before V2.0, a rescued -ite character could ONLY come from the
+     V1.7 auto-unlock, so those ids are removed once (saves without charRulesV2). After that, any
+     -ite character in the save was purchased or won and is kept. Nothing else is touched. */
+  if(d.charRulesV2 !== true) state.unlockedCharacters = state.unlockedCharacters.filter(id => !String(id).startsWith("ite-"));
   if(!state.unlockedCharacters.includes(DEFAULT_CHARACTER_ID)) state.unlockedCharacters.unshift(DEFAULT_CHARACTER_ID);
   if(!state.unlockedCharacters.includes("yall-too-beaver")) state.unlockedCharacters.push("yall-too-beaver");
   if(!state.unlockedCharacters.includes(state.activeCharacter)) state.activeCharacter = DEFAULT_CHARACTER_ID;
@@ -4127,7 +4146,7 @@ function commitBonusPrize(prize){
   } else if(prize.kind === "damPlay"){
     state.damMachineFreePlays = Math.min(999, state.damMachineFreePlays + 1);   // free play only; FL OZ untouched
     res.title = "🎰 DAM MACHINE PLAY!";
-    res.detail = "🎰 A free DAM MACHINE spin is ready on the left side of the game.";
+    res.detail = "🎰 A free DAM MACHINE spin is ready on the left side of the game!";
   } else {
     res.title = "😂 DAM PUN!"; res.detail = "";
   }
@@ -4375,6 +4394,18 @@ function selectDamMachineResult({ forcedResult = null, rng = Math.random } = {})
 /* ---------- ONE canonical combination evaluator (pure; no DOM, no state, no animation).
    Returns a reward descriptor or null (no reward). Special hydraulic sequences are
    checked first, then triples. ---------- */
+/* V2.0.7 — pair prize ladder (111 → 2,220). */
+const DAM_PAIR_PRIZES = {
+  "water":   { amount:111,  title:"DOUBLE WATER!",       label:"💧 water drops" },
+  "dam":     { amount:222,  title:"DOUBLE DAM!",         label:"🧱 dams" },
+  "millpond":{ amount:333,  title:"DOUBLE MILLPOND!",    label:"millponds" },
+  "sluice":  { amount:444,  title:"DOUBLE SLUICE!",      label:"sluice gates" },
+  "wheel":   { amount:555,  title:"DOUBLE WATERWHEEL!",  label:"waterwheels" },
+  "factory": { amount:666,  title:"DOUBLE FACTORY!",     label:"factories" },
+  "fl-111":  { amount:777,  title:"LUCKY 111 PAIR!",     label:"111s" },
+  "fl-666":  { amount:1110, title:"666 PAIR!",           label:"666s" },
+  "fl-6660": { amount:2220, title:"ALMOST JACKPOT!",     label:"6,660s" }
+};
 function evaluateDamCombination(ids){
   if(!Array.isArray(ids) || ids.length !== 3 || !ids.every(id => DAM_SYMBOL_BY_ID[id])) return null;
   const [a, b, c] = ids;
@@ -4383,34 +4414,30 @@ function evaluateDamCombination(ids){
   if(a === "water"  && b === "wheel" && c === "water")   return { ...oz(LEVEL_REWARD_FL_OZ), title:"NOW THAT'S FLOW!",               humorKey:"machineWin",  special:true, detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the wheel barely got wet.` };
   if(a === "dam"    && b === "wheel" && c === "factory") return { kind:"play",               title:"THE WHOLE SYSTEM IS RUNNING!",   humorKey:"machineWin",  special:true, detail:"+1 free Dam Machine play — the whole flow, end to end." };
   if(a === "sluice" && b === "water" && c === "millpond")return { ...oz(DAY_REWARD_FL_OZ),   title:"FLOW ACHIEVED.",                 humorKey:"machineWin",  special:true, detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — gate to pond, no leaks.` };
-  /* V2.0 pair wins: many more FL OZ-winning combinations without changing the reel catalog. */
-  const pairCounts = {};
-  [a,b,c].forEach(id => pairCounts[id] = (pairCounts[id] || 0) + 1);
-  const pairId = Object.keys(pairCounts).find(id => pairCounts[id] === 2);
-  if(pairId){
-    const pairRewards = {
-      water:[222,"DOUBLE WATER!"], dam:[333,"DOUBLE DAM!"], millpond:[444,"DOUBLE MILLPOND!"],
-      sluice:[555,"DOUBLE SLUICE!"], wheel:[666,"DOUBLE WATERWHEEL!"], factory:[777,"DOUBLE FACTORY!"],
-      "fl-111":[1110,"1,110 FL OZ FLOW!"], "fl-666":[2220,"2,220 FL OZ FLOW!"],
-      "fl-6660":[UNLOCK_COST_FL_OZ,"DAM JACKPOT PAIR!"]
-    };
-    const pr=pairRewards[pairId];
-    if(pr) return { ...oz(pr[0]), title:pr[1], humorKey:pr[0]>=UNLOCK_COST_FL_OZ?"machineJackpot":"machineWin", jackpot:pr[0]>=UNLOCK_COST_FL_OZ, special:true, detail:`+${fmt(pr[0])} FL OZ` };
-  }
   if(a === b && b === c){
     switch(a){
-      case "water":   return { ...oz(DAY_REWARD_FL_OZ),   title:"WATER TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
-      case "dam":     return { ...oz(LEVEL_REWARD_FL_OZ), title:"DAM TRIPLE!",    humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ` };
-      case "wheel":   return { ...oz(LEVEL_REWARD_FL_OZ), title:"WHEEL TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — round and round she goes.` };
-      case "fl-111":  return { ...oz(DAY_REWARD_FL_OZ),   title:"111 TRIPLE!",    humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
-      case "fl-666":  return { ...oz(LEVEL_REWARD_FL_OZ), title:"666 TRIPLE!",    humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ` };
-      case "fl-6660": return { ...oz(UNLOCK_COST_FL_OZ),  title:"DAM JACKPOT",    humorKey:"machineJackpot", jackpot:true, detail:`+${fmt(UNLOCK_COST_FL_OZ)} FL OZ` };
+      case "water":    return { ...oz(333),                title:"WATER TRIPLE!",     humorKey:"machineWin", detail:"+333 FL OZ" };
+      case "dam":      return { ...oz(LEVEL_REWARD_FL_OZ), title:"DAM TRIPLE!",       humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ` };
+      case "millpond": return { ...oz(LEVEL_REWARD_FL_OZ), title:"MILLPOND TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the pond is brimming.` };
+      case "sluice":   return { ...oz(777),                title:"SLUICE TRIPLE!",    humorKey:"machineWin", detail:"+777 FL OZ — every gate wide open." };
+      case "wheel":    return { ...oz(LEVEL_REWARD_FL_OZ), title:"WHEEL TRIPLE!",     humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — round and round she goes.` };
+      case "factory":  return { ...oz(1110),               title:"FACTORY TRIPLE!",   humorKey:"machineWin", detail:"+1,110 FL OZ — the mill is roaring." };
+      case "fl-111":   return { ...oz(1110),               title:"111 TRIPLE!",       humorKey:"machineWin", detail:"+1,110 FL OZ" };
+      case "fl-666":   return { ...oz(2220),               title:"666 TRIPLE!",       humorKey:"machineWin", detail:"+2,220 FL OZ" };
+      case "fl-6660":  return { ...oz(UNLOCK_COST_FL_OZ),  title:"DAM JACKPOT",       humorKey:"machineJackpot", jackpot:true, detail:`+${fmt(UNLOCK_COST_FL_OZ)} FL OZ` };
       case "song":     return { kind:"song",     title:"🎵 FREE SONG!",         humorKey:"machineSong",     detail:"The next locked song joins the radio. No FL OZ spent." };
       case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };
       case "pun":      return { kind:"pun",      title:"😂 DAM PUN!",           humorKey:"machinePun",      detail:"The machine has jokes." };
-      default:        return { ...oz(DAY_REWARD_FL_OZ),   title:"TRIPLE FLOW!",   humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
+      default:         return { ...oz(DAY_REWARD_FL_OZ),   title:"TRIPLE FLOW!",      humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
     }
   }
+  /* V2.0.7 — PAIR wins: any two matching water/system symbols pay FL OZ. Always below the matching
+     triple, so three-of-a-kind stays the bigger win and the 6,660 triple stays the only jackpot. */
+  const counts = {};
+  [a, b, c].forEach(id => counts[id] = (counts[id] || 0) + 1);
+  const pairId = Object.keys(counts).find(id => counts[id] === 2);
+  const pr = pairId ? DAM_PAIR_PRIZES[pairId] : null;
+  if(pr) return { ...oz(pr.amount), title:pr.title, humorKey:"machineWin", pair:true, detail:`+${fmt(pr.amount)} FL OZ — two ${pr.label} line up.` };
   return null;                                          // no combination: the machine keeps its water
 }
 
@@ -4827,7 +4854,8 @@ function awardDamMachinePlay(n = 1){
   const k = Math.min(DAM_MACHINE_MAX_PLAYS, Math.max(0, Math.floor(Number(n) || 1)));
   state.damMachineFreePlays = Math.min(DAM_MACHINE_MAX_PLAYS, state.damMachineFreePlays + k);
   saveGame();
-  if(damMachine.open) renderDamMachineHeader();
+  renderDamMachineHeader();                             // V2.0.7: floating 🎰 flips to BONUS READY at once
+  if(k > 0) showToast("🎰 A free DAM MACHINE spin is ready on the left side of the game!", 3600);
   renderProfile();
   return state.damMachineFreePlays;
 }
@@ -4859,7 +4887,8 @@ function playDamMachineCharacterWinSound(){ playDamCharacterSound(); }
 function playDamMachinePunSound(){ playPunSound(); }
 
 /* ---------- wiring ---------- */
-$("dmOpenBtn").addEventListener("click", openDamMachine);
+/* V2.0.7 — the menu row (dmOpenBtn) was replaced by the floating 🎰 button (wired in the nav block).
+   Attaching to the removed row threw and stopped every line after this one. */
 $("dmCloseBtn").addEventListener("click", closeDamMachine);
 $("dmSpinBtn").addEventListener("click", () => spinDamMachine());
 $("dmContinueBtn").addEventListener("click", () => { continueDamMachine(); try { $("dmSpinBtn").focus({ preventScroll:true }); } catch(e){} });
@@ -4895,7 +4924,7 @@ function runDamMachineSelfTest(){
     return e3.textContent === "🧪";
   })());
   const ev = evaluateDamCombination;
-  t("evaluator: water triple = +111", ev(["water","water","water"]).amount === DAY_REWARD_FL_OZ);
+  t("evaluator: water triple = +333", ev(["water","water","water"]).amount === 333);
   t("evaluator: dam triple = +666", ev(["dam","dam","dam"]).amount === LEVEL_REWARD_FL_OZ);
   t("evaluator: wheel triple = +666", ev(["wheel","wheel","wheel"]).amount === LEVEL_REWARD_FL_OZ);
   t("evaluator: 6,660 jackpot", ev(["fl-6660","fl-6660","fl-6660"]).amount === UNLOCK_COST_FL_OZ && ev(["fl-6660","fl-6660","fl-6660"]).jackpot);
@@ -4904,7 +4933,12 @@ function runDamMachineSelfTest(){
   t("evaluator: water-wheel-water special = +666", ev(["water","wheel","water"]).amount === LEVEL_REWARD_FL_OZ);
   t("evaluator: dam-wheel-factory special = +1 play", ev(["dam","wheel","factory"]).kind === "play");
   t("evaluator: sluice-water-millpond special = +111", ev(["sluice","water","millpond"]).amount === DAY_REWARD_FL_OZ);
-  t("evaluator: pair wins add more water prizes", ev(["water","water","dam"]).amount === 222 && ev(["fl-111","fl-111","pun"]).amount === 1110 && ev(["fl-666","fl-666","pun"]).amount === 2220);
+  t("evaluator: pair ladder 111→2,220", ev(["water","water","dam"]).amount === 111 && ev(["dam","pun","dam"]).amount === 222 && ev(["millpond","millpond","song"]).amount === 333
+     && ev(["sluice","wheel","sluice"]).amount === 444 && ev(["wheel","wheel","pun"]).amount === 555 && ev(["factory","song","factory"]).amount === 666
+     && ev(["fl-111","fl-111","pun"]).amount === 777 && ev(["fl-666","pun","fl-666"]).amount === 1110 && ev(["fl-6660","fl-6660","pun"]).amount === 2220);
+  t("evaluator: pairs never jackpot; every triple beats its pair", !ev(["fl-6660","fl-6660","pun"]).jackpot
+     && Object.keys(DAM_PAIR_PRIZES).every(id => { const t3 = ev([id,id,id]); return t3 && t3.kind === "flOz" && t3.amount > DAM_PAIR_PRIZES[id].amount; }));
+  t("evaluator: specials still win over pairs", ev(["dam","water","dam"]).title === "THE DAM IS HOLDING!" && ev(["water","wheel","water"]).amount === LEVEL_REWARD_FL_OZ);
   t("evaluator: no match → null", ev(["water","dam","wheel"]) === null);
   ["machineIdle","machineSpin","machineLose","machineWin","machineJackpot","machineSong","machineCharacter","machinePun","machinePlayAward"].forEach(k =>
     t("humor: " + k + " non-empty", Array.isArray(DAM_HUMOR[k]) && DAM_HUMOR[k].length > 0));
@@ -5207,8 +5241,20 @@ function pickTribe(){
   return t;
 }
 
+function allItesSavedBannerEl(){
+  const box = document.createElement("div");
+  box.className = "itesSavedBanner"; box.id = "itesSavedBanner";
+  const img = document.createElement("img");
+  img.alt = "Save the -ites — DAM NATION celebration"; img.decoding = "async";
+  img.addEventListener("error", () => img.remove(), { once:true });
+  img.src = ALL_ITES_SAVED_ART_URL;
+  const t = document.createElement("strong"); t.textContent = "ALL -ITES SAVED! ✅";
+  box.appendChild(img); box.appendChild(t);
+  return box;
+}
 function renderTribesList(){
   tribesList.innerHTML = "";
+  if(state.iteRescueStats && state.iteRescueStats.savedCount >= ITES.length) tribesList.appendChild(allItesSavedBannerEl());
   const seen = new Set();
   const unique = state.tribesFound.filter(t=>{
     if(seen.has(t.name)) return false;
@@ -5217,6 +5263,7 @@ function renderTribesList(){
 
   if(unique.length === 0){
     tribesList.innerHTML = `<div class="emptyNote">Complete a full loop — Mountain to Ocean — to reveal your first name.</div>`;
+    if(state.iteRescueStats && state.iteRescueStats.savedCount >= ITES.length) tribesList.prepend(allItesSavedBannerEl());
     return;
   }
 
@@ -5271,11 +5318,11 @@ function resetSystem(){
    TOAST
 ========================================================= */
 let toastTimer;
-function showToast(text){
+function showToast(text, ms){
   labelToast.textContent = text;
   labelToast.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=> labelToast.classList.remove("show"), 1300);
+  toastTimer = setTimeout(()=> labelToast.classList.remove("show"), ms || 1300);
 }
 
 /* =========================================================
@@ -5375,65 +5422,229 @@ $("navHowBtn").addEventListener("click", ()=>{ closeNavMenu(); openGameGuide(tru
 $("dmFloatBtn").addEventListener("click", ()=>openDamMachine());
 $("bonusBtn").addEventListener("click", ()=>{ if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
 
+/* V2.0.7 — COMMAND GUIDE. One card, three tabs. Character rules come from the canonical
+   CHARACTERS catalog + isUnlocked()/purchaseItem()/setActiveCharacter() — no second roster. */
+const GUIDE_SEEN_KEY = "yalltooDamGame.guideSeen";
+var guideSelection = null;          // first run: nothing preselected until the player taps an unlocked avatar
+function guideNeverShow(){ return storageGet(GUIDE_SEEN_KEY) === "1"; }
+function setGuideNeverShow(on){ if(on) storageSet(GUIDE_SEEN_KEY, "1"); else { try { localStorage.removeItem(GUIDE_SEEN_KEY); } catch(e){} } }
+function characterNeedText(c){
+  const short = c.cost - state.totalFlOz;
+  return short > 0 ? `NEED ${fmt(short)} MORE FL OZ` : `PURCHASE · ${fmt(c.cost)} FL OZ`;
+}
+function renderGuideRules(){
+  const list = $("guideRulesList"); if(!list) return;
+  const taps = getRequiredTaps(state.level);
+  const nextTier = Math.ceil(Math.max(1, state.level) / 6) * 6 + 1;
+  const secs = Math.round(getDayTimeLimitMs(state.level) / 1000);
+  const rules = [
+    `🌊 <strong>Six days per level.</strong> ${DAM_DAYS.map(d => esc(d.station)).join(" → ")} → Ocean. Each day is one station.`,
+    `👆 <strong>Taps per station.</strong> At your level (Level ${fmt(state.level)}) each station needs <strong>${fmt(taps)} taps</strong>. The requirement goes up as you level — next increase at Level ${fmt(nextTier)} (${fmt(getRequiredTaps(nextTier))} taps).`,
+    `⏱️ <strong>Beat the timer.</strong> Your first tap starts a ${secs}-second clock for that day${state.level > 60 ? "" : " (10 seconds per day after Level 60)"}.`,
+    `💥 <strong>Timer runs out?</strong> The dam breaks and you retry that day. FL OZ you already earned stays in your wallet.`,
+    `💧 <strong>Rewards.</strong> +${fmt(DAY_REWARD_FL_OZ)} FL OZ per day · ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ per level. Finishing Day 6 saves the current -ite.`,
+    `🎡 <strong>Level complete.</strong> Spin the Bonus Waterwheel, then continue to the next level.`,
+    `🎰 <strong>DAM MACHINE.</strong> Spins only use free plays — they never cost FL OZ.`,
+    `👤 <strong>Characters.</strong> ${esc(CHARACTERS[0].name)} and Y'all Too Beaver start unlocked. Others cost ${fmt(UNLOCK_COST_FL_OZ)} FL OZ or can be won. Only unlocked characters can be played.`,
+    `🏆 <strong>Milestones.</strong> Levels 6, 36, 66, 96… trigger major celebrations.`
+  ];
+  list.innerHTML = rules.map(r => `<div class="preGameRule">${r}</div>`).join("");
+}
 function renderPreGameCharacters(){
-  const grid=$("preGameAvatarGrid"); if(!grid)return;
-  grid.innerHTML="";
-  CHARACTERS.forEach(c=>{
-    const owned=isUnlocked("characters",c.id), active=state.activeCharacter===c.id;
-    const card=document.createElement("div");
-    card.className="preGameAvatar"+(active?" selected":"")+(owned?"":" locked");
-    card.appendChild(characterImage(c,"preGameAvatarImg"));
-    const name=document.createElement("div"); name.className="preGameAvatarName"; name.textContent=c.name; card.appendChild(name);
-    const status=document.createElement("div"); status.className="preGameAvatarStatus";
-    status.textContent=owned ? ((c.isStarter||c.id===DEFAULT_CHARACTER_ID)?"STARTER · UNLOCKED":"UNLOCKED") : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+  const grid = $("preGameAvatarGrid"); if(!grid) return;
+  const w = $("preGameWallet"); if(w) w.textContent = `💧 Wallet: ${fmt(state.totalFlOz)} FL OZ`;
+  grid.innerHTML = "";
+  CHARACTERS.forEach(c => {
+    const owned = isUnlocked("characters", c.id), selected = guideSelection === c.id;
+    const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
+    const card = document.createElement("div");
+    card.className = "preGameAvatar" + (selected ? " selected" : "") + (owned ? "" : " locked");
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-pressed", selected ? "true" : "false");
+    card.dataset.charId = c.id;
+    card.setAttribute("aria-label", `${c.name} — ${owned ? "unlocked" : "locked, " + fmt(c.cost) + " FL OZ"}`);
+    card.appendChild(characterImage(c, "preGameAvatarImg"));
+    const name = document.createElement("div"); name.className = "preGameAvatarName"; name.textContent = c.name; card.appendChild(name);
+    const status = document.createElement("div"); status.className = "preGameAvatarStatus";
+    status.textContent = owned ? (starter ? "⭐ STARTER · UNLOCKED" : "✅ UNLOCKED") : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
     card.appendChild(status);
-    if(owned){
-      card.addEventListener("click",()=>{setActiveCharacter(c.id);renderPreGameCharacters();$("preGameMsg").textContent=`✅ ${c.name} selected.`;});
-    }else{
-      const b=document.createElement("button"); b.className="storeBtn"; b.type="button";
-      b.textContent=state.totalFlOz>=c.cost?`PURCHASE · ${fmt(c.cost)} FL OZ`:`NEED ${fmt(c.cost)} FL OZ`;
-      b.addEventListener("click",ev=>{
-        ev.stopPropagation();
-        if(state.totalFlOz<c.cost){$("preGameMsg").textContent=`💧 Earn ${fmt(c.cost)} FL OZ to purchase ${c.name}.`;return;}
-        const res=purchaseItem("characters",c.id);
-        $("preGameMsg").textContent=res.ok?`🎉 ${c.name} unlocked and selected!`:res.message;
-        if(res.ok){setActiveCharacter(c.id);renderPreGameCharacters();}
-      });
+    if(!owned){
+      const b = document.createElement("button"); b.className = "storeBtn"; b.type = "button";
+      b.textContent = characterNeedText(c);
+      b.disabled = state.totalFlOz < c.cost;
+      b.dataset.guideBuy = c.id;
       card.appendChild(b);
     }
     grid.appendChild(card);
   });
 }
-function openGameGuide(fromMenu){
-  preGameOpen=true;
-  $("preGameCard").classList.add("show");
-  $("preGameClose").hidden=!fromMenu;
-  $("preGameMsg").textContent="";
+/* Tap an unlocked avatar → select + save. Tap a locked one → never selected; show its purchase option. */
+function selectGuideCharacter(id){
+  const c = CHARACTERS.find(x => x.id === id); if(!c) return false;
+  const msg = $("preGameMsg");
+  if(!isUnlocked("characters", id)){
+    msg.textContent = state.totalFlOz >= c.cost
+      ? `🔒 ${c.name} is locked — tap PURCHASE · ${fmt(c.cost)} FL OZ to unlock.`
+      : `🔒 ${c.name} is locked — you need ${fmt(c.cost - state.totalFlOz)} more FL OZ.`;
+    return false;
+  }
+  if(!setActiveCharacter(id)) return false;
+  guideSelection = id;
+  msg.textContent = `✅ ${c.name} selected.`;
   renderPreGameCharacters();
+  return true;
+}
+function purchaseGuideCharacter(id){
+  const c = CHARACTERS.find(x => x.id === id); if(!c) return false;
+  const res = purchaseItem("characters", id);
+  if(!res.ok){ $("preGameMsg").textContent = res.message; renderPreGameCharacters(); return false; }
+  try { playSongUnlockSound(); } catch(e){}
+  selectGuideCharacter(id);
+  $("preGameMsg").textContent = `🎉 ${c.name} unlocked and selected!`;
+  renderCharactersPanel();
+  return true;
+}
+function showGuideTab(name){
+  document.querySelectorAll("[data-guide-tab]").forEach(t => { const on = t.dataset.guideTab === name; t.classList.toggle("active", on); t.setAttribute("aria-selected", on ? "true" : "false"); });
+  document.querySelectorAll("[data-guide-pane]").forEach(p => p.classList.toggle("active", p.dataset.guidePane === name));
+  const choose = $("preGameChooseBtn"); if(choose) choose.hidden = name === "avatar";
+}
+function openGameGuide(fromMenu){
+  closeNavMenu();
+  preGameOpen = true;
+  guideSelection = fromMenu ? state.activeCharacter : null;
+  $("preGameCard").classList.add("show");
+  $("preGameClose").hidden = !fromMenu;
+  $("preGameNever").checked = guideNeverShow();
+  $("preGameStart").textContent = fromMenu ? "🚀 BACK TO THE GAME" : "🚀 START GAME";
+  $("preGameMsg").textContent = "";
+  showGuideTab("how");
+  renderGuideRules();
+  renderPreGameCharacters();
+  syncTimerPause();                                   // a running day clock holds while the guide is open
 }
 function closeGameGuide(){
-  if(!preGameOpen)return;
-  preGameOpen=false;
+  if(!preGameOpen) return;
+  setGuideNeverShow($("preGameNever").checked);
+  preGameOpen = false;
   $("preGameCard").classList.remove("show");
   syncTimerPause();
 }
+/* START GAME: only with an unlocked, explicitly selected avatar. Gameplay then starts on the first board tap. */
 function beginFromGuide(){
-  const c=getActiveCharacter();
-  if(!c||!isUnlocked("characters",c.id)){ $("preGameMsg").textContent="Choose an unlocked character first."; return; }
-  if($("preGameNever").checked)storageSet("yalltooDamGame.guideSeen","1");
-  preGameOpen=false;
+  if(!guideSelection || !isUnlocked("characters", guideSelection)){
+    $("preGameMsg").textContent = "Choose an unlocked character to begin.";
+    showGuideTab("avatar");
+    return false;
+  }
+  setActiveCharacter(guideSelection);
+  setGuideNeverShow($("preGameNever").checked);
+  preGameOpen = false;
   $("preGameCard").classList.remove("show");
   syncTimerPause();
+  renderCharacter();
+  showToast(`${getActiveCharacter().name} is ready — tap the glowing station to begin`, 2600);
+  return true;
 }
-$("preGameStart").addEventListener("click",beginFromGuide);
-$("preGameClose").addEventListener("click",closeGameGuide);
-$("preGameChooseBtn").addEventListener("click",()=>{document.querySelector('[data-guide-tab="avatar"]').click();$("preGameAvatarGrid").scrollIntoView({block:"nearest"});});
-document.querySelectorAll("[data-guide-tab]").forEach(tab=>{
-  tab.addEventListener("click",()=>{
-    document.querySelectorAll("[data-guide-tab]").forEach(t=>t.classList.toggle("active",t===tab));
-    document.querySelectorAll("[data-guide-pane]").forEach(p=>p.classList.toggle("active",p.dataset.guidePane===tab.dataset.guideTab));
-  });
+$("preGameStart").addEventListener("click", beginFromGuide);
+$("preGameClose").addEventListener("click", closeGameGuide);
+$("preGameChooseBtn").addEventListener("click", () => { showGuideTab("avatar"); try { $("preGameAvatarGrid").scrollIntoView({ block:"nearest" }); } catch(e){} });
+document.querySelectorAll("[data-guide-tab]").forEach(tab => tab.addEventListener("click", () => showGuideTab(tab.dataset.guideTab)));
+$("preGameAvatarGrid").addEventListener("click", e => {          // one delegated listener; re-renders never stack handlers
+  const buy = e.target.closest("[data-guide-buy]");
+  if(buy){ e.stopPropagation(); purchaseGuideCharacter(buy.dataset.guideBuy); return; }
+  const card = e.target.closest(".preGameAvatar");
+  if(card) selectGuideCharacter(card.dataset.charId);
 });
+$("preGameAvatarGrid").addEventListener("keydown", e => {
+  if(e.key !== "Enter" && e.key !== " ") return;
+  const card = e.target.closest(".preGameAvatar");
+  if(card && e.target === card){ e.preventDefault(); selectGuideCharacter(card.dataset.charId); }
+});
+/* ---------- V2.0.7 self-test: guide, characters, menu, floating machine, prizes, UI.
+   runCommandCenterSelfTest() → { pass, fail, results:[…] }. Console only. Live state, the save,
+   and the guide preference are snapshotted first and restored afterwards. ---------- */
+function runCommandCenterSelfTest(){
+  const results = [];
+  const t = (name, fn) => { let ok = false; try { ok = !!fn(); } catch(e){ ok = false; } results.push({ name, ok }); };
+  const snap = {}; Object.keys(state).forEach(k => { snap[k] = state[k] && typeof state[k] === "object" ? JSON.parse(JSON.stringify(state[k])) : state[k]; });
+  const rawSave = storageGet(SAVE_KEY), rawGuide = storageGet(GUIDE_SEEN_KEY);
+  const wasGuideOpen = preGameOpen, wasSel = guideSelection, dmWasOpen = damMachine.open;
+  const craft = obj => { storageSet(SAVE_KEY, JSON.stringify(Object.assign({ version:SAVE_VERSION, level:9, levelFlOz:222, totalFlOz:12345 }, obj))); return loadGame(); };
+  try {
+    /* characters */
+    craft({ unlockedCharacters:["wilbert-dam-guide"] });
+    t("character: Wilbert is unlocked", () => isUnlocked("characters", DEFAULT_CHARACTER_ID));
+    t("character: Y'all Too Beaver is unlocked", () => isUnlocked("characters", "yall-too-beaver"));
+    t("character: every other character starts locked", () => CHARACTERS.filter(c => c.id !== DEFAULT_CHARACTER_ID && c.id !== "yall-too-beaver").every(c => !isUnlocked("characters", c.id)));
+    craft({ unlockedCharacters:["wilbert-dam-guide","operator-moses","ite-danite"], activeCharacter:"operator-moses",
+            iteRescueStats:{ savedIteIds:ITES.map(i => i.id) } });
+    t("migration: pre-V2 auto-unlocked -ite removed; progress kept", () => !isUnlocked("characters","ite-danite") && state.level === 9 && state.totalFlOz === 12345 && state.levelFlOz === 222);
+    t("migration: purchased character + active character kept", () => isUnlocked("characters","operator-moses") && state.activeCharacter === "operator-moses");
+    t("rescue: saving -ites never unlocks their characters", () => state.iteRescueStats.savedCount === ITES.length && ITES.every(i => !isUnlocked("characters", "ite-" + i.id)) && syncIteCharacters() === false);
+    craft({ unlockedCharacters:["wilbert-dam-guide","ite-danite"], charRulesV2:true });
+    t("migration: -ite character bought after V2 is kept", () => isUnlocked("characters","ite-danite"));
+    craft({ unlockedCharacters:["wilbert-dam-guide"], totalFlOz:0 });
+    t("character: locked character cannot be selected", () => !setActiveCharacter("operator-fireman") && !selectGuideCharacter("operator-fireman") && state.activeCharacter !== "operator-fireman");
+    t("character: can't buy without enough FL OZ", () => !purchaseGuideCharacter("operator-fireman") && state.totalFlOz === 0);
+    state.totalFlOz = UNLOCK_COST_FL_OZ;
+    t("character: purchase deducts FL OZ and unlocks", () => purchaseGuideCharacter("operator-fireman") && isUnlocked("characters","operator-fireman") && state.totalFlOz === 0);
+    t("character: selection persists in the save", () => { selectGuideCharacter("yall-too-beaver"); return JSON.parse(storageGet(SAVE_KEY)).activeCharacter === "yall-too-beaver"; });
+    /* guide */
+    openGameGuide(false);
+    t("guide: opens with title and 3 tabs", () => preGameOpen && $("preGameCard").classList.contains("show") && /DAM NATION COMMAND GUIDE/.test($("preGameTitle").textContent) && document.querySelectorAll("[data-guide-tab]").length === 3);
+    t("guide: rules describe the live tap requirement", () => $("guideRulesList").textContent.includes(fmt(getRequiredTaps(state.level)) + " taps"));
+    t("guide: START without a selection is refused", () => !beginFromGuide() && preGameOpen && /Choose an unlocked character to begin/.test($("preGameMsg").textContent));
+    t("guide: tapping an unlocked avatar selects it", () => { document.querySelector('.preGameAvatar[data-char-id="wilbert-dam-guide"]').click(); return guideSelection === "wilbert-dam-guide" && !!document.querySelector('.preGameAvatar.selected[data-char-id="wilbert-dam-guide"]'); });
+    t("guide: tapping a locked avatar does not select it", () => { document.querySelector('.preGameAvatar[data-char-id="operator-moses"]').click(); return guideSelection === "wilbert-dam-guide" && /LOCKED|locked/.test($("preGameMsg").textContent); });
+    $("preGameNever").checked = true;
+    t("guide: START GAME works and closes the guide", () => beginFromGuide() && !preGameOpen && !$("preGameCard").classList.contains("show"));
+    t("guide: never-show preference persists", () => storageGet(GUIDE_SEEN_KEY) === "1");
+    openGameGuide(true); $("preGameNever").checked = false; closeGameGuide();
+    t("guide: closes from the menu and the preference can be cleared", () => !preGameOpen && storageGet(GUIDE_SEEN_KEY) !== "1");
+    /* menu */
+    t("menu: How to Play + Characters rows in the menu", () => !!$("navHowBtn") && !!$("navCharactersBtn") && !!$("navHowBtn").closest("#navSheet") && !!$("navCharactersBtn").closest("#navSheet"));
+    t("menu: DAM MACHINE menu entry removed", () => !$("dmOpenBtn") && !/DAM MACHINE/i.test($("navSheet").textContent));
+    t("menu: floating DAM MACHINE button exists outside the menu", () => !!$("dmFloatBtn") && !$("dmFloatBtn").closest("#navSheet"));
+    /* floating machine */
+    state.damMachineFreePlays = 0; renderDamMachineHeader();
+    t("machine: hidden with no free plays", () => $("dmFloatBtn").hidden);
+    awardDamMachinePlay(1);
+    t("machine: a free play shows BONUS READY at once", () => !$("dmFloatBtn").hidden && $("dmFloatBtn").classList.contains("ready") && /BONUS READY/.test($("dmFloatBtn").textContent));
+    t("machine: ready state animates", () => getComputedStyle($("dmFloatBtn")).animationName !== "none");
+    const before = state.totalFlOz, pair = commitDamResult(evaluateDamCombination(["wheel","wheel","pun"]), ["wheel","wheel","pun"]);
+    t("machine: water prize is credited", () => pair.amount === 555 && state.totalFlOz === before + 555);
+    const b2 = state.totalFlOz, jack = commitDamResult(evaluateDamCombination(["fl-6660","fl-6660","fl-6660"]), ["fl-6660","fl-6660","fl-6660"]);
+    t("machine: jackpot still pays 6,660", () => jack.jackpot && state.totalFlOz === b2 + UNLOCK_COST_FL_OZ);
+    t("machine: 10 distinct FL OZ prize values incl. jackpot", () => {
+      const ids = Object.keys(DAM_REEL_WEIGHTS), vals = new Set();
+      ids.forEach(a => ids.forEach(b => ids.forEach(c => { const r = evaluateDamCombination([a,b,c]); if(r && r.kind === "flOz") vals.add(r.amount); })));
+      return [111,222,333,444,555,666,777,1110,2220,6660].every(v => vals.has(v));
+    });
+    /* UI */
+    state.iteRescueStats = sanitizeIteRescueStats({ savedIteIds:ITES.map(i => i.id) });
+    renderIteRescue(); renderTribesList();
+    t("ui: ALL -ITES SAVED uses the supplied artwork", () => { const img = $("iteHudAvatar").querySelector("img"); return img && img.src === ALL_ITES_SAVED_ART_URL && /ALL -ITES SAVED/.test($("iteHudLine").textContent); });
+    t("ui: -ites panel shows the celebration banner", () => { const b = $("itesSavedBanner"); return b && b.querySelector("img").src === ALL_ITES_SAVED_ART_URL; });
+    t("ui: Store has no character / Rescued -ites section", () => !$("storeCharacters") && !/Rescued -ites/i.test($("storePanel").textContent) && !$("storePanel").querySelector(".charCard"));
+    t("ui: Characters panel lists the full roster", () => $("charactersGrid").querySelectorAll(".charCard").length === CHARACTERS.length);
+    t("ui: no duplicate ids", () => { const seen = new Set(); return [...document.querySelectorAll("[id]")].every(el => !seen.has(el.id) && seen.add(el.id)); });
+  } finally {
+    Object.keys(snap).forEach(k => { state[k] = snap[k]; });
+    state.tribesFound = (snap.tribesFound || []).map(x => ALL_TRIBES.find(t2 => t2.name === x.name)).filter(Boolean);
+    state.lastTribe = snap.lastTribe ? ALL_TRIBES.find(t2 => t2.name === snap.lastTribe.name) || null : null;
+    if(rawSave === null){ try { localStorage.removeItem(SAVE_KEY); } catch(e){} } else storageSet(SAVE_KEY, rawSave);
+    if(rawGuide === null){ try { localStorage.removeItem(GUIDE_SEEN_KEY); } catch(e){} } else storageSet(GUIDE_SEEN_KEY, rawGuide);
+    guideSelection = wasSel;
+    if(!wasGuideOpen && preGameOpen){ preGameOpen = false; $("preGameCard").classList.remove("show"); }
+    if(!dmWasOpen && damMachine.open) closeDamMachine();
+    renderHud(); renderIteRescue(); renderTribesList(); renderStore(); renderRadio(); renderProfile(); renderDamMachineHeader(); renderCharacter();
+    syncTimerPause();
+  }
+  const pass = results.filter(r => r.ok).length;
+  return { pass, fail: results.length - pass, results };
+}
 document.querySelectorAll("[data-close-panel]").forEach(b => b.addEventListener("click", closePanels));
 
 /* =========================================================
@@ -5673,11 +5884,11 @@ function renderCharactersPanel(){
     const img = characterImage(c, "charThumbImg");
     img.loading = "lazy";
     thumb.appendChild(img);
-    const status = starter ? "STARTER · UNLOCKED" : owned ? "UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+    const status = starter ? "⭐ STARTER · UNLOCKED" : owned ? "✅ UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
     let btn;
     if(active) btn = `<button class="storeBtn" disabled>ACTIVE</button>`;
     else if(owned) btn = `<button class="storeBtn" data-char-use="${esc(c.id)}">USE CHARACTER</button>`;
-    else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>NEED ${fmt(c.cost)} FL OZ</button>`;
+    else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>${characterNeedText(c)}</button>`;
     else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">PURCHASE · ${fmt(c.cost)} FL OZ</button>`;
     const info = document.createElement("div");
     info.className = "charInfo";
