@@ -1504,6 +1504,20 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   transition:opacity .9s ease, visibility .9s ease;
 }
 #geiSplash.isDone{opacity:0;visibility:hidden;pointer-events:none}
+.geiSplashSkip{
+  position:absolute; right:14px; bottom:calc(env(safe-area-inset-bottom) + 16px); z-index:20;
+  min-height:38px; padding:8px 14px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.38);
+  background:rgba(3,7,17,.62); color:#fff;
+  font:800 .72rem/1 Inter,system-ui,sans-serif;
+  letter-spacing:.1em; text-transform:uppercase;
+  cursor:pointer; backdrop-filter:blur(8px);
+  box-shadow:0 0 16px rgba(47,210,255,.18);
+  -webkit-tap-highlight-color:transparent;
+}
+.geiSplashSkip:active{transform:scale(.96);background:rgba(47,210,255,.18)}
+.geiSplashSkip:focus-visible{outline:2px solid #2fd2ff;outline-offset:3px}
+@media (max-width:380px){.geiSplashSkip{right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);font-size:.66rem;padding:7px 12px}}
 .geiSplashNoise{position:absolute;inset:0;opacity:.13;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.8) .6px,transparent .6px);background-size:7px 7px;mix-blend-mode:screen}
 .geiSplashGlow{position:absolute;width:75vmax;height:75vmax;border-radius:50%;background:radial-gradient(circle,rgba(47,210,255,.13),transparent 68%);filter:blur(10px);animation:geiSplashPulse 3.5s ease-in-out infinite}
 .geiSplashWater{position:absolute;left:-15%;top:44%;width:130%;height:12px;transform:scaleX(0);transform-origin:left center;background:linear-gradient(90deg,transparent,#2fd2ff 10%,#eafcff 48%,#2fd2ff 88%,transparent);box-shadow:0 0 18px #2fd2ff,0 0 45px rgba(47,210,255,.65);animation:geiWaterRun 3.1s cubic-bezier(.2,.8,.2,1) 1.8s forwards}
@@ -1570,7 +1584,29 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   </div>
   <div class="geiSplashBrand"><div class="geiSplashEyebrow">GENESIS ENGINEERED</div><div class="geiSplashTitle">DAM NATION</div><div class="geiSplashSub">MOUNTAIN → DAM → MILL → OCEAN</div></div>
   <div class="geiSplashEnter">HYDRAULIC SYSTEM ONLINE</div><div class="geiSplashProgress"><i></i></div>
+  <button class="geiSplashSkip" id="geiSplashSkip" type="button" aria-label="Skip the 10 second intro">SKIP INTRO</button>
 </div>
+<script>
+/* GEI SPLASH SAFETY EXIT — intentionally isolated from the main game script. */
+(function(){
+  var splash=document.getElementById("geiSplash");
+  var skip=document.getElementById("geiSplashSkip");
+  if(!splash)return;
+  var finished=false;
+  function finishSplash(){
+    if(finished)return;
+    finished=true;
+    splash.classList.add("isDone");
+    if(skip) skip.disabled=true;
+    window.setTimeout(function(){
+      if(splash && splash.parentNode) splash.parentNode.removeChild(splash);
+    },950);
+  }
+  if(skip) skip.addEventListener("click",finishSplash,{once:true});
+  window.setTimeout(finishSplash,10000);
+  window.geiFinishSplash=finishSplash;
+})();
+</script>
 
 
 <div class="bg">
@@ -5602,15 +5638,7 @@ function restoreVisualProgress(){
   ite.onerror=function(){ite.style.display="none";};
 })();
 
-/* GEI SPLASH V1.0 — reveal the game after exactly 10 seconds. */
-(function(){
-  var splash=document.getElementById("geiSplash");
-  if(!splash)return;
-  var finished=false;
-  function finish(){if(finished)return;finished=true;splash.classList.add("isDone");setTimeout(function(){splash.remove();},950);}
-  window.addEventListener("pageshow",function(){setTimeout(function(){if(!finished)finish();},10000);},{once:true});
-  setTimeout(finish,10000);
-})();
+/* GEI SPLASH V1.0 — exit is handled by the isolated safety block above. */
 
 /* GEI SPLASH AUDIO V1.3 — synthesized hydraulic + randomized natural crescendo */
 (function(){
