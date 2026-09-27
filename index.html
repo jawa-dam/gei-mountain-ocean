@@ -5219,30 +5219,45 @@ function paypalDiagnosticMessage(code, detail){
 
 async function paypalServerProbe(){
   try{
-    const r = await fetch("/api/paypal/sdk-probe", { cache:"no-store" });
-    const data = await r.json().catch(()=>({}));
-    if(!r.ok) return { ok:false, summary:"server probe HTTP " + r.status };
-    if(data.ok && data.paypalHttpStatus === 200){
-      return {
-        ok:true,
-        summary:"PayPal CDN returned HTTP 200 for the configured Live client ID (fingerprint " +
-          String(data.clientIdFingerprint || "unknown") + ")."
-      };
+    const [sdkResult, credentialResult] = await Promise.all([
+      fetch("/api/paypal/sdk-probe", { cache:"no-store" }).then(async r => ({http:r.status,data:await r.json().catch(()=>({}))})),
+      fetch("/api/paypal/credential-probe", { cache:"no-store" }).then(async r => ({http:r.status,data:await r.json().catch(()=>({}))}))
+    ]);
+
+    const sdk=sdkResult.data || {};
+    const cred=credentialResult.data || {};
+
+    let sdkSummary;
+    if(sdkResult.http !== 200){
+      sdkSummary="SDK probe HTTP " + sdkResult.http;
+    }else if(sdk.ok && sdk.paypalHttpStatus === 200){
+      sdkSummary="PayPal SDK CDN returned HTTP 200 (client fingerprint " +
+        String(sdk.clientIdFingerprint || "unknown") + ")";
+    }else if(sdk.paypalHttpStatus){
+      sdkSummary="PayPal SDK CDN returned HTTP " + sdk.paypalHttpStatus +
+        " (client fingerprint " + String(sdk.clientIdFingerprint || "unknown") + ")";
+    }else{
+      sdkSummary=sdk.error || "Server could not reach PayPal SDK CDN";
     }
-    if(data.paypalHttpStatus){
-      return {
-        ok:false,
-        summary:"PayPal CDN returned HTTP " + data.paypalHttpStatus +
-          " for the configured Live client ID (fingerprint " +
-          String(data.clientIdFingerprint || "unknown") + ")."
-      };
+
+    let credentialSummary;
+    if(credentialResult.http !== 200){
+      credentialSummary="credential probe HTTP " + credentialResult.http;
+    }else if(cred.ok && cred.paypalHttpStatus === 200){
+      credentialSummary="Live Client ID + Secret authenticate successfully";
+    }else if(cred.paypalHttpStatus){
+      credentialSummary="Live credential authentication returned HTTP " + cred.paypalHttpStatus +
+        (cred.error ? " (" + cred.error + ")" : "");
+    }else{
+      credentialSummary=cred.error || "Live credential probe failed";
     }
+
     return {
-      ok:false,
-      summary:data.error || "The server could not reach the PayPal SDK."
+      ok: !!(sdk.ok && cred.ok),
+      summary:sdkSummary + " · " + credentialSummary
     };
   }catch(err){
-    return { ok:false, summary:"Browser could not reach the server diagnostic endpoint." };
+    return { ok:false, summary:"Browser could not reach the PayPal diagnostic endpoints." };
   }
 }
 
