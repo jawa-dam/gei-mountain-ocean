@@ -5255,10 +5255,11 @@ async function startCheckout(packId){
           throw new Error(result.error || "Payment could not be confirmed.");
         }
 
+        const claimId="checkout-"+crypto.randomUUID();
         const claimResponse=await fetch("/api/paypal/claim-entitlement",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({claimToken:result.claimToken,captureID:result.captureID})
+          body:JSON.stringify({claimToken:result.claimToken,captureID:result.captureID,claimId})
         });
         const claim=await claimResponse.json();
         if(!claimResponse.ok || !claim.ok || !claim.entitlement){
