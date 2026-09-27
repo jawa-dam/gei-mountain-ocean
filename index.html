@@ -1279,6 +1279,10 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   filter:drop-shadow(0 0 16px color-mix(in srgb, var(--juicy-blue) 55%, transparent)); }
 .tribeCard.show .tribeArt img{ animation:timeUpArtIn .6s cubic-bezier(.34,1.56,.64,1) both; }
 @media (max-width:380px){ .timeUpArt{ height:120px; } .tribeArt{ height:112px; } }
+/* V1.7 — portraits in the -ites Discovered list + rescued -ites heading in character select */
+.tribeItem{ display:flex; align-items:center; gap:10px; }
+.tribeItemImg{ width:38px; height:38px; flex:0 0 38px; object-fit:contain; border-radius:10px; background:rgba(255,255,255,.06); }
+.charGroup{ grid-column:1 / -1; margin-top:16px; }
 @media (prefers-reduced-motion:reduce){ .timeUpCard.show .timeUpArt.hasArt img, .tribeCard.show .tribeArt img{ animation:none; } }
 
 /* ============ v2: PANELS ============ */
@@ -2675,6 +2679,18 @@ const TIMEUP_ART_URLS = [
   GEI_ART_BASE + "dam-flood-LntFS6si2lCt3Nan.png",
   GEI_ART_BASE + "broken-dam-system-Z6rTez37RWUnLftu.png"
 ];
+/* GEI ART V1.7 — -ite portraits. person-1…10 belong to the 10 rescue -ites (in catalog order);
+   the rest are the "A People Revealed" pool. Each revealed name keeps the portrait it first got. */
+const ITE_PORTRAIT_FILES = [
+  "ites-person-1-A0Jn7dRFb8eUyXrl.png",  "ites-person-2-bN6MBUmRA6A1xnkJ.png",  "ites-person-3-3k8ykGDlJH8s6Xg3.png",
+  "ites-person-4-p3aVUF141QrdgKcP.png",  "ites-person-5-q1NUgzn3n6mfZGJz.png",  "ites-person-6-lme5nP0HphG8lvcM.png",
+  "ites-person-7-e0GVOl99RIYAQ24G.png",  "ites-person-8-th22pZwpTyBTnbJp.png",  "ites-person-9-1KVYhAQqOBMjwJVK.png",
+  "ites-person-10-tQlMEYInTsjn9riG.png"
+];
+const REVEAL_PORTRAIT_URLS = [
+  "ites-person-11-N1q6H3fVU1D2HemX.png", "ites-person-12-yOZQUkKw5hcK93Tm.png", "ites-person-13-tnqhYZ2rCXjYq5Yn.png",
+  "ites-person-14-6XSsm1QMl2kY8j6G.png", "ites-person-9Cygcj2PsDYTjmZN.png"
+].map(f => GEI_ART_BASE + f);
 const ITE_STATUSES = ["trapped", "inFlow", "saved"];
 const ITE_STATUS_META = {
   trapped: { icon:"🔒", label:"TRAPPED", sr:"trapped" },
@@ -2682,16 +2698,16 @@ const ITE_STATUS_META = {
   saved:   { icon:"✅", label:"SAVED",   sr:"saved" }
 };
 const ITES = [
-  { id:"danite",     name:"Danite",     imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"levite",     name:"Levite",     imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"israelite",  name:"Israelite",  imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"amorite",    name:"Amorite",    imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"jebusite",   name:"Jebusite",   imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"hittite",    name:"Hittite",    imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"hivite",     name:"Hivite",     imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"ammonite",   name:"Ammonite",   imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"benjamite",  name:"Benjamite",  imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
-  { id:"ephraimite", name:"Ephraimite", imageUrl:ITE_ICON_URL, status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ }
+  { id:"danite",     name:"Danite",     imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[0], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"levite",     name:"Levite",     imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[1], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"israelite",  name:"Israelite",  imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[2], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"amorite",    name:"Amorite",    imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[3], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"jebusite",   name:"Jebusite",   imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[4], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"hittite",    name:"Hittite",    imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[5], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"hivite",     name:"Hivite",     imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[6], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"ammonite",   name:"Ammonite",   imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[7], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"benjamite",  name:"Benjamite",  imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[8], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ },
+  { id:"ephraimite", name:"Ephraimite", imageUrl:GEI_ART_BASE + ITE_PORTRAIT_FILES[9], status:"trapped", rescued:false, waterReward:DAY_REWARD_FL_OZ }
 ];
 const ITE_BY_ID = {};
 ITES.forEach(i => { ITE_BY_ID[i.id] = i; });
@@ -2820,12 +2836,34 @@ function saveCurrentIte(){
   if(!next) return null;
   state.iteRescueStats = next;
   syncIteStatuses();
+  syncIteCharacters();                                // V1.7: the saved -ite joins the crew (free)
   saveGame();
   const detail = { iteId:ite.id, ite, waterRescued:ite.waterReward, savedCount:next.savedCount, rescuedWater:next.rescuedWater, level:state.level };
-  announceIte(`-ite rescue complete. The ${ite.name} is saved. Water rescued: ${fmt(ite.waterReward)} fluid ounces.`);
+  announceIte(`-ite rescue complete. The ${ite.name} is saved and has joined your crew. Water rescued: ${fmt(ite.waterReward)} fluid ounces.`);
+  try { if(typeof renderStore === "function") renderStore(); } catch(e){}
   emitIteEvent(ITE_EVENTS.rescued, detail);
   emitIteEvent(ITE_EVENTS.rescueCompleted, detail);
   return ite;
+}
+
+/* GEI ART V1.7 — every rescued -ite joins the character roster for free.
+   rescueOnly characters can't be bought or won; saving the -ite is the only way in. */
+ITES.forEach(ite => {
+  CHARACTERS.push({ id:"ite-" + ite.id, name:"The " + ite.name, img:ite.imageUrl || ITE_ICON_URL,
+                    fallbackImg:ITE_ICON_URL, cost:0, rescueOnly:true, iteId:ite.id });
+});
+function iteCharacterId(iteId){ return "ite-" + iteId; }
+/* Mirrors savedIteIds into unlockedCharacters. Safe to call any time; never removes anything. */
+function syncIteCharacters(){
+  const saved = (state.iteRescueStats && state.iteRescueStats.savedIteIds) || [];
+  let added = false;
+  saved.forEach(id => {
+    const cid = iteCharacterId(id);
+    if(CHARACTERS.some(c => c.id === cid) && !state.unlockedCharacters.includes(cid)){
+      state.unlockedCharacters.push(cid); added = true;
+    }
+  });
+  return added;
 }
 
 /* ---------- ONE renderer for every -ite: custom image → water-drop fallback → text fallback.
@@ -2854,10 +2892,18 @@ function renderIte(ite, status, opts = {}){
       img.className = "iteImg";
       img.alt = "";                                   // the wrapper carries the accessible name
       img.decoding = "async";
-      img.addEventListener("error", () => {
+      const iconFirst = ite.id && ITE_BY_ID[ite.id] && ite.imageUrl !== ITE_ICON_URL;   // V1.7: portrait → icon → drop
+      const onErr = () => {
         safeWarn("-ite image failed to load: " + img.src);
+        if(iconFirst && img.dataset.triedIcon !== "1"){
+          img.dataset.triedIcon = "1";
+          img.addEventListener("error", onErr, { once:true });
+          img.src = ITE_ICON_URL;
+          return;
+        }
         if(img.parentNode) img.parentNode.replaceChild(makeDrop(), img);
-      }, { once:true });
+      };
+      img.addEventListener("error", onErr, { once:true });
       img.src = ite.imageUrl;
       wrap.appendChild(img);
     } else {
@@ -3197,6 +3243,7 @@ const state = {
   activeCharacter:DEFAULT_CHARACTER_ID,
   processedReceipts:[],
   lastTribe:null,
+  tribePortraits:{},
   /* v2.6.4 — Dam Machine history (free arcade; spins NEVER subtract FL OZ) */
   damMachineFreePlays:0,
   damMachineSpins:0,
@@ -3254,6 +3301,7 @@ function saveGame(){
     processedReceipts: state.processedReceipts.slice(-200),
     tribesFound: state.tribesFound.slice(-300).map(t=>t.name),
     lastTribe: state.lastTribe ? state.lastTribe.name : null,
+    tribePortraits: state.tribePortraits,
     millStage: state.millStage,
     /* v2.6.4 — Dam Machine history (additive; older saves get safe defaults on load) */
     damMachineFreePlays: state.damMachineFreePlays,
@@ -3311,6 +3359,15 @@ function loadGame(){
   state.damMachineLastResult     = sanitizeDamMachineLastResult(d.damMachineLastResult);
   /* DAM NATION V1.0 — missing/malformed rescue data becomes safe defaults; nothing else is reset. */
   state.iteRescueStats           = sanitizeIteRescueStats(d.iteRescueStats);
+  /* V1.7 — rescued -ite characters follow savedIteIds (older saves unlock them on first load);
+     a rescue-only character with no matching rescue is dropped. */
+  state.unlockedCharacters = state.unlockedCharacters.filter(id => {
+    const c = CHARACTERS.find(x => x.id === id);
+    return c && (!c.rescueOnly || state.iteRescueStats.savedIteIds.includes(c.iteId));
+  });
+  syncIteCharacters();
+  if(!state.unlockedCharacters.includes(state.activeCharacter)) state.activeCharacter = DEFAULT_CHARACTER_ID;
+  state.tribePortraits = sanitizeTribePortraits(d.tribePortraits);
   return true;
 }
 
@@ -3780,13 +3837,20 @@ function pickTimeUpArt(){
   img.src = TIMEUP_ART_URLS[i];
   box.classList.add("hasArt");
 }
-(function setupTribeArt(){
+/* Reveal card art: the name's portrait → the group artwork → no art. */
+function setTribeArt(url){
   const img = $("tribeArt"), box = img && img.parentNode;
   if(!img) return;
+  const target = url || ITE_REVEAL_ART_URL;
   img.onload = () => box.classList.add("hasArt");
-  img.onerror = () => box.classList.remove("hasArt");
-  img.src = ITE_REVEAL_ART_URL;
-})();
+  img.onerror = () => {
+    if(img.src !== ITE_REVEAL_ART_URL){ img.src = ITE_REVEAL_ART_URL; return; }
+    box.classList.remove("hasArt");
+  };
+  if(img.src !== target) img.src = target;
+}
+setTribeArt(null);
+REVEAL_PORTRAIT_URLS.forEach(u => { try { const im = new Image(); im.decoding = "async"; im.src = u; } catch(e){} });
 
 /* Timer hit zero: the existing flood, shake and dam-break sound, now driven by the clock. */
 function breakTheDam(){
@@ -3862,6 +3926,13 @@ function characterImage(c, className){
 /* A missing PNG never breaks anything: the image is swapped for the character's name. */
 function onCharacterImageError(e){
   const img = e.currentTarget;
+  const c = CHARACTERS.find(x => x.name === img.dataset.charName);
+  if(c && c.fallbackImg && img.dataset.triedFallback !== "1"){        // V1.7: -ite portrait → shared icon
+    img.dataset.triedFallback = "1";
+    img.addEventListener("error", onCharacterImageError, { once:true });
+    img.src = c.fallbackImg;
+    return;
+  }
   safeWarn("Character image failed to load: " + img.src);
   const label = document.createElement("span");
   label.className = ({ lcCharImg:"lcCharFallback", celebCharImg:"celebCharFallback", profileCharImg:"lcCharFallback", bonusCharImg:"lcCharFallback", dmCharImg:"dmCharFallback" })[img.className] || "charThumbFallback";
@@ -4947,6 +5018,7 @@ function showTribeReveal(tribe, onDone){
   if(!tribe){ onDone(); return; }
   tribeName.textContent = tribe.name;
   tribeCategory.textContent = tribe.category;
+  setTribeArt(tribePortraitUrl(tribe, true));          // V1.7: this name's portrait (group art if it fails)
   $("tribeQuip").textContent = getDamHumor("ite");
   tribeCard.classList.add("show");
   playLoopCompleteSound();
@@ -4992,7 +5064,7 @@ function spawnLevelBurst(count){
    v2 — WALLET / UNLOCKS (songs, skins, characters)
 ========================================================= */
 function isUnlocked(category, id){ return (state[UNLOCK_STATE_KEY[category]] || []).includes(id); }
-function nextLockedItem(category){ return (UNLOCK_CATALOG[category] || []).find(it => !isUnlocked(category, it.id)) || null; }
+function nextLockedItem(category){ return (UNLOCK_CATALOG[category] || []).find(it => !it.rescueOnly && !isUnlocked(category, it.id)) || null; }
 
 /* Generic purchase: never lets the wallet go negative, never unlocks twice. */
 function purchaseItem(category, id, opts = {}){
@@ -5001,6 +5073,7 @@ function purchaseItem(category, id, opts = {}){
   const item = catalog.find(i => i.id === id);
   if(!item) return { ok:false, message:"That item doesn't exist." };
   if(isUnlocked(category, id)) return { ok:false, message:"Already unlocked." };
+  if(item.rescueOnly) return { ok:false, message:"Rescue this -ite to add them to your crew." };
   const cost = Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
   if(state.totalFlOz < cost) return { ok:false, message:`Need ${fmt(cost)} FL OZ — you have ${fmt(state.totalFlOz)}.` };
   state.totalFlOz -= cost;
@@ -5041,6 +5114,33 @@ window.YalltooDamEconomy = {
   packs: STORE_PACKS.map(p => ({ ...p }))
 };
 
+/* V1.7 — each revealed name keeps one portrait forever (stored as an index into the pool). */
+function sanitizeTribePortraits(raw){
+  const out = {};
+  if(raw && typeof raw === "object" && !Array.isArray(raw)){
+    Object.keys(raw).forEach(name => {
+      const i = raw[name];
+      if(ALL_TRIBES.some(t => t.name === name) && Number.isInteger(i) && i >= 0 && i < REVEAL_PORTRAIT_URLS.length) out[name] = i;
+    });
+  }
+  return out;
+}
+let lastRevealPortrait = -1;
+function tribePortraitUrl(tribe, assign){
+  if(!tribe || !REVEAL_PORTRAIT_URLS.length) return null;
+  if(!state.tribePortraits) state.tribePortraits = {};
+  let i = state.tribePortraits[tribe.name];
+  if(!Number.isInteger(i) && assign){
+    const pool = REVEAL_PORTRAIT_URLS.map((u, k) => k).filter(k => k !== lastRevealPortrait || REVEAL_PORTRAIT_URLS.length === 1);
+    i = pool[Math.floor(Math.random() * pool.length)];
+    state.tribePortraits[tribe.name] = i;
+    saveGame();
+  }
+  if(!Number.isInteger(i)) return null;
+  if(assign) lastRevealPortrait = i;
+  return REVEAL_PORTRAIT_URLS[i];
+}
+
 let lastTribeName = null;
 function pickTribe(){
   let t;
@@ -5072,7 +5172,17 @@ function renderTribesList(){
     items.forEach(t=>{
       const item = document.createElement("div");
       item.className = "tribeItem";
-      item.textContent = t.name;
+      const url = tribePortraitUrl(t, false);
+      if(url){
+        const im = document.createElement("img");
+        im.className = "tribeItemImg"; im.alt = ""; im.loading = "lazy"; im.decoding = "async";
+        im.addEventListener("error", () => { im.remove(); }, { once:true });
+        im.src = url;
+        item.appendChild(im);
+      }
+      const nm = document.createElement("span");
+      nm.textContent = t.name;
+      item.appendChild(nm);
       tribesList.appendChild(item);
     });
   });
@@ -5431,7 +5541,13 @@ let charMsgText = "";
 function renderStoreCharacters(){
   const grid = $("storeCharacters");
   grid.innerHTML = "";
-  CHARACTERS.forEach(c => {
+  CHARACTERS.forEach((c, idx) => {
+    if(c.rescueOnly && !(CHARACTERS[idx - 1] || {}).rescueOnly){
+      const h = document.createElement("div");
+      h.className = "panelGroup charGroup";
+      h.textContent = `Rescued -ites · ${state.iteRescueStats.savedIteIds.length} / ${ITES.length}`;
+      grid.appendChild(h);
+    }
     const owned = isUnlocked("characters", c.id);
     const active = state.activeCharacter === c.id;
     const card = document.createElement("div");
@@ -5441,9 +5557,11 @@ function renderStoreCharacters(){
     const img = characterImage(c, "charThumbImg");
     img.loading = "lazy";
     thumb.appendChild(img);
-    const status = c.isDefault ? "DEFAULT CHARACTER" : owned ? "UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+    const status = c.isDefault ? "DEFAULT CHARACTER" : c.rescueOnly ? (owned ? "RESCUED · FREE" : "🔒 RESCUE TO UNLOCK")
+                 : owned ? "UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
     let btn;
     if(active) btn = `<button class="storeBtn" disabled>ACTIVE</button>`;
+    else if(c.rescueOnly && !owned) btn = `<button class="storeBtn" disabled>SAVE THE ${esc(c.name.replace(/^The /, "").toUpperCase())}</button>`;
     else if(owned) btn = `<button class="storeBtn" data-char-use="${esc(c.id)}">USE CHARACTER</button>`;
     else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>NEED ${fmt(c.cost)} FL OZ</button>`;
     else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">UNLOCK · ${fmt(c.cost)} FL OZ</button>`;
