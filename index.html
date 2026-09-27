@@ -4383,6 +4383,20 @@ function evaluateDamCombination(ids){
   if(a === "water"  && b === "wheel" && c === "water")   return { ...oz(LEVEL_REWARD_FL_OZ), title:"NOW THAT'S FLOW!",               humorKey:"machineWin",  special:true, detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the wheel barely got wet.` };
   if(a === "dam"    && b === "wheel" && c === "factory") return { kind:"play",               title:"THE WHOLE SYSTEM IS RUNNING!",   humorKey:"machineWin",  special:true, detail:"+1 free Dam Machine play — the whole flow, end to end." };
   if(a === "sluice" && b === "water" && c === "millpond")return { ...oz(DAY_REWARD_FL_OZ),   title:"FLOW ACHIEVED.",                 humorKey:"machineWin",  special:true, detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — gate to pond, no leaks.` };
+  /* V2.0 pair wins: many more FL OZ-winning combinations without changing the reel catalog. */
+  const pairCounts = {};
+  [a,b,c].forEach(id => pairCounts[id] = (pairCounts[id] || 0) + 1);
+  const pairId = Object.keys(pairCounts).find(id => pairCounts[id] === 2);
+  if(pairId){
+    const pairRewards = {
+      water:[222,"DOUBLE WATER!"], dam:[333,"DOUBLE DAM!"], millpond:[444,"DOUBLE MILLPOND!"],
+      sluice:[555,"DOUBLE SLUICE!"], wheel:[666,"DOUBLE WATERWHEEL!"], factory:[777,"DOUBLE FACTORY!"],
+      "fl-111":[1110,"1,110 FL OZ FLOW!"], "fl-666":[2220,"2,220 FL OZ FLOW!"],
+      "fl-6660":[UNLOCK_COST_FL_OZ,"DAM JACKPOT PAIR!"]
+    };
+    const pr=pairRewards[pairId];
+    if(pr) return { ...oz(pr[0]), title:pr[1], humorKey:pr[0]>=UNLOCK_COST_FL_OZ?"machineJackpot":"machineWin", jackpot:pr[0]>=UNLOCK_COST_FL_OZ, special:true, detail:`+${fmt(pr[0])} FL OZ` };
+  }
   if(a === b && b === c){
     switch(a){
       case "water":   return { ...oz(DAY_REWARD_FL_OZ),   title:"WATER TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
@@ -4890,6 +4904,7 @@ function runDamMachineSelfTest(){
   t("evaluator: water-wheel-water special = +666", ev(["water","wheel","water"]).amount === LEVEL_REWARD_FL_OZ);
   t("evaluator: dam-wheel-factory special = +1 play", ev(["dam","wheel","factory"]).kind === "play");
   t("evaluator: sluice-water-millpond special = +111", ev(["sluice","water","millpond"]).amount === DAY_REWARD_FL_OZ);
+  t("evaluator: pair wins add more water prizes", ev(["water","water","dam"]).amount === 222 && ev(["fl-111","fl-111","pun"]).amount === 1110 && ev(["fl-666","fl-666","pun"]).amount === 2220);
   t("evaluator: no match → null", ev(["water","dam","wheel"]) === null);
   ["machineIdle","machineSpin","machineLose","machineWin","machineJackpot","machineSong","machineCharacter","machinePun","machinePlayAward"].forEach(k =>
     t("humor: " + k + " non-empty", Array.isArray(DAM_HUMOR[k]) && DAM_HUMOR[k].length > 0));
