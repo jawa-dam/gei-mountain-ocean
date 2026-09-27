@@ -1489,6 +1489,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); }
 .iteHud[data-status="saved"], .iteHud[data-status="complete"]{ border-color:color-mix(in srgb, var(--gold) 60%, transparent); }
 .iteHudAvatar{ flex:0 0 auto; display:flex; }
+.iteHudCompleteArt{width:46px;height:38px;object-fit:contain;border-radius:9px;filter:drop-shadow(0 0 8px var(--gold));}
 .iteHudText{ flex:1 1 auto; min-width:0; }
 .iteHudLine{ font-size:.78rem; font-weight:900; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .iteHudLine strong{ color:var(--gold); }
@@ -2985,6 +2986,7 @@ function renderIteRescue(){
     box.dataset.status = "saved";
   } else if(st.savedCount >= ITES.length){
     avatar.appendChild(renderIte({ name:"All" }, "saved", { size:34 }));
+    avatar.innerHTML = `<img class="iteHudCompleteArt" src="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/save-the-ites-dam-nation-x844iIM6Fy5edJP9.png" alt="Save the -ites — DAM NATION celebration">`;
     line.innerHTML = `<strong>All -ites saved</strong><span class="iteState is-saved">✅</span>`;
     sub.textContent = "Keep the water flowing.";
     box.dataset.status = "complete";
@@ -3444,7 +3446,7 @@ const dayRewardEl = $("dayReward"), drTitle = $("drTitle"), drAmount = $("drAmou
 const timeUpCard = $("timeUpCard"), timeUpDetail = $("timeUpDetail");
 const levelCard = $("levelCard"), levelInner = $("levelInner"), lcLevel = $("lcLevel"), lcBackdrop = $("lcBackdrop");
 const lcChar = $("lcChar"), lcCharName = $("lcCharName"), lcChain = $("lcChain"), lcSong = $("lcSong"), lcBtn = $("lcBtn"), lcNote = $("lcNote"), lcBurst = $("lcBurst");
-const PANELS = { tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel"), profile: $("profilePanel") };
+const PANELS = { characters: $("charactersPanel"), tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel"), profile: $("profilePanel") };
 const fmt = n => Number(n).toLocaleString("en-US");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -4957,6 +4959,7 @@ function setActiveCharacter(id){
   if(!CHARACTERS.some(c => c.id === id) || !isUnlocked("characters", id)) return false;
   state.activeCharacter = id;
   saveGame();
+  renderCharactersPanel();
   renderStore();
   preloadCharacter(getActiveCharacter());
   return true;
@@ -5574,18 +5577,14 @@ function playSong(id){
 let storeMsgText = "";
 function setStoreMsg(t){ storeMsgText = t; const el = $("storeMsg"); if(el) el.textContent = t; }
 let charMsgText = "";
-function renderStoreCharacters(){
-  const grid = $("storeCharacters");
+function renderCharactersPanel(){
+  const grid = $("charactersGrid");
+  if(!grid) return;
   grid.innerHTML = "";
-  CHARACTERS.forEach((c, idx) => {
-    if(c.rescueOnly && !(CHARACTERS[idx - 1] || {}).rescueOnly){
-      const h = document.createElement("div");
-      h.className = "panelGroup charGroup";
-      h.textContent = `Rescued -ites · ${state.iteRescueStats.savedIteIds.length} / ${ITES.length}`;
-      grid.appendChild(h);
-    }
+  CHARACTERS.forEach(c => {
     const owned = isUnlocked("characters", c.id);
     const active = state.activeCharacter === c.id;
+    const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
     const card = document.createElement("div");
     card.className = "charCard" + (active ? " active" : "") + (owned ? "" : " locked");
     const thumb = document.createElement("div");
@@ -5593,14 +5592,12 @@ function renderStoreCharacters(){
     const img = characterImage(c, "charThumbImg");
     img.loading = "lazy";
     thumb.appendChild(img);
-    const status = c.isDefault ? "DEFAULT CHARACTER" : c.rescueOnly ? (owned ? "RESCUED · FREE" : "🔒 RESCUE TO UNLOCK")
-                 : owned ? "UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+    const status = starter ? "STARTER · UNLOCKED" : owned ? "UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
     let btn;
     if(active) btn = `<button class="storeBtn" disabled>ACTIVE</button>`;
-    else if(c.rescueOnly && !owned) btn = `<button class="storeBtn" disabled>SAVE THE ${esc(c.name.replace(/^The /, "").toUpperCase())}</button>`;
     else if(owned) btn = `<button class="storeBtn" data-char-use="${esc(c.id)}">USE CHARACTER</button>`;
     else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>NEED ${fmt(c.cost)} FL OZ</button>`;
-    else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">UNLOCK · ${fmt(c.cost)} FL OZ</button>`;
+    else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">PURCHASE · ${fmt(c.cost)} FL OZ</button>`;
     const info = document.createElement("div");
     info.className = "charInfo";
     info.innerHTML = `<div class="packName">${esc(c.name)}</div><div class="charTitle">${esc(damTitle(c.id))}</div><div class="packDetail">${status}</div>${btn}`;
@@ -5608,11 +5605,12 @@ function renderStoreCharacters(){
     card.appendChild(info);
     grid.appendChild(card);
   });
-  $("charMsg").textContent = charMsgText;
+  $("charactersMsg").textContent = charMsgText;
+  $("charactersWallet").textContent = `${fmt(state.totalFlOz)} FL OZ`;
 }
 
 function renderStore(){
-  renderStoreCharacters();
+  renderCharactersPanel();
   $("storeQuip").textContent = storeQuipText;
   $("storeWallet").textContent = `${fmt(state.totalFlOz)} FL OZ`;
   const next = nextLockedItem("songs");
@@ -5638,17 +5636,17 @@ function purchaseFailureHumor(category, id){
   const cost = item && Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
   return state.totalFlOz < cost ? getDamHumor("insufficientFunds") : "";
 }
-$("storePanel").addEventListener("click", e => {
+$("charactersPanel").addEventListener("click", e => {
   const unlockBtn = e.target.closest("[data-char-unlock]");
   if(unlockBtn){
-    unlockBtn.disabled = true;                      // one click = one purchase attempt
+    unlockBtn.disabled = true;
     const id = unlockBtn.getAttribute("data-char-unlock");
     const why = purchaseFailureHumor("characters", id);
-    const res = purchaseItem("characters", id);     // balance check, subtract, unlock, save
+    const res = purchaseItem("characters", id);
     const c = CHARACTERS.find(x => x.id === id);
     charMsgText = res.ok ? `🎉 ${getDamHumor("characterPurchase")} ${c.name} — tap USE CHARACTER` : `${why} ${res.message}`.trim();
     if(res.ok) playSongUnlockSound();
-    renderStore();
+    renderCharactersPanel();
     return;
   }
   const useBtn = e.target.closest("[data-char-use]");
@@ -5656,9 +5654,11 @@ $("storePanel").addEventListener("click", e => {
     const id = useBtn.getAttribute("data-char-use");
     const c = CHARACTERS.find(x => x.id === id);
     charMsgText = setActiveCharacter(id) ? `✅ ${c.name} is now your character. ${getDamHumor("characterSelect")}` : "That character is locked.";
-    renderStore();
+    renderCharactersPanel();
     return;
   }
+});
+$("storePanel").addEventListener("click", e => {
   if(e.target.closest("#storeRedeemBtn")){
     const next = nextLockedItem("songs");
     if(!next) return;
