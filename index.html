@@ -5268,7 +5268,7 @@ function loadPayPalSdk(forceRetry){
       const sdkUrl =
         "https://www.paypal.com/sdk/js?client-id=" +
         encodeURIComponent(cfg.clientId.trim()) +
-        "&currency=USD&intent=capture&components=buttons";
+        "&currency=USD&intent=capture&components=buttons&debug=true";
 
       let settled = false;
       const timeout = setTimeout(()=>{
