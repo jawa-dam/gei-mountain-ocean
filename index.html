@@ -7,12 +7,20 @@
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
 <script>
 (function(){
-  var ids = ["aurora","clay","canopy","heaven","neon","ember","abyss"];
-  var last = null;
+  /* V2.1.12 — LIVING SKIN SYSTEM: the original seven + nine new worlds. Presentation only. */
+  var ids = ["aurora","clay","canopy","heaven","neon","ember","abyss",
+             "midnight","storm","crystal","frost","golden","pink","cosmic","industrial","floodlight"];
+  var last = null, recent = [];
   try { last = sessionStorage.getItem("ytNiteSkin"); } catch (e) {}
-  var pick;
-  do { pick = ids[Math.floor(Math.random() * ids.length)]; } while (pick === last && ids.length > 1);
-  try { sessionStorage.setItem("ytNiteSkin", pick); } catch (e) {}
+  try { recent = JSON.parse(sessionStorage.getItem("ytNiteSkinRecent") || "[]"); if (!Array.isArray(recent)) recent = []; } catch (e) { recent = []; }
+  var forced = null;
+  try { var q = new URLSearchParams(window.location.search).get("skin"); if (q && ids.indexOf(q) >= 0) forced = q; } catch (e) {}
+  /* "It looks different this time": skip the last few worlds this tab has already shown. */
+  var fresh = ids.filter(function(id){ return id !== last && recent.indexOf(id) < 0; });
+  var pool = fresh.length ? fresh : ids.filter(function(id){ return id !== last; });
+  var pick = forced || pool[Math.floor(Math.random() * pool.length)];
+  recent = [pick].concat(recent.filter(function(id){ return id !== pick && ids.indexOf(id) >= 0; })).slice(0, 5);
+  try { sessionStorage.setItem("ytNiteSkin", pick); sessionStorage.setItem("ytNiteSkinRecent", JSON.stringify(recent)); } catch (e) {}
   document.documentElement.className = "skin-" + pick;
   document.documentElement.setAttribute("data-skin", pick);
 })();
@@ -473,6 +481,584 @@ html.skin-abyss{
   --deco-shadow:rgba(0,255,200,.7);
 }
 
+/* ===== V2.1.12 — LIVING SKIN SYSTEM: nine new hydraulic worlds (same token contract as the original seven) ===== */
+/* ===== SKIN: Midnight Reservoir — moonlit navy, silver water ===== */
+html.skin-midnight{
+  --water-deep:#020a1f;
+  --water-bright:#9fc9ff;
+  --foam:#f2f6ff;
+  --juicy-navy:#050b24;
+  --juicy-blue:#7fb2ff;
+  --juicy-violet:#4c5fd6;
+  --juicy-magenta:#c7d6ff;
+  --juicy-pink:#e6ecff;
+  --gold:#f5e6a8;
+  --danger:#ff7a8a;
+  --panel:rgba(4,8,26,.93);
+  --radius:22px;
+  --page-bg-a:#13224d;
+  --page-bg-b:#01030c;
+  --sky-0:#1a2a5c;
+  --sky-1:#0c1638;
+  --sky-2:#02050f;
+  --world-top:#101d45;
+  --world-bot:#01030a;
+  --glow-a:rgba(159,201,255,.18);
+  --glow-b:rgba(245,230,168,.10);
+  --flow-0:#7fb2ff;
+  --flow-1:#f2f6ff;
+  --flow-2:#4c5fd6;
+  --mtn-front-0:#5a6a9a;
+  --mtn-front-1:#2a355e;
+  --mtn-back:#1c2548;
+  --snow:#eef3ff;
+  --tree:#10263a;
+  --water-accent:#9fc9ff;
+  --dam-0:#b8c3dc;
+  --dam-1:#76829e;
+  --dam-stroke:#4a5578;
+  --dam-line:rgba(40,50,80,.4);
+  --pond-0:#bcd8ff;
+  --pond-1:#2a4f9a;
+  --reed:#1f4a4a;
+  --sluice:#6a7896;
+  --sluice-stroke:#3e4968;
+  --wood-0:#7a6250;
+  --wood-1:#4a3a2e;
+  --wood-mid:#5e4a3a;
+  --wood-spoke:#3e3026;
+  --wood-dark:#2a2019;
+  --mill-roof:#3a3f6a;
+  --mill-door:#0a0c1a;
+  --mill-light:#f5e6a8;
+  --mill-metal:#4a4f63;
+  --mill-add:#6a5a4a;
+  --mill-tank:#8a96b0;
+  --mill-factory:#3a4258;
+  --mill-factory-stroke:#1e2436;
+  --ocean:#6f9fe8;
+  --mist:rgba(159,201,255,.12);
+  --seg-track:rgba(127,178,255,.32);
+  --flood-0:rgba(127,178,255,.85);
+  --flood-1:rgba(1,3,12,.97);
+  --flash:rgba(159,201,255,.42);
+  --fs-bg:#01030a;
+  --deco-shadow:rgba(159,201,255,.6);
+}
+/* ===== SKIN: Storm Dam — slate thunderheads, electric water ===== */
+html.skin-storm{
+  --water-deep:#0a1622;
+  --water-bright:#7ee8ff;
+  --foam:#eef9ff;
+  --juicy-navy:#0d1520;
+  --juicy-blue:#5fc8ff;
+  --juicy-violet:#5a6b8c;
+  --juicy-magenta:#ffe45c;
+  --juicy-pink:#b9e6ff;
+  --gold:#ffe45c;
+  --danger:#ff5e6a;
+  --panel:rgba(10,16,24,.93);
+  --radius:18px;
+  --page-bg-a:#2c3a4c;
+  --page-bg-b:#06090f;
+  --sky-0:#3a4a5e;
+  --sky-1:#1e2a3a;
+  --sky-2:#070b12;
+  --world-top:#263446;
+  --world-bot:#05080d;
+  --glow-a:rgba(126,232,255,.16);
+  --glow-b:rgba(255,228,92,.10);
+  --flow-0:#5fc8ff;
+  --flow-1:#eef9ff;
+  --flow-2:#8fa6c4;
+  --mtn-front-0:#6f7f94;
+  --mtn-front-1:#3a4656;
+  --mtn-back:#2a3442;
+  --snow:#dfe8f2;
+  --tree:#1c3328;
+  --water-accent:#7ee8ff;
+  --dam-0:#c3ccd6;
+  --dam-1:#818d9c;
+  --dam-stroke:#4e5a6a;
+  --dam-line:rgba(30,40,55,.45);
+  --pond-0:#9fe3ff;
+  --pond-1:#1f5f86;
+  --reed:#2b5a44;
+  --sluice:#7a8698;
+  --sluice-stroke:#465264;
+  --wood-0:#8a6a4e;
+  --wood-1:#54402e;
+  --wood-mid:#6e5238;
+  --wood-spoke:#463424;
+  --wood-dark:#33261a;
+  --mill-roof:#4a5566;
+  --mill-door:#10141a;
+  --mill-light:#ffe45c;
+  --mill-metal:#50565f;
+  --mill-add:#7a6450;
+  --mill-tank:#a3adb9;
+  --mill-factory:#4a5360;
+  --mill-factory-stroke:#22282f;
+  --ocean:#4fb4e8;
+  --mist:rgba(126,232,255,.12);
+  --seg-track:rgba(95,200,255,.32);
+  --flood-0:rgba(95,200,255,.86);
+  --flood-1:rgba(4,7,12,.97);
+  --flash:rgba(255,228,92,.4);
+  --fs-bg:#05080d;
+  --deco-shadow:rgba(126,232,255,.6);
+}
+/* ===== SKIN: Crystal Water — turquoise glass, sharp highlights ===== */
+html.skin-crystal{
+  --water-deep:#032a33;
+  --water-bright:#5ff5ff;
+  --foam:#f0ffff;
+  --juicy-navy:#062a36;
+  --juicy-blue:#3ce0f0;
+  --juicy-violet:#3a9fd6;
+  --juicy-magenta:#a0fff4;
+  --juicy-pink:#d4fbff;
+  --gold:#fff4a8;
+  --danger:#ff6f91;
+  --panel:rgba(3,24,32,.92);
+  --radius:24px;
+  --page-bg-a:#0e6a7c;
+  --page-bg-b:#021a22;
+  --sky-0:#1a8aa0;
+  --sky-1:#0a4f60;
+  --sky-2:#021319;
+  --world-top:#0e5566;
+  --world-bot:#01121a;
+  --glow-a:rgba(95,245,255,.24);
+  --glow-b:rgba(160,255,244,.14);
+  --flow-0:#3ce0f0;
+  --flow-1:#f0ffff;
+  --flow-2:#a0fff4;
+  --mtn-front-0:#8fd8e0;
+  --mtn-front-1:#4a9aa8;
+  --mtn-back:#3a7a88;
+  --snow:#f4ffff;
+  --tree:#0e5a4a;
+  --water-accent:#5ff5ff;
+  --dam-0:#e0f6f8;
+  --dam-1:#9ccbd2;
+  --dam-stroke:#5f98a2;
+  --dam-line:rgba(30,90,100,.3);
+  --pond-0:#a8fbff;
+  --pond-1:#0fa8c0;
+  --reed:#1f8a6a;
+  --sluice:#8ec4cc;
+  --sluice-stroke:#4f8a94;
+  --wood-0:#b08a5a;
+  --wood-1:#6f5236;
+  --wood-mid:#8e6c44;
+  --wood-spoke:#5e4428;
+  --wood-dark:#43301c;
+  --mill-roof:#2f7a8a;
+  --mill-door:#06232a;
+  --mill-light:#fff4a8;
+  --mill-metal:#4e6a70;
+  --mill-add:#9a7a52;
+  --mill-tank:#cfeef2;
+  --mill-factory:#5a8088;
+  --mill-factory-stroke:#2a4a50;
+  --ocean:#3ce0f0;
+  --mist:rgba(95,245,255,.14);
+  --seg-track:rgba(60,224,240,.36);
+  --flood-0:rgba(60,224,240,.88);
+  --flood-1:rgba(1,14,20,.97);
+  --flash:rgba(95,245,255,.48);
+  --fs-bg:#01121a;
+  --deco-shadow:rgba(95,245,255,.7);
+}
+/* ===== SKIN: Frozen Reservoir — pale ice, frost-light water ===== */
+html.skin-frost{
+  --water-deep:#0c1e33;
+  --water-bright:#bfe9ff;
+  --foam:#ffffff;
+  --juicy-navy:#0f2238;
+  --juicy-blue:#8fd3ff;
+  --juicy-violet:#7a9ccf;
+  --juicy-magenta:#e3f4ff;
+  --juicy-pink:#cfe8ff;
+  --gold:#e8f6ff;
+  --danger:#ff7b8f;
+  --panel:rgba(10,24,40,.92);
+  --radius:20px;
+  --page-bg-a:#3a5f86;
+  --page-bg-b:#081524;
+  --sky-0:#5d86b0;
+  --sky-1:#2a4a70;
+  --sky-2:#0a1626;
+  --world-top:#34587e;
+  --world-bot:#07121f;
+  --glow-a:rgba(191,233,255,.22);
+  --glow-b:rgba(255,255,255,.10);
+  --flow-0:#8fd3ff;
+  --flow-1:#ffffff;
+  --flow-2:#b8d6f2;
+  --mtn-front-0:#d8e8f6;
+  --mtn-front-1:#8aa6c4;
+  --mtn-back:#6a86a6;
+  --snow:#ffffff;
+  --tree:#2a4a4e;
+  --water-accent:#bfe9ff;
+  --dam-0:#eef5fb;
+  --dam-1:#aebfd2;
+  --dam-stroke:#7088a4;
+  --dam-line:rgba(60,80,110,.3);
+  --pond-0:#dff4ff;
+  --pond-1:#4a8ac0;
+  --reed:#4a7a78;
+  --sluice:#a8bcd2;
+  --sluice-stroke:#6a82a0;
+  --wood-0:#9c8470;
+  --wood-1:#5e4e42;
+  --wood-mid:#7e6a58;
+  --wood-spoke:#4e4036;
+  --wood-dark:#3a2e26;
+  --mill-roof:#5a7aa0;
+  --mill-door:#142234;
+  --mill-light:#e8f6ff;
+  --mill-metal:#6a7888;
+  --mill-add:#8c7a68;
+  --mill-tank:#dfeaf4;
+  --mill-factory:#6f8298;
+  --mill-factory-stroke:#34465a;
+  --ocean:#8fd3ff;
+  --mist:rgba(191,233,255,.16);
+  --seg-track:rgba(143,211,255,.34);
+  --flood-0:rgba(143,211,255,.86);
+  --flood-1:rgba(6,14,24,.97);
+  --flash:rgba(255,255,255,.45);
+  --fs-bg:#07121f;
+  --deco-shadow:rgba(191,233,255,.7);
+}
+/* ===== SKIN: Golden Hour — sunset sky, golden hydraulics ===== */
+html.skin-golden{
+  --water-deep:#2a1430;
+  --water-bright:#ffc46b;
+  --foam:#fff6e6;
+  --juicy-navy:#2a1228;
+  --juicy-blue:#ff9f5a;
+  --juicy-violet:#c45a8a;
+  --juicy-magenta:#ff6f91;
+  --juicy-pink:#ffc2a8;
+  --gold:#ffd76a;
+  --danger:#ff5e6a;
+  --panel:rgba(34,14,30,.92);
+  --radius:22px;
+  --page-bg-a:#b8566a;
+  --page-bg-b:#1c0a1a;
+  --sky-0:#ff9a5a;
+  --sky-1:#b8466a;
+  --sky-2:#2a0f28;
+  --world-top:#7a3a5a;
+  --world-bot:#140818;
+  --glow-a:rgba(255,196,107,.24);
+  --glow-b:rgba(255,111,145,.18);
+  --flow-0:#ffb45a;
+  --flow-1:#fff6e6;
+  --flow-2:#ff6f91;
+  --mtn-front-0:#d88a7a;
+  --mtn-front-1:#8a4a5a;
+  --mtn-back:#6a3448;
+  --snow:#fff0e0;
+  --tree:#3a3a2a;
+  --water-accent:#ffc46b;
+  --dam-0:#f4dcc8;
+  --dam-1:#c49a86;
+  --dam-stroke:#8a5e56;
+  --dam-line:rgba(100,50,50,.3);
+  --pond-0:#ffd9a8;
+  --pond-1:#c8607a;
+  --reed:#6a6a3a;
+  --sluice:#c8a092;
+  --sluice-stroke:#8a5e56;
+  --wood-0:#c88048;
+  --wood-1:#7e4228;
+  --wood-mid:#a86034;
+  --wood-spoke:#6e3a1e;
+  --wood-dark:#4e2814;
+  --mill-roof:#9a3a4a;
+  --mill-door:#2e1018;
+  --mill-light:#ffe9a8;
+  --mill-metal:#6a4e56;
+  --mill-add:#b0784a;
+  --mill-tank:#e8cfc0;
+  --mill-factory:#8a5e66;
+  --mill-factory-stroke:#4a2a34;
+  --ocean:#ff9f5a;
+  --mist:rgba(255,196,107,.14);
+  --seg-track:rgba(255,159,90,.38);
+  --flood-0:rgba(255,159,90,.88);
+  --flood-1:rgba(20,6,16,.97);
+  --flash:rgba(255,196,107,.48);
+  --fs-bg:#140818;
+  --deco-shadow:rgba(255,196,107,.7);
+}
+/* ===== SKIN: Pink Current — hot pink flow, cyan spray ===== */
+html.skin-pink{
+  --water-deep:#1a0730;
+  --water-bright:#3ff0ff;
+  --foam:#fff0fb;
+  --juicy-navy:#1e0632;
+  --juicy-blue:#3ff0ff;
+  --juicy-violet:#b04aff;
+  --juicy-magenta:#ff2fa8;
+  --juicy-pink:#ff9ad8;
+  --gold:#ffe066;
+  --danger:#ff4f6f;
+  --panel:rgba(26,6,40,.92);
+  --radius:26px;
+  --page-bg-a:#8a1a78;
+  --page-bg-b:#12041e;
+  --sky-0:#d42f9a;
+  --sky-1:#6a1a8a;
+  --sky-2:#14041f;
+  --world-top:#5a1470;
+  --world-bot:#0e0318;
+  --glow-a:rgba(255,47,168,.24);
+  --glow-b:rgba(63,240,255,.18);
+  --flow-0:#3ff0ff;
+  --flow-1:#fff0fb;
+  --flow-2:#ff2fa8;
+  --mtn-front-0:#e08ad0;
+  --mtn-front-1:#8a3a9a;
+  --mtn-back:#6a2a7e;
+  --snow:#fff0fb;
+  --tree:#3a2a6a;
+  --water-accent:#3ff0ff;
+  --dam-0:#f6dff0;
+  --dam-1:#c49ad6;
+  --dam-stroke:#8a5aa6;
+  --dam-line:rgba(120,40,120,.3);
+  --pond-0:#9ff8ff;
+  --pond-1:#c42a9a;
+  --reed:#5a3aa0;
+  --sluice:#c89ad8;
+  --sluice-stroke:#8a5aa6;
+  --wood-0:#d07aa8;
+  --wood-1:#7a3a6a;
+  --wood-mid:#a85488;
+  --wood-spoke:#6a2e5a;
+  --wood-dark:#4a1e40;
+  --mill-roof:#c42a8a;
+  --mill-door:#22062e;
+  --mill-light:#ffe066;
+  --mill-metal:#6a4a7a;
+  --mill-add:#b06a9a;
+  --mill-tank:#f0d6ec;
+  --mill-factory:#7a4a8a;
+  --mill-factory-stroke:#3e1e4a;
+  --ocean:#3ff0ff;
+  --mist:rgba(255,47,168,.14);
+  --seg-track:rgba(255,47,168,.38);
+  --flood-0:rgba(255,47,168,.86);
+  --flood-1:rgba(14,3,24,.97);
+  --flash:rgba(63,240,255,.45);
+  --fs-bg:#0e0318;
+  --deco-shadow:rgba(255,47,168,.7);
+}
+/* ===== SKIN: Cosmic Flow — violet space, cyan current ===== */
+html.skin-cosmic{
+  --water-deep:#0a0626;
+  --water-bright:#7af0ff;
+  --foam:#f4eeff;
+  --juicy-navy:#0c0626;
+  --juicy-blue:#5ad8ff;
+  --juicy-violet:#8a4dff;
+  --juicy-magenta:#c46bff;
+  --juicy-pink:#d9b8ff;
+  --gold:#ffe38a;
+  --danger:#ff6b8a;
+  --panel:rgba(10,6,34,.93);
+  --radius:22px;
+  --page-bg-a:#3a1a7a;
+  --page-bg-b:#03020d;
+  --sky-0:#4a2a9a;
+  --sky-1:#1e0e4e;
+  --sky-2:#04020f;
+  --world-top:#2a1560;
+  --world-bot:#020108;
+  --glow-a:rgba(138,77,255,.22);
+  --glow-b:rgba(122,240,255,.16);
+  --flow-0:#7af0ff;
+  --flow-1:#f4eeff;
+  --flow-2:#8a4dff;
+  --mtn-front-0:#7a6ac4;
+  --mtn-front-1:#3a2a7a;
+  --mtn-back:#2a1e5e;
+  --snow:#efe8ff;
+  --tree:#1e2a5a;
+  --water-accent:#7af0ff;
+  --dam-0:#d6ccf2;
+  --dam-1:#9486c4;
+  --dam-stroke:#5e4e9a;
+  --dam-line:rgba(70,40,130,.35);
+  --pond-0:#b8f6ff;
+  --pond-1:#5a3ac8;
+  --reed:#3a4a9a;
+  --sluice:#8e84c4;
+  --sluice-stroke:#54468e;
+  --wood-0:#8a6aa0;
+  --wood-1:#4e3a64;
+  --wood-mid:#6c5284;
+  --wood-spoke:#42305a;
+  --wood-dark:#2e2042;
+  --mill-roof:#5a2aa0;
+  --mill-door:#0e0624;
+  --mill-light:#ffe38a;
+  --mill-metal:#4e4a6a;
+  --mill-add:#7a6090;
+  --mill-tank:#cfc6ee;
+  --mill-factory:#4e4278;
+  --mill-factory-stroke:#261e44;
+  --ocean:#7af0ff;
+  --mist:rgba(138,77,255,.14);
+  --seg-track:rgba(138,77,255,.38);
+  --flood-0:rgba(138,77,255,.86);
+  --flood-1:rgba(2,1,8,.97);
+  --flash:rgba(122,240,255,.45);
+  --fs-bg:#020108;
+  --deco-shadow:rgba(138,77,255,.7);
+}
+/* ===== SKIN: Industrial Dam — steel, concrete, amber warning lights ===== */
+html.skin-industrial{
+  --water-deep:#0c1a26;
+  --water-bright:#4ec3ff;
+  --foam:#eaf4fa;
+  --juicy-navy:#101a24;
+  --juicy-blue:#4ea8d8;
+  --juicy-violet:#50657c;
+  --juicy-magenta:#ffb020;
+  --juicy-pink:#c2d4e2;
+  --gold:#ffb020;
+  --danger:#ff5a3c;
+  --panel:rgba(14,22,30,.94);
+  --radius:14px;
+  --page-bg-a:#34475a;
+  --page-bg-b:#080d13;
+  --sky-0:#4a6078;
+  --sky-1:#243444;
+  --sky-2:#0a1017;
+  --world-top:#2c3e50;
+  --world-bot:#070b10;
+  --glow-a:rgba(78,195,255,.16);
+  --glow-b:rgba(255,176,32,.12);
+  --flow-0:#4ec3ff;
+  --flow-1:#eaf4fa;
+  --flow-2:#7890a8;
+  --mtn-front-0:#8898a8;
+  --mtn-front-1:#4e5c6a;
+  --mtn-back:#3a4552;
+  --snow:#e6edf2;
+  --tree:#2a3a30;
+  --water-accent:#4ec3ff;
+  --dam-0:#cfd4d8;
+  --dam-1:#8c949c;
+  --dam-stroke:#5a626a;
+  --dam-line:rgba(40,48,56,.45);
+  --pond-0:#9ad8ff;
+  --pond-1:#26628e;
+  --reed:#3e5a44;
+  --sluice:#8a949e;
+  --sluice-stroke:#4e565e;
+  --wood-0:#8a7a66;
+  --wood-1:#544a3e;
+  --wood-mid:#6e6252;
+  --wood-spoke:#463e34;
+  --wood-dark:#332c24;
+  --mill-roof:#5a6470;
+  --mill-door:#12161a;
+  --mill-light:#ffb020;
+  --mill-metal:#5a6068;
+  --mill-add:#7e7262;
+  --mill-tank:#b4bcc4;
+  --mill-factory:#56606a;
+  --mill-factory-stroke:#262c32;
+  --ocean:#3fa8e0;
+  --mist:rgba(78,195,255,.10);
+  --seg-track:rgba(78,195,255,.3);
+  --flood-0:rgba(78,168,216,.86);
+  --flood-1:rgba(6,10,14,.97);
+  --flash:rgba(255,176,32,.38);
+  --fs-bg:#070b10;
+  --deco-shadow:rgba(255,176,32,.55);
+}
+/* ===== SKIN: Floodlight — bright arcade water, white-cyan light ===== */
+html.skin-floodlight{
+  --water-deep:#032a6a;
+  --water-bright:#4fe3ff;
+  --foam:#ffffff;
+  --juicy-navy:#06225a;
+  --juicy-blue:#36c8ff;
+  --juicy-violet:#3a7bff;
+  --juicy-magenta:#00e0ff;
+  --juicy-pink:#b8f2ff;
+  --gold:#fff27a;
+  --danger:#ff4f6a;
+  --panel:rgba(4,24,64,.9);
+  --radius:22px;
+  --page-bg-a:#1a6ad8;
+  --page-bg-b:#031a4a;
+  --sky-0:#2a8aff;
+  --sky-1:#0a4ab8;
+  --sky-2:#031a4a;
+  --world-top:#1860c8;
+  --world-bot:#021640;
+  --glow-a:rgba(79,227,255,.3);
+  --glow-b:rgba(255,255,255,.16);
+  --flow-0:#4fe3ff;
+  --flow-1:#ffffff;
+  --flow-2:#36c8ff;
+  --mtn-front-0:#a8c8ff;
+  --mtn-front-1:#5a88d8;
+  --mtn-back:#4a74c0;
+  --snow:#ffffff;
+  --tree:#0e5a6a;
+  --water-accent:#4fe3ff;
+  --dam-0:#eef6ff;
+  --dam-1:#b0c8e6;
+  --dam-stroke:#6a8cc0;
+  --dam-line:rgba(40,80,140,.3);
+  --pond-0:#b8f8ff;
+  --pond-1:#1a8ae8;
+  --reed:#1a8a8a;
+  --sluice:#9ab8e0;
+  --sluice-stroke:#5a7ab0;
+  --wood-0:#c49060;
+  --wood-1:#7a5436;
+  --wood-mid:#9e7046;
+  --wood-spoke:#6a4a2a;
+  --wood-dark:#4a321c;
+  --mill-roof:#2a6ad8;
+  --mill-door:#06225a;
+  --mill-light:#fff27a;
+  --mill-metal:#5a74a0;
+  --mill-add:#a8804e;
+  --mill-tank:#dff0ff;
+  --mill-factory:#4a6ab0;
+  --mill-factory-stroke:#203a70;
+  --ocean:#4fe3ff;
+  --mist:rgba(79,227,255,.16);
+  --seg-track:rgba(79,227,255,.4);
+  --flood-0:rgba(79,227,255,.9);
+  --flood-1:rgba(2,14,40,.97);
+  --flash:rgba(255,255,255,.5);
+  --fs-bg:#021640;
+  --deco-shadow:rgba(79,227,255,.75);
+}
+html.skin-midnight .world{ box-shadow:0 0 40px rgba(159,201,255,.3), 0 0 70px rgba(245,230,168,.12), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-storm .world{ box-shadow:0 0 40px rgba(126,232,255,.26), 0 0 70px rgba(255,228,92,.1), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-crystal .world{ box-shadow:0 0 40px rgba(95,245,255,.38), 0 0 70px rgba(160,255,244,.18), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-frost .world{ box-shadow:0 0 40px rgba(191,233,255,.34), 0 0 70px rgba(255,255,255,.14), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-golden .world{ box-shadow:0 0 40px rgba(255,196,107,.36), 0 0 70px rgba(255,111,145,.2), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-pink .world{ box-shadow:0 0 40px rgba(255,47,168,.38), 0 0 70px rgba(63,240,255,.2), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-cosmic .world{ box-shadow:0 0 40px rgba(138,77,255,.36), 0 0 70px rgba(122,240,255,.18), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-industrial .world{ box-shadow:0 0 40px rgba(78,195,255,.22), 0 0 70px rgba(255,176,32,.12), inset 0 0 60px rgba(0,0,0,.42); }
+html.skin-floodlight .world{ box-shadow:0 0 40px rgba(79,227,255,.45), 0 0 80px rgba(255,255,255,.2), inset 0 0 60px rgba(0,0,0,.42); }
+
 *{margin:0;padding:0;box-sizing:border-box;}
 
 html,body{
@@ -764,6 +1350,125 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes tapWaterContextRing{0%{transform:translate(-50%,-50%) scale(.2);opacity:.85}100%{transform:translate(-50%,-50%) scale(4.8);opacity:0}}
 @keyframes tapWaterBreakthrough{0%{transform:translate(-50%,-50%) translate(0,0) scale(.6);opacity:0}12%{opacity:1}100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.18);opacity:0}}
 @media (prefers-reduced-motion:reduce){.tapWaterContextRing,.tapWaterBreakthrough{animation-duration:.001ms !important}}
+/* =========================================================
+   V2.1.12 — LIVING WORLD. Decorative only: every layer is pointer-events:none,
+   every temporary element removes itself, nothing here reads or writes game state.
+========================================================= */
+.livingWorldLayer{z-index:4;overflow:hidden}
+.livingEventLayer{z-index:8;overflow:hidden}
+.livingBreath{position:absolute;inset:-12%;pointer-events:none;background:radial-gradient(ellipse at 50% 32%,var(--glow-a),transparent 58%),radial-gradient(ellipse at 70% 88%,var(--glow-b),transparent 52%);opacity:.3;animation:livingBreath 11s ease-in-out infinite}
+@keyframes livingBreath{0%,100%{opacity:.22;transform:scale(1)}50%{opacity:.62;transform:scale(1.045)}}
+/* sky atmospheres, chosen per skin through html[data-sky] */
+.livingWorldLayer::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:0}
+html[data-sky="stars"] .livingWorldLayer::before{opacity:.85;background-image:radial-gradient(1.3px 1.3px at 7% 9%,#fff,transparent),radial-gradient(1px 1px at 19% 21%,var(--foam),transparent),radial-gradient(1.6px 1.6px at 33% 6%,#fff,transparent),radial-gradient(1px 1px at 46% 17%,var(--water-bright),transparent),radial-gradient(1.2px 1.2px at 58% 8%,#fff,transparent),radial-gradient(1px 1px at 71% 24%,var(--foam),transparent),radial-gradient(1.5px 1.5px at 84% 11%,#fff,transparent),radial-gradient(1px 1px at 93% 29%,var(--water-bright),transparent),radial-gradient(1px 1px at 26% 33%,#fff,transparent),radial-gradient(1.2px 1.2px at 63% 36%,var(--foam),transparent);animation:livingStarfield 9s ease-in-out infinite}
+@keyframes livingStarfield{0%,100%{opacity:.55}50%{opacity:.95}}
+html[data-sky="clouds"] .livingWorldLayer::before{opacity:.75;inset:-4% -30% auto -30%;height:34%;background:radial-gradient(ellipse at 20% 40%,rgba(10,14,22,.55),transparent 55%),radial-gradient(ellipse at 55% 30%,rgba(20,28,40,.6),transparent 50%),radial-gradient(ellipse at 85% 45%,rgba(10,14,22,.5),transparent 55%);animation:livingCloudDrift 38s ease-in-out infinite alternate}
+@keyframes livingCloudDrift{from{transform:translateX(-6%)}to{transform:translateX(6%)}}
+html[data-sky="haze"] .livingWorldLayer::before{opacity:.6;background:linear-gradient(180deg,color-mix(in srgb,var(--sky-0) 45%,transparent) 0%,transparent 38%,transparent 70%,color-mix(in srgb,var(--glow-a) 80%,transparent) 100%);animation:livingStarfield 14s ease-in-out infinite}
+html[data-sky="beams"] .livingWorldLayer::before{opacity:.5;background:linear-gradient(115deg,transparent 18%,rgba(255,255,255,.1) 24%,transparent 30%),linear-gradient(65deg,transparent 62%,rgba(255,255,255,.08) 68%,transparent 74%);animation:livingStarfield 10s ease-in-out infinite}
+html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.2px 1.2px at 5% 14%,#fff,transparent),radial-gradient(1px 1px at 17% 64%,#fff,transparent),radial-gradient(1.4px 1.4px at 91% 22%,#fff,transparent),radial-gradient(1px 1px at 82% 76%,#fff,transparent),radial-gradient(1px 1px at 3% 88%,#fff,transparent)}
+.livingSky{position:absolute;inset:0;pointer-events:none;opacity:0}
+
+/* ambient particles: one class, skin-colored, short-lived */
+.lwP{position:absolute;left:var(--x);top:var(--y);pointer-events:none;will-change:transform,opacity;animation:var(--anim,lwRise) var(--dur,7s) ease-in-out forwards}
+.lwP.bubble{width:var(--s,8px);height:var(--s,8px);border-radius:50%;border:1px solid color-mix(in srgb,var(--foam) 75%,transparent);background:radial-gradient(circle at 32% 30%,rgba(255,255,255,.55),transparent 45%);--anim:lwBubble}
+.lwP.ember{width:4px;height:4px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--juicy-blue),0 0 3px #fff;--anim:lwEmber}
+.lwP.firefly{width:5px;height:5px;border-radius:50%;background:#e8ff8a;box-shadow:0 0 10px #d4ff5a,0 0 18px color-mix(in srgb,var(--water-bright) 60%,transparent);--anim:lwFirefly}
+.lwP.frost{width:7px;height:7px;background:linear-gradient(45deg,transparent 42%,#fff 50%,transparent 58%),linear-gradient(-45deg,transparent 42%,#fff 50%,transparent 58%);filter:drop-shadow(0 0 4px var(--water-bright));--anim:lwFrost}
+.lwP.star{width:3px;height:3px;border-radius:50%;background:#fff;box-shadow:0 0 6px var(--foam),0 0 12px var(--water-bright);--anim:lwStar}
+.lwP.glint{width:10px;height:10px;background:linear-gradient(90deg,transparent 44%,#fff 50%,transparent 56%),linear-gradient(0deg,transparent 44%,#fff 50%,transparent 56%);filter:drop-shadow(0 0 5px var(--water-bright));--anim:lwStar}
+.lwP.petal{width:7px;height:5px;border-radius:70% 10% 70% 10%;background:linear-gradient(135deg,var(--juicy-pink),var(--juicy-magenta));opacity:.8;--anim:lwPetal}
+.lwP.mote{width:3px;height:3px;border-radius:50%;background:var(--foam);box-shadow:0 0 6px var(--water-bright);opacity:.7;--anim:lwMote}
+.lwP.dust{width:3px;height:3px;border-radius:50%;background:color-mix(in srgb,var(--dam-0) 80%,transparent);--anim:lwMote}
+.lwP.rain{width:1.5px;height:14px;border-radius:2px;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--water-bright) 70%,transparent));--anim:lwRain}
+.lwP.drop{width:5px;height:8px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,var(--foam),var(--water-bright));opacity:.75;--anim:lwDrop}
+@keyframes lwBubble{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:.8}50%{transform:translate(8px,-90px) scale(1)}100%{opacity:0;transform:translate(-6px,-190px) scale(1.1)}}
+@keyframes lwEmber{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx,14px),-170px) scale(.4)}}
+@keyframes lwFirefly{0%{opacity:0;transform:translate(0,0)}20%{opacity:1}35%{opacity:.25}50%{opacity:1;transform:translate(var(--dx,20px),-18px)}70%{opacity:.3}85%{opacity:.9;transform:translate(calc(var(--dx,20px) * -.5),-36px)}100%{opacity:0;transform:translate(0,-44px)}}
+@keyframes lwFrost{0%{opacity:0;transform:translate(0,0) rotate(0) scale(.5)}25%{opacity:1}100%{opacity:0;transform:translate(var(--dx,-10px),70px) rotate(90deg) scale(1)}}
+@keyframes lwStar{0%,100%{opacity:0;transform:scale(.3)}40%{opacity:1;transform:scale(1.3)}60%{opacity:.9;transform:scale(1)}}
+@keyframes lwPetal{0%{opacity:0;transform:translate(0,0) rotate(0)}15%{opacity:.85}100%{opacity:0;transform:translate(var(--dx,40px),140px) rotate(220deg)}}
+@keyframes lwMote{0%{opacity:0;transform:translate(0,0)}25%{opacity:.8}100%{opacity:0;transform:translate(var(--dx,30px),-60px)}}
+@keyframes lwRain{0%{opacity:0;transform:translate(0,0) rotate(12deg)}20%{opacity:.8}100%{opacity:0;transform:translate(-30px,160px) rotate(12deg)}}
+@keyframes lwDrop{0%{opacity:0;transform:translate(0,0)}20%{opacity:.8}100%{opacity:0;transform:translate(0,120px) scale(.7)}}
+
+/* rare environmental events (presentation only) */
+.lwFx{position:absolute;pointer-events:none}
+.lwFlash{inset:0;background:radial-gradient(ellipse at var(--fx,50%) 0%,color-mix(in srgb,var(--flash) 90%,#fff 10%),transparent 70%);opacity:0;animation:lwFlash 1s ease-out forwards}
+@keyframes lwFlash{0%{opacity:0}8%{opacity:.55}16%{opacity:.08}26%{opacity:.4}100%{opacity:0}}
+.lwWave{left:50%;top:var(--wy,82%);width:120px;height:36px;border-radius:50%;border:2px solid color-mix(in srgb,var(--foam) 70%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--water-bright) 45%,transparent);transform:translate(-50%,-50%) scale(.3);opacity:0;animation:lwWave 2.6s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes lwWave{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}12%{opacity:.75}100%{opacity:0;transform:translate(-50%,-50%) scale(5.2)}}
+.lwBurstDrop{left:var(--x);top:var(--y);width:6px;height:9px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,var(--foam),var(--water-bright));box-shadow:0 0 8px var(--water-bright);animation:lwBurstDrop 1.1s cubic-bezier(.15,.7,.25,1) forwards}
+@keyframes lwBurstDrop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3)}}
+.lwStreak{left:var(--x);top:var(--y);width:70px;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--foam) 80%,transparent),#fff);box-shadow:0 0 10px var(--water-bright);transform:rotate(var(--rot,18deg));opacity:0;animation:lwStreak var(--dur,1.5s) ease-in forwards}
+@keyframes lwStreak{0%{opacity:0;translate:0 0}15%{opacity:.95}100%{opacity:0;translate:var(--tx,260px) var(--ty,90px)}}
+.lwGiant{left:var(--x);top:-30px;width:18px;height:26px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,#fff,var(--water-bright) 55%,var(--juicy-blue));box-shadow:0 0 16px var(--water-bright);animation:lwGiantFall 1.1s cubic-bezier(.5,0,.9,.6) forwards}
+@keyframes lwGiantFall{0%{opacity:0;transform:translateY(0)}10%{opacity:1}92%{opacity:1}100%{opacity:0;transform:translateY(var(--fall,420px)) scaleY(1.2)}}
+.lwBeacon{top:6%;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--gold) 35%,transparent 70%);opacity:0;animation:lwBeacon 1.8s ease-in-out 2 forwards}
+@keyframes lwBeacon{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.9;transform:scale(1.3)}}
+.lwSweep{top:0;bottom:0;left:-40%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.16),transparent);animation:lwSweep 1.8s ease-in-out forwards}
+@keyframes lwSweep{from{transform:translateX(0)}to{transform:translateX(360%)}}
+.lwShimmer{left:0;right:0;top:var(--y,78%);height:3px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--foam) 80%,transparent),transparent);background-size:40% 100%;background-repeat:no-repeat;opacity:0;animation:lwShimmer 2.4s ease-in-out forwards}
+@keyframes lwShimmer{0%{opacity:0;background-position:-40% 0}20%{opacity:.8}100%{opacity:0;background-position:140% 0}}
+
+/* skin reveal: "DAM! It looks different this time." */
+.livingSkinBadge{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 74px);z-index:90;pointer-events:none;max-width:calc(100% - 32px);padding:9px 18px;border-radius:999px;background:color-mix(in srgb,var(--juicy-navy) 88%,transparent);border:1.5px solid color-mix(in srgb,var(--water-bright) 60%,transparent);box-shadow:0 0 24px color-mix(in srgb,var(--water-bright) 38%,transparent);color:#fff;font:950 1rem/1.25 Inter,system-ui,sans-serif;letter-spacing:.04em;text-align:center;opacity:0;transform:translate(-50%,-10px);transition:opacity .45s ease,transform .45s ease}
+.livingSkinBadge.show{opacity:1;transform:translate(-50%,0)}
+.livingSkinBadge small{display:block;font-size:.8rem;font-weight:800;letter-spacing:.02em;color:color-mix(in srgb,var(--foam) 82%,transparent)}
+.livingSkinBadge:empty{display:none}
+
+/* V2.1.12 — hydraulic tap accents: one extra shape per station, bigger only at 75% / final tap */
+.tapAccent{position:absolute;left:var(--x);top:var(--y);pointer-events:none}
+.tapAccent.rise{width:5px;height:9px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,#fff,var(--water-bright));animation:tapAccentRise .7s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes tapAccentRise{0%{opacity:0;transform:translate(-50%,-50%)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% - var(--h,56px)))}}
+.tapAccent.thump{width:30px;height:30px;border-radius:50%;border:5px solid color-mix(in srgb,var(--dam-0) 70%,var(--water-bright));animation:tapAccentThump .55s ease-out forwards}
+@keyframes tapAccentThump{0%{opacity:.9;transform:translate(-50%,-50%) scale(.4)}25%{transform:translate(calc(-50% + 2px),-50%) scale(1.1)}40%{transform:translate(calc(-50% - 2px),-50%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.6)}}
+.tapAccent.calm{width:44px;height:16px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--foam) 70%,transparent);animation:tapAccentCalm 1.3s ease-out forwards;animation-delay:var(--d,0s);opacity:0}
+@keyframes tapAccentCalm{0%{opacity:.8;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,-50%) scale(4.2)}}
+.tapAccent.streak{width:46px;height:2.5px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--water-bright),#fff);animation:tapAccentStreak .55s ease-out forwards;animation-delay:var(--d,0s);opacity:0}
+@keyframes tapAccentStreak{0%{opacity:0;transform:translate(-80%,calc(-50% + var(--oy,0px)))}25%{opacity:1}100%{opacity:0;transform:translate(60%,calc(-50% + var(--oy,0px)))}}
+.tapAccent.spin{width:52px;height:52px;border-radius:50%;border:3px solid transparent;border-top-color:var(--water-bright);border-right-color:color-mix(in srgb,var(--foam) 70%,transparent);animation:tapAccentSpin .75s cubic-bezier(.3,.6,.3,1) forwards}
+@keyframes tapAccentSpin{0%{opacity:.95;transform:translate(-50%,-50%) rotate(0) scale(.6)}100%{opacity:0;transform:translate(-50%,-50%) rotate(300deg) scale(1.6)}}
+.tapAccent.cascade{width:6px;height:12px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,#fff,var(--water-bright) 60%,var(--juicy-blue));animation:tapAccentCascade .95s cubic-bezier(.4,0,.8,.6) forwards;animation-delay:var(--d,0s);opacity:0}
+@keyframes tapAccentCascade{0%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),-50%)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + 90px))}}
+
+/* V2.1.12 — DAM MACHINE: a physical hydraulic cabinet (presentation only) */
+.dmCabinet::before{content:"";position:absolute;inset:-10px -4px;z-index:-1;border-radius:24px;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,color-mix(in srgb,var(--water-bright) 30%,transparent),transparent 70%);opacity:0}
+.dmCard.show .dmCabinet::before{animation:lwMachineIdleGlow 3.4s ease-in-out infinite}
+@keyframes lwMachineIdleGlow{0%,100%{opacity:.25}50%{opacity:.7}}
+.dmCard.show .dmReels{animation:lwMachineIdle 2.8s ease-in-out infinite}
+@keyframes lwMachineIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+.dmCabinet{isolation:isolate}
+.dmPipe{position:relative}
+.dmPipe::after{content:"";position:absolute;left:50%;bottom:-4px;width:6px;height:9px;margin-left:-3px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,var(--foam),var(--water-bright));opacity:0;pointer-events:none}
+.dmCard.show .dmPipe::after{animation:lwPipeDrip 3.2s ease-in infinite}
+.dmCard.show .dmPipeR::after{animation-delay:1.6s}
+@keyframes lwPipeDrip{0%,60%{opacity:0;transform:translateY(0) scale(.5)}68%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(22px) scale(.7)}}
+.dmCard.lwSpinning .dmCabinet::before{animation:lwMachineIdleGlow .7s ease-in-out infinite}
+.dmCard.lwSpinning .dmPipe{animation:lwPipePressure .35s ease-in-out infinite alternate}
+@keyframes lwPipePressure{from{filter:brightness(1)}to{filter:brightness(1.35)}}
+.dmReel.lwWin{animation:lwReelWin 1.1s ease-in-out infinite alternate;border-color:var(--gold)}
+@keyframes lwReelWin{from{box-shadow:inset 0 10px 14px rgba(0,0,0,.5),0 0 10px color-mix(in srgb,var(--gold) 50%,transparent)}to{box-shadow:inset 0 10px 14px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--gold) 85%,transparent)}}
+.dmCabinet::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;border-radius:18px;pointer-events:none;background:linear-gradient(0deg,color-mix(in srgb,var(--water-bright) 55%,transparent),transparent);opacity:0}
+.dmCard.lwSurge .dmCabinet::after{animation:lwSurge 1.4s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes lwSurge{0%{height:0;opacity:0}30%{opacity:.85}70%{height:100%;opacity:.6}100%{height:100%;opacity:0}}
+.lwPuff{position:absolute;width:14px;height:14px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,color-mix(in srgb,var(--foam) 85%,transparent),transparent 70%);animation:lwPuff .7s ease-out forwards}
+@keyframes lwPuff{0%{opacity:.9;transform:translate(-50%,-50%) scale(.4)}100%{opacity:0;transform:translate(-50%,calc(-50% - 22px)) scale(2.4)}}
+
+/* V2.1.12 — CHARACTER SPOTLIGHT: water rises around the operator */
+.lwSpotBubble{position:absolute;bottom:6%;left:var(--x);z-index:0;width:var(--s,9px);height:var(--s,9px);border-radius:50%;pointer-events:none;border:1px solid color-mix(in srgb,var(--spot-accent,var(--water-bright)) 80%,#fff);background:radial-gradient(circle at 32% 30%,rgba(255,255,255,.6),transparent 50%);animation:lwSpotBubble var(--dur,2.6s) ease-out forwards}
+@keyframes lwSpotBubble{0%{opacity:0;transform:translate(0,0) scale(.5)}15%{opacity:.85}100%{opacity:0;transform:translate(var(--dx,10px),-190px) scale(1.1)}}
+.lwSpotRing{position:absolute;left:50%;bottom:10%;z-index:0;width:120px;height:26px;border-radius:50%;pointer-events:none;border:2px solid var(--spot-accent,var(--water-bright));box-shadow:0 0 14px var(--spot-accent,var(--water-bright));animation:lwSpotRing .9s ease-out forwards}
+@keyframes lwSpotRing{0%{opacity:.9;transform:translateX(-50%) scale(.4)}100%{opacity:0;transform:translateX(-50%) scale(2.3)}}
+.characterSpotlightStage::after{content:"";position:absolute;left:18%;right:18%;bottom:2%;height:14px;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse,color-mix(in srgb,var(--spot-accent,var(--water-bright)) 45%,transparent),transparent 70%);animation:lwSpotPool 3.2s ease-in-out infinite}
+@keyframes lwSpotPool{0%,100%{opacity:.45;transform:scaleX(.92)}50%{opacity:.9;transform:scaleX(1.06)}}
+
+@media (prefers-reduced-motion:reduce){
+  .livingBreath,.livingWorldLayer::before,.dmCard.show .dmReels,.dmCard.show .dmPipe::after,.dmCard.show .dmCabinet::before,.dmCard.lwSpinning .dmPipe,.dmReel.lwWin,.characterSpotlightStage::after{animation:none !important}
+  .lwP,.lwFx,.tapAccent,.lwPuff,.lwSpotBubble,.lwSpotRing{display:none !important}
+  .livingSkinBadge{transition:none;transform:translate(-50%,0)}
+}
+
 
 /* ============ TRIBE REVEAL CARD ============ */
 .tribeCard{
@@ -2030,6 +2735,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
 
 <div class="bg">
+  <div class="livingSky" id="livingSky" aria-hidden="true"></div>
   <div class="bgGlow"></div>
   <div class="bgGlow"></div>
   <div class="dropletDeco" style="top:8%; left:6%; font-size:1.8rem; animation-delay:0s;">💧</div>
@@ -2041,6 +2747,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 </div>
 
 <div class="tapWaterLayer" id="tapWaterLayer" aria-hidden="true"></div>
+<div class="livingSkinBadge" id="livingSkinBadge" role="status" aria-live="polite"></div>
 
 <div class="stage">
 
@@ -2144,6 +2851,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 
     <div class="world" id="world">
       <div class="layer" id="mistLayer"></div>
+      <div class="layer livingWorldLayer" id="livingWorldLayer" aria-hidden="true"><div class="livingBreath"></div></div>
+      <div class="layer livingEventLayer" id="livingEventLayer" aria-hidden="true"></div>
       <div class="layer" id="particleLayer"></div>
 
       <div class="labelToast" id="labelToast"></div>
@@ -2328,7 +3037,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="groupPrice"><span class="costText"></span> each</div>
         <div id="storeRedeem"></div>
         <div class="panelGroup">🎨 Skins</div>
-        <div class="emptyNote">Premium skins will cost <span class="costText"></span> each. The 7 built-in skins stay free.</div>
+        <div class="emptyNote">Premium skins will cost <span class="costText"></span> each. The built-in living skins stay free.</div>
         <div class="panelGroup">Get FL OZ</div>
         <div class="groupPrice">Earn it through gameplay (${DAY_REWARD} per day) — or grab a pack</div>
         <div id="storePacks"></div>
@@ -3571,7 +4280,17 @@ const SKIN_META = {
   heaven: { name:"Heaven",      deco:"✨" },
   neon:   { name:"Neon Grid",   deco:"⚡" },
   ember:  { name:"Ember Dam",   deco:"🔥" },
-  abyss:  { name:"Abyss",       deco:"🌊" }
+  abyss:  { name:"Abyss",       deco:"🌊" },
+  /* V2.1.12 — Living Skin System additions (presentation only; free and random like the originals). */
+  midnight:   { name:"Midnight Reservoir", deco:"🌙" },
+  storm:      { name:"Storm Dam",          deco:"⛈️" },
+  crystal:    { name:"Crystal Water",      deco:"💎" },
+  frost:      { name:"Frozen Reservoir",   deco:"❄️" },
+  golden:     { name:"Golden Hour",        deco:"🌅" },
+  pink:       { name:"Pink Current",       deco:"🌸" },
+  cosmic:     { name:"Cosmic Flow",        deco:"🌌" },
+  industrial: { name:"Industrial Dam",     deco:"⚙️" },
+  floodlight: { name:"Floodlight",         deco:"💡" }
 };
 const activeSkinId = document.documentElement.getAttribute("data-skin") || "aurora";
 const activeSkin = SKIN_META[activeSkinId] || SKIN_META.aurora;
@@ -5053,6 +5772,7 @@ function openDamMachine(){
   renderDamMachineHeader();
   syncTimerPause();                                     // the day clock pauses while the machine is open
   dmSfx(() => playWaterNoise(0.7, 250, 1400, 0.1));     // hydraulic power-up
+  livingMachineHook("onOpen");                          // V2.1.12: mechanical hum (presentation only)
 }
 
 function closeDamMachine(){
@@ -5060,6 +5780,7 @@ function closeDamMachine(){
   cancelDamPresentation();                              // v2.6.3: close cancels a celebration cleanly
   damMachine.open = false;
   dmCard().classList.remove("show", "jackpotWin", "hasResult", "fxGlow", "fxFlash");
+  livingMachineHook("onClose");                         // V2.1.12
   syncTimerPause();
 }
 
@@ -5099,6 +5820,7 @@ function spinDamMachine(){
   const lastDur = durs[durs.length - 1];
   if(!reduced) dmSfx(() => playBonusSpinSounds(lastDur));
   dmSfx(() => playWaterNoise(0.8, 180, 1600, 0.14));    // hydraulic whoosh on launch
+  livingMachineHook("onSpin", token, ids, durs);        // V2.1.12: pressure + anticipation (presentation only)
 
   durs.forEach((dur, i) => {
     const filler = [];
@@ -5135,6 +5857,7 @@ function revealDamResult(token, ids){
   damMachine.timers = [];                               // all spin timers have fired; release them
   $("dmCloseBtn").disabled = false;
   dmCard().classList.toggle("jackpotWin", !!(res && res.jackpot));
+  livingMachineHook("onReveal", res, ids);              // V2.1.12: win glow / surge AFTER the single commit above
   if(res) presentDamMachineWin(res);                    // v2.6.3: presentation only — reward already committed above
   else presentDamMachineNoFlow();
 }
@@ -5288,6 +6011,7 @@ function continueDamMachine(){
   cancelDamPresentation();
   const card = dmCard();
   card.classList.remove("hasResult","fxGlow","fxFlash");
+  livingMachineHook("reset");                           // V2.1.12
   $("dmResult").hidden = true;
   $("dmResult").className = "dmResult";
   $("dmResult").querySelectorAll(".staged").forEach(el => el.classList.remove("show"));
@@ -5379,7 +6103,7 @@ function forceDamMachineResult(ids){
 
 /* ---------- v2.6 sounds — same Web Audio engine, same synth, no external files, never throws. ---------- */
 function dmSfx(fn){ try { fn(); } catch(e){ safeWarn("Dam Machine sound skipped: " + e); } }
-function playDamReelStopClunk(){ playTone(150, 0.16, "square"); setTimeout(() => playWaterNoise(0.18, 700, 160, 0.1), 30); }
+function playDamReelStopClunk(){ playTone(150, 0.16, "square"); setTimeout(() => playWaterNoise(0.18, 700, 160, 0.1), 30); livingMachineHook("onReelStop"); }   // V2.1.12: heavier clunk + pipe puff
 function playDamWinBigSound(){ [659, 784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => playTone(f, 0.22, "triangle"), i * 90)); }
 function playDamCharacterSound(){ [523, 659, 784, 1046, 784, 1318].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "sine"), i * 80)); }
 function playDamMachineAwardSound(){ playWaterNoise(0.5, 200, 1500, 0.1); setTimeout(() => [784, 988, 1175].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "triangle"), i * 80)), 300); }
@@ -6591,6 +7315,7 @@ function playContextualTapWaterSound(context,intensity){
   try{
     playWaterNoise(.12+intensity*.035,p.noise[0],p.noise[1],.045+intensity*.012);
     const notes=p.tone; playTone(notes[Math.max(0,Math.min(notes.length-1,intensity-1))],.08+intensity*.015,p.wave);
+    playTapTexture(context,intensity);                 // V2.1.12: station-specific hydraulic texture (presentation only)
   }catch(e){}
 }
 function spawnTapWaterFeedback(clientX,clientY,intensity,context){
@@ -6614,6 +7339,7 @@ function spawnTapWaterFeedback(clientX,clientY,intensity,context){
     drop.style.animationDelay=Math.random()*.06+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),900);
   }
   setTimeout(()=>{ripple.remove();flash.remove()},1200);
+  try{spawnTapAccent(layer,clientX,clientY,contextId,power)}catch(e){}   // V2.1.12: station accent (presentation only)
   tapWaterPulseCount++; const now=performance.now();
   if(now-lastTapWaterAudioAt>55){lastTapWaterAudioAt=now;playContextualTapWaterSound(contextId,power)}
   return true;
@@ -6631,7 +7357,9 @@ function spawnHydraulicBreakthrough(index){
     drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-p.rise*2)+"px");
     drop.style.animationDelay=Math.random()*.12+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),1150);
   }
-  playContextualTapWaterSound(context,3); return true;
+  playContextualTapWaterSound(context,3);
+  try{livingWorldMilestone(index)}catch(e){}           // V2.1.12: the whole world answers a completed day
+  return true;
 }
 function getTapWaterPointerContext(){
   if(!state)return "mountain";
@@ -6680,7 +7408,9 @@ fullscreenBtn.addEventListener("click", toggleFullscreen);
 ========================================================= */
 function anyPanelOpen(){ return Object.values(PANELS).some(p => p.classList.contains("open")); }
 function closePanels(){
+  const wasOpen = Object.values(PANELS).some(p => p.classList.contains("open"));
   Object.values(PANELS).forEach(p => p.classList.remove("open"));
+  if(wasOpen) livingUiSound("panelClose");            // V2.1.12
   syncTimerPause();
 }
 function togglePanel(name){
@@ -6692,6 +7422,7 @@ function togglePanel(name){
     if(name === "store"){ storeQuipText = getDamHumor(walletHumorCategory(state.totalFlOz)); renderStore(); }
     PANELS[name].classList.add("open");
   }
+  livingUiSound(willOpen ? "panelOpen" : "panelClose"); // V2.1.12
   syncTimerPause();                                  // open panel pauses the day clock
 }
 /* =========================================================
@@ -6791,6 +7522,7 @@ function closeCharacterSpotlight(){
   const card = $("characterSpotlight");
   if(!card) return;
   characterSpotlightId = null;
+  livingSpotlightHook("stop");                          // V2.1.12
   card.classList.remove("show");
   const stage = $("characterSpotlightStage");
   if(stage) stage.innerHTML = "";
@@ -6850,6 +7582,7 @@ function reactCharacterSpotlight(id){
   const hint = $("characterSpotlightTapHint");
   if(hint) hint.textContent = "💧 OPERATOR RESPONDED · TAP " + fmt(characterSpotlightTapCount);
   playCharacterSpotlightTapSound(id);
+  livingSpotlightHook("react", id);                     // V2.1.12: ripple + personality texture
   setTimeout(() => {
     if(characterSpotlightId === id){
       stage.classList.remove("is-reacting");
@@ -6933,6 +7666,7 @@ function openCharacterSpotlight(id){
   card.classList.add("show");
   try { $("characterSpotlightClose").focus({ preventScroll:true }); } catch(e){}
   playCharacterSpotlightSound(c.id);
+  livingSpotlightHook("start", c.id);                   // V2.1.12: water rises around the operator
   return true;
 }
 
@@ -7043,7 +7777,18 @@ const CHARACTER_SPOTLIGHT_PROFILES = {
   "operator-jack-o-lantern": { accent:"#ff8a00", accent2:"#a855f7", motion:"shake",  rotate:"6deg",  notes:[185,233,277,370],   wave:"square" },
   "operator-santa-claus":   { accent:"#ef4444", accent2:"#f8fafc", motion:"jolly",  rotate:"-4deg", notes:[523,659,784,1046],  wave:"sine" },
   "operator-woman":          { accent:"#22d3ee", accent2:"#f310ba", motion:"pulse",  rotate:"4deg",  notes:[440,554,659,880],   wave:"triangle" },
-  "operator-man":            { accent:"#818cf8", accent2:"#2fd2ff", motion:"steady", rotate:"-3deg", notes:[294,370,440,587],   wave:"square" }
+  "operator-man":            { accent:"#818cf8", accent2:"#2fd2ff", motion:"steady", rotate:"-3deg", notes:[294,370,440,587],   wave:"square" },
+  /* V2.1.12 — the rescued -ites get their own spotlight personalities (presentation only). */
+  "ite-danite":     { accent:"#38bdf8", accent2:"#a5f3fc", motion:"rise",   rotate:"-3deg", notes:[330,392,494,659], wave:"triangle" },
+  "ite-levite":     { accent:"#fde68a", accent2:"#fbbf24", motion:"steady", rotate:"2deg",  notes:[392,494,587,784], wave:"sine" },
+  "ite-israelite":  { accent:"#60a5fa", accent2:"#e0f2fe", motion:"pulse",  rotate:"-2deg", notes:[294,370,440,587], wave:"sine" },
+  "ite-amorite":    { accent:"#fb923c", accent2:"#fcd34d", motion:"shake",  rotate:"4deg",  notes:[220,277,330,440], wave:"triangle" },
+  "ite-jebusite":   { accent:"#a78bfa", accent2:"#22d3ee", motion:"bounce", rotate:"-4deg", notes:[440,554,659,880], wave:"sine" },
+  "ite-hittite":    { accent:"#f87171", accent2:"#fbbf24", motion:"shake",  rotate:"3deg",  notes:[196,247,294,392], wave:"sawtooth" },
+  "ite-hivite":     { accent:"#34d399", accent2:"#a3e635", motion:"bounce", rotate:"5deg",  notes:[523,659,784,1046], wave:"triangle" },
+  "ite-ammonite":   { accent:"#2dd4bf", accent2:"#818cf8", motion:"rise",   rotate:"-5deg", notes:[262,330,392,523], wave:"sine" },
+  "ite-benjamite":  { accent:"#f472b6", accent2:"#38bdf8", motion:"jolly",  rotate:"3deg",  notes:[587,740,880,1175], wave:"sine" },
+  "ite-ephraimite": { accent:"#4ade80", accent2:"#facc15", motion:"pulse",  rotate:"-3deg", notes:[349,440,523,698], wave:"triangle" }
 };
 
 function playCharacterSpotlightSound(id){
@@ -7222,8 +7967,10 @@ function runCommandCenterSelfTest(){
       return shown&&afterNodes>beforeNodes&&state.totalFlOz===beforeOz&&state.tapCount===beforeTap&&state.level===beforeLevel;
     });
     t("V2.1.10: tap-water feedback creates ripple, flash, and droplets", () => {
-      const layer=$("tapWaterLayer"); spawnTapWaterFeedback(160,210,3);
-      return !!layer.querySelector(".tapWaterRipple")&&!!layer.querySelector(".tapWaterFlash")&&layer.querySelectorAll(".tapWaterDrop").length===10;
+      /* V2.1.12: count only the drops this call adds, sized by the V2.1.11 profile (was a stale fixed 10). */
+      const layer=$("tapWaterLayer"),before=layer.querySelectorAll(".tapWaterDrop").length; spawnTapWaterFeedback(160,210,3);
+      const expected=Math.max(3,Math.round(getTapWaterProfile("mountain").drops*1.45));
+      return !!layer.querySelector(".tapWaterRipple")&&!!layer.querySelector(".tapWaterFlash")&&layer.querySelectorAll(".tapWaterDrop").length-before===expected;
     });
     /* UI */
     state.iteRescueStats = sanitizeIteRescueStats({ savedIteIds:ITES.map(i => i.id) });
@@ -7737,6 +8484,508 @@ function playSongUnlockSound(){
 }
 
 /* =========================================================
+   V2.1.12 — LIVING WORLD ENGINE
+   Presentation only. Nothing in this block reads or writes FL OZ, XP, levels, days,
+   unlocks, purchases, entitlements or rewards. Every temporary node removes itself,
+   every loop is capped, and prefers-reduced-motion switches the ambience off.
+========================================================= */
+const LIVING_MAX_AMBIENT = 9;            // hard cap: live ambient particles in the world
+const LIVING_MAX_EVENT_NODES = 36;       // hard cap: live rare-event nodes
+
+/* Each skin's atmospheric voice. Gameplay sounds stay identical; only this layer changes. */
+const SKIN_AUDIO_PROFILES = Object.freeze({
+  aurora:     { root:523, wave:"sine",     noise:[700,1500], gain:.016 },
+  clay:       { root:294, wave:"triangle", noise:[300,700],  gain:.018 },
+  canopy:     { root:659, wave:"sine",     noise:[1400,2600],gain:.012 },
+  heaven:     { root:784, wave:"sine",     noise:[1600,3000],gain:.012 },
+  neon:       { root:440, wave:"square",   noise:[900,2000], gain:.010 },
+  ember:      { root:147, wave:"sawtooth", noise:[200,500],  gain:.016 },
+  abyss:      { root:196, wave:"sine",     noise:[250,650],  gain:.020 },
+  midnight:   { root:392, wave:"sine",     noise:[500,1100], gain:.014 },
+  storm:      { root:73,  wave:"sine",     noise:[60,220],   gain:.040 },
+  crystal:    { root:1047,wave:"sine",     noise:[2400,4200],gain:.010 },
+  frost:      { root:880, wave:"triangle", noise:[2000,3800],gain:.010 },
+  golden:     { root:330, wave:"triangle", noise:[500,1200], gain:.014 },
+  pink:       { root:587, wave:"sine",     noise:[900,1900], gain:.012 },
+  cosmic:     { root:247, wave:"sine",     noise:[400,1600], gain:.016 },
+  industrial: { root:110, wave:"square",   noise:[150,450],  gain:.012 },
+  floodlight: { root:698, wave:"triangle", noise:[1200,2600],gain:.012 }
+});
+
+/* Skin moments: atmosphere + ambient particle + accent + rare pool + signature event. */
+const DAM_SKIN_MOMENTS = Object.freeze([
+  { id:"aurora",     atmosphere:"Nite-lite water glowing through the valley", sky:"none",   particle:"drop",    rate:[2600,4600], accent:null,        rare:["reservoirWave","waterSpark","giantDroplet"],   signature:"reservoirWave" },
+  { id:"clay",       atmosphere:"Harvest dust over a terracotta reservoir",   sky:"haze",   particle:"dust",    rate:[2400,4200], accent:null,        rare:["pressureRelease","reservoirWave","emberBurst"], signature:"pressureRelease" },
+  { id:"canopy",     atmosphere:"Jungle reservoir · fireflies over the creek", sky:"haze",  particle:"firefly", rate:[2200,4000], accent:"firefly",   rare:["fireflySwarm","reservoirWave","waterSpark"],   signature:"fireflySwarm" },
+  { id:"heaven",     atmosphere:"Ivory light on still water",                 sky:"beams",  particle:"mote",    rate:[2600,4600], accent:null,        rare:["lightSweep","waterSpark","giantDroplet"],      signature:"lightSweep" },
+  { id:"neon",       atmosphere:"Arcade current on the grid",                 sky:"none",   particle:"glint",   rate:[2400,4200], accent:null,        rare:["hydraulicFlash","waterSpark","lightSweep"],    signature:"hydraulicFlash" },
+  { id:"ember",      atmosphere:"Volcanic dam · embers on the spillway",      sky:"haze",   particle:"ember",   rate:[1900,3600], accent:null,        rare:["emberBurst","pressureRelease","hydraulicFlash"],signature:"emberBurst" },
+  { id:"abyss",      atmosphere:"Deep ocean · bioluminescent bubbles",        sky:"none",   particle:"bubble",  rate:[2000,3800], accent:null,        rare:["bubbleColumn","reservoirWave","waterSpark"],   signature:"bubbleColumn" },
+  { id:"midnight",   atmosphere:"Moonlit reservoir under the stars",          sky:"stars",  particle:"star",    rate:[2200,4000], accent:"shimmer",   rare:["moonShimmer","waterSpark","reservoirWave"],    signature:"moonShimmer" },
+  { id:"storm",      atmosphere:"Thunderheads over the spillway",             sky:"clouds", particle:"rain",    rate:[900,1900],  accent:"lightning", rare:["stormSurge","hydraulicFlash","reservoirWave"],  signature:"stormSurge" },
+  { id:"crystal",    atmosphere:"Crystal-clear water, sharp as glass",        sky:"none",   particle:"glint",   rate:[2200,4000], accent:null,        rare:["frostShimmer","waterSpark","giantDroplet"],    signature:"waterSpark" },
+  { id:"frost",      atmosphere:"Frozen reservoir · frost on the gates",      sky:"haze",   particle:"frost",   rate:[1800,3400], accent:null,        rare:["frostShimmer","moonShimmer","reservoirWave"],  signature:"frostShimmer" },
+  { id:"golden",     atmosphere:"Golden hour on the hydraulics",              sky:"haze",   particle:"mote",    rate:[2200,4000], accent:null,        rare:["lightSweep","waterSpark","reservoirWave"],     signature:"lightSweep" },
+  { id:"pink",       atmosphere:"Pink current, cyan spray",                   sky:"none",   particle:"petal",   rate:[2200,4000], accent:null,        rare:["waterSpark","reservoirWave","giantDroplet"],   signature:"giantDroplet" },
+  { id:"cosmic",     atmosphere:"Cosmic flow across the firmament",           sky:"stars",  particle:"mote",    rate:[2000,3800], accent:"shimmer",   rare:["cosmicDrift","waterSpark","frostShimmer"],     signature:"cosmicDrift" },
+  { id:"industrial", atmosphere:"Steel, concrete and warning lights",         sky:"haze",   particle:"dust",    rate:[2400,4200], accent:"beacon",    rare:["warningBeacon","pressureRelease","hydraulicFlash"], signature:"warningBeacon" },
+  { id:"floodlight", atmosphere:"Floodlights on bright blue water",           sky:"beams",  particle:"drop",    rate:[2200,4000], accent:null,        rare:["lightSweep","giantDroplet","reservoirWave"],   signature:"lightSweep" }
+]);
+const DAM_SKIN_MOMENT_BY_ID = {};
+DAM_SKIN_MOMENTS.forEach(m => { DAM_SKIN_MOMENT_BY_ID[m.id] = m; });
+function getSkinMoment(id){ return DAM_SKIN_MOMENT_BY_ID[id] || DAM_SKIN_MOMENT_BY_ID.aurora; }
+
+/* ---------- audio vocabulary (reuses the existing Web Audio context; never autoplays) ---------- */
+function livingAudioCtx(allowCreate){
+  try{
+    if(allowCreate) return getAudio();                          // only from a user gesture
+    return (audioCtx && audioCtx.state === "running") ? audioCtx : null;   // ambience never creates or resumes audio
+  }catch(e){ return null; }
+}
+function damVoice(o){
+  const ctx = livingAudioCtx(!!o.gesture); if(!ctx) return false;
+  try{
+    const t0 = ctx.currentTime + (o.delay || 0), dur = Math.max(.03, o.time || .1);
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = o.type || "sine";
+    osc.frequency.setValueAtTime(o.freq, t0);
+    if(o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(o.gain || .02, t0 + Math.min(.025, dur * .25));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(t0); osc.stop(t0 + dur + .03);
+    return true;
+  }catch(e){ return false; }
+}
+function damNoise(o){
+  const ctx = livingAudioCtx(!!o.gesture); if(!ctx) return false;
+  try{
+    const t0 = ctx.currentTime + (o.delay || 0), dur = Math.max(.05, o.dur || .2);
+    const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx, dur);
+    const f = ctx.createBiquadFilter(); f.type = o.filter || "bandpass"; f.Q.value = o.q || .8;
+    f.frequency.setValueAtTime(o.from || 600, t0);
+    f.frequency.linearRampToValueAtTime(o.to || o.from || 600, t0 + dur);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(o.gain || .02, t0 + dur * .25);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start(t0); src.stop(t0 + dur + .03);
+    return true;
+  }catch(e){ return false; }
+}
+const DAM_AUDIO = Object.freeze({
+  ui: Object.freeze({
+    click:      () => damVoice({ freq:1320, to:990, time:.05, gain:.014, type:"sine", gesture:true }),
+    confirm:    () => { damVoice({ freq:660, time:.08, gain:.016, gesture:true }); damVoice({ freq:990, time:.12, gain:.014, delay:.06, gesture:true }); },
+    panelOpen:  () => damNoise({ dur:.22, from:500, to:1500, gain:.02, gesture:true }),
+    panelClose: () => damNoise({ dur:.18, from:1300, to:450, gain:.016, gesture:true })
+  }),
+  hydraulic: Object.freeze({
+    drip:     () => damVoice({ freq:1500, to:700, time:.07, gain:.016 }),
+    splash:   () => damNoise({ dur:.3, from:900, to:2000, gain:.03 }),
+    pressure: () => { damVoice({ freq:80, to:48, time:.3, gain:.04 }); damNoise({ dur:.35, from:220, to:90, gain:.028, filter:"lowpass" }); },
+    rush:     () => damNoise({ dur:.45, from:1100, to:2600, gain:.024, filter:"highpass" }),
+    release:  () => damNoise({ dur:.9, from:1600, to:180, gain:.03 })
+  }),
+  machine: Object.freeze({
+    click:        () => damVoice({ freq:2100, time:.025, gain:.012, type:"square" }),
+    hum:          () => { damVoice({ freq:58, time:.7, gain:.03 }); damVoice({ freq:116, time:.6, gain:.012, type:"triangle" }); },
+    reelSpin:     () => damNoise({ dur:.5, from:600, to:1400, gain:.016 }),
+    reelStop:     () => { damVoice({ freq:72, to:44, time:.16, gain:.05 }); damNoise({ dur:.08, from:2400, to:1200, gain:.012, filter:"highpass" }); },
+    anticipation: strong => { damNoise({ dur:.6, from:300, to:strong ? 2200 : 1400, gain:strong ? .03 : .018 }); damVoice({ freq:220, to:strong ? 440 : 330, time:.55, gain:.014, type:"triangle" }); },
+    jackpot:      () => { damVoice({ freq:55, to:110, time:.9, gain:.035, type:"triangle" }); damNoise({ dur:1.1, from:180, to:2400, gain:.03 }); }
+  }),
+  character: Object.freeze({
+    texture: motion => {
+      if(motion === "shake")  return damNoise({ dur:.12, from:260, to:140, gain:.02, filter:"lowpass" });
+      if(motion === "rise")   return damNoise({ dur:.25, from:800, to:1800, gain:.014 });
+      if(motion === "bounce") return damVoice({ freq:520, to:880, time:.09, gain:.014 });
+      if(motion === "pulse")  return damVoice({ freq:660, time:.16, gain:.012 }) && damVoice({ freq:660, time:.16, gain:.01, delay:.18 });
+      if(motion === "jolly")  return damVoice({ freq:1318, time:.22, gain:.01, type:"triangle" });
+      return damVoice({ freq:330, time:.06, gain:.012, type:"triangle" });
+    }
+  }),
+  env: Object.freeze({
+    play: kind => {
+      const p = SKIN_AUDIO_PROFILES[livingWorld.skinId] || SKIN_AUDIO_PROFILES.aurora;
+      if(kind === "rumble")  return damNoise({ dur:1.3, from:p.noise[0], to:Math.max(40, p.noise[0] * .6), gain:p.gain * 1.2, filter:"lowpass" });
+      if(kind === "shimmer") return damVoice({ freq:p.root * 2, time:.5, gain:p.gain * .6, type:"sine" });
+      if(kind === "swell")   return damNoise({ dur:1.1, from:p.noise[0], to:p.noise[1], gain:p.gain });
+      return damVoice({ freq:p.root, to:p.root * 1.5, time:.4, gain:p.gain, type:p.wave });
+    }
+  })
+});
+
+/* ---------- world state (presentation only) ---------- */
+const livingWorld = { skinId:"aurora", moment:null, started:false, timers:{ ambient:0, accent:0, event:0 }, events:0, lastEventId:null, badgeShown:false };
+function livingReducedMotion(){ try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } }
+function livingQuiet(){
+  try{
+    if(document.hidden || livingReducedMotion() || window.__GEI_PRODUCTION_GUARD__) return true;
+    if(damMachine.open || characterSpotlightId) return true;       // overlays own the screen
+    if(typeof anyPanelOpen === "function" && anyPanelOpen()) return true;
+  }catch(e){}
+  return false;
+}
+function livingNode(layer, className, vars, ttl){
+  if(!layer) return null;
+  const el = document.createElement("div");
+  el.className = className;
+  if(vars) Object.keys(vars).forEach(k => el.style.setProperty(k, vars[k]));
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), ttl);                              // every temporary node cleans itself up
+  return el;
+}
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+/* ---------- ambient particles ---------- */
+function spawnAmbientParticle(type){
+  const layer = $("livingWorldLayer"); if(!layer) return null;
+  if(layer.querySelectorAll(".lwP").length >= LIVING_MAX_AMBIENT) return null;
+  const t = type || livingWorld.moment.particle;
+  const rising = t === "bubble" || t === "ember" || t === "firefly" || t === "mote" || t === "dust";
+  const falling = t === "rain" || t === "frost" || t === "petal" || t === "drop";
+  const y = rising ? rnd(62, 94) : falling ? rnd(-4, 30) : rnd(4, 48);
+  const dur = t === "rain" ? rnd(1.1, 1.7) : t === "star" || t === "glint" ? rnd(2.4, 3.6) : rnd(6, 9);
+  return livingNode(layer, "lwP " + t, {
+    "--x": rnd(3, 95).toFixed(1) + "%", "--y": y.toFixed(1) + "%", "--dur": dur.toFixed(2) + "s",
+    "--dx": rnd(-30, 30).toFixed(0) + "px", "--s": rnd(5, 11).toFixed(1) + "px"
+  }, dur * 1000 + 250);
+}
+function scheduleAmbient(){
+  clearTimeout(livingWorld.timers.ambient);
+  const m = livingWorld.moment;
+  livingWorld.timers.ambient = setTimeout(() => { if(!livingQuiet()) spawnAmbientParticle(); scheduleAmbient(); }, rnd(m.rate[0], m.rate[1]));
+}
+
+/* ---------- rare environmental events (presentation only, non-interactive) ---------- */
+function livingEventLayer(){
+  const layer = $("livingEventLayer");
+  if(!layer || layer.childElementCount >= LIVING_MAX_EVENT_NODES) return null;
+  return layer;
+}
+function lwBurst(layer, x, y, n, spread, rise){
+  for(let i = 0; i < n; i++){
+    const a = (i / n) * Math.PI * 2 + rnd(-.3, .3), d = spread * rnd(.6, 1.2);
+    livingNode(layer, "lwFx lwBurstDrop", { "--x":x, "--y":y, "--dx":(Math.cos(a) * d).toFixed(0) + "px", "--dy":(Math.sin(a) * d - rise).toFixed(0) + "px" }, 1250);
+  }
+}
+const LIVING_WORLD_EVENTS = Object.freeze({
+  reservoirWave:  { emoji:"🌊", label:"Reservoir Wave",   run:L => { livingNode(L, "lwFx lwWave", { "--wy":rnd(68, 88).toFixed(0) + "%" }, 2800); DAM_AUDIO.env.play("swell"); } },
+  pressureRelease:{ emoji:"💧", label:"Pressure Release", run:L => { livingNode(L, "lwFx lwWave", { "--wy":"42%" }, 2800); lwBurst(L, "30%", "42%", 9, 60, 20); DAM_AUDIO.hydraulic.pressure(); } },
+  waterSpark:     { emoji:"✨", label:"Water Spark",      run:L => { livingNode(L, "lwFx lwStreak", { "--x":rnd(-5, 20).toFixed(0) + "%", "--y":rnd(10, 40).toFixed(0) + "%", "--tx":"300px", "--ty":"110px" }, 1700); DAM_AUDIO.hydraulic.drip(); } },
+  stormSurge:     { emoji:"🌩️", label:"Storm Surge",      run:L => { livingNode(L, "lwFx lwFlash", { "--fx":rnd(20, 80).toFixed(0) + "%" }, 1100); setTimeout(() => { const l2 = livingEventLayer(); if(l2) livingNode(l2, "lwFx lwWave", { "--wy":"84%" }, 2800); }, 350); DAM_AUDIO.env.play("rumble"); } },
+  hydraulicFlash: { emoji:"⚡", label:"Hydraulic Flash",  run:L => { livingNode(L, "lwFx lwFlash", { "--fx":"50%" }, 1100); DAM_AUDIO.env.play("tone"); } },
+  cosmicDrift:    { emoji:"🌌", label:"Cosmic Drift",     run:L => { for(let i = 0; i < 3; i++) livingNode(L, "lwFx lwStreak", { "--x":rnd(-10, 30).toFixed(0) + "%", "--y":rnd(4, 26).toFixed(0) + "%", "--tx":"340px", "--ty":"60px", "--rot":"10deg", "--dur":(1.8 + i * .3) + "s" }, 2400); DAM_AUDIO.env.play("shimmer"); } },
+  emberBurst:     { emoji:"🔥", label:"Ember Burst",      run:L => { const x = rnd(20, 80); for(let i = 0; i < 8; i++) livingNode($("livingWorldLayer") || L, "lwP ember", { "--x":(x + rnd(-6, 6)).toFixed(1) + "%", "--y":rnd(80, 92).toFixed(0) + "%", "--dur":rnd(2.4, 3.6).toFixed(2) + "s", "--dx":rnd(-40, 40).toFixed(0) + "px" }, 3800); DAM_AUDIO.env.play("rumble"); } },
+  frostShimmer:   { emoji:"❄️", label:"Frost Shimmer",    run:L => { for(let i = 0; i < 7; i++) livingNode(L, "lwFx lwP glint", { "--x":rnd(8, 92).toFixed(0) + "%", "--y":rnd(8, 70).toFixed(0) + "%", "--dur":rnd(1.6, 2.6).toFixed(2) + "s" }, 2800); DAM_AUDIO.env.play("shimmer"); } },
+  giantDroplet:   { emoji:"💧", label:"Giant Droplet",    run:L => { const x = rnd(25, 75).toFixed(0) + "%", h = L.clientHeight || 420; livingNode(L, "lwFx lwGiant", { "--x":x, "--fall":Math.round(h * .8) + "px" }, 1250); setTimeout(() => { const l2 = livingEventLayer(); if(!l2) return; livingNode(l2, "lwFx lwWave", { "--wy":"80%" }, 2800); lwBurst(l2, x, "80%", 8, 46, 28); DAM_AUDIO.hydraulic.splash(); }, 1000); } },
+  bubbleColumn:   { emoji:"🫧", label:"Bubble Column",    run:L => { const x = rnd(15, 85); for(let i = 0; i < 7; i++) setTimeout(() => spawnAmbientBurstBubble(x), i * 140); DAM_AUDIO.env.play("swell"); } },
+  fireflySwarm:   { emoji:"✨", label:"Firefly Swarm",    run:L => { for(let i = 0; i < 6; i++) livingNode($("livingWorldLayer") || L, "lwP firefly", { "--x":rnd(10, 90).toFixed(0) + "%", "--y":rnd(30, 75).toFixed(0) + "%", "--dur":rnd(4, 6).toFixed(2) + "s", "--dx":rnd(-30, 30).toFixed(0) + "px" }, 6200); DAM_AUDIO.env.play("shimmer"); } },
+  moonShimmer:    { emoji:"🌙", label:"Moon Shimmer",     run:L => { livingNode(L, "lwFx lwShimmer", { "--y":rnd(70, 86).toFixed(0) + "%" }, 2600); livingNode(L, "lwFx lwShimmer", { "--y":rnd(55, 68).toFixed(0) + "%" }, 2600); DAM_AUDIO.env.play("shimmer"); } },
+  lightSweep:     { emoji:"💡", label:"Light Sweep",      run:L => { livingNode(L, "lwFx lwSweep", null, 2000); DAM_AUDIO.env.play("swell"); } },
+  warningBeacon:  { emoji:"🚨", label:"Warning Beacon",   run:L => { livingNode(L, "lwFx lwBeacon", { left:"8%" }, 3800); livingNode(L, "lwFx lwBeacon", { left:"calc(92% - 22px)" }, 3800); DAM_AUDIO.env.play("tone"); } },
+  machinePuff:    { emoji:"🎰", label:"Machine Pressure Puff", run:() => { const b = $("dmFloatBtn"), layer = $("tapWaterLayer"); if(!b || !layer || b.hidden) return; const r = b.getBoundingClientRect(); for(let i = 0; i < 3; i++) livingNode(layer, "lwPuff", { left:(r.left + r.width * (.3 + i * .2)) + "px", top:(r.top + 4) + "px" }, 800); DAM_AUDIO.machine.click(); } }
+});
+/* Not in any skin pool: extra DAM moments that can happen anywhere. */
+const LIVING_GLOBAL_MOMENTS = Object.freeze(["giantDroplet","waterSpark","hydraulicFlash","machinePuff","reservoirWave"]);
+function spawnAmbientBurstBubble(xPct){
+  const layer = $("livingWorldLayer"); if(!layer) return;
+  livingNode(layer, "lwP bubble", { "--x":(xPct + rnd(-3, 3)).toFixed(1) + "%", "--y":rnd(86, 94).toFixed(0) + "%", "--dur":rnd(3, 4.2).toFixed(2) + "s", "--s":rnd(6, 13).toFixed(1) + "px" }, 4500);
+}
+function triggerLivingEvent(id){
+  const ev = LIVING_WORLD_EVENTS[id]; if(!ev) return false;
+  const layer = livingEventLayer(); if(!layer) return false;
+  try { ev.run(layer); } catch(e){ safeWarn("Living world event skipped: " + e); return false; }
+  livingWorld.events++; livingWorld.lastEventId = id;
+  return true;
+}
+/* Frequency ladder: ambience frequent · noticeable events occasional · spectacular moments rare. */
+function rollLivingEvent(r){
+  const m = livingWorld.moment;
+  if(r < .035) return { tier:"spectacular", id:m.signature };
+  if(r < .10)  return { tier:"noticeable",  id:LIVING_GLOBAL_MOMENTS[Math.floor(Math.random() * LIVING_GLOBAL_MOMENTS.length)] };
+  if(r < .42)  return { tier:"noticeable",  id:m.rare[Math.floor(Math.random() * m.rare.length)] };
+  return null;
+}
+function scheduleEvents(){
+  clearTimeout(livingWorld.timers.event);
+  livingWorld.timers.event = setTimeout(() => {
+    if(!livingQuiet()){
+      const pick = rollLivingEvent(Math.random());
+      if(pick && triggerLivingEvent(pick.id) && pick.tier === "spectacular"){
+        const ev = LIVING_WORLD_EVENTS[pick.id];
+        showLivingBadge(`${ev.emoji} RARE DAM MOMENT`, ev.label, 2600);
+        setTimeout(() => triggerLivingEvent(livingWorld.moment.rare[0]), 700);   // a rare moment gets an encore
+      }
+    }
+    scheduleEvents();
+  }, rnd(22000, 40000));
+}
+/* Accents: small, skin-specific, every so often (storm flashes, moon shimmer, beacons, fireflies). */
+function runSkinAccent(){
+  const a = livingWorld.moment.accent, L = livingEventLayer();
+  if(!a || !L) return false;
+  if(a === "lightning"){ livingNode(L, "lwFx lwFlash", { "--fx":rnd(10, 90).toFixed(0) + "%", opacity:".5" }, 1100); setTimeout(() => DAM_AUDIO.env.play("rumble"), 420); }
+  else if(a === "shimmer") livingNode(L, "lwFx lwShimmer", { "--y":rnd(62, 86).toFixed(0) + "%" }, 2600);
+  else if(a === "beacon") livingNode(L, "lwFx lwBeacon", { left:Math.random() < .5 ? "8%" : "calc(92% - 22px)" }, 3800);
+  else if(a === "firefly") spawnAmbientParticle("firefly");
+  return true;
+}
+function scheduleAccent(){
+  clearTimeout(livingWorld.timers.accent);
+  if(!livingWorld.moment.accent) return;
+  livingWorld.timers.accent = setTimeout(() => { if(!livingQuiet()) runSkinAccent(); scheduleAccent(); }, rnd(11000, 19000));
+}
+
+/* ---------- skin reveal badge ---------- */
+let livingBadgeTimer = 0;
+function showLivingBadge(title, sub, ms){
+  const b = $("livingSkinBadge"); if(!b) return false;
+  b.innerHTML = "";
+  b.appendChild(document.createTextNode(title));
+  if(sub){ const s = document.createElement("small"); s.textContent = sub; b.appendChild(s); }
+  try { const w = $("world").getBoundingClientRect(); if(w.height > 120) b.style.top = Math.round(w.top + 58) + "px"; } catch(e){}   // sit inside the world, never over the HUD stats
+  b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
+  clearTimeout(livingBadgeTimer);
+  livingBadgeTimer = setTimeout(() => { b.classList.remove("show"); setTimeout(() => { if(!b.classList.contains("show")) b.innerHTML = ""; }, 500); }, ms || 2600);
+  return true;
+}
+function revealSkinWhenReady(tries){
+  if(livingWorld.badgeShown || window.__GEI_PRODUCTION_GUARD__) return;
+  const splash = $("geiSplash");
+  const splashUp = splash && !splash.classList.contains("isDone") && splash.style.display !== "none";
+  if(splashUp || preGameOpen || damMachine.open){ if(tries < 180) setTimeout(() => revealSkinWhenReady(tries + 1), 500); return; }
+  livingWorld.badgeShown = true;
+  showLivingBadge(`${activeSkin.deco} ${activeSkin.name.toUpperCase()}`, livingWorld.moment.atmosphere, 2800);
+  if(!livingReducedMotion() && Math.random() < .12) setTimeout(() => triggerLivingEvent(livingWorld.moment.signature), 900);   // "Whoa — never seen THAT."
+}
+
+/* ---------- start ---------- */
+function startLivingWorld(){
+  if(livingWorld.started) return false;
+  livingWorld.skinId = SKIN_META[activeSkinId] ? activeSkinId : "aurora";
+  livingWorld.moment = getSkinMoment(livingWorld.skinId);
+  document.documentElement.setAttribute("data-sky", livingWorld.moment.sky);
+  livingWorld.started = true;
+  scheduleAmbient(); scheduleAccent(); scheduleEvents();
+  revealSkinWhenReady(0);
+  return true;
+}
+
+function pauseLivingWorld(){ Object.keys(livingWorld.timers).forEach(k => { clearTimeout(livingWorld.timers[k]); livingWorld.timers[k] = 0; }); livingWorld.started = false; return true; }
+function resumeLivingWorld(){ if(livingWorld.started || !livingWorld.moment) return false; livingWorld.started = true; scheduleAmbient(); scheduleAccent(); scheduleEvents(); return true; }
+
+/* ---------- hydraulic tap polish (builds on V2.1.11; called from its presentation functions) ---------- */
+function spawnTapAccent(layer, x, y, context, power){
+  if(!layer || livingReducedMotion()) return 0;
+  const add = (cls, vars, ttl) => { const v = Object.assign({ "--x":x + "px", "--y":y + "px" }, vars || {}); livingNode(layer, "tapAccent " + cls, v, ttl || 1500); };
+  const big = power >= 2, huge = power >= 3;
+  let n = 0;
+  if(context === "mountain"){ n = huge ? 5 : big ? 3 : 1; for(let i = 0; i < n; i++) add("rise", { "--dx":rnd(-12, 12).toFixed(0) + "px", "--h":rnd(40, 80).toFixed(0) + "px" }, 900); }
+  else if(context === "dam"){ n = huge ? 2 : 1; for(let i = 0; i < n; i++) add("thump", { animationDelay:(i * .12) + "s" }, 900); }
+  else if(context === "reservoir"){ n = huge ? 3 : big ? 2 : 1; for(let i = 0; i < n; i++) add("calm", { "--d":(.1 + i * .2).toFixed(2) + "s" }, 1900); }
+  else if(context === "sluice"){ n = huge ? 5 : big ? 3 : 1; for(let i = 0; i < n; i++) add("streak", { "--oy":((i - (n - 1) / 2) * 7) + "px", "--d":(i * .04).toFixed(2) + "s" }, 900); }
+  else if(context === "wheel"){ n = huge ? 2 : 1; for(let i = 0; i < n; i++) add("spin", { animationDelay:(i * .15) + "s" }, 1100); }
+  else if(context === "ocean"){ n = huge ? 7 : big ? 4 : 2; for(let i = 0; i < n; i++) add("cascade", { "--dx":((i - (n - 1) / 2) * 11) + "px", "--d":(Math.abs(i - (n - 1) / 2) * .05).toFixed(2) + "s" }, 1300); }
+  return n;
+}
+function playTapTexture(context, intensity){
+  const k = Math.max(1, Math.min(3, intensity || 1)), g = .6 + k * .25;
+  if(context === "mountain") return damVoice({ freq:520, to:860 + k * 80, time:.12, gain:.014 * g });
+  if(context === "dam")      { damVoice({ freq:96, to:50, time:.2, gain:.045 * g }); if(k >= 2) damNoise({ dur:.25, from:220, to:80, gain:.02 * g, filter:"lowpass" }); return true; }
+  if(context === "reservoir"){ damVoice({ freq:392, time:.5, gain:.012 * g }); return damVoice({ freq:588, time:.55, gain:.007 * g, delay:.04 }); }
+  if(context === "sluice")   return damNoise({ dur:.18 + k * .05, from:1200, to:2600, gain:.018 * g, filter:"highpass" });
+  if(context === "wheel")    { for(let i = 0; i < 1 + k; i++) damVoice({ freq:300 + i * 60, time:.04, gain:.016 * g, type:"triangle", delay:i * .07 }); return true; }
+  if(context === "ocean")    { damNoise({ dur:.35 + k * .1, from:520, to:110, gain:.03 * g, filter:"lowpass" }); return damVoice({ freq:110, to:68, time:.4, gain:.02 * g }); }
+  return false;
+}
+/* Big moments only: day completion / final Mill tap → the whole world answers. */
+function livingWorldMilestone(index){
+  if(livingReducedMotion()) return false;
+  const L = livingEventLayer(); if(!L) return false;
+  livingNode(L, "lwFx lwWave", { "--wy":"80%" }, 2800);
+  if(index === MILL_INDEX){
+    setTimeout(() => { const l2 = livingEventLayer(); if(l2) livingNode(l2, "lwFx lwWave", { "--wy":"70%" }, 2800); }, 260);
+    triggerLivingEvent("waterSpark");
+  }
+  return true;
+}
+
+/* ---------- DAM MACHINE polish (hooks only; the authoritative reward path is untouched) ---------- */
+const livingMachine = {
+  timers: [],
+  clear(){ this.timers.forEach(clearTimeout); this.timers = []; },
+  card(){ return $("damMachineCard"); },
+  onOpen(){ DAM_AUDIO.machine.hum(); return true; },
+  onSpin(token, ids, durs){
+    const card = this.card(); if(!card) return false;
+    this.reset(); card.classList.add("lwSpinning");
+    DAM_AUDIO.machine.reelSpin();
+    const last = durs[durs.length - 1], strong = Array.isArray(ids) && ids[0] === ids[1];
+    if(last > 900) this.timers.push(setTimeout(() => { if(token === damMachine.spinToken && damMachine.spinning) DAM_AUDIO.machine.anticipation(strong); }, last - 700));
+    return true;
+  },
+  onReelStop(){
+    DAM_AUDIO.machine.reelStop();
+    const cab = document.querySelector("#damMachineCard .dmCabinet");
+    if(cab && !livingReducedMotion()){
+      [".dmPipeL", ".dmPipeR"].forEach(sel => {
+        const pipe = cab.querySelector(sel); if(!pipe) return;
+        livingNode(cab, "lwPuff", { left:(pipe.offsetLeft + pipe.offsetWidth / 2) + "px", top:(pipe.offsetTop + 4) + "px" }, 800);
+      });
+    }
+    return true;
+  },
+  winningReels(ids){
+    if(!Array.isArray(ids)) return [];
+    const hits = ids.map((id, i) => ids.filter(x => x === id).length >= 2 ? i : -1).filter(i => i >= 0);
+    return hits.length ? hits : [0, 1, 2];
+  },
+  onReveal(res, ids){
+    const card = this.card(); if(!card) return false;
+    card.classList.remove("lwSpinning");
+    if(!res) return true;
+    const reels = document.querySelectorAll("#dmReels .dmReel");
+    this.winningReels(ids).forEach(i => reels[i] && reels[i].classList.add("lwWin"));
+    if(res.jackpot){
+      card.classList.add("lwSurge"); DAM_AUDIO.machine.jackpot();
+      this.timers.push(setTimeout(() => card.classList.remove("lwSurge"), 1600));
+    }
+    return true;
+  },
+  reset(){
+    const card = this.card(); if(!card) return;
+    card.classList.remove("lwSpinning", "lwSurge");
+    card.querySelectorAll(".dmReel.lwWin").forEach(r => r.classList.remove("lwWin"));
+  },
+  onClose(){ this.clear(); this.reset(); return true; }
+};
+function livingMachineHook(name, ...args){ try { return livingMachine[name](...args); } catch(e){ safeWarn("Dam Machine polish skipped: " + e); return false; } }
+
+/* ---------- CHARACTER SPOTLIGHT polish ---------- */
+const livingSpotlight = {
+  timer: 0,
+  start(id){
+    this.stop();
+    if(livingReducedMotion()) return false;
+    const tick = () => {
+      if(characterSpotlightId !== id) return this.stop();
+      const stage = $("characterSpotlightStage");
+      if(stage && stage.querySelectorAll(".lwSpotBubble").length < 6){
+        livingNode(stage, "lwSpotBubble", { "--x":rnd(18, 82).toFixed(0) + "%", "--dx":rnd(-18, 18).toFixed(0) + "px", "--s":rnd(6, 12).toFixed(1) + "px", "--dur":rnd(2.2, 3.2).toFixed(2) + "s" }, 3400);
+      }
+      this.timer = setTimeout(tick, rnd(650, 1100));
+    };
+    this.timer = setTimeout(tick, 350);
+    return true;
+  },
+  stop(){ clearTimeout(this.timer); this.timer = 0; return true; },
+  react(id){
+    const stage = $("characterSpotlightStage"); if(!stage) return false;
+    if(!livingReducedMotion()) livingNode(stage, "lwSpotRing", null, 1000);
+    const p = CHARACTER_SPOTLIGHT_PROFILES[id] || CHARACTER_SPOTLIGHT_PROFILES[DEFAULT_CHARACTER_ID];
+    DAM_AUDIO.character.texture(p && p.motion);
+    return true;
+  }
+};
+function livingSpotlightHook(name, ...args){ try { return livingSpotlight[name](...args); } catch(e){ safeWarn("Spotlight polish skipped: " + e); return false; } }
+
+/* ---------- V2.1.12 self-test: runLivingWorldSelfTest() → { pass, fail, results:[…] }. Console only. ---------- */
+function runLivingWorldSelfTest(){
+  const results = [];
+  const t = (name, fn) => { let ok = false; try { ok = !!fn(); } catch(e){ ok = false; } results.push({ name, ok }); };
+  const snapshot = () => JSON.stringify(state);
+  const skinIds = Object.keys(SKIN_META);
+  t("V2.1.12: expanded skin catalog exists", () => skinIds.length >= 12 && skinIds.length <= 18 && ["aurora","clay","canopy","heaven","neon","ember","abyss"].every(id => skinIds.includes(id)));
+  t("V2.1.12: every skin has a valid visual profile", () => {
+    const probe = document.createElement("div"); probe.style.display = "none"; document.body.appendChild(probe);
+    try{
+      return skinIds.every(id => {
+        const cssOk = [...document.styleSheets].some(sh => { try { return [...sh.cssRules].some(r => r.selectorText === "html.skin-" + id || (id === "aurora" && r.selectorText === ":root")); } catch(e){ return false; } });
+        const m = DAM_SKIN_MOMENT_BY_ID[id], meta = SKIN_META[id];
+        return cssOk && !!meta.name && !!meta.deco && !!m && !!SKIN_AUDIO_PROFILES[id] &&
+          Array.isArray(m.rare) && m.rare.length > 0 && m.rare.every(ev => !!LIVING_WORLD_EVENTS[ev]) && !!LIVING_WORLD_EVENTS[m.signature] &&
+          ["none","stars","clouds","haze","beams"].includes(m.sky) && m.rate[0] >= 800 && m.rate[1] > m.rate[0];
+      });
+    } finally { probe.remove(); }
+  });
+  t("V2.1.12: active skin is one of the catalog skins", () => skinIds.includes(document.documentElement.getAttribute("data-skin")) && document.documentElement.classList.contains("skin-" + activeSkinId));
+  t("V2.1.12: decorative layers never take pointer input", () => ["livingWorldLayer","livingEventLayer","livingSkinBadge","livingSky"].every(id => $(id) && getComputedStyle($(id)).pointerEvents === "none"));
+  t("V2.1.12: skin moments remain presentation-only", () => {
+    const before = snapshot();
+    Object.keys(LIVING_WORLD_EVENTS).forEach(id => { const L = $("livingEventLayer"); if(L) LIVING_WORLD_EVENTS[id].run(L); });
+    runSkinAccent(); spawnAmbientParticle(); showLivingBadge("TEST", "", 50); livingWorldMilestone(MILL_INDEX);
+    return snapshot() === before;
+  });
+  t("V2.1.12: no ambient effect modifies FL OZ", () => { const a = state.totalFlOz, b = state.levelFlOz; for(let i = 0; i < 12; i++) spawnAmbientParticle(); triggerLivingEvent("giantDroplet"); return state.totalFlOz === a && state.levelFlOz === b; });
+  t("V2.1.12: no ambient effect modifies XP", () => { const keys = Object.keys(state).filter(k => /xp|exp/i.test(k)), before = JSON.stringify(keys.map(k => state[k])); triggerLivingEvent("stormSurge"); spawnAmbientParticle("ember"); return JSON.stringify(keys.map(k => state[k])) === before; });
+  t("V2.1.12: no ambient effect modifies progression", () => {
+    const pick = () => JSON.stringify([state.level, state.completedLevels, state.currentStep, state.tapCount, state.phase, state.millStage, state.tribesFound, state.unlockedSongs, state.unlockedCharacters, state.unlockedSkins, state.activeCharacter, state.damMachineFreePlays]);
+    const before = pick(); triggerLivingEvent("pressureRelease"); triggerLivingEvent("machinePuff"); runSkinAccent(); return pick() === before;
+  });
+  t("V2.1.12: living-world code never references economy authority", () => {
+    const src = [spawnAmbientParticle, triggerLivingEvent, rollLivingEvent, runSkinAccent, spawnTapAccent, playTapTexture, livingWorldMilestone, showLivingBadge, revealSkinWhenReady, startLivingWorld, damVoice, damNoise, livingMachineHook, livingSpotlightHook].map(f => f.toString()).join("\n") +
+      Object.values(LIVING_WORLD_EVENTS).map(e => e.run.toString()).join("\n") +
+      Object.keys(livingMachine).map(k => String(livingMachine[k])).join("\n") + Object.keys(livingSpotlight).map(k => String(livingSpotlight[k])).join("\n");
+    return !/totalFlOz|levelFlOz|safeAddFlOz|commitDamResult|creditPack|awardDay|saveGame|unlockItem|purchase|entitlement|paypal/i.test(src);
+  });
+  t("V2.1.12: ambient particles are capped", () => { for(let i = 0; i < 30; i++) spawnAmbientParticle(); return $("livingWorldLayer").querySelectorAll(".lwP").length <= LIVING_MAX_AMBIENT + 8; });
+  t("V2.1.12: event layer is capped", () => { for(let i = 0; i < 40; i++) triggerLivingEvent("waterSpark"); return $("livingEventLayer").childElementCount <= LIVING_MAX_EVENT_NODES + 12; });
+  t("V2.1.12: rare-event ladder keeps spectacular moments rare", () => rollLivingEvent(.01).tier === "spectacular" && rollLivingEvent(.2).tier === "noticeable" && rollLivingEvent(.8) === null);
+  t("V2.1.12: reduced-motion mode remains supported", () => {
+    const rules = [...document.styleSheets].flatMap(sh => { try { return [...sh.cssRules]; } catch(e){ return []; } });
+    return rules.some(r => r.media && /prefers-reduced-motion/.test(r.media.mediaText) && /\.lwP/.test(r.cssText) && /livingBreath/.test(r.cssText)) && typeof livingReducedMotion() === "boolean";
+  });
+  t("V2.1.12: hydraulic tap profiles remain intact", () => ["mountain","dam","reservoir","sluice","wheel","ocean"].every((id, i) => !!TAP_WATER_PROFILES[id] && getTapWaterContext({ index:i }) === id) && Object.isFrozen(TAP_WATER_PROFILES));
+  t("V2.1.12: every hydraulic station has a distinct tap accent", () => {
+    if(livingReducedMotion()) return true;
+    const L = $("tapWaterLayer"), seen = new Set();
+    ["mountain","dam","reservoir","sluice","wheel","ocean"].forEach(c => { const b = L.querySelectorAll(".tapAccent").length; spawnTapAccent(L, 50, 50, c, 2); const added = [...L.querySelectorAll(".tapAccent")].slice(b); added.forEach(el => seen.add(el.className)); });
+    return seen.size === 6;
+  });
+  t("V2.1.12: normal taps stay restrained, 75% and final taps grow", () => {
+    if(livingReducedMotion()) return true;
+    const L = $("tapWaterLayer");
+    return spawnTapAccent(L, 40, 40, "ocean", 1) < spawnTapAccent(L, 40, 40, "ocean", 2) && spawnTapAccent(L, 40, 40, "ocean", 2) < spawnTapAccent(L, 40, 40, "ocean", 3);
+  });
+  t("V2.1.12: DAM Machine reward authority remains unchanged", () => {
+    const before = snapshot();
+    livingMachine.onOpen(); livingMachine.onSpin(-1, ["fl-6660","fl-6660","fl-6660"], [400,600,800]); livingMachine.onReelStop();
+    livingMachine.onReveal({ jackpot:true, amount:UNLOCK_COST_FL_OZ, kind:"flOz" }, ["fl-6660","fl-6660","fl-6660"]);
+    livingMachine.onClose();
+    return snapshot() === before && /commitDamResult\(combo, ids\)/.test(revealDamResult.toString()) && !/livingMachine|lwWin/.test(commitDamResult.toString());
+  });
+  t("V2.1.12: winning-reel glow picks matching symbols", () => JSON.stringify(livingMachine.winningReels(["a","a","b"])) === "[0,1]" && livingMachine.winningReels(["a","b","c"]).length === 3);
+  t("V2.1.12: spotlight polish is presentation-only", () => { const before = snapshot(); livingSpotlight.react(DEFAULT_CHARACTER_ID); livingSpotlight.start("__none__"); livingSpotlight.stop(); return snapshot() === before; });
+  t("V2.1.12: audio vocabulary exists and never autoplays", () => {
+    const groups = ["ui","hydraulic","machine","character","env"].every(g => !!DAM_AUDIO[g]);
+    const created = !audioCtx;                                   // if no context yet, ambience must not create one
+    DAM_AUDIO.env.play("rumble"); DAM_AUDIO.hydraulic.drip();
+    return groups && (!created || !audioCtx);
+  });
+  t("V2.1.12: ambient effects clean themselves up", () => {
+    const L = $("livingWorldLayer"), el = livingNode(L, "lwP drop", null, 0);
+    return !!el;                                                // removal is verified asynchronously by runLivingWorldCleanupCheck()
+  });
+  const pass = results.filter(r => r.ok).length;
+  return { pass, fail: results.length - pass, results };
+}
+/* Async half of the cleanup test: every temporary node must be gone after its lifetime. */
+function runLivingWorldCleanupCheck(waitMs){
+  const wasRunning = livingWorld.started;
+  pauseLivingWorld();                                   // hold the schedulers so only already-spawned nodes are measured
+  return new Promise(resolve => setTimeout(() => {
+    const leftovers = document.querySelectorAll("#livingEventLayer > *, #livingWorldLayer > .lwP, #tapWaterLayer > *, .lwPuff, .lwSpotBubble, .lwSpotRing").length;
+    if(wasRunning) resumeLivingWorld();
+    resolve({ leftovers, ok: leftovers === 0 });
+  }, waitMs || 11000));
+}
+function livingUiSound(kind){ try { DAM_AUDIO.ui[kind](); } catch(e){} }
+
+/* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
 ========================================================= */
 function reportHeight(){
@@ -7774,6 +9023,7 @@ if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
 }
 broadcastUnlocks();
 preloadCharacter(getActiveCharacter());
+try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); }   // V2.1.12 — presentation only
 
 /* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
 if(state.level===1 && state.levelFlOz===0 && storageGet("yalltooDamGame.guideSeen")!=="1"){
