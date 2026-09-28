@@ -1,4 +1,7 @@
-import { claimEntitlement } from "../_lib/paypal-ledger.js";
+import {
+  claimEntitlement,
+  recordEconomyIncident
+} from "../_lib/paypal-ledger.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -41,6 +44,25 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error("[PayPal claim-entitlement]", err);
+    if (err?.code === "ECONOMY_DRIFT_DETECTED") {
+      const incident = await recordEconomyIncident({
+        invoiceId: claimToken,
+        captureID,
+        source: "CLAIM_RECONCILIATION",
+        reconciliation: err.reconciliation,
+        record: null
+      }).catch(incidentError => {
+        console.error("[PayPal claim-entitlement] incident recording failed", incidentError);
+        return null;
+      });
+      return res.status(409).json({
+        error: "Economy authority drift detected.",
+        code: "ECONOMY_DRIFT_DETECTED",
+        frozen: true,
+        incident: incident?.incident || null,
+        reconciliation: err.reconciliation || null
+      });
+    }
     return res.status(500).json({ error: err.message || "Unable to claim entitlement." });
   }
 }
