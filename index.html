@@ -732,6 +732,16 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 }
 @keyframes rippleExpand{ to{ transform:translate(-50%,-50%) scale(6.5); opacity:0; border-width:1px; } }
 
+/* V2.1.10 — TAP WATER: global hydraulic response for every meaningful pointer tap. */
+.tapWaterLayer{position:fixed;inset:0;z-index:80;overflow:hidden;pointer-events:none}
+.tapWaterRipple{position:absolute;width:18px;height:18px;border:2px solid var(--water-bright);border-radius:50%;transform:translate(-50%,-50%) scale(.35);opacity:.9;box-shadow:0 0 12px color-mix(in srgb,var(--water-bright) 55%,transparent);animation:tapWaterRipple .72s cubic-bezier(.2,.75,.2,1) forwards}
+.tapWaterDrop{position:absolute;width:8px;height:12px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,var(--foam),var(--water-bright) 58%,var(--juicy-blue));box-shadow:0 0 9px color-mix(in srgb,var(--water-bright) 58%,transparent);transform:translate(-50%,-50%) rotate(45deg) scale(.65);animation:tapWaterDrop .72s cubic-bezier(.18,.7,.25,1) forwards}
+.tapWaterFlash{position:absolute;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,var(--foam) 0%,color-mix(in srgb,var(--water-bright) 55%,transparent) 34%,transparent 72%);transform:translate(-50%,-50%) scale(.4);opacity:.9;animation:tapWaterFlash .42s ease-out forwards}
+@keyframes tapWaterRipple{0%{transform:translate(-50%,-50%) scale(.35);opacity:.9}100%{transform:translate(-50%,-50%) scale(5.8);opacity:0}}
+@keyframes tapWaterDrop{0%{transform:translate(-50%,-50%) rotate(45deg) scale(.65);opacity:0}12%{opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(45deg) scale(.28);opacity:0}}
+@keyframes tapWaterFlash{0%{transform:translate(-50%,-50%) scale(.4);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
+@media (prefers-reduced-motion:reduce){.tapWaterRipple,.tapWaterDrop,.tapWaterFlash{animation-duration:.001ms !important}}
+
 /* ============ TRIBE REVEAL CARD ============ */
 .tribeCard{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -2006,6 +2016,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   <div class="dropletDeco" style="top:46%; left:3%; font-size:.9rem; animation-delay:3s;">💧</div>
   <div class="dropletDeco" style="top:60%; right:3%; font-size:1rem; animation-delay:1.8s;">💧</div>
 </div>
+
+<div class="tapWaterLayer" id="tapWaterLayer" aria-hidden="true"></div>
 
 <div class="stage">
 
@@ -4125,18 +4137,9 @@ world.addEventListener("click", (e)=>{
   const index = state.currentStep;
   const step = STEPS[index];
 
-  g.classList.remove("tapped"); void g.offsetWidth; g.classList.add("tapped");
-
-  const worldRect = world.getBoundingClientRect();
-  const tapX = e.clientX - worldRect.left;
-  const tapY = e.clientY - worldRect.top;
-
   state.tapCount++;
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
-  spawnRippleAt(tapX, tapY);
-  spawnFoamAt(tapX, tapY, state.tapCount === requiredTaps);
-  playWaterTap(state.tapCount);
 
   if(state.tapCount === 1){
     g.classList.add("highlight");
@@ -6541,6 +6544,40 @@ function spawnFoamAt(x, y, big){
   }
 }
 
+/* V2.1.10 — centralized TAP WATER feedback. Presentation-only: no state, XP, FL OZ, or progression changes. */
+let tapWaterPulseCount = 0;
+let lastTapWaterAudioAt = 0;
+function spawnTapWaterFeedback(clientX, clientY, intensity){
+  const layer = $("tapWaterLayer");
+  if(!layer || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return false;
+  const power = Math.max(1, Math.min(3, Number(intensity) || 1));
+  const ripple = document.createElement("div"); ripple.className = "tapWaterRipple"; ripple.style.left = clientX+"px"; ripple.style.top = clientY+"px"; layer.appendChild(ripple);
+  const flash = document.createElement("div"); flash.className = "tapWaterFlash"; flash.style.left = clientX+"px"; flash.style.top = clientY+"px"; layer.appendChild(flash);
+  const count = power >= 3 ? 10 : power >= 2 ? 7 : 4, spread = power >= 3 ? 82 : power >= 2 ? 64 : 48;
+  for(let i=0;i<count;i++){
+    const drop=document.createElement("div"); drop.className="tapWaterDrop";
+    const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.5, distance=spread*(.55+Math.random()*.65);
+    drop.style.left=clientX+"px"; drop.style.top=clientY+"px";
+    drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-power*8)+"px");
+    drop.style.animationDelay=Math.random()*.05+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),820);
+  }
+  setTimeout(()=>{ripple.remove();flash.remove()},800);
+  tapWaterPulseCount++; const now=performance.now();
+  if(now-lastTapWaterAudioAt>55){lastTapWaterAudioAt=now;try{playWaterTap(tapWaterPulseCount)}catch(e){}}
+  return true;
+}
+document.addEventListener("pointerdown",e=>{
+  if(e.button!==undefined&&e.button!==0)return;
+  const target=e.target instanceof Element?e.target:null;
+  if(target&&target.closest("#tapWaterLayer, script, style"))return;
+  let intensity=1;
+  if(state&&state.phase==="playing"){
+    const required=getRequiredTaps(state.level), nextTap=state.tapCount+1;
+    if(nextTap>=required)intensity=3; else if(nextTap/required>=.75)intensity=2;
+  }
+  spawnTapWaterFeedback(e.clientX,e.clientY,intensity);
+},{capture:true,passive:true});
+
 /* =========================================================
    FULLSCREEN
 ========================================================= */
@@ -7078,6 +7115,17 @@ function runCommandCenterSelfTest(){
       const ids = Object.keys(DAM_REEL_WEIGHTS), vals = new Set();
       ids.forEach(a => ids.forEach(b => ids.forEach(c => { const r = evaluateDamCombination([a,b,c]); if(r && r.kind === "flOz") vals.add(r.amount); })));
       return [111,222,333,444,555,666,777,1110,2220,6660].every(v => vals.has(v));
+    });
+    /* V2.1.10 — TAP WATER */
+    t("V2.1.10: global tap-water layer exists", () => !!$("tapWaterLayer"));
+    t("V2.1.10: tap-water feedback is presentation-only", () => {
+      const beforeOz=state.totalFlOz,beforeTap=state.tapCount,beforeLevel=state.level,beforeNodes=$("tapWaterLayer")?.childElementCount||0;
+      const shown=spawnTapWaterFeedback(120,160,2),afterNodes=$("tapWaterLayer")?.childElementCount||0;
+      return shown&&afterNodes>beforeNodes&&state.totalFlOz===beforeOz&&state.tapCount===beforeTap&&state.level===beforeLevel;
+    });
+    t("V2.1.10: tap-water feedback creates ripple, flash, and droplets", () => {
+      const layer=$("tapWaterLayer"); spawnTapWaterFeedback(160,210,3);
+      return !!layer.querySelector(".tapWaterRipple")&&!!layer.querySelector(".tapWaterFlash")&&layer.querySelectorAll(".tapWaterDrop").length===10;
     });
     /* UI */
     state.iteRescueStats = sanitizeIteRescueStats({ savedIteIds:ITES.map(i => i.id) });
