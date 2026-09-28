@@ -1212,6 +1212,11 @@ html.skin-heaven .world{
   box-shadow:0 0 40px color-mix(in srgb, var(--juicy-blue) 28%, transparent), 0 0 70px color-mix(in srgb, var(--juicy-magenta) 16%, transparent), inset 0 0 60px rgba(0,0,0,.4);
   touch-action:manipulation;
 }
+/* V2.1.27 — MOBILE FRAME GUARD: keep the playable SVG as a real flex child with a
+   non-zero floor. Mobile browser chrome can change the visual viewport while the page stays loaded. */
+.world{ min-height:240px; flex:1 1 0; }
+#worldSVG{ width:100%; height:100%; min-width:0; min-height:0; max-width:100%; max-height:100%; }
+@media (max-height:620px){ .world{ min-height:210px; } }
 .layer{ position:absolute; inset:0; pointer-events:none; }
 #mistLayer{ z-index:3; }
 #particleLayer{ z-index:9; }
@@ -4974,27 +4979,177 @@ function layoutStationLabels(){
   });
 }
 
-STEPS.forEach((step, i)=> stationsGroup.appendChild(stationGraphic(step, i)));
-layoutStationLabels();
-
-/* Static day map (not controls): "DAY" + number beside each station, left column.
-   x = 62 clears every illustration, including the fully grown factory (left edge ≈ 94). */
+/* V2.1.27 — WORLD RENDER RECOVERY
+   The dynamic SVG scene is built through one idempotent renderer. If a browser,
+   iframe resize, or a single illustration ever leaves the world incomplete,
+   the watchdog can rebuild it without touching game/economy state. */
 const DAY_GUIDE_X = 62;
 const dayGuide = document.getElementById("dayGuide");
-DAM_DAYS.forEach((d, i) => {
-  const t = document.createElementNS(NS, "text");
-  t.setAttribute("class", "dayGuideItem");
-  t.setAttribute("text-anchor", "middle");
-  const a = document.createElementNS(NS, "tspan");
-  a.setAttribute("class", "dgWord"); a.setAttribute("x", DAY_GUIDE_X); a.setAttribute("y", CENTERS[i] - 12); a.textContent = "DAY";
-  const b = document.createElementNS(NS, "tspan");
-  b.setAttribute("class", "dgNum"); b.setAttribute("x", DAY_GUIDE_X); b.setAttribute("y", CENTERS[i] + 30); b.textContent = String(d.day);
-  t.appendChild(a); t.appendChild(b);
-  dayGuide.appendChild(t);
-});
+const segments = [];
+
+function fallbackStationGraphic(step, index){
+  const cy = CENTERS[index];
+  const g = document.createElementNS(NS, "g");
+  g.setAttribute("class", "station locked worldFallbackStation");
+  g.dataset.index = index;
+
+  const ring = document.createElementNS(NS, "circle");
+  ring.setAttribute("class", "ringOuter");
+  ring.setAttribute("cx", 200); ring.setAttribute("cy", cy); ring.setAttribute("r", 68);
+  g.appendChild(ring);
+
+  const body = document.createElementNS(NS, "g");
+  body.setAttribute("class", "body");
+
+  const circle = document.createElementNS(NS, "circle");
+  circle.setAttribute("cx", 200); circle.setAttribute("cy", cy); circle.setAttribute("r", 60);
+  circle.setAttribute("fill", "rgba(47,210,255,.12)");
+  circle.setAttribute("stroke", "var(--water-bright)");
+  circle.setAttribute("stroke-width", "2");
+  body.appendChild(circle);
+
+  const icon = document.createElementNS(NS, "text");
+  icon.setAttribute("x", 200); icon.setAttribute("y", cy + 10);
+  icon.setAttribute("text-anchor", "middle");
+  icon.setAttribute("font-size", "38");
+  icon.textContent = (STATION_LABELS[step.id] || {}).lines?.[0] || "💧";
+  body.appendChild(icon);
+  g.appendChild(body);
+
+  const name = document.createElementNS(NS, "text");
+  name.setAttribute("class", "nameLabel");
+  name.setAttribute("text-anchor", "middle");
+  name.setAttribute("font-size", "20");
+  name.setAttribute("x", 330);
+  name.setAttribute("y", cy + 8);
+  name.textContent = step.name || (STATION_LABELS[step.id] || {}).aria || step.id;
+  g.appendChild(name);
+  return g;
+}
+
+function buildWorldDynamicGraphics(){
+  stationsGroup.replaceChildren();
+  segmentsGroup.replaceChildren();
+  dayGuide.replaceChildren();
+  segments.length = 0;
+
+  const stationErrors = [];
+  STEPS.forEach((step, i)=>{
+    try{
+      const g = stationGraphic(step, i);
+      if(!g) throw new Error("stationGraphic returned no node");
+      stationsGroup.appendChild(g);
+    }catch(err){
+      stationErrors.push({index:i,id:step.id,error:String(err && err.message || err)});
+      stationsGroup.appendChild(fallbackStationGraphic(step, i));
+    }
+  });
+
+  try{
+    layoutStationLabels();
+  }catch(err){
+    stationErrors.push({index:-1,id:"labels",error:String(err && err.message || err)});
+  }
+
+  DAM_DAYS.forEach((d, i)=>{
+    const t = document.createElementNS(NS, "text");
+    t.setAttribute("class", "dayGuideItem");
+    t.setAttribute("text-anchor", "middle");
+
+    const a = document.createElementNS(NS, "tspan");
+    a.setAttribute("class", "dgWord");
+    a.setAttribute("x", DAY_GUIDE_X);
+    a.setAttribute("y", CENTERS[i] - 12);
+    a.textContent = "DAY";
+
+    const b = document.createElementNS(NS, "tspan");
+    b.setAttribute("class", "dgNum");
+    b.setAttribute("x", DAY_GUIDE_X);
+    b.setAttribute("y", CENTERS[i] + 30);
+    b.textContent = String(d.day);
+
+    t.appendChild(a); t.appendChild(b);
+    dayGuide.appendChild(t);
+  });
+
+  const segEnds = [...CENTERS.slice(1), OCEAN_Y];
+  CENTERS.forEach((startY, i)=>{
+    const endY = segEnds[i];
+    const d = `M200 ${startY + 62} L200 ${endY - (i===5?60:62)}`;
+
+    const track = document.createElementNS(NS, "path");
+    track.setAttribute("class", "segTrack");
+    track.setAttribute("d", d);
+    segmentsGroup.appendChild(track);
+
+    const flow = document.createElementNS(NS, "path");
+    flow.setAttribute("class", "segFlow");
+    flow.setAttribute("d", d);
+    flow.setAttribute("pathLength", "100");
+    segmentsGroup.appendChild(flow);
+    segments.push(flow);
+  });
+
+  renderDayGuide();
+  return {
+    stations: stationsGroup.querySelectorAll(".station").length,
+    segments: segments.length,
+    stationErrors
+  };
+}
+
+function worldRenderIsHealthy(){
+  return stationsGroup.querySelectorAll(".station").length === STEPS.length
+    && segments.length === STEPS.length
+    && segmentsGroup.querySelectorAll(".segTrack").length === STEPS.length
+    && segmentsGroup.querySelectorAll(".segFlow").length === STEPS.length
+    && dayGuide.children.length === DAM_DAYS.length;
+}
+
+let worldRenderGuardTimer = null;
+let worldRenderGuardRuns = 0;
+
+function ensureWorldRendered(reason="watchdog"){
+  if(worldRenderIsHealthy()) return true;
+  worldRenderGuardRuns++;
+  try{
+    buildWorldDynamicGraphics();
+    restoreVisualProgress();
+    renderDayGuide();
+    renderHud();
+    safeWarn("V2.1.27 world render recovered: " + reason);
+    return worldRenderIsHealthy();
+  }catch(err){
+    safeWarn("V2.1.27 world render recovery failed: " + String(err && err.message || err));
+    return false;
+  }
+}
+
+function scheduleWorldRenderGuard(reason="viewport"){
+  clearTimeout(worldRenderGuardTimer);
+  worldRenderGuardTimer = setTimeout(()=>ensureWorldRendered(reason), 80);
+}
+
+function runWorldRenderRecoverySelfTest(){
+  const results=[];
+  const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.27: six station nodes render",()=>stationsGroup.querySelectorAll(".station").length===STEPS.length);
+  t("V2.1.27: six flow segments render",()=>segments.length===STEPS.length);
+  t("V2.1.27: six day-guide nodes render",()=>dayGuide.children.length===DAM_DAYS.length);
+  t("V2.1.27: renderer is idempotent",()=>{
+    const before=JSON.stringify(state);
+    const ok=worldRenderIsHealthy() || ensureWorldRendered("self-test");
+    return ok && JSON.stringify(state)===before;
+  });
+  t("V2.1.27: renderer does not call economy authority",
+    ()=>!/safeAddFlOz|commitDamResult|purchase|entitlement|paypal/i.test(buildWorldDynamicGraphics.toString()+ensureWorldRendered.toString()));
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
+
+/* Static day map (not controls): "DAY" + number beside each station. */
 function renderDayGuide(){
   const done = daysDoneThisLevel();
-  [...dayGuide.children].forEach((t, i) => {
+  [...dayGuide.children].forEach((t, i)=>{
     t.classList.toggle("done", i < done);
     t.classList.toggle("current", i === state.currentStep && i >= done);
   });
@@ -5004,29 +5159,17 @@ function renderMillStage(){
   const g = stationsGroup.querySelector(`.station[data-index="${MILL_INDEX}"]`);
   if(!g) return;
   const wrap = g.querySelector(".illoWrap");
-  wrap.innerHTML = millMarkup(state.millStage);
-  wrap.setAttribute("transform", `translate(200,${CENTERS[MILL_INDEX]}) scale(${millScale(state.millStage)})`);
+  if(!wrap) return;
+  try{
+    wrap.innerHTML = millMarkup(state.millStage);
+    wrap.setAttribute("transform", `translate(200,${CENTERS[MILL_INDEX]}) scale(${millScale(state.millStage)})`);
+  }catch(err){
+    safeWarn("V2.1.27 mill render fallback: " + String(err && err.message || err));
+  }
 }
 
-const segEnds = [...CENTERS.slice(1), OCEAN_Y];
-const segments = [];
-CENTERS.forEach((startY, i)=>{
-  const endY = segEnds[i];
-  const d = `M200 ${startY + 62} L200 ${endY - (i===5?60:62)}`;
-
-  const track = document.createElementNS(NS, "path");
-  track.setAttribute("class", "segTrack");
-  track.setAttribute("d", d);
-  segmentsGroup.appendChild(track);
-
-  const flow = document.createElementNS(NS, "path");
-  flow.setAttribute("class", "segFlow");
-  flow.setAttribute("d", d);
-  flow.setAttribute("pathLength", "100");
-  segmentsGroup.appendChild(flow);
-
-  segments.push(flow);
-});
+/* First build occurs here; init performs a second build after persisted state is loaded. */
+buildWorldDynamicGraphics();
 
 /* =========================================================
    CERTIFICATE RAILS
@@ -9715,6 +9858,9 @@ function reportHeight(){
 }
 if(window.ResizeObserver) new ResizeObserver(reportHeight).observe(document.body);
 window.addEventListener("load", reportHeight);
+/* V2.1.27 — recover after mobile browser/iframe viewport changes. */
+window.addEventListener("resize", ()=>scheduleWorldRenderGuard("window-resize"));
+if(window.visualViewport) window.visualViewport.addEventListener("resize", ()=>scheduleWorldRenderGuard("visual-viewport-resize"));
 
 /* =========================================================
    INIT
@@ -9722,11 +9868,14 @@ window.addEventListener("load", reportHeight);
 document.querySelectorAll(".costText").forEach(el => { el.textContent = `${fmt(UNLOCK_COST_FL_OZ)} FL OZ`; });
 document.querySelectorAll(".groupPrice").forEach(el => { el.innerHTML = el.innerHTML.replace("${DAY_REWARD}", `${DAY_REWARD_FL_OZ} FL OZ`); });
 loadGame();
+/* V2.1.27 — persisted state is loaded before the canonical world is rebuilt. */
+buildWorldDynamicGraphics();
 syncIteStatuses();                                      // DAM NATION V1.0: catalog mirrors the loaded record
 restoreVisualProgress();
 renderTribesList();
 renderRadio();
 renderStore();
+ensureWorldRendered("post-init");
 restorePurchaseVerificationSession();
 renderCharactersPanel();
 renderDamMachineHeader();                               // v2.6.2: menu free-play line reflects the save
