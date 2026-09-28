@@ -2058,6 +2058,33 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .dmSpinBtn:disabled{ opacity:.55; cursor:default; }
 .dmAutoControls{ width:100%; display:flex; gap:8px; margin-top:2px; }
 .dmAutoControls .lcBtn{ font-size:.88rem; font-weight:900; letter-spacing:.02em; }
+/* V2.1.28 — DAM STORE FRONT: presentation-only storefront attached to the DAM MACHINE. */
+.dmStoreFront{position:relative;width:100%;margin:4px 0 8px;padding:9px 10px 10px;border-radius:18px;overflow:hidden;border:1.5px solid color-mix(in srgb,var(--gold) 70%,rgba(255,255,255,.25));background:linear-gradient(135deg,rgba(95,9,24,.96),rgba(163,38,34,.88) 48%,rgba(4,73,70,.94));box-shadow:0 0 18px color-mix(in srgb,var(--gold) 28%,transparent),inset 0 0 22px rgba(0,0,0,.25)}
+.dmStoreFront::before{content:"";position:absolute;inset:-40% -20%;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.22) 48%,transparent 60%);transform:translateX(-65%);animation:dmStoreSheen 4.8s ease-in-out infinite}
+@keyframes dmStoreSheen{0%,55%{transform:translateX(-65%)}78%,100%{transform:translateX(65%)}}
+.dmStoreRibbon{position:relative;z-index:1;font-size:clamp(1rem,4.8vw,1.35rem);font-weight:1000;letter-spacing:.04em;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.dmStoreCopy{position:relative;z-index:1;margin-top:1px;font-size:.66rem;font-weight:900;letter-spacing:.1em;color:rgba(255,255,255,.82);text-transform:uppercase}
+.dmStoreOpenBtn{position:relative;z-index:1;width:100%;margin-top:7px;min-height:42px;border-radius:13px;border:2px solid rgba(255,255,255,.72);color:#fff;cursor:pointer;font-size:.9rem;font-weight:1000;letter-spacing:.035em;background:linear-gradient(180deg,#63e94a,#16a83b);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 5px 12px rgba(0,0,0,.25)}
+.dmStoreOpenBtn:active{transform:translateY(1px) scale(.99)}
+.dmStoreOpenBtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.dmStoreWallet{position:relative;z-index:1;margin-top:5px;text-align:center;font-size:.68rem;font-weight:900;color:var(--foam);letter-spacing:.05em}
+@media (prefers-reduced-motion:reduce){.dmStoreFront::before{animation:none}.dmStoreOpenBtn:active{transform:none}}
+/* V2.1.28 — character FL OZ shelf inside the store. */
+.storeFrontHero{padding:12px 13px;margin-bottom:10px;border-radius:17px;border:1.5px solid color-mix(in srgb,var(--gold) 55%,transparent);background:linear-gradient(145deg,rgba(255,191,54,.12),rgba(20,150,170,.09));box-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 12%,transparent)}
+.storeFrontHeroTitle{font-size:clamp(1.1rem,5vw,1.35rem);font-weight:1000;line-height:1.05}
+.storeFrontHeroCopy{margin-top:4px;font-size:.78rem;line-height:1.4;font-weight:750;color:rgba(255,255,255,.78)}
+.storeCharGrid{display:flex;flex-direction:column;gap:8px}
+.storeCharCard{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:14px;background:rgba(255,255,255,.055);border:1.5px solid rgba(255,255,255,.16)}
+.storeCharCard.locked{border-left:3px solid var(--gold)}
+.storeCharCard.active{border-color:var(--gold);box-shadow:0 0 13px color-mix(in srgb,var(--gold) 24%,transparent)}
+.storeCharThumb{flex:0 0 58px;width:58px;height:58px;border-radius:12px;overflow:hidden;background:rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center}
+.storeCharThumb img{width:100%;height:100%;object-fit:contain;display:block}
+.storeCharCard.locked .storeCharThumb img{filter:grayscale(.45) brightness(.82)}
+.storeCharInfo{flex:1;min-width:0}
+.storeCharName{font-size:.86rem;font-weight:950;line-height:1.15}
+.storeCharMeta{font-size:.68rem;font-weight:750;color:rgba(255,255,255,.68);margin-top:2px;line-height:1.25}
+.storeCharCard .storeBtn{margin-top:5px;font-size:.7rem;padding:6px 9px}
+.storeCharMsg{min-height:1.1em;margin-top:7px;font-size:.74rem;font-weight:800;color:var(--foam)}
 .dmAutoStatus{ min-height:1.2em; margin-top:6px; font-size:.72rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--foam); opacity:.88; }
 .dmAutoStatus[hidden]{ display:none; }
 /* V2.1.26 — AUTO SPIN HYDRAULIC MOMENTUM: consecutive auto spins build presentation-only pressure. */
@@ -2945,7 +2972,6 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       <button class="navRow" id="navProfileBtn" aria-label="Open player profile"><span class="navRowIcon" aria-hidden="true">📊</span><span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navTribesBtn" aria-label="Open tribes list"><span class="navRowIcon" aria-hidden="true">🚢</span><span class="navRowText"><strong>-ites</strong><small>Rescue record · preserved names</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-      <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store"><span class="navRowIcon" aria-hidden="true">🛒</span><span class="navRowText"><strong>Store</strong><small>FL OZ · songs · skins · packs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
     <button class="dmFloatBtn inactive" id="dmFloatBtn" type="button" aria-disabled="true" aria-label="DAM MACHINE — no free plays yet">🎰<span class="dmIdleFx" aria-hidden="true"><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmSpark"></i></span><span class="dmFloatLabel" id="dmFloatLabel">BONUS READY</span></button>
 
@@ -3196,13 +3222,21 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       <div class="sidePanel" id="storePanel">
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
         <div class="panelTitle">🛒 FL OZ Store</div>
+        <div class="storeFrontHero">
+          <div class="storeFrontHeroTitle">💧 POWER THE FLOW</div>
+          <div class="storeFrontHeroCopy">Use your FL OZ to unlock characters and music. Buy FL OZ packs below when you need more flow.</div>
+        </div>
         <div class="walletBlock">
           <div class="wbLabel">💧 FL OZ Wallet</div>
           <div class="wbValue" id="storeWallet"></div>
           <div class="wbCost">Unlock cost: <strong class="costText"></strong></div>
         </div>
         <div class="damQuip panelQuip" id="storeQuip"></div>
-        <div class="panelGroup">🎵 Songs</div>
+        <div class="panelGroup">👤 Character FL OZ</div>
+        <div class="groupPrice">Unlock operators with FL OZ. Your purchase uses the existing character unlock authority.</div>
+        <div class="storeCharGrid" id="storeCharactersGrid"></div>
+        <div class="storeCharMsg" id="storeCharactersMsg" aria-live="polite"></div>
+        <div class="panelGroup">🎵 Music FL OZ</div>
         <div class="groupPrice"><span class="costText"></span> each</div>
         <div id="storeRedeem"></div>
         <div class="panelGroup">🎨 Skins</div>
@@ -3307,6 +3341,12 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         <div class="bwEyebrow">💧 Free hydraulic arcade</div>
         <div class="dmTitle" id="dmTitle">🎰 DAM MACHINE</div>
         <div class="dmSubtitle" id="dmSubtitle">Where the flow meets the reels.</div>
+        <div class="dmStoreFront" id="dmStoreFront">
+          <div class="dmStoreRibbon">💧 DAM STORE</div>
+          <div class="dmStoreCopy">CHARACTERS • MUSIC • FL OZ</div>
+          <button class="dmStoreOpenBtn" id="dmStoreBtn" type="button">OPEN DAM STORE <span aria-hidden="true">›</span></button>
+          <div class="dmStoreWallet" id="dmStoreWallet" aria-live="polite">0 FL OZ READY</div>
+        </div>
         <div class="dmPlays" id="dmPlays" role="status">NO FREE PLAYS</div>
         <div class="dmCabinet" aria-hidden="true">
           <div class="dmPipe dmPipeL"></div>
@@ -6049,6 +6089,8 @@ function renderDamMachineHeader(){
   const pill = $("dmPlays");
   pill.textContent = plays > 0 ? `DAM MACHINE PLAYS: ${fmt(plays)}` : "NO FREE PLAYS";
   pill.classList.toggle("none", plays <= 0);
+  const storeWallet = $("dmStoreWallet");
+  if(storeWallet) storeWallet.textContent = `${fmt(state.totalFlOz)} FL OZ READY`;
   const float = $("dmFloatBtn");
   if(float){
     /* V2.1.4 — persistent station: visible at zero, interactive only when charged. */
@@ -8085,7 +8127,11 @@ function closeNavMenu(){
   navMenuBtn.setAttribute("aria-expanded", "false");
 }
 navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMenu(); });
-[["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navStoreBtn","store"],["navCharactersBtn","characters"]].forEach(([rowId, panelName])=>{
+$("dmStoreBtn").addEventListener("click", ()=>{
+  closeDamMachine();
+  togglePanel("store");
+});
+[["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navCharactersBtn","characters"]].forEach(([rowId, panelName])=>{
   $(rowId).addEventListener("click", ()=>{ closeNavMenu(); togglePanel(panelName); });
 });
 $("songVaultStoreBtn").addEventListener("click", ()=>{ closePanels(); togglePanel("store"); });
@@ -8953,6 +8999,37 @@ function playSong(id){
 let storeMsgText = "";
 function setStoreMsg(t){ storeMsgText = t; const el = $("storeMsg"); if(el) el.textContent = t; }
 let charMsgText = "";
+function renderStoreCharacterShelf(){
+  const grid = $("storeCharactersGrid");
+  if(!grid) return;
+  grid.innerHTML = "";
+  CHARACTERS.forEach(c => {
+    const owned = isUnlocked("characters", c.id);
+    const active = state.activeCharacter === c.id;
+    const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
+    const card = document.createElement("div");
+    card.className = "storeCharCard" + (active ? " active" : "") + (owned ? "" : " locked");
+    const thumb = document.createElement("div");
+    thumb.className = "storeCharThumb";
+    const img = characterImage(c, "storeCharThumbImg");
+    img.loading = "lazy";
+    thumb.appendChild(img);
+    const status = starter ? "⭐ STARTER · UNLOCKED" : owned ? "✅ UNLOCKED" : `🔒 ${fmt(c.cost)} FL OZ`;
+    let btn;
+    if(active) btn = `<button class="storeBtn" disabled>ACTIVE</button>`;
+    else if(owned) btn = `<button class="storeBtn" data-store-char-use="${esc(c.id)}">USE CHARACTER</button>`;
+    else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>${characterNeedText(c)}</button>`;
+    else btn = `<button class="storeBtn" data-store-char-unlock="${esc(c.id)}">BUY · ${fmt(c.cost)} FL OZ</button>`;
+    const info = document.createElement("div");
+    info.className = "storeCharInfo";
+    info.innerHTML = `<div class="storeCharName">${esc(c.name)}</div><div class="storeCharMeta">${esc(damTitle(c.id))} · ${status}</div>${btn}`;
+    card.appendChild(thumb);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+  $("storeCharactersMsg").textContent = charMsgText;
+}
+
 function renderCharactersPanel(){
   const grid = $("charactersGrid");
   if(!grid) return;
@@ -9018,6 +9095,7 @@ if(runtimeBtn && !runtimeBtn.dataset.bound){
 }
 function renderStore(){
   renderCharactersPanel();
+  renderStoreCharacterShelf();
   renderPurchaseHistory();
   $("storeQuip").textContent = storeQuipText;
   $("storeWallet").textContent = `${fmt(state.totalFlOz)} FL OZ`;
@@ -9044,6 +9122,30 @@ function purchaseFailureHumor(category, id){
   const cost = item && Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
   return state.totalFlOz < cost ? getDamHumor("insufficientFunds") : "";
 }
+$("storePanel").addEventListener("click", e => {
+  const unlockBtn = e.target.closest("[data-store-char-unlock]");
+  if(unlockBtn){
+    unlockBtn.disabled = true;
+    const id = unlockBtn.getAttribute("data-store-char-unlock");
+    const why = purchaseFailureHumor("characters", id);
+    const res = purchaseItem("characters", id);
+    const c = CHARACTERS.find(x => x.id === id);
+    charMsgText = res.ok ? `🎉 ${getDamHumor("characterPurchase")} ${c.name} — tap USE CHARACTER` : `${why} ${res.message}`.trim();
+    if(res.ok) playSongUnlockSound();
+    renderCharactersPanel();
+    renderStoreCharacterShelf();
+    return;
+  }
+  const useBtn = e.target.closest("[data-store-char-use]");
+  if(useBtn){
+    const id = useBtn.getAttribute("data-store-char-use");
+    setActiveCharacter(id);
+    charMsgText = `👤 ${CHARACTERS.find(x => x.id === id)?.name || "Character"} is now active.`;
+    renderCharactersPanel();
+    renderStoreCharacterShelf();
+    return;
+  }
+});
 $("charactersPanel").addEventListener("click", e => {
   const unlockBtn = e.target.closest("[data-char-unlock]");
   if(unlockBtn){
