@@ -8446,12 +8446,10 @@ function renderDamIteIdentityEvolution(){
   const visual=DAM_ITE_IDENTITY_VISUALS[ev.stage.key] || DAM_ITE_IDENTITY_VISUALS.initiate;
   card.setAttribute("data-identity-stage",ev.stage.key);
   box.setAttribute("data-stage",ev.stage.key);
-  stageEl.innerHTML='<span class="damIteStageGlyph" aria-hidden="true">'+visual.glyph+'</span>DAM-ITE <span>'+esc(ev.stage.name.replace(/^DAM-ITE\s+/,""))+'</span>';
   const badge=$("damIteIdentityBadge");
   if(badge) badge.textContent=visual.glyph;
 
   const previous=box.getAttribute("data-stage")||"";
-  stageEl.innerHTML='DAM-ITE <span>'+esc(ev.stage.name.replace(/^DAM-ITE\s+/,""))+'</span>';
   stepEl.textContent='STAGE '+(ev.index+1)+' / '+DAM_ITE_IDENTITY_STAGES.length;
   descEl.textContent=ev.stage.desc;
   fillEl.style.width=ev.pct+"%";
