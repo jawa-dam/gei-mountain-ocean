@@ -2213,7 +2213,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .preGameFoot label{font-size:.9rem;font-weight:800;text-align:left;line-height:1.2;cursor:pointer}
 .preGameStart{width:100%;margin-top:10px;min-height:56px;font-size:1.1rem}.preGameMsg{min-height:1.2em;margin-top:8px;font-size:.9rem;font-weight:800;color:var(--gold)}
 .preGameHowBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:900}
-.dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent);isolation:isolate;overflow:visible;will-change:transform,box-shadow,filter}
+.dmStoreFloatBtn{position:absolute;left:7px;top:calc(53% - 76px);z-index:83;width:154px;min-height:54px;padding:7px 10px;border-radius:16px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;cursor:pointer;border:1.5px solid rgba(255,255,255,.72);color:#fff;text-align:left;background:linear-gradient(135deg,rgba(104,8,30,.97),rgba(198,47,54,.94) 48%,rgba(7,101,100,.96));box-shadow:0 0 16px color-mix(in srgb,var(--gold) 34%,transparent),0 0 28px color-mix(in srgb,var(--water-bright) 18%,transparent),inset 0 0 16px rgba(0,0,0,.2);overflow:hidden;will-change:transform,box-shadow,filter;isolation:isolate}.dmStoreFloatBtn::before{content:"";position:absolute;inset:-55% -35%;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.25) 48%,transparent 60%);transform:translateX(-70%);animation:dmStorePopSheen 4.8s ease-in-out infinite}.dmStoreFloatBtn::after{content:"";position:absolute;left:10px;right:10px;bottom:-9px;height:16px;border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--water-bright) 45%,transparent),transparent 72%);filter:blur(2px);pointer-events:none;opacity:.8}.dmStoreFloatBtn:hover{filter:brightness(1.08);box-shadow:0 0 22px color-mix(in srgb,var(--gold) 45%,transparent),0 0 34px color-mix(in srgb,var(--water-bright) 25%,transparent),inset 0 0 16px rgba(0,0,0,.2)}.dmStoreFloatBtn:active{transform:translateY(2px) scale(.98)}.dmStoreFloatBtn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.dmStoreFloatTitle{position:relative;z-index:1;font-size:1rem;font-weight:1000;letter-spacing:.035em;line-height:1}.dmStoreFloatSub{position:relative;z-index:1;font-size:.59rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.82);line-height:1.15}.dmStoreFloatWallet{position:relative;z-index:1;font-size:.62rem;font-weight:1000;color:var(--gold);line-height:1.15}@keyframes dmStorePopSheen{0%,55%{transform:translateX(-70%)}78%,100%{transform:translateX(70%)}}.dmStoreFloatBtn.ready{animation:dmStoreFloatBreath 3.6s ease-in-out infinite}@keyframes dmStoreFloatBreath{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.015)}}@media (max-width:430px){.dmStoreFloatBtn{width:145px;top:calc(53% - 74px);min-height:52px}}@media (max-height:620px){.dmStoreFloatBtn{top:calc(53% - 70px);min-height:49px}}@media (prefers-reduced-motion:reduce){.dmStoreFloatBtn::before,.dmStoreFloatBtn.ready{animation:none!important}.dmStoreFloatBtn:active{transform:none}}.dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent);isolation:isolate;overflow:visible;will-change:transform,box-shadow,filter}
 /* V2.1.4 — the DAM Machine is a permanent station. Zero plays means inactive, never hidden. */
 .dmFloatBtn.inactive{cursor:default;opacity:.62;filter:saturate(.45);box-shadow:0 0 10px color-mix(in srgb,var(--water-bright) 18%,transparent);}
 .dmFloatBtn.inactive::before{opacity:.35;animation-duration:8s}
@@ -2973,6 +2973,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       <button class="navRow" id="navTribesBtn" aria-label="Open tribes list"><span class="navRowIcon" aria-hidden="true">🚢</span><span class="navRowText"><strong>-ites</strong><small>Rescue record · preserved names</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
+    <button class="dmStoreFloatBtn" id="dmStoreFloatBtn" type="button" aria-label="Open DAM STORE">
+      <span class="dmStoreFloatTitle">💧 DAM STORE</span>
+      <span class="dmStoreFloatSub">CHARACTERS • MUSIC • FL OZ</span>
+      <span class="dmStoreFloatWallet" id="dmStoreFloatWallet">0 FL OZ</span>
+    </button>
     <button class="dmFloatBtn inactive" id="dmFloatBtn" type="button" aria-disabled="true" aria-label="DAM MACHINE — no free plays yet">🎰<span class="dmIdleFx" aria-hidden="true"><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmSpark"></i></span><span class="dmFloatLabel" id="dmFloatLabel">BONUS READY</span></button>
 
     <div class="preGameCard" id="preGameCard" role="dialog" aria-modal="true" aria-labelledby="preGameTitle">
@@ -3341,12 +3346,6 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         <div class="bwEyebrow">💧 Free hydraulic arcade</div>
         <div class="dmTitle" id="dmTitle">🎰 DAM MACHINE</div>
         <div class="dmSubtitle" id="dmSubtitle">Where the flow meets the reels.</div>
-        <div class="dmStoreFront" id="dmStoreFront">
-          <div class="dmStoreRibbon">💧 DAM STORE</div>
-          <div class="dmStoreCopy">CHARACTERS • MUSIC • FL OZ</div>
-          <button class="dmStoreOpenBtn" id="dmStoreBtn" type="button">OPEN DAM STORE <span aria-hidden="true">›</span></button>
-          <div class="dmStoreWallet" id="dmStoreWallet" aria-live="polite">0 FL OZ READY</div>
-        </div>
         <div class="dmPlays" id="dmPlays" role="status">NO FREE PLAYS</div>
         <div class="dmCabinet" aria-hidden="true">
           <div class="dmPipe dmPipeL"></div>
@@ -6089,8 +6088,8 @@ function renderDamMachineHeader(){
   const pill = $("dmPlays");
   pill.textContent = plays > 0 ? `DAM MACHINE PLAYS: ${fmt(plays)}` : "NO FREE PLAYS";
   pill.classList.toggle("none", plays <= 0);
-  const storeWallet = $("dmStoreWallet");
-  if(storeWallet) storeWallet.textContent = `${fmt(state.totalFlOz)} FL OZ READY`;
+  const storeWallet = $("dmStoreFloatWallet");
+  if(storeWallet) storeWallet.textContent = fmt(state.totalFlOz) + " FL OZ";
   const float = $("dmFloatBtn");
   if(float){
     /* V2.1.4 — persistent station: visible at zero, interactive only when charged. */
@@ -8127,8 +8126,9 @@ function closeNavMenu(){
   navMenuBtn.setAttribute("aria-expanded", "false");
 }
 navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMenu(); });
-$("dmStoreBtn").addEventListener("click", ()=>{
+$("dmStoreFloatBtn").addEventListener("click", ()=>{
   closeDamMachine();
+  closeNavMenu();
   togglePanel("store");
 });
 [["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navCharactersBtn","characters"]].forEach(([rowId, panelName])=>{
