@@ -6187,7 +6187,7 @@ function toggleDamMachineAutoSpin(){
   return startDamMachineAutoSpin();
 }
 
-function openDamMachine()
+function openDamMachine(){
   /* V2.1.4 — the station stays visible, but cannot open until a free play exists. */
   if(state.damMachineFreePlays <= 0) return;
   if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
