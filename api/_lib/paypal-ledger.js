@@ -40,9 +40,8 @@ function reconciled(record) {
   return result;
 }
 
-function incidentId() {
-  return "GEI-INC-" + Date.now().toString(36).toUpperCase() + "-" +
-    Math.random().toString(36).slice(2, 10).toUpperCase();
+function incidentKeyFor(invoiceId) {
+  return "gei:paypal:incident:" + invoiceId;
 }
 
 export async function recordEconomyIncident({
@@ -54,11 +53,11 @@ export async function recordEconomyIncident({
 }) {
   if (!invoiceId) throw new Error("Missing entitlement incident identity.");
 
-  const id = incidentId();
-  const incidentKey = "gei:paypal:incident:" + id;
+  const incidentKey = incidentKeyFor(invoiceId);
   const indexKey = "gei:paypal:incident:index:" + invoiceId;
+  const incidentId = "GEI-INC-" + String(invoiceId).replace(/[^A-Za-z0-9._:-]/g, "-").slice(0, 96);
   const incident = {
-    incidentId: id,
+    incidentId,
     incidentVersion: "2.0.27",
     status: "FROZEN",
     source: source || "UNKNOWN",
@@ -87,7 +86,7 @@ export async function recordEconomyIncident({
     indexKey,
     JSON.stringify(incident),
     String(LEDGER_TTL_SECONDS),
-    id
+    incidentId
   ]);
 
   return {
@@ -102,7 +101,7 @@ export async function getEconomyIncident(invoiceId) {
   const incidentIdValue = await redisCommand(["GET", indexKey]);
   if (!incidentIdValue) return { ok: false, reason: "NOT_FOUND" };
 
-  const raw = await redisCommand(["GET", "gei:paypal:incident:" + incidentIdValue]);
+  const raw = await redisCommand(["GET", incidentKeyFor(invoiceId)]);
   if (!raw) return { ok: false, reason: "INCIDENT_NOT_FOUND" };
 
   return { ok: true, incident: JSON.parse(raw) };
