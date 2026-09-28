@@ -86,7 +86,7 @@ export default async function handler(req, res) {
         packId,
         flOz: PACKS[packId].flOz,
         claimToken: invoiceId,
-        fulfillmentStatus: "FULFILLABLE"
+        fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE"
       });
     }
 
