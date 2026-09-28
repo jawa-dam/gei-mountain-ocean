@@ -2055,6 +2055,36 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .dmAutoControls .lcBtn{ font-size:.88rem; font-weight:900; letter-spacing:.02em; }
 .dmAutoStatus{ min-height:1.2em; margin-top:6px; font-size:.72rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--foam); opacity:.88; }
 .dmAutoStatus[hidden]{ display:none; }
+/* V2.1.26 — AUTO SPIN HYDRAULIC MOMENTUM: consecutive auto spins build presentation-only pressure. */
+.dmCard.dmAutoMomentum{
+  --dmMomentumLevel:1;
+  --dmMomentumGlow:.08;
+  --dmMomentumSpread:10px;
+}
+.dmCard.dmAutoMomentum .dmCabinet{
+  filter:brightness(calc(1 + var(--dmMomentumGlow))) drop-shadow(0 0 var(--dmMomentumSpread) color-mix(in srgb,var(--water-bright) 48%,transparent));
+  transition:filter .28s ease;
+}
+.dmCard.dmAutoMomentum .dmReels{
+  box-shadow:0 0 calc(var(--dmMomentumSpread) + 6px) color-mix(in srgb,var(--water-bright) 22%,transparent);
+  transition:box-shadow .28s ease;
+}
+.dmCard.dmAutoMomentum .dmReel{
+  animation:dmAutoMomentumPulse calc(1.05s - (var(--dmMomentumLevel) * .06s)) ease-in-out infinite alternate;
+}
+.dmCard.dmAutoMomentum .dmPipe{
+  filter:brightness(calc(1 + (var(--dmMomentumGlow) * .65))) drop-shadow(0 0 7px color-mix(in srgb,var(--water-bright) 34%,transparent));
+}
+@keyframes dmAutoMomentumPulse{
+  from{ transform:scale(1); }
+  to{ transform:scale(calc(1 + (var(--dmMomentumLevel) * .012))); }
+}
+@media (prefers-reduced-motion:reduce){
+  .dmCard.dmAutoMomentum .dmReel{ animation:none; }
+  .dmCard.dmAutoMomentum .dmCabinet,
+  .dmCard.dmAutoMomentum .dmReels,
+  .dmCard.dmAutoMomentum .dmPipe{ transition:none; }
+}
 .dmNoPlays{ font-size:.86rem; font-weight:800; color:var(--gold); margin-top:10px; line-height:1.4; }
 .dmNoPlays[hidden]{ display:none; }
 /* --- result --- */
@@ -5714,7 +5744,7 @@ const DAM_REEL_MS_REDUCED = [450, 600, 750];       // reduced motion: short tran
 const DAM_MACHINE_MAX_PLAYS = 999;
 
 /* Runtime only — never saved. `var` (not let/const) so isTimerBlocked can probe it safely. */
-var damMachine = { open:false, spinning:false, revealed:false, presenting:false, presToken:0, presTimers:[], presentCount:0, forcedResult:null, spinToken:0, timers:[], reelIds:["water","wheel","millpond"], autoSpin:false, autoTimer:null, autoToken:0, autoStopReason:"" };
+var damMachine = { open:false, spinning:false, revealed:false, presenting:false, presToken:0, presTimers:[], presentCount:0, forcedResult:null, spinToken:0, timers:[], reelIds:["water","wheel","millpond"], autoSpin:false, autoTimer:null, autoToken:0, autoStopReason:"", autoMomentum:0 };
 
 /* ---------- ONE canonical symbol renderer: custom image → CSS icon → emoji fallback.
    Reel logic calls this and never checks for images itself. ---------- */
@@ -5903,13 +5933,15 @@ function renderDamMachineHeader(){
     const show = damMachine.autoSpin || damMachine.autoStopReason;
     autoStatus.hidden = !show;
     autoStatus.textContent = damMachine.autoSpin
-      ? "⚡ AUTO SPINNING — each completed result advances the next spin"
+      ? "⚡ AUTO SPINNING — HYDRAULIC MOMENTUM " + damMachine.autoMomentum + "/" + DAM_AUTO_MOMENTUM_MAX
       : (damMachine.autoStopReason ? "AUTO STOPPED — " + damMachine.autoStopReason : "");
   }
   $("dmNoPlays").hidden = plays > 0;
 }
 
 const DAM_AUTO_SPIN_DELAY_MS = 700;
+const DAM_AUTO_MOMENTUM_MAX = 6;
+
 function damMachineAutoStopReason(res){
   if(!res) return "";
   if(res.jackpot) return "JACKPOT — review the celebration";
@@ -5917,6 +5949,46 @@ function damMachineAutoStopReason(res){
   if(res.kind === "character") return "NEW OPERATOR — review the unlock";
   return "";
 }
+
+function applyDamMachineAutoMomentum(level){
+  const n=Math.max(0,Math.min(DAM_AUTO_MOMENTUM_MAX,Math.floor(Number(level)||0)));
+  damMachine.autoMomentum=n;
+  const card=dmCard();
+  if(!card) return n;
+  if(n<=0){
+    card.classList.remove("dmAutoMomentum");
+    card.style.removeProperty("--dmMomentumLevel");
+    card.style.removeProperty("--dmMomentumGlow");
+    card.style.removeProperty("--dmMomentumSpread");
+    card.removeAttribute("data-auto-momentum");
+    return n;
+  }
+  const glow=(0.07 + n*0.035).toFixed(3);
+  const spread=(8 + n*3).toFixed(0) + "px";
+  card.classList.add("dmAutoMomentum");
+  card.setAttribute("data-auto-momentum",String(n));
+  card.style.setProperty("--dmMomentumLevel",String(n));
+  card.style.setProperty("--dmMomentumGlow",glow);
+  card.style.setProperty("--dmMomentumSpread",spread);
+  return n;
+}
+
+function resetDamMachineAutoMomentum(){
+  return applyDamMachineAutoMomentum(0);
+}
+
+function advanceDamMachineAutoMomentum(){
+  if(!damMachine.autoSpin) return 0;
+  const next=Math.min(DAM_AUTO_MOMENTUM_MAX,damMachine.autoMomentum+1);
+  applyDamMachineAutoMomentum(next);
+  dmSfx(() => playDamMachineMomentumSound(next));
+  const msg=next>=DAM_AUTO_MOMENTUM_MAX
+    ? "⚡ FULL HYDRAULIC PRESSURE — MOMENTUM MAX"
+    : "⚡ HYDRAULIC MOMENTUM " + next + "/" + DAM_AUTO_MOMENTUM_MAX;
+  $("dmStatus").textContent=msg;
+  return next;
+}
+
 function stopDamMachineAutoSpin(reason="manual"){
   damMachine.autoSpin = false;
   damMachine.autoStopReason = reason || "";
@@ -5925,8 +5997,10 @@ function stopDamMachineAutoSpin(reason="manual"){
     clearTimeout(damMachine.autoTimer);
     damMachine.autoTimer = null;
   }
+  resetDamMachineAutoMomentum();
   renderDamMachineHeader();
 }
+
 function scheduleDamMachineAutoSpin(){
   if(!damMachine.autoSpin || !damMachine.open) return;
   if(state.damMachineFreePlays <= 0){
@@ -5944,18 +6018,24 @@ function scheduleDamMachineAutoSpin(){
     }
     if(damMachine.spinning || damMachine.presenting) return;
     if(damMachine.revealed) continueDamMachine({auto:true});
-    if(damMachine.autoSpin && damMachine.open && state.damMachineFreePlays > 0) spinDamMachine();
+    if(damMachine.autoSpin && damMachine.open && state.damMachineFreePlays > 0){
+      advanceDamMachineAutoMomentum();
+      spinDamMachine();
+    }
   }, DAM_AUTO_SPIN_DELAY_MS);
 }
+
 function startDamMachineAutoSpin(){
   if(!damMachine.open || damMachine.spinning || damMachine.presenting || state.damMachineFreePlays <= 0) return false;
   damMachine.autoSpin = true;
   damMachine.autoStopReason = "";
   damMachine.autoToken++;
+  resetDamMachineAutoMomentum();
   renderDamMachineHeader();
   spinDamMachine();
   return true;
 }
+
 function toggleDamMachineAutoSpin(){
   if(damMachine.autoSpin){
     stopDamMachineAutoSpin("MANUAL STOP");
@@ -5970,7 +6050,7 @@ function openDamMachine()
   if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
   closePanels();
   closeNavMenu();                                       // v2.6.2: dismiss the consolidated menu
-  damMachine.open = true; damMachine.revealed = false; damMachine.autoStopReason = "";
+  damMachine.open = true; damMachine.revealed = false; damMachine.autoStopReason = ""; damMachine.autoMomentum = 0;
   // note: a forced test result set before opening is intentionally kept — it is consumed by the next spin only.
   const card = dmCard();
   card.classList.remove("show", "jackpotWin");
@@ -6343,6 +6423,17 @@ function playDamReelStopClunk(){ playTone(150, 0.16, "square"); setTimeout(() =>
 function playDamWinBigSound(){ [659, 784, 988, 1175, 1568].forEach((f, i) => setTimeout(() => playTone(f, 0.22, "triangle"), i * 90)); }
 function playDamCharacterSound(){ [523, 659, 784, 1046, 784, 1318].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "sine"), i * 80)); }
 function playDamMachineAwardSound(){ playWaterNoise(0.5, 200, 1500, 0.1); setTimeout(() => [784, 988, 1175].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "triangle"), i * 80)), 300); }
+/* V2.1.26 — progressive hydraulic momentum sound. Presentation only; never touches rewards. */
+function playDamMachineMomentumSound(level){
+  const n=Math.max(1,Math.min(DAM_AUTO_MOMENTUM_MAX,Math.floor(Number(level)||1)));
+  const base=170 + n*28;
+  playWaterNoise(0.18 + n*0.025, 170 + n*35, 760 + n*180, 0.045 + n*0.008);
+  playTone(base,0.12,"triangle");
+  setTimeout(() => playTone(base*1.5,0.10,"sine",), 55);
+  if(n>=DAM_AUTO_MOMENTUM_MAX){
+    setTimeout(() => playTone(1046,0.18,"triangle"),120);
+  }
+}
 /* v2.6.3 — named presentation sounds. Same synth engine, no external files, one call per presentation. */
 function playDamMachineSmallWinSound(){ playWaterNoise(0.35, 900, 2000, 0.08); [880, 1175].forEach((f, i) => setTimeout(() => playTone(f, 0.14, "triangle"), i * 90)); }
 function playDamMachineBigWinSound(){ playTone(98, 0.4, "sawtooth"); playWaterNoise(0.8, 300, 1600, 0.14); [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.2, "triangle"), 150 + i * 110)); }
@@ -6417,6 +6508,11 @@ function runDamMachineSelfTest(){
   t("V2.1.25: jackpot stops auto-spin", damMachineAutoStopReason({jackpot:true,kind:"flOz"}) === "JACKPOT — review the celebration");
   t("V2.1.25: song/character unlocks stop auto-spin", damMachineAutoStopReason({jackpot:false,kind:"song"}) && damMachineAutoStopReason({jackpot:false,kind:"character"}));
   t("V2.1.25: ordinary result continues auto-spin", damMachineAutoStopReason({jackpot:false,kind:"flOz"}) === "" && damMachineAutoStopReason(null) === "");
+  t("V2.1.26: momentum authority is presentation-only", !/safeAddFlOz|commitDamResult|purchase|entitlement|paypal/i.test(applyDamMachineAutoMomentum.toString()+advanceDamMachineAutoMomentum.toString()+playDamMachineMomentumSound.toString()));
+  t("V2.1.26: momentum is capped at six hydraulic stages", applyDamMachineAutoMomentum(99) === DAM_AUTO_MOMENTUM_MAX && damMachine.autoMomentum === DAM_AUTO_MOMENTUM_MAX);
+  t("V2.1.26: momentum reset returns the card to neutral", resetDamMachineAutoMomentum() === 0 && damMachine.autoMomentum === 0 && !$("damMachineCard").classList.contains("dmAutoMomentum"));
+  t("V2.1.26: auto-spin advances momentum only between spins", /advanceDamMachineAutoMomentum\(\)/.test(scheduleDamMachineAutoSpin.toString()) && !/advanceDamMachineAutoMomentum\(\)/.test(startDamMachineAutoSpin.toString()));
+  t("V2.1.26: momentum never changes free-play authority", !/damMachineFreePlays\s*=|damMachineFreePlays\s*\+|damMachineFreePlays\s*-/.test(applyDamMachineAutoMomentum.toString()+advanceDamMachineAutoMomentum.toString()));
   const P = damPresentationFor;
   t("presentation: 111 map", (() => { const x = P({ kind:"flOz", amount:DAY_REWARD_FL_OZ, title:"WATER TRIPLE!", detail:"d", humor:"h", jackpot:false, fallback:false, combo:null, unlockedId:null }); return x.title === "WATER RELEASED" && x.rarity === "common"; })());
   t("presentation: 666 map", (() => { const x = P({ kind:"flOz", amount:LEVEL_REWARD_FL_OZ, title:"t", detail:"d", humor:"h", jackpot:false, fallback:false, combo:null, unlockedId:null }); return x.title === "PRESSURE RELEASED" && x.rarity === "rare"; })());
