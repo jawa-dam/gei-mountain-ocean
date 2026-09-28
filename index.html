@@ -9077,8 +9077,93 @@ function damItePersonalityNode(){
   n.innerHTML='<div class="damItePersonalityCard"><div class="damItePersonalityEyebrow">DAM-ITE MOMENT</div><div class="damItePersonalityText"></div></div>';
   document.body.appendChild(n); damItePersonality.node=n; return n;
 }
+const DAM_ITE_OPERATOR_VOICES = Object.freeze({
+  "wilbert-dam-guide": { name:"Wilbert", wave:"triangle", notes:[523,659,784], lines:{
+    tap:["Now THAT'S what I call pressure.","Guide the flow. Preserve the -ites."],
+    breakthrough:["That's a DAM-ITE breakthrough!","Now THAT is hydraulic progress."],
+    machine:["Let's see what the DAM-ITE Machine is cooking.","Guide's watching the wheel."],
+    level:["Another level DAMMED.","You're learning the system. Keep going."]
+  }},
+  "yall-too-beaver": { name:"Beaver", wave:"sine", notes:[392,494,587], lines:{
+    tap:["Beaver pressure approved.","You know I'm gonna approve that dam."],
+    breakthrough:["Now THAT'S a dam!","Gnaw-thing can stop this flow."],
+    machine:["Let me see those reels, dam builder.","Beaver says: spin it!"],
+    level:["Another dam completed. That's good beaver work.","Built. Flowing. DAM-ITE."]
+  }},
+  "operator-fireman": { name:"Fireman", wave:"sawtooth", notes:[220,277,330], lines:{
+    tap:["PRESSURE CHECK!","Hose ready. Flow steady."],
+    breakthrough:["BREAKTHROUGH! Release the water!","Pressure handled. Flow moving."],
+    machine:["Station alarm: the machine is spinning.","Eyes on the reels!"],
+    level:["Level secured. Pressure under control.","Good work, operator. Keep the flow moving."]
+  }},
+  "operator-moses": { name:"Moses", wave:"triangle", notes:[261,329,392], lines:{
+    tap:["The water has been released.","Let the water find its course."],
+    breakthrough:["The waters have opened.","The path is clear. Move forward."],
+    machine:["The wheel turns in its appointed course.","Let us see what the machine reveals."],
+    level:["The passage is complete.","The water has carried you to the next level."]
+  }},
+  "operator-valentine": { name:"Valentine", wave:"sine", notes:[659,784,988], lines:{
+    tap:["I love the way that water moves.","That's some beautiful pressure."],
+    breakthrough:["Now THAT is a flow worth celebrating.","The breakthrough has my heart."],
+    machine:["Let's see if the machine sends us a little love.","Spin with feeling."],
+    level:["Another level, beautifully dammed.","You're falling into the flow."]
+  }},
+  "operator-sam": { name:"Sam", wave:"triangle", notes:[330,392,494], lines:{
+    tap:["Sam says: nice flow.","Steady pressure. That's the move."],
+    breakthrough:["Sam I am. Dam I am.","Okay... THAT was nice."],
+    machine:["Sam's on shift. Spin it.","Let's see what the dam machine says."],
+    level:["Level cleared. Sam approves.","Water's on track. Next level."]
+  }},
+  "operator-jack-o-lantern": { name:"Jack-O-Lantern", wave:"square", notes:[185,233,277], lines:{
+    tap:["Something spooky is brewing in that reservoir.","Frightfully good pressure."],
+    breakthrough:["BOO! That's a breakthrough!","The reservoir just got spooky."],
+    machine:["The reels are creeping...","Trick or treat? Spin and see."],
+    level:["Another level carved into the dam.","That flow was frighteningly good."]
+  }},
+  "operator-santa-claus": { name:"Santa", wave:"sine", notes:[523,659,784], lines:{
+    tap:["Ho ho hold the flow!","Santa says: keep that water moving."],
+    breakthrough:["Ho ho HO! That's a breakthrough!","The dam made the nice list."],
+    machine:["Let's see what's under the machine tree.","Spin it, operator!"],
+    level:["Another level on the nice list.","Sleigh the pressure. Next level!"]
+  }},
+  "operator-woman": { name:"Operator Woman", wave:"triangle", notes:[440,554,659], lines:{
+    tap:["Flow boss reporting in.","That's tight hydraulic work."],
+    breakthrough:["That's how you run a breakthrough.","Pressure handled. Keep moving."],
+    machine:["Operator Woman says: watch those reels.","Let's make this spin count."],
+    level:["Level secured. That's how it's done.","Flow controlled. Next challenge."]
+  }},
+  "operator-man": { name:"Operator Man", wave:"square", notes:[294,370,440], lines:{
+    tap:["Hard hat on. Water under control.","The Dam Man sees that pressure."],
+    breakthrough:["The Dam Man can. And did.","Breakthrough secured."],
+    machine:["The Dam Man is watching the reels.","Let's see what the machine delivers."],
+    level:["The Dam Man approves the level.","Hard hat on. Next level."]
+  }}
+});
+
+function getDamIteOperatorVoice(id, context){
+  const profile=DAM_ITE_OPERATOR_VOICES[id] || DAM_ITE_OPERATOR_VOICES["wilbert-dam-guide"];
+  const pool=profile.lines[context] || profile.lines.tap;
+  return pool[Math.floor(Math.random()*pool.length)] || "";
+}
+function playDamIteOperatorVoice(id, context){
+  const profile=DAM_ITE_OPERATOR_VOICES[id] || DAM_ITE_OPERATOR_VOICES["wilbert-dam-guide"];
+  try{
+    profile.notes.forEach((freq,index)=>{
+      setTimeout(()=>playTone(freq,index===profile.notes.length-1?.24:.14,profile.wave),index*58);
+    });
+    if(context==="breakthrough") setTimeout(()=>playWaterNoise(.32,180,900,.045),90);
+    if(context==="machine") setTimeout(()=>playTone(profile.notes[0]*.5,.12,"square"),120);
+  }catch(e){}
+}
 function damItePersonalityCharacterLine(context){
-  try{ const c=getActiveCharacter(), line=getCharacterHumor(c.id); if(line && (context==="breakthrough" || context==="machine" || Math.random()<.18)) return line; }catch(e){}
+  try{
+    const c=getActiveCharacter(), line=getDamIteOperatorVoice(c.id,context);
+    if(line) return line;
+  }catch(e){}
+  try{
+    const c=getActiveCharacter(), line=getCharacterHumor(c.id);
+    if(line) return line;
+  }catch(e){}
   return "";
 }
 function triggerDamItePersonality(context, payload={}){
@@ -9095,8 +9180,18 @@ function triggerDamItePersonality(context, payload={}){
   }
   text.textContent=line; n.className=""; void n.offsetWidth; n.className="show "+context; damItePersonality.lastAt=now; damItePersonality.count++;
   clearTimeout(damItePersonality.hideTimer); damItePersonality.hideTimer=setTimeout(()=>n.classList.remove("show"),important?2100:1450);
-  try{ if(context==="breakthrough") playTone(659,.16,"triangle"); else if(context==="machine") playTone(392,.12,"square"); else if(context==="level") playTone(523,.18,"triangle"); }catch(e){}
+  try{ playDamIteOperatorVoice(getActiveCharacter().id,context); }catch(e){ try{ if(context==="breakthrough") playTone(659,.16,"triangle"); else if(context==="machine") playTone(392,.12,"square"); else if(context==="level") playTone(523,.18,"triangle"); }catch(e){} }
   return true;
+}
+function runDamIteOperatorVoiceSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  const ids=CHARACTERS.map(c=>c.id);
+  t("V2.1.19: every canonical operator has a voice profile",()=>ids.every(id=>!!DAM_ITE_OPERATOR_VOICES[id]&&typeof getDamIteOperatorVoice(id,"tap")==="string"));
+  t("V2.1.19: every operator has all four gameplay contexts",()=>ids.every(id=>["tap","breakthrough","machine","level"].every(k=>Array.isArray(DAM_ITE_OPERATOR_VOICES[id].lines[k])&&DAM_ITE_OPERATOR_VOICES[id].lines[k].length>=2)));
+  t("V2.1.19: voice system reuses canonical active operator",()=>{const c=getActiveCharacter();return !!c&&!!DAM_ITE_OPERATOR_VOICES[c.id]});
+  t("V2.1.19: operator voice is presentation-only",()=>{const before=JSON.stringify(state);const c=getActiveCharacter();getDamIteOperatorVoice(c.id,"tap");return JSON.stringify(state)===before});
+  t("V2.1.19: voice engine does not call economy authority",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(getDamIteOperatorVoice.toString()+playDamIteOperatorVoice.toString()));
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
 }
 function runDamItePersonalitySelfTest(){
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})}; const snapshot=()=>JSON.stringify(state);
