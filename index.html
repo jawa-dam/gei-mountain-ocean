@@ -9188,13 +9188,9 @@ function runLivingWorldSelfTest(){
     const before = pick(); triggerLivingEvent("pressureRelease"); triggerLivingEvent("machinePuff"); runSkinAccent(); return pick() === before;
   });
   t("V2.1.12: living-world code never references economy authority", () => {
-    const src = [spawnAmbientParticle, triggerLivingEvent, rollLivingEvent, runSkinAccent, spawnTapAccent, playTapTexture, livingWorldMilestone, showLivingBadge, revealSkinWhenReady, startLivingWorld, damVoice, damNoise, livingMachineHook, livingSpotlightHook].map(f => f.toString()).join("
-") +
-      Object.values(LIVING_WORLD_EVENTS).map(e => e.run.toString()).join("
-") +
-      Object.keys(livingMachine).map(k => String(livingMachine[k])).join("
-") + Object.keys(livingSpotlight).map(k => String(livingSpotlight[k])).join("
-");
+    const src = [spawnAmbientParticle, triggerLivingEvent, rollLivingEvent, runSkinAccent, spawnTapAccent, playTapTexture, livingWorldMilestone, showLivingBadge, revealSkinWhenReady, startLivingWorld, damVoice, damNoise, livingMachineHook, livingSpotlightHook].map(f => f.toString()).join("\n") +
+      Object.values(LIVING_WORLD_EVENTS).map(e => e.run.toString()).join("\n") +
+      Object.keys(livingMachine).map(k => String(livingMachine[k])).join("\n") + Object.keys(livingSpotlight).map(k => String(livingSpotlight[k])).join("\n");
     return !/totalFlOz|levelFlOz|safeAddFlOz|commitDamResult|creditPack|awardDay|saveGame|unlockItem|purchase|entitlement|paypal/i.test(src);
   });
   t("V2.1.12: ambient particles are capped", () => { for(let i = 0; i < 30; i++) spawnAmbientParticle(); return $("livingWorldLayer").querySelectorAll(".lwP").length <= LIVING_MAX_AMBIENT + 8; });
