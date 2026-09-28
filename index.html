@@ -2214,6 +2214,14 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .preGameStart{width:100%;margin-top:10px;min-height:56px;font-size:1.1rem}.preGameMsg{min-height:1.2em;margin-top:8px;font-size:.9rem;font-weight:800;color:var(--gold)}
 .preGameHowBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:900}
 .dmStoreFloatBtn{position:absolute;left:7px;top:calc(53% - 72px);z-index:83;width:76px;height:76px;min-height:0;padding:7px 5px;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;border:1.5px solid rgba(255,255,255,.72);color:#fff;text-align:center;background:linear-gradient(145deg,color-mix(in srgb,var(--juicy-blue) 22%,#081125),color-mix(in srgb,var(--juicy-violet) 28%,#081125));box-shadow:0 0 16px color-mix(in srgb,var(--water-bright) 32%,transparent),0 0 28px color-mix(in srgb,var(--juicy-violet) 22%,transparent),inset 0 0 16px rgba(0,0,0,.22);overflow:visible;will-change:transform,box-shadow,filter;isolation:isolate}.dmStoreFloatBtn::before{content:"";position:absolute;inset:-5px;border-radius:24px;pointer-events:none;border:1px solid color-mix(in srgb,var(--water-bright) 62%,transparent);box-shadow:0 0 12px color-mix(in srgb,var(--water-bright) 36%,transparent);animation:dmBuyItesRing 4.8s linear infinite}.dmStoreFloatBtn::after{content:"💧";position:absolute;right:-4px;top:-10px;font-size:15px;filter:drop-shadow(0 0 6px var(--water-bright));animation:dmBuyItesDrop 3.8s ease-in-out infinite}.dmStoreFloatBtn:hover{filter:brightness(1.1);box-shadow:0 0 22px color-mix(in srgb,var(--water-bright) 45%,transparent),0 0 34px color-mix(in srgb,var(--juicy-violet) 28%,transparent),inset 0 0 16px rgba(0,0,0,.2)}.dmStoreFloatBtn:active{transform:translateY(2px) scale(.94)}.dmStoreFloatBtn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.dmStoreFloatTitle{position:relative;z-index:1;font-size:2.05rem;line-height:1;filter:drop-shadow(0 0 9px color-mix(in srgb,var(--water-bright) 62%,transparent));animation:dmBuyItesCartBob 3.4s ease-in-out infinite;display:block}.dmStoreFloatSub{position:relative;z-index:1;margin-top:4px;font-size:.72rem;font-weight:1000;letter-spacing:.045em;color:#fff;line-height:1;text-shadow:0 1px 0 rgba(0,0,0,.55)}.dmStoreFloatWallet{display:none}@keyframes dmBuyItesCartBob{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}25%{transform:translateY(-3px) rotate(2deg) scale(1.03)}50%{transform:translateY(0) rotate(-1deg) scale(1.01)}75%{transform:translateY(-2px) rotate(2deg) scale(1.025)}}@keyframes dmBuyItesRing{0%{transform:rotate(0deg);opacity:.35}50%{transform:rotate(180deg);opacity:.85}100%{transform:rotate(360deg);opacity:.35}}@keyframes dmBuyItesDrop{0%,100%{transform:translateY(0) scale(.85);opacity:.35}45%{transform:translateY(4px) scale(1.05);opacity:1}70%{transform:translateY(0) scale(.9);opacity:.55}}@media (max-width:430px){.dmStoreFloatBtn{width:70px;height:70px;top:calc(53% - 68px);border-radius:20px}.dmStoreFloatTitle{font-size:1.9rem}.dmStoreFloatSub{font-size:.66rem}}@media (max-height:620px){.dmStoreFloatBtn{top:calc(53% - 66px)}}@media (prefers-reduced-motion:reduce){.dmStoreFloatBtn::before,.dmStoreFloatBtn::after,.dmStoreFloatBtn .dmStoreFloatTitle{animation:none!important}.dmStoreFloatBtn:active{transform:none}}.dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent);isolation:isolate;overflow:visible;will-change:transform,box-shadow,filter}
+/* V2.1.29 — BUY-ites ITEM DROP: rare randomized shopping motion, presentation-only. */
+.dmBuyItesItem{position:absolute;left:50%;top:14px;z-index:4;opacity:0;pointer-events:none;font-size:15px;line-height:1;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--water-bright) 55%,transparent));}
+.dmBuyItesItem.drop{animation:dmBuyItesItemDrop .78s cubic-bezier(.22,.72,.31,1.12) forwards}
+@keyframes dmBuyItesItemDrop{0%{opacity:0;transform:translate(-50%,-6px) scale(.45) rotate(-16deg)}16%{opacity:1;transform:translate(-50%,-1px) scale(1.08) rotate(7deg)}65%{opacity:1;transform:translate(-50%,30px) scale(.92) rotate(-5deg)}100%{opacity:0;transform:translate(-50%,47px) scale(.58) rotate(4deg)}}
+.dmBuyItesItemLand{position:absolute;left:50%;top:58px;width:22px;height:8px;border-radius:50%;opacity:0;pointer-events:none;background:radial-gradient(ellipse,color-mix(in srgb,var(--water-bright) 75%,#fff),transparent 72%);filter:blur(1px);transform:translateX(-50%) scale(.25)}
+.dmBuyItesItemLand.pop{animation:dmBuyItesItemLand .42s ease-out forwards}
+@keyframes dmBuyItesItemLand{0%{opacity:0;transform:translateX(-50%) scale(.25)}35%{opacity:.9;transform:translateX(-50%) scale(1.15)}100%{opacity:0;transform:translateX(-50%) scale(1.7)}}
+@media (prefers-reduced-motion:reduce){.dmBuyItesItem.drop,.dmBuyItesItemLand.pop{animation:none!important}.dmBuyItesItem,.dmBuyItesItemLand{opacity:0!important}}
 /* V2.1.4 — the DAM Machine is a permanent station. Zero plays means inactive, never hidden. */
 .dmFloatBtn.inactive{cursor:default;opacity:.62;filter:saturate(.45);box-shadow:0 0 10px color-mix(in srgb,var(--water-bright) 18%,transparent);}
 .dmFloatBtn.inactive::before{opacity:.35;animation-duration:8s}
@@ -2976,6 +2984,8 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
     <button class="dmStoreFloatBtn" id="dmStoreFloatBtn" type="button" aria-label="Open BUY-ites shop">
       <span class="dmStoreFloatTitle" aria-hidden="true">🛒</span>
       <span class="dmStoreFloatSub">BUY-ites</span>
+      <span class="dmBuyItesItem" id="dmBuyItesItem" aria-hidden="true">💧</span>
+      <span class="dmBuyItesItemLand" id="dmBuyItesItemLand" aria-hidden="true"></span>
       <span class="dmStoreFloatWallet" id="dmStoreFloatWallet" aria-hidden="true">0 FL OZ</span>
     </button>
     <button class="dmFloatBtn inactive" id="dmFloatBtn" type="button" aria-disabled="true" aria-label="DAM MACHINE — no free plays yet">🎰<span class="dmIdleFx" aria-hidden="true"><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmSpark"></i></span><span class="dmFloatLabel" id="dmFloatLabel">BONUS READY</span></button>
@@ -9955,6 +9965,35 @@ function runDamItePersonalitySelfTest(){
 /* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
 ========================================================= */
+/* V2.1.29 — randomized BUY-ites item-drop behavior. It never mutates gameplay/economy state. */
+(function initBuyItesItemDrop(){
+  const btn=document.getElementById("dmStoreFloatBtn");
+  const item=document.getElementById("dmBuyItesItem");
+  const land=document.getElementById("dmBuyItesItemLand");
+  if(!btn||!item||!land)return;
+  const reduce=()=>window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let timer=null, busy=false;
+  const items=["💧","💎","🧪","⭐","🪙","🎵"];
+  function reset(){
+    item.classList.remove("drop"); land.classList.remove("pop");
+    void item.offsetWidth;
+    item.textContent=items[Math.floor(Math.random()*items.length)];
+    item.classList.add("drop");
+    setTimeout(()=>{ land.classList.remove("pop"); void land.offsetWidth; land.classList.add("pop"); },650);
+    setTimeout(()=>{ item.classList.remove("drop"); land.classList.remove("pop"); busy=false; schedule(); },1100);
+  }
+  function schedule(){
+    clearTimeout(timer);
+    if(reduce()||document.hidden){ timer=setTimeout(schedule,4200); return; }
+    const delay=9000+Math.random()*16000;
+    timer=setTimeout(()=>{ if(!busy){busy=true;reset();} else schedule(); },delay);
+  }
+  btn.addEventListener("pointerenter",()=>{btn.classList.add("hovering")},{passive:true});
+  btn.addEventListener("pointerleave",()=>btn.classList.remove("hovering"),{passive:true});
+  document.addEventListener("visibilitychange",schedule);
+  schedule();
+})();
+
 function reportHeight(){
   try{ window.parent.postMessage({ type:"resize", height: document.documentElement.scrollHeight }, "*"); }catch(e){}
 }
