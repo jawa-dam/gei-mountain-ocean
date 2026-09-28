@@ -1,10 +1,13 @@
-import { ECONOMY_AUTHORITY_VERSION, validateEntitlementAuthority, auditReceipt, reconcileEntitlementAuthority } from "./economy-authority.js";
+import {
+  ECONOMY_AUTHORITY_VERSION,
+  validateEntitlementAuthority,
+  auditReceipt,
+  reconcileEntitlementAuthority
+} from "./economy-authority.js";
 
 const LEDGER_TTL_SECONDS = 60 * 60 * 24 * 365;
 
 function ledgerConfig() {
-  // Support both the explicit Upstash names and the Vercel/Upstash
-  // integration names already provisioned on this project.
   const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   if (!url || !token) throw new Error("Durable entitlement storage is not configured.");
@@ -35,6 +38,181 @@ function reconciled(record) {
     throw error;
   }
   return result;
+}
+
+function incidentId() {
+  return "GEI-INC-" + Date.now().toString(36).toUpperCase() + "-" +
+    Math.random().toString(36).slice(2, 10).toUpperCase();
+}
+
+export async function recordEconomyIncident({
+  invoiceId,
+  captureID,
+  source,
+  reconciliation,
+  record
+}) {
+  if (!invoiceId) throw new Error("Missing entitlement incident identity.");
+
+  const id = incidentId();
+  const incidentKey = "gei:paypal:incident:" + id;
+  const indexKey = "gei:paypal:incident:index:" + invoiceId;
+  const incident = {
+    incidentId: id,
+    incidentVersion: "2.0.27",
+    status: "FROZEN",
+    source: source || "UNKNOWN",
+    invoiceId,
+    captureID: captureID || record?.captureID || null,
+    orderID: record?.orderID || null,
+    packId: record?.packId || null,
+    detectedAt: new Date().toISOString(),
+    reconciliation: reconciliation || null,
+    auditVersion: ECONOMY_AUTHORITY_VERSION
+  };
+
+  const script = `
+    local existing = redis.call("GET", KEYS[1])
+    if existing then return {0, existing} end
+    redis.call("SET", KEYS[1], ARGV[1], "EX", ARGV[2])
+    redis.call("SET", KEYS[2], ARGV[3], "EX", ARGV[2])
+    return {1, ARGV[1]}
+  `;
+
+  const result = await redisCommand([
+    "EVAL",
+    script,
+    2,
+    incidentKey,
+    indexKey,
+    JSON.stringify(incident),
+    String(LEDGER_TTL_SECONDS),
+    id
+  ]);
+
+  return {
+    created: Number(result?.[0]) === 1,
+    incident: JSON.parse(result?.[1] || JSON.stringify(incident))
+  };
+}
+
+export async function getEconomyIncident(invoiceId) {
+  if (!invoiceId) throw new Error("Missing entitlement incident identity.");
+  const indexKey = "gei:paypal:incident:index:" + invoiceId;
+  const incidentIdValue = await redisCommand(["GET", indexKey]);
+  if (!incidentIdValue) return { ok: false, reason: "NOT_FOUND" };
+
+  const raw = await redisCommand(["GET", "gei:paypal:incident:" + incidentIdValue]);
+  if (!raw) return { ok: false, reason: "INCIDENT_NOT_FOUND" };
+
+  return { ok: true, incident: JSON.parse(raw) };
+}
+
+export async function getEntitlement(invoiceId, captureID = null) {
+  if (!invoiceId) throw new Error("Missing entitlement identity.");
+
+  const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
+  const raw = await redisCommand(["GET", entitlementKey]);
+  if (!raw) return { ok: false, reason: "NOT_FOUND" };
+
+  let record;
+  try {
+    record = JSON.parse(raw);
+  } catch {
+    return { ok: false, reason: "CORRUPT_RECORD" };
+  }
+
+  if (captureID && record.captureID !== captureID) {
+    return { ok: false, reason: "CAPTURE_MISMATCH", record };
+  }
+
+  const reconciliation = reconcileEntitlementAuthority(record);
+  return {
+    ok: reconciliation.ok,
+    driftDetected: reconciliation.driftDetected,
+    reconciliation,
+    record
+  };
+}
+
+export async function reconcileAndFreezeEntitlement(invoiceId, captureID = null, source = "UNKNOWN") {
+  const result = await getEntitlement(invoiceId, captureID);
+  if (result.ok) {
+    return {
+      ok: true,
+      frozen: false,
+      incident: null,
+      reconciliation: result.reconciliation,
+      record: result.record
+    };
+  }
+
+  if (result.reason === "NOT_FOUND" || result.reason === "CAPTURE_MISMATCH") {
+    return { ok: false, frozen: false, reason: result.reason };
+  }
+
+  const incident = await recordEconomyIncident({
+    invoiceId,
+    captureID,
+    source,
+    reconciliation: result.reconciliation,
+    record: result.record
+  });
+
+  return {
+    ok: false,
+    frozen: true,
+    incident: incident.incident,
+    reconciliation: result.reconciliation,
+    record: result.record
+  };
+}
+
+export async function recoverEconomyIncident(invoiceId, captureID = null) {
+  const incidentResult = await getEconomyIncident(invoiceId);
+  if (!incidentResult.ok) return incidentResult;
+
+  const entitlement = await getEntitlement(invoiceId, captureID);
+  if (entitlement.reason === "NOT_FOUND") {
+    return {
+      ok: false,
+      recoverable: false,
+      status: "FROZEN",
+      reason: "ENTITLEMENT_NOT_FOUND",
+      incident: incidentResult.incident
+    };
+  }
+
+  if (entitlement.reason === "CAPTURE_MISMATCH") {
+    return {
+      ok: false,
+      recoverable: false,
+      status: "FROZEN",
+      reason: "CAPTURE_MISMATCH",
+      incident: incidentResult.incident
+    };
+  }
+
+  if (!entitlement.ok) {
+    return {
+      ok: false,
+      recoverable: false,
+      status: "FROZEN",
+      reason: "DRIFT_REMAINS",
+      incident: incidentResult.incident,
+      reconciliation: entitlement.reconciliation
+    };
+  }
+
+  return {
+    ok: true,
+    recoverable: true,
+    status: "RECOVERABLE",
+    action: "REVERIFY_BEFORE_CLAIM_OR_FULFILLMENT",
+    incident: incidentResult.incident,
+    reconciliation: entitlement.reconciliation,
+    record: entitlement.record
+  };
 }
 
 export async function recordEntitlement({
@@ -100,33 +278,6 @@ export async function recordEntitlement({
   return {
     created: Number(result?.[0]) === 1,
     record: parsed
-  };
-}
-
-export async function getEntitlement(invoiceId, captureID = null) {
-  if (!invoiceId) throw new Error("Missing entitlement identity.");
-
-  const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
-  const raw = await redisCommand(["GET", entitlementKey]);
-  if (!raw) return { ok: false, reason: "NOT_FOUND" };
-
-  let record;
-  try {
-    record = JSON.parse(raw);
-  } catch {
-    return { ok: false, reason: "CORRUPT_RECORD" };
-  }
-
-  if (captureID && record.captureID !== captureID) {
-    return { ok: false, reason: "CAPTURE_MISMATCH", record };
-  }
-
-  const reconciliation = reconcileEntitlementAuthority(record);
-  return {
-    ok: reconciliation.ok,
-    driftDetected: reconciliation.driftDetected,
-    reconciliation,
-    record
   };
 }
 
