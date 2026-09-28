@@ -5742,6 +5742,7 @@ function armProductionPurchaseVerification(pack){
     claimToken:null,
     claimId:null
   };
+  persistPurchaseVerificationSession();
   const arm=$("purchaseArm");
   if(arm){ arm.textContent="ARMED"; const row=arm.closest(".purchaseVerificationCheck"); row.classList.remove("pending"); row.classList.add("pass"); }
   const meta=$("purchaseVerificationMeta");
@@ -5814,6 +5815,34 @@ function safeSessionGet(key){
 }
 function safeSessionSet(key,value){
   try { sessionStorage.setItem(key,value); } catch(e){}
+}
+const PURCHASE_VERIFICATION_KEY="gei.paypal.v2.0.22.verification";
+function persistPurchaseVerificationSession(){
+  if(!purchaseVerificationSession) return;
+  safeSessionSet(PURCHASE_VERIFICATION_KEY, JSON.stringify(purchaseVerificationSession));
+}
+function clearPersistedPurchaseVerificationSession(){
+  safeSessionRemove(PURCHASE_VERIFICATION_KEY);
+}
+function restorePurchaseVerificationSession(){
+  const raw=safeSessionGet(PURCHASE_VERIFICATION_KEY);
+  if(!raw) return;
+  try{
+    const saved=JSON.parse(raw);
+    if(!saved || saved.packId!=="single" || !saved.claimId) return;
+    purchaseVerificationSession=saved;
+    setPurchaseVerification("purchaseArm","pass","RESTORED");
+    if(saved.capture) setPurchaseVerification("purchaseCapture","pass","PASS");
+    if(saved.claim) setPurchaseVerification("purchaseClaim","pass",saved.recovered?"RECOVERED":"PASS");
+    if(saved.credit) setPurchaseVerification("purchaseCredit","pass","PASS");
+    const replayBtn=$(\"purchaseReplayBtn\");
+    if(replayBtn && saved.captureID && saved.claimToken && saved.claimId) replayBtn.hidden=false;
+    updateProductionPurchaseVerification();
+    const meta=$(\"purchaseVerificationMeta\");
+    if(meta) meta.textContent="🔄 V2.0.22 verification state restored after refresh.";
+  }catch(e){
+    clearPersistedPurchaseVerificationSession();
+  }
 }
 function safeSessionRemove(key){
   try { sessionStorage.removeItem(key); } catch(e){}
@@ -5922,6 +5951,7 @@ function startCheckout(packId){
           purchaseVerificationSession.captureID=result.captureID;
           purchaseVerificationSession.claimToken=result.claimToken;
           setPurchaseVerification("purchaseCapture","pass","PASS");
+          persistPurchaseVerificationSession();
         }
 
         const claimId=checkoutClaimId(data.orderID);
@@ -5945,6 +5975,7 @@ function startCheckout(packId){
           purchaseVerificationSession.claim=true;
           purchaseVerificationSession.recovered=claim.alreadyClaimed===true;
           setPurchaseVerification("purchaseClaim","pass",claim.alreadyClaimed===true?"RECOVERED":"PASS");
+          persistPurchaseVerificationSession();
         }
 
         const credited=creditPack(claim.entitlement.packId,claim.entitlement.captureID, {
@@ -5958,6 +5989,7 @@ function startCheckout(packId){
           purchaseVerificationSession.credit=true;
           setPurchaseVerification("purchaseCredit","pass","PASS");
           updateProductionPurchaseVerification();
+          persistPurchaseVerificationSession();
         }
 
         status.textContent="✅ Payment complete — your FL OZ entitlement is secured!";
@@ -5973,6 +6005,7 @@ function startCheckout(packId){
       onCancel:()=>{
         clearPayPalReceipt();
         clearCheckoutRecovery(packId,purchaseVerificationSession && purchaseVerificationSession.orderID);
+        clearPersistedPurchaseVerificationSession();
         status.textContent="Checkout canceled. Your payment was not captured.";
       },
       onError:(err)=>{
@@ -6982,6 +7015,7 @@ restoreVisualProgress();
 renderTribesList();
 renderRadio();
 renderStore();
+restorePurchaseVerificationSession();
 renderCharactersPanel();
 renderDamMachineHeader();                               // v2.6.2: menu free-play line reflects the save
 if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
