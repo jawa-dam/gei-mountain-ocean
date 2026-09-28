@@ -1748,6 +1748,23 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .damIteIdentityMeta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 .damIteIdentityPill{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.68rem;font-weight:900;color:rgba(255,255,255,.86)}
 .damIteIdentityPill strong{color:var(--gold)}
+/* V2.1.22 — DAM-ITE IDENTITY EVOLUTION: presentation-only identity progression. */
+.damIteEvolution{position:relative;margin:0 0 12px;padding:12px;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(47,210,255,.045));overflow:hidden}
+.damIteEvolution.evolving{animation:damIteIdentityEvolve .85s cubic-bezier(.16,.82,.22,1)}
+.damIteEvolutionHead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.damIteEvolutionStage{font-size:clamp(.9rem,3.8vw,1.08rem);font-weight:1000;letter-spacing:.02em;color:#fff;line-height:1.15}
+.damIteEvolutionStage span{color:var(--gold)}
+.damIteEvolutionStep{font-size:.68rem;font-weight:1000;letter-spacing:.1em;text-transform:uppercase;color:var(--juicy-blue);white-space:nowrap}
+.damIteEvolutionDesc{margin-top:5px;font-size:.75rem;font-weight:750;line-height:1.3;color:rgba(255,255,255,.72)}
+.damIteEvolutionTrack{height:8px;margin-top:9px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.damIteEvolutionFill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--juicy-blue),var(--water-bright),var(--juicy-magenta));box-shadow:0 0 14px color-mix(in srgb,var(--water-bright) 55%,transparent);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+.damIteEvolutionNext{margin-top:7px;font-size:.7rem;font-weight:850;color:rgba(255,255,255,.62)}
+.damIteEvolutionNext strong{color:var(--foam)}
+@keyframes damIteIdentityEvolve{0%{transform:scale(.97);filter:brightness(1)}35%{transform:scale(1.025);filter:brightness(1.35)}100%{transform:scale(1);filter:brightness(1)}}
+.damIteIdentityCard.evolved{animation:damIteIdentityCardEvolved .9s cubic-bezier(.15,.8,.2,1)}
+@keyframes damIteIdentityCardEvolved{0%{box-shadow:0 0 18px rgba(47,210,255,.08),inset 0 1px 0 rgba(255,255,255,.08)}35%{box-shadow:0 0 34px color-mix(in srgb,var(--juicy-magenta) 35%,transparent),0 0 24px color-mix(in srgb,var(--water-bright) 42%,transparent),inset 0 1px 0 rgba(255,255,255,.2)}100%{box-shadow:0 0 18px rgba(47,210,255,.08),inset 0 1px 0 rgba(255,255,255,.08)}}
+@media (prefers-reduced-motion:reduce){.damIteEvolution.evolving,.damIteIdentityCard.evolved{animation:none}.damIteEvolutionFill{transition:none}}
+
 .dmLastResultTitle{ font-size:.82rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--juicy-blue); }
 .dmLastResultMain{ margin-top:3px; font-size:1rem; font-weight:900; line-height:1.2; color:#fff; }
 .dmLastResultSub{ margin-top:4px; font-size:.78rem; font-weight:700; line-height:1.35; color:rgba(255,255,255,.78); overflow-wrap:anywhere; }
@@ -3085,7 +3102,17 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
               <span class="damIteIdentityPill" id="damIteIdentityFlow">FLOW —</span>
             </div>
           </div>
-        </div>        <div class="profileGrid" id="profileStats"></div>
+        </div>
+        <div class="damIteEvolution" id="damIteEvolution" aria-live="polite">
+          <div class="damIteEvolutionHead">
+            <div class="damIteEvolutionStage" id="damIteEvolutionStage">DAM-ITE <span>INITIATE</span></div>
+            <div class="damIteEvolutionStep" id="damIteEvolutionStep">STAGE 1 / 4</div>
+          </div>
+          <div class="damIteEvolutionDesc" id="damIteEvolutionDesc">Your hydraulic identity is just beginning.</div>
+          <div class="damIteEvolutionTrack" aria-hidden="true"><div class="damIteEvolutionFill" id="damIteEvolutionFill"></div></div>
+          <div class="damIteEvolutionNext" id="damIteEvolutionNext">Next evolution: <strong>DAM-ITE OPERATOR</strong></div>
+        </div>
+        <div class="profileGrid" id="profileStats"></div>
 
         <!-- DAM NATION V1.0: -ite rescue record + gallery foundation (rendered by renderIteRescueRecord). -->
         <div class="panelGroup">🌊 -ITE RESCUE RECORD</div>
@@ -8365,6 +8392,59 @@ function renderDamMachineHistory(){
     '<div class="dmLastResultSub">' + esc(symLine) + (symLine && detailBits.length ? " · " : "") + esc(detailBits.join(" · ")) + '</div>';
 }
 
+/* V2.1.22 — DAM-ITE Identity Evolution: derives identity from existing progression only. */
+const DAM_ITE_IDENTITY_STAGES = Object.freeze([
+  Object.freeze({key:"initiate",name:"DAM-ITE INITIATE",min:0,max:1,desc:"Your hydraulic identity is just beginning.",next:"DAM-ITE OPERATOR"}),
+  Object.freeze({key:"operator",name:"DAM-ITE OPERATOR",min:2,max:5,desc:"You are no longer just tapping. You are operating the flow.",next:"DAM-ITE FLOW MASTER"}),
+  Object.freeze({key:"flow-master",name:"DAM-ITE FLOW MASTER",min:6,max:11,desc:"The hydraulic cycle is becoming second nature.",next:"DAM-ITE ENGINEER"}),
+  Object.freeze({key:"engineer",name:"DAM-ITE ENGINEER",min:12,max:null,desc:"Long-term mastery: observe, control, and understand the system.",next:"MASTERED FLOW"})
+]);
+function getDamIteIdentityEvolution(completedLevels){
+  const n=Math.max(0,Number(completedLevels)||0);
+  let stage=DAM_ITE_IDENTITY_STAGES[0];
+  for(let i=0;i<DAM_ITE_IDENTITY_STAGES.length;i++){
+    if(n>=DAM_ITE_IDENTITY_STAGES[i].min) stage=DAM_ITE_IDENTITY_STAGES[i];
+  }
+  const index=DAM_ITE_IDENTITY_STAGES.indexOf(stage);
+  const next=DAM_ITE_IDENTITY_STAGES[index+1]||null;
+  const stageSpan=next ? Math.max(1,next.min-stage.min) : Math.max(1,stage.max-stage.min+1);
+  const within=next ? Math.max(0,n-stage.min) : Math.min(stageSpan,n-stage.min+1);
+  const pct=next ? Math.max(0,Math.min(100,(within/stageSpan)*100)) : 100;
+  return {stage,index,next,pct,completedLevels:n};
+}
+function renderDamIteIdentityEvolution(){
+  const stageEl=$("damIteEvolutionStage"), stepEl=$("damIteEvolutionStep"), descEl=$("damIteEvolutionDesc");
+  const fillEl=$("damIteEvolutionFill"), nextEl=$("damIteEvolutionNext"), card=$("damIteIdentityCard"), box=$("damIteEvolution");
+  if(!stageEl||!stepEl||!descEl||!fillEl||!nextEl) return;
+  const ev=getDamIteIdentityEvolution(state.completedLevels);
+  const previous=box.getAttribute("data-stage")||"";
+  stageEl.innerHTML='DAM-ITE <span>'+esc(ev.stage.name.replace(/^DAM-ITE\\s+/,""))+'</span>';
+  stepEl.textContent='STAGE '+(ev.index+1)+' / '+DAM_ITE_IDENTITY_STAGES.length;
+  descEl.textContent=ev.stage.desc;
+  fillEl.style.width=ev.pct+"%";
+  nextEl.innerHTML=ev.next
+    ? 'Next evolution: <strong>'+esc(ev.next.name)+'</strong> · '+esc(String(ev.next.min))+' loops'
+    : 'Evolution complete: <strong>MASTERED FLOW</strong>';
+  box.setAttribute("data-stage",ev.stage.key);
+  if(previous && previous!==ev.stage.key){
+    box.classList.remove("evolving"); card.classList.remove("evolved");
+    void box.offsetWidth; void card.offsetWidth;
+    box.classList.add("evolving"); card.classList.add("evolved");
+    setTimeout(()=>{box.classList.remove("evolving");card.classList.remove("evolved")},950);
+    triggerDamItePersonality("level",{text:ev.stage.name+" — IDENTITY EVOLVED!"});
+  }
+}
+function runDamIteIdentityEvolutionSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.22: four identity stages exist",()=>DAM_ITE_IDENTITY_STAGES.length===4);
+  t("V2.1.22: stage thresholds are ordered",()=>DAM_ITE_IDENTITY_STAGES.every((s,i)=>i===0||s.min>DAM_ITE_IDENTITY_STAGES[i-1].min));
+  t("V2.1.22: zero loops starts as initiate",()=>getDamIteIdentityEvolution(0).stage.key==="initiate");
+  t("V2.1.22: six loops reaches flow master",()=>getDamIteIdentityEvolution(6).stage.key==="flow-master");
+  t("V2.1.22: twelve loops reaches engineer",()=>getDamIteIdentityEvolution(12).stage.key==="engineer");
+  t("V2.1.22: identity evolution is presentation-only",()=>{const before=JSON.stringify(state);getDamIteIdentityEvolution(state.completedLevels);return JSON.stringify(state)===before});
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
+
 function renderProfile(){
   const c = getActiveCharacter();
   $("profileQuip").textContent = profileQuipText;
@@ -8384,6 +8464,7 @@ function renderProfile(){
   $("damIteIdentityLevel").innerHTML = `LEVEL <strong>${esc(identityLevel)}</strong>`;
   $("damIteIdentityRank").innerHTML = `RANK <strong>${esc(identityRank)}</strong>`;
   $("damIteIdentityFlow").innerHTML = `FLOW <strong>${esc(identityFlow)}</strong>`;
+  renderDamIteIdentityEvolution();
 
   const day = Math.min(daysDoneThisLevel() + 1, DAYS_PER_LEVEL);
   const ites = new Set(state.tribesFound.map(t => t.name)).size;
