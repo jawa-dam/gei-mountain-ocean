@@ -1,14 +1,6 @@
 import { recordEntitlement } from "../_lib/paypal-ledger.js";
 import { PACKS, ECONOMY_AUTHORITY_VERSION, validateEntitlementAuthority } from "../_lib/economy-authority.js";
 
-
-/* V2.0.25 — server economy authority */
-
-  single: { label: "1 Song", price: "1.00", flOz: 6660 },
-  ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
-  twentyfive: { label: "25 Songs", price: "6.00", flOz: 166500 }
-};
-
 async function paypalToken() {
   const id = process.env.PAYPAL_CLIENT_ID;
   const secret = process.env.PAYPAL_CLIENT_SECRET;
@@ -41,6 +33,16 @@ function completedCapture(order) {
   return captures.find(capture => capture.status === "COMPLETED") || null;
 }
 
+function validateCanonicalEntitlement(packId) {
+  const pack = PACKS[packId];
+  return !!pack && validateEntitlementAuthority({
+    packId,
+    flOz: pack.flOz,
+    amount: pack.price,
+    currency: "USD"
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -50,6 +52,9 @@ export default async function handler(req, res) {
   try {
     const { orderID, packId } = req.body || {};
     if (!orderID || !PACKS[packId]) return res.status(400).json({ error: "Missing order or pack." });
+    if (!validateCanonicalEntitlement(packId)) {
+      return res.status(400).json({ error: "Economy authority validation failed." });
+    }
 
     const token = await paypalToken();
     const headers = {
@@ -63,7 +68,7 @@ export default async function handler(req, res) {
     );
     const order = await check.json();
 
-    if (!check.ok || !validOrder(order, packId) || !validateEntitlementAuthority({ packId, flOz: PACKS[packId].flOz, amount: PACKS[packId].price, currency: "USD" })) {
+    if (!check.ok || !validOrder(order, packId)) {
       return res.status(400).json({ error: "PayPal order validation failed." });
     }
 
@@ -90,7 +95,7 @@ export default async function handler(req, res) {
         flOz: PACKS[packId].flOz,
         claimToken: invoiceId,
         fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE",
-      economyAuthorityVersion: ECONOMY_AUTHORITY_VERSION
+        economyAuthorityVersion: ECONOMY_AUTHORITY_VERSION
       });
     }
 
@@ -109,8 +114,6 @@ export default async function handler(req, res) {
     const capture = await captureResponse.json();
 
     if (!captureResponse.ok) {
-      // A retry can race with an already-completed capture. Re-read the order
-      // before treating the request as a failed payment.
       const retryCheck = await fetch(
         "https://api-m.paypal.com/v2/checkout/orders/" + encodeURIComponent(orderID),
         { headers, cache: "no-store" }
@@ -181,10 +184,18 @@ export default async function handler(req, res) {
       packId,
       flOz: PACKS[packId].flOz,
       claimToken: finalInvoiceId,
-      fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE"
+      fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE",
+      economyAuthorityVersion: ECONOMY_AUTHORITY_VERSION
     });
   } catch (err) {
     console.error("[PayPal capture-order]", err);
+    if (err?.code === "ECONOMY_DRIFT_DETECTED") {
+      return res.status(409).json({
+        error: "Economy authority drift detected.",
+        code: "ECONOMY_DRIFT_DETECTED",
+        reconciliation: err.reconciliation || null
+      });
+    }
     return res.status(500).json({ error: err.message || "Unable to capture PayPal order." });
   }
 }
