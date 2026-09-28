@@ -5720,7 +5720,7 @@ function closePayPalCheckout(){
   clearPayPalReceipt();
 }
 
-async let purchaseVerificationSession = null;
+let purchaseVerificationSession = null;
 
 function armProductionPurchaseVerification(pack){
   if(!pack || pack.id !== "single") return;
