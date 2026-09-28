@@ -1390,6 +1390,27 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .characterSpotlightMeta{margin-top:8px;font-size:.82rem;font-weight:750;line-height:1.35;color:rgba(255,255,255,.78)}
 @keyframes characterSpotlightFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-7px) scale(1.015)}}
 @keyframes characterSpotlightGlow{0%,100%{transform:scale(.88);opacity:.55}50%{transform:scale(1.08);opacity:1}}
+.characterSpotlightInner{--spot-accent:var(--water-bright);--spot-accent2:var(--juicy-blue);--spot-rotate:0deg}
+.characterSpotlightInner::before{content:"";position:absolute;inset:-35%;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--spot-accent) 18%,transparent),transparent 42%),radial-gradient(circle at 20% 80%,color-mix(in srgb,var(--spot-accent2) 13%,transparent),transparent 38%);animation:spotlightAura 4.5s ease-in-out infinite}
+.characterSpotlightInner > *{position:relative;z-index:1}
+.characterSpotlight.show .characterSpotlightStage{animation:spotlightStageIn .52s cubic-bezier(.22,1,.36,1) both}
+.characterSpotlight.show .characterSpotlightName{animation:spotlightNameIn .42s .08s cubic-bezier(.22,1,.36,1) both}
+.characterSpotlight.show .characterSpotlightQuip{animation:spotlightQuipIn .48s .16s cubic-bezier(.22,1,.36,1) both}
+.characterSpotlightInner[data-spot-motion="bounce"] .characterSpotlightImg{animation:characterSpotlightFloat 2.4s ease-in-out infinite}
+.characterSpotlightInner[data-spot-motion="shake"] .characterSpotlightImg{animation:spotlightShake 2.8s ease-in-out infinite}
+.characterSpotlightInner[data-spot-motion="rise"] .characterSpotlightImg{animation:spotlightRise 3s ease-in-out infinite}
+.characterSpotlightInner[data-spot-motion="pulse"] .characterSpotlightImg{animation:spotlightPulse 2.6s ease-in-out infinite}
+.characterSpotlightInner[data-spot-motion="jolly"] .characterSpotlightImg{animation:spotlightJolly 2.9s ease-in-out infinite}
+.characterSpotlightInner[data-spot-motion="steady"] .characterSpotlightImg{animation:spotlightSteady 3.6s ease-in-out infinite}
+@keyframes spotlightAura{0%,100%{transform:scale(.94) rotate(0deg);opacity:.65}50%{transform:scale(1.06) rotate(var(--spot-rotate));opacity:1}}
+@keyframes spotlightStageIn{from{opacity:0;transform:translateY(18px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes spotlightNameIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spotlightQuipIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes spotlightShake{0%,100%{transform:translateX(0) rotate(0)}15%{transform:translateX(-2px) rotate(-1deg)}30%{transform:translateX(2px) rotate(1deg)}45%{transform:translateX(-1px)}60%{transform:translateX(1px)}}
+@keyframes spotlightRise{0%,100%{transform:translateY(2px) scale(1)}50%{transform:translateY(-11px) scale(1.02)}}
+@keyframes spotlightPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes spotlightJolly{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-5px) rotate(-1.5deg)}50%{transform:translateY(0) rotate(1.5deg)}75%{transform:translateY(-4px) rotate(-1deg)}}
+@keyframes spotlightSteady{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .characterSpotlightClose:focus-visible,.characterSpotlightActions button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 @media(max-width:380px){.characterSpotlightInner{padding:16px 12px 13px}.characterSpotlightStage{height:220px}.characterSpotlightName{font-size:1.55rem}}
 @media(prefers-reduced-motion:reduce){.characterSpotlightStage::before,.characterSpotlightImg{animation:none!important}.characterSpotlightInner{transition:none}}
@@ -6657,6 +6678,7 @@ function openCharacterSpotlight(id){
   if(!c || !card) return false;
 
   characterSpotlightId = c.id;
+  applyCharacterSpotlightProfile(c.id);
   const owned = isUnlocked("characters", c.id);
   const active = state.activeCharacter === c.id;
   const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
@@ -6711,7 +6733,7 @@ function openCharacterSpotlight(id){
 
   card.classList.add("show");
   try { $("characterSpotlightClose").focus({ preventScroll:true }); } catch(e){}
-  try { playTone(880, 0.08, "triangle"); } catch(e){}
+  playCharacterSpotlightSound(c.id);
   return true;
 }
 
@@ -6811,6 +6833,41 @@ $("characterSpotlight").addEventListener("click", e => {
 document.addEventListener("keydown", e => {
   if(e.key === "Escape" && $("characterSpotlight").classList.contains("show")) closeCharacterSpotlight();
 });
+/* V2.1.8 — character spotlight entrance personalities. Presentation only; no unlock/economy authority. */
+const CHARACTER_SPOTLIGHT_PROFILES = {
+  "wilbert-dam-guide":       { accent:"#2fd2ff", accent2:"#3d3dea", motion:"rise",   rotate:"-3deg", notes:[523,659,784,1046], wave:"triangle" },
+  "yall-too-beaver":         { accent:"#ff9df2", accent2:"#ff4081", motion:"bounce", rotate:"5deg",  notes:[392,494,587,784],   wave:"sine" },
+  "operator-fireman":        { accent:"#ff6a00", accent2:"#ff3040", motion:"shake",  rotate:"2deg",  notes:[220,277,330,440],   wave:"sawtooth" },
+  "operator-moses":          { accent:"#38bdf8", accent2:"#00ffc8", motion:"rise",   rotate:"-5deg", notes:[261,329,392,523],   wave:"triangle" },
+  "operator-valentine":      { accent:"#ff4fa3", accent2:"#ff9df2", motion:"pulse",  rotate:"3deg",  notes:[659,784,988,1318], wave:"sine" },
+  "operator-sam":             { accent:"#60a5fa", accent2:"#93c5fd", motion:"steady", rotate:"-2deg", notes:[330,392,494,659],  wave:"triangle" },
+  "operator-jack-o-lantern": { accent:"#ff8a00", accent2:"#a855f7", motion:"shake",  rotate:"6deg",  notes:[185,233,277,370],   wave:"square" },
+  "operator-santa-claus":   { accent:"#ef4444", accent2:"#f8fafc", motion:"jolly",  rotate:"-4deg", notes:[523,659,784,1046],  wave:"sine" },
+  "operator-woman":          { accent:"#22d3ee", accent2:"#f310ba", motion:"pulse",  rotate:"4deg",  notes:[440,554,659,880],   wave:"triangle" },
+  "operator-man":            { accent:"#818cf8", accent2:"#2fd2ff", motion:"steady", rotate:"-3deg", notes:[294,370,440,587],   wave:"square" }
+};
+
+function playCharacterSpotlightSound(id){
+  const p = CHARACTER_SPOTLIGHT_PROFILES[id] || CHARACTER_SPOTLIGHT_PROFILES[DEFAULT_CHARACTER_ID];
+  try{
+    p.notes.forEach((freq, i) => setTimeout(() => playTone(freq, i === p.notes.length - 1 ? 0.28 : 0.16, p.wave), i * 72));
+    if(id === "operator-moses" || id === "wilbert-dam-guide"){
+      setTimeout(() => playWaterNoise(0.42, 280, 1250, 0.055), 70);
+    }
+  }catch(e){ safeWarn("Character spotlight sound skipped: " + e); }
+}
+
+function applyCharacterSpotlightProfile(id){
+  const inner = $("characterSpotlight")?.querySelector(".characterSpotlightInner");
+  const p = CHARACTER_SPOTLIGHT_PROFILES[id] || CHARACTER_SPOTLIGHT_PROFILES[DEFAULT_CHARACTER_ID];
+  if(!inner || !p) return false;
+  inner.dataset.characterId = id;
+  inner.dataset.spotMotion = p.motion;
+  inner.style.setProperty("--spot-accent", p.accent);
+  inner.style.setProperty("--spot-accent2", p.accent2);
+  inner.style.setProperty("--spot-rotate", p.rotate);
+  return true;
+}
 /* V2.1.7 — one keyboard path for character spotlight; no duplicate handlers. */
 /* ---------- V2.0.7 self-test: guide, characters, menu, floating machine, prizes, UI.
    runCommandCenterSelfTest() → { pass, fail, results:[…] }. Console only. Live state, the save,
@@ -6865,6 +6922,20 @@ function runCommandCenterSelfTest(){
       const after = $("characterSpotlightQuip").textContent;
       return after.length > 0 && DAM_HUMOR_CHARACTER["wilbert-dam-guide"].includes(after) &&
         DAM_HUMOR_CHARACTER["wilbert-dam-guide"].length === 4 && before.length > 0;
+    });
+    t("V2.1.8: every canonical character has a spotlight personality", () => {
+      return CHARACTERS.every(c => {
+        const p = CHARACTER_SPOTLIGHT_PROFILES[c.id];
+        return !!p && Array.isArray(p.notes) && p.notes.length === 4 && !!p.motion;
+      });
+    });
+    t("V2.1.8: spotlight profile is applied without changing character authority", () => {
+      openCharacterSpotlight("operator-moses");
+      const inner = $("characterSpotlight").querySelector(".characterSpotlightInner");
+      const applied = inner && inner.dataset.characterId === "operator-moses" &&
+        inner.dataset.spotMotion === CHARACTER_SPOTLIGHT_PROFILES["operator-moses"].motion;
+      closeCharacterSpotlight();
+      return applied && state.activeCharacter === "wilbert-dam-guide";
     });
     t("guide: spotlight keeps canonical selection in one action", () => {
       const use = $("characterSpotlightActions").querySelector("button:not(:disabled)");
