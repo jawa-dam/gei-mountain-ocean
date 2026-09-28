@@ -1324,6 +1324,21 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes rippleExpand{ to{ transform:translate(-50%,-50%) scale(6.5); opacity:0; border-width:1px; } }
 
 /* V2.1.10 — TAP WATER: global hydraulic response for every meaningful pointer tap. */
+
+/* V2.1.33 — TAP FEEL ENGINE: physical tap response + random musical tones. */
+:root{
+  --tap-feel-scale:1;
+}
+.tapFeelPulse{position:fixed;inset:0;z-index:119;pointer-events:none;overflow:hidden}
+.tapFeelPulse::before{content:"";position:absolute;left:var(--tap-x);top:var(--tap-y);width:72px;height:72px;border-radius:50%;transform:translate(-50%,-50%) scale(.22);opacity:.72;background:radial-gradient(circle,var(--foam) 0%,color-mix(in srgb,var(--water-bright) 58%,transparent) 26%,transparent 70%);animation:tapFeelFlash .34s cubic-bezier(.16,.74,.2,1) forwards}
+.tapFeelBeat{position:absolute;left:var(--tap-x);top:var(--tap-y);width:18px;height:18px;border:2px solid var(--water-bright);border-radius:50%;transform:translate(-50%,-50%) scale(.45);opacity:.75;box-shadow:0 0 14px color-mix(in srgb,var(--water-bright) 58%,transparent);animation:tapFeelRing .46s cubic-bezier(.18,.78,.18,1) forwards}
+.world.tap-feel-hit{animation:tapFeelWorldHit .13s ease-out}
+.station.tap-feel-hit{animation:tapFeelStationHit .18s cubic-bezier(.2,.8,.2,1)}
+@keyframes tapFeelFlash{0%{transform:translate(-50%,-50%) scale(.22);opacity:.72}45%{transform:translate(-50%,-50%) scale(1.1);opacity:.55}100%{transform:translate(-50%,-50%) scale(1.9);opacity:0}}
+@keyframes tapFeelRing{0%{transform:translate(-50%,-50%) scale(.45);opacity:.72}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
+@keyframes tapFeelWorldHit{0%{transform:scale(1)}45%{transform:scale(.996) translateY(1px)}100%{transform:scale(1)}}
+@keyframes tapFeelStationHit{0%{transform:scale(1)}50%{transform:scale(.965) translateY(2px)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.tapFeelPulse::before,.tapFeelBeat,.world.tap-feel-hit,.station.tap-feel-hit{animation-duration:.001ms!important}}
 .tapWaterLayer{position:fixed;inset:0;z-index:80;overflow:hidden;pointer-events:none}
 .tapWaterRipple{position:absolute;width:18px;height:18px;border:2px solid var(--water-bright);border-radius:50%;transform:translate(-50%,-50%) scale(.35);opacity:.9;box-shadow:0 0 12px color-mix(in srgb,var(--water-bright) 55%,transparent);animation:tapWaterRipple .72s cubic-bezier(.2,.75,.2,1) forwards}
 .tapWaterDrop{position:absolute;width:8px;height:12px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,var(--foam),var(--water-bright) 58%,var(--juicy-blue));box-shadow:0 0 9px color-mix(in srgb,var(--water-bright) 58%,transparent);transform:translate(-50%,-50%) rotate(45deg) scale(.65);animation:tapWaterDrop .72s cubic-bezier(.18,.7,.25,1) forwards}
@@ -7833,6 +7848,64 @@ function spawnFoamAt(x, y, big){
 }
 
 /* V2.1.10 — centralized TAP WATER feedback. Presentation-only: no state, XP, FL OZ, or progression changes. */
+/* V2.1.33 — randomized musical phrase bank. Presentation-only. */
+const TAP_FEEL_SCALES = Object.freeze([
+  [523,587,659,784,880,1047],
+  [440,494,554,659,740,880],
+  [392,440,494,587,659,784],
+  [330,370,415,494,554,659],
+  [261,294,330,392,440,523]
+]);
+const tapFeelState={lastX:0,lastY:0,lastAt:0,noteIndex:0,lastContext:"mountain"};
+
+function playRandomTapTone(context,intensity,combo=0){
+  try{
+    const scale=TAP_FEEL_SCALES[Math.floor(Math.random()*TAP_FEEL_SCALES.length)];
+    const base=scale[(tapFeelState.noteIndex++)%scale.length];
+    const k=Math.max(1,Math.min(3,Number(intensity)||1));
+    const rise=(combo>=8?1.12:combo>=6?1.08:combo>=3?1.04:1);
+    const detune=(Math.random()-.5)*10;
+    const freq=Math.max(120,base*rise+detune);
+    const type=(combo>=6||context==="wheel")?"triangle":(Math.random()<.35?"sine":"triangle");
+    damVoice({freq,to:freq*(k===3?1.16:1.06),time:combo>=6?.095:(k===3?.08:.06),
+      gain:combo>=8?.024:combo>=6?.020:(k===3?.017:.013),type,gesture:true});
+    if(Math.random()<.22 && combo<6){
+      damVoice({freq:freq*1.5,time:.045,gain:.006,type:"sine",delay:.035,gesture:true});
+    }
+    return {freq,scaleSize:scale.length};
+  }catch(e){return null}
+}
+
+function triggerTapFeel(clientX,clientY,intensity,context,combo=0){
+  const x=Number(clientX),y=Number(clientY);
+  if(!Number.isFinite(x)||!Number.isFinite(y))return false;
+  const layer=$("tapFeelPulse");
+  if(layer){
+    layer.style.setProperty("--tap-x",x+"px");
+    layer.style.setProperty("--tap-y",y+"px");
+    layer.className="tapFeelPulse";
+    void layer.offsetWidth;
+    layer.className="tapFeelPulse";
+    const beat=document.createElement("div"); beat.className="tapFeelBeat";
+    beat.style.setProperty("left",x+"px"); beat.style.setProperty("top",y+"px");
+    layer.appendChild(beat);
+    setTimeout(()=>beat.remove(),520);
+  }
+  try{
+    const worldNode=$("world");
+    if(worldNode){
+      worldNode.classList.remove("tap-feel-hit"); void worldNode.offsetWidth; worldNode.classList.add("tap-feel-hit");
+    }
+    const g=stationsGroup?.querySelector?.('.station[data-index="'+Math.max(0,Math.min(5,Number(state?.currentStep)||0))+'"]');
+    if(g){
+      g.classList.remove("tap-feel-hit"); void g.offsetWidth; g.classList.add("tap-feel-hit");
+      setTimeout(()=>g.classList.remove("tap-feel-hit"),220);
+    }
+  }catch(e){}
+  tapFeelState.lastX=x;tapFeelState.lastY=y;tapFeelState.lastAt=performance.now();tapFeelState.lastContext=context||"mountain";
+  playRandomTapTone(context,intensity,combo);
+  return true;
+}
 let tapWaterPulseCount = 0;
 
 /* V2.1.32 — RAPID TAP AUDIO BUS
