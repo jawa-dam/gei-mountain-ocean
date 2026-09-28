@@ -7834,30 +7834,48 @@ function spawnFoamAt(x, y, big){
 
 /* V2.1.10 — centralized TAP WATER feedback. Presentation-only: no state, XP, FL OZ, or progression changes. */
 let tapWaterPulseCount = 0;
-let lastTapWaterAudioAt = 0;
-/* V2.1.11 — six canonical hydraulic personalities. Presentation-only: never mutates game/economy state. */
-const TAP_WATER_PROFILES = Object.freeze({
-  mountain:{label:"Mountain pressure",drops:5,spread:44,rise:18,noise:[420,720],tone:[523,659],wave:"triangle"},
-  dam:{label:"Dam pressure",drops:7,spread:58,rise:8,noise:[260,430],tone:[196,247],wave:"sawtooth"},
-  reservoir:{label:"Reservoir rings",drops:6,spread:70,rise:3,noise:[360,560],tone:[392,494],wave:"sine"},
-  sluice:{label:"Sluice release",drops:8,spread:82,rise:14,noise:[520,980],tone:[440,554],wave:"triangle"},
-  wheel:{label:"Waterwheel energy",drops:9,spread:74,rise:10,noise:[300,760],tone:[330,494],wave:"square"},
-  ocean:{label:"Ocean breakthrough",drops:14,spread:116,rise:22,noise:[180,620],tone:[220,330],wave:"sine"}
-});
-function getTapWaterContext(options={}){
-  const index=Number.isInteger(options.index)?options.index:Number(state?.currentStep);
-  if(options.breakthrough||index===MILL_INDEX&&options.finalTap)return "ocean";
-  return ["mountain","dam","reservoir","sluice","wheel","ocean"][Math.max(0,Math.min(5,index))]||"mountain";
-}
-function getTapWaterProfile(context){return TAP_WATER_PROFILES[context]||TAP_WATER_PROFILES.mountain}
-function playContextualTapWaterSound(context,intensity){
-  const p=getTapWaterProfile(context);
+
+/* V2.1.32 — RAPID TAP AUDIO BUS
+   Fast taps share one lightweight audio lane. Visual effects can remain expressive,
+   while sound stays clean, rhythmic, and responsive instead of stacking noise buffers. */
+const TAP_AUDIO_BUS = Object.freeze({minGapMs:72});
+const tapAudioBus={index:0,lastAt:0};
+
+function playRapidTapAudio(context,intensity){
+  const now=performance.now(),p=getTapWaterProfile(context),k=Math.max(1,Math.min(3,Number(intensity)||1));
+  const notes=p.tone||[440,554],freq=notes[(tapAudioBus.index++)%notes.length],fast=now-tapAudioBus.lastAt<TAP_AUDIO_BUS.minGapMs;
+  tapAudioBus.lastAt=now;
   try{
-    playWaterNoise(.12+intensity*.035,p.noise[0],p.noise[1],.045+intensity*.012);
-    const notes=p.tone; playTone(notes[Math.max(0,Math.min(notes.length-1,intensity-1))],.08+intensity*.015,p.wave);
-    playTapTexture(context,intensity);                 // V2.1.12: station-specific hydraulic texture (presentation only)
+    damVoice({
+      freq:freq*(k===3?1.08:1),
+      to:freq*(k===3?1.18:1.06),
+      time:fast?.045:(k===3?.085:k===2?.072:.06),
+      gain:fast?.008:(k===3?.018:k===2?.015:.012),
+      type:p.wave||"sine",
+      gesture:true
+    });
+    if(!fast && k>=2){
+      damNoise({
+        dur:k===3?.10:.075,from:p.noise[0],to:p.noise[1],
+        gain:k===3?.012:.008,filter:k===3?"bandpass":"lowpass",gesture:true
+      });
+    }
+    return true;
+  }catch(e){ return false; }
+}
+
+function playContextualTapWaterSound(context,intensity){
+  playRapidTapAudio(context,intensity);
+  try{ playTapTexture(context,intensity); }catch(e){}
+}
+
+function playTapBreakthroughAccent(){
+  try{
+    damNoise({dur:.34,from:180,to:1100,gain:.028,filter:"bandpass",gesture:true});
+    damVoice({freq:220,to:330,time:.28,gain:.018,type:"sine",gesture:true});
   }catch(e){}
 }
+
 function spawnTapWaterFeedback(clientX,clientY,intensity,context){
   const layer=$("tapWaterLayer");
   if(!layer||!Number.isFinite(clientX)||!Number.isFinite(clientY))return false;
@@ -7879,9 +7897,9 @@ function spawnTapWaterFeedback(clientX,clientY,intensity,context){
     drop.style.animationDelay=Math.random()*.06+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),900);
   }
   setTimeout(()=>{ripple.remove();flash.remove()},1200);
-  try{spawnTapAccent(layer,clientX,clientY,contextId,power)}catch(e){}   // V2.1.12: station accent (presentation only)
-  tapWaterPulseCount++; const now=performance.now();
-  if(now-lastTapWaterAudioAt>55){lastTapWaterAudioAt=now;playContextualTapWaterSound(contextId,power)}
+  try{spawnTapAccent(layer,clientX,clientY,contextId,power)}catch(e){}
+  tapWaterPulseCount++;
+  playContextualTapWaterSound(contextId,power);
   return true;
 }
 function spawnHydraulicBreakthrough(index){
@@ -7898,8 +7916,8 @@ function spawnHydraulicBreakthrough(index){
     drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-p.rise*2)+"px");
     drop.style.animationDelay=Math.random()*.12+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),1150);
   }
-  playContextualTapWaterSound(context,3);
-  try{livingWorldMilestone(index)}catch(e){}           // V2.1.12: the whole world answers a completed day
+  playTapBreakthroughAccent();
+  try{livingWorldMilestone(index)}catch(e){}
   triggerDamItePersonality("breakthrough",{index});
   return true;
 }
