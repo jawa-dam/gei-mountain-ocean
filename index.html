@@ -1328,6 +1328,29 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes tapWaterFlash{0%{transform:translate(-50%,-50%) scale(.4);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
 @media (prefers-reduced-motion:reduce){.tapWaterRipple,.tapWaterDrop,.tapWaterFlash{animation-duration:.001ms !important}}
 
+/* V2.1.20 — DAM-ITE HYDRAULIC REACTIONS: environmental game-feel layer. Presentation only. */
+.hydraulicReactionBurst{position:absolute;width:10px;height:18px;border-radius:70% 70% 55% 55%;background:linear-gradient(160deg,var(--foam),var(--water-bright) 55%,var(--juicy-blue));box-shadow:0 0 14px color-mix(in srgb,var(--water-bright) 72%,transparent);pointer-events:none;transform:translate(-50%,-50%);animation:damIteHydraulicBurst .72s cubic-bezier(.12,.72,.18,1) forwards}
+.hydraulicReactionBurst.ring{width:26px;height:26px;border:3px solid var(--water-bright);background:transparent;border-radius:50%;box-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 65%,transparent);animation:damIteHydraulicRing .82s cubic-bezier(.18,.78,.2,1) forwards}
+.hydraulicReactionBurst.surge{width:16px;height:30px;animation-duration:.9s}
+.station.hydraulicReact{filter:drop-shadow(0 0 12px color-mix(in srgb,var(--water-bright) 70%,transparent))}
+.station.hydraulicReact .ringOuter{animation:damIteStationPulse .58s cubic-bezier(.2,.8,.2,1) 1}
+.station.hydraulicReact .ringInner{animation:damIteStationPulse .58s cubic-bezier(.2,.8,.2,1) 1 .04s}
+.station.hydraulicReact .spring,.station.hydraulicReact .spillway,.station.hydraulicReact .jet{animation:damIteWaterPulse .55s ease-out 1}
+.station.hydraulicReact .wheelSpin{animation:damIteWheelKick .72s cubic-bezier(.12,.72,.18,1) 1}
+.station.hydraulicReact[data-reaction="mountain"] .spring{stroke-width:5}
+.station.hydraulicReact[data-reaction="dam"] .spillway{stroke-width:12}
+.station.hydraulicReact[data-reaction="reservoir"] .ripple{animation:damIteRipplePulse .8s ease-out 1}
+.station.hydraulicReact[data-reaction="sluice"] .jet{stroke-width:7}
+.station.hydraulicReact[data-reaction="wheel"] .wheelSpin{animation-duration:.9s}
+.station.hydraulicReact[data-reaction="ocean"]{filter:drop-shadow(0 0 20px color-mix(in srgb,var(--water-bright) 88%,transparent))}
+@keyframes damIteStationPulse{0%{opacity:.72}35%{opacity:1}100%{opacity:.8}}
+@keyframes damIteWaterPulse{0%{opacity:.65;filter:brightness(1)}45%{opacity:1;filter:brightness(1.65)}100%{opacity:.88;filter:brightness(1)}}
+@keyframes damIteWheelKick{0%{transform:rotate(0)}45%{transform:rotate(24deg)}100%{transform:rotate(360deg)}}
+@keyframes damIteRipplePulse{0%{transform:scale(.72);opacity:.45}45%{transform:scale(1.35);opacity:1}100%{transform:scale(1);opacity:.6}}
+@keyframes damIteHydraulicBurst{0%{opacity:0;transform:translate(-50%,-50%) translate(0,8px) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.15)}}
+@keyframes damIteHydraulicRing{0%{opacity:.9;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(4.5)}}
+@media (prefers-reduced-motion:reduce){.hydraulicReactionBurst,.station.hydraulicReact .ringOuter,.station.hydraulicReact .ringInner,.station.hydraulicReact .spring,.station.hydraulicReact .spillway,.station.hydraulicReact .jet,.station.hydraulicReact .wheelSpin,.station.hydraulicReact .ripple{animation-duration:.001ms !important}}
+ 
 /* V2.1.11 — CONTEXTUAL HYDRAULIC TAP ENGINE. The water now speaks the language of the station. */
 .tapWaterLayer[data-tap-context="mountain"] .tapWaterRipple{border-width:2px;transform:translate(-50%,-50%) scale(.28)}
 .tapWaterLayer[data-tap-context="mountain"] .tapWaterDrop{filter:brightness(1.08);--lift:-18px}
@@ -4922,6 +4945,10 @@ world.addEventListener("click", (e)=>{
   const step = STEPS[index];
 
   state.tapCount++;
+    const hydraulicContext = getTapWaterPointerContext();
+  const hydraulicPower = state.tapCount >= getRequiredTaps(state.level) ? 3 : state.tapCount / getRequiredTaps(state.level) >= .75 ? 2 : 1;
+  triggerDamIteHydraulicReaction(hydraulicContext,{index:state.currentStep,power:hydraulicPower});
+  triggerDamItePersonality("tap",{hydraulic:hydraulicContext});
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
 
@@ -5214,6 +5241,8 @@ function renderHud(){
    OCEAN + LOOP COMPLETE
 ========================================================= */
 function reachOcean(){
+  triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});
+  triggerDamItePersonality("level",{level:state.level});
   oceanGroup.classList.add("reached");
   playOceanSound();
   world.classList.add("flash");
@@ -5863,6 +5892,7 @@ function spinDamMachine(){
   if(!reduced) dmSfx(() => playBonusSpinSounds(lastDur));
   dmSfx(() => playWaterNoise(0.8, 180, 1600, 0.14));    // hydraulic whoosh on launch
   livingMachineHook("onSpin", token, ids, durs);        // V2.1.12: pressure + anticipation (presentation only)
+  triggerDamIteHydraulicReaction("wheel",{index:MILL_INDEX,power:3,source:"machine"});
 
   durs.forEach((dur, i) => {
     const filler = [];
@@ -7407,6 +7437,7 @@ function spawnTapWaterFeedback(clientX,clientY,intensity,context){
   return true;
 }
 function spawnHydraulicBreakthrough(index){
+  triggerDamIteHydraulicReaction("ocean",{index,power:3});
   const layer=$("tapWaterLayer"); if(!layer)return false;
   const context=getTapWaterContext({index,breakthrough:true}),rect=world?.getBoundingClientRect?.();
   const x=rect?rect.left+rect.width*.5:innerWidth*.5,y=rect?rect.top+rect.height*.68:innerHeight*.68;
@@ -7433,6 +7464,66 @@ function getTapWaterPointerContext(){
   }
   if(state.phase==="ready"||state.phase==="timeout")return getTapWaterContext({index});
   return "ocean";
+}
+/* V2.1.20 — DAM-ITE HYDRAULIC REACTION ENGINE.
+   Presentation-only: the environment answers the player without changing economy or progression. */
+const DAM_ITE_HYDRAULIC_REACTIONS=Object.freeze({
+  mountain:{label:"TRIBUTARY PRESSURE",count:5,spread:46,rise:28,ring:false,wave:"triangle",notes:[330,440],noise:[420,760]},
+  dam:{label:"DAM PRESSURE",count:7,spread:58,rise:10,ring:true,wave:"sawtooth",notes:[196,247],noise:[220,420]},
+  reservoir:{label:"RESERVOIR SWELL",count:8,spread:72,rise:4,ring:true,wave:"sine",notes:[392,494],noise:[300,620]},
+  sluice:{label:"SLUICE RELEASE",count:10,spread:88,rise:18,ring:false,wave:"triangle",notes:[440,554],noise:[520,1100]},
+  wheel:{label:"WHEEL ENGAGED",count:12,spread:82,rise:12,ring:true,wave:"square",notes:[330,494],noise:[280,820]},
+  ocean:{label:"OCEAN BREAKTHROUGH",count:18,spread:122,rise:34,ring:true,wave:"sine",notes:[220,330,440],noise:[150,700]}
+});
+const damIteHydraulicReaction={timers:[],count:0,lastContext:null};
+function triggerDamIteHydraulicReaction(context,options={}){
+  const p=DAM_ITE_HYDRAULIC_REACTIONS[context]||DAM_ITE_HYDRAULIC_REACTIONS.mountain;
+  const index=Number.isInteger(options.index)?options.index:Number(state?.currentStep);
+  const station=stationsGroup?.querySelector?.('.station[data-index="'+Math.max(0,Math.min(5,index))+'"]');
+  if(station){
+    station.classList.remove("hydraulicReact"); void station.offsetWidth;
+    station.dataset.reaction=context; station.classList.add("hydraulicReact");
+    const ttl=context==="ocean"?1050:720;
+    const timer=setTimeout(()=>station.classList.remove("hydraulicReact"),ttl);
+    damIteHydraulicReaction.timers.push(timer);
+  }
+  const layer=$("tapWaterLayer");
+  if(layer){
+    const rect=world?.getBoundingClientRect?.();
+    const baseX=Number.isFinite(options.x)?options.x:(rect?rect.left+rect.width*.5:innerWidth*.5);
+    const baseY=Number.isFinite(options.y)?options.y:(rect?rect.top+rect.height*(context==="ocean"?.72:.5):innerHeight*.55);
+    const power=Math.max(1,Math.min(3,Number(options.power)||1));
+    layer.dataset.hydraulicReaction=context;
+    const count=Math.max(3,Math.round(p.count*(power===3?1.35:power===2?1:.68)));
+    for(let i=0;i<count;i++){
+      const d=document.createElement("div");
+      d.className="hydraulicReactionBurst"+(p.ring&&i===0?" ring":"")+(context==="ocean"?" surge":"");
+      const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.28, distance=p.spread*(.55+Math.random()*.75);
+      d.style.left=baseX+"px"; d.style.top=baseY+"px";
+      d.style.setProperty("--dx",Math.cos(angle)*distance+"px");
+      d.style.setProperty("--dy",(Math.sin(angle)*distance-p.rise)+"px");
+      d.style.animationDelay=(Math.random()*.08).toFixed(2)+"s";
+      layer.appendChild(d); setTimeout(()=>d.remove(),context==="ocean"?1250:900);
+    }
+  }
+  damIteHydraulicReaction.count++; damIteHydraulicReaction.lastContext=context;
+  try{
+    const notes=p.notes;
+    notes.forEach((freq,i)=>setTimeout(()=>playTone(freq,i===notes.length-1 ? .2 : .11,p.wave),i*48));
+    playWaterNoise(context==="ocean"?.34:.11+((Number(options.power)||1)*.025),p.noise[0],p.noise[1],context==="ocean"?.12:.045);
+  }catch(e){}
+  return true;
+}
+function runDamIteHydraulicReactionSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  const before=JSON.stringify({totalFlOz:state.totalFlOz,level:state.level,levelFlOz:state.levelFlOz,tapCount:state.tapCount,completedLevels:state.completedLevels,damMachineFreePlays:state.damMachineFreePlays});
+  const ids=["mountain","dam","reservoir","sluice","wheel","ocean"];
+  t("V2.1.20: six hydraulic reaction profiles exist",()=>ids.every(id=>!!DAM_ITE_HYDRAULIC_REACTIONS[id]));
+  t("V2.1.20: reactions preserve the six canonical contexts",()=>ids.every((id,i)=>getTapWaterContext({index:i})===id));
+  t("V2.1.20: reaction engine is presentation-only",()=>{triggerDamIteHydraulicReaction("dam",{index:1,power:2});return JSON.stringify({totalFlOz:state.totalFlOz,level:state.level,levelFlOz:state.levelFlOz,tapCount:state.tapCount,completedLevels:state.completedLevels,damMachineFreePlays:state.damMachineFreePlays})===before});
+  t("V2.1.20: breakthrough context is ocean",()=>getTapWaterContext({index:MILL_INDEX,breakthrough:true})==="ocean");
+  t("V2.1.20: engine contains no economy authority calls",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(triggerDamIteHydraulicReaction.toString()));
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
 }
 document.addEventListener("pointerdown",e=>{
   if(e.button!==undefined&&e.button!==0)return;
@@ -9149,7 +9240,7 @@ function playDamIteOperatorVoice(id, context){
   const profile=DAM_ITE_OPERATOR_VOICES[id] || DAM_ITE_OPERATOR_VOICES["wilbert-dam-guide"];
   try{
     profile.notes.forEach((freq,index)=>{
-      setTimeout(()=>playTone(freq,index===profile.notes.length-1?.24:.14,profile.wave),index*58);
+      setTimeout(()=>playTone(freq,index===profile.notes.length-1 ? .24 : .14,profile.wave),index*58);
     });
     if(context==="breakthrough") setTimeout(()=>playWaterNoise(.32,180,900,.045),90);
     if(context==="machine") setTimeout(()=>playTone(profile.notes[0]*.5,.12,"square"),120);
