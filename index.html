@@ -5834,8 +5834,10 @@ function restorePurchaseVerificationSession(){
   if(!raw) return;
   try{
     const saved=JSON.parse(raw);
-    if(!saved || saved.packId!=="single" || !saved.claimId) return;
+    if(!saved || saved.packId!=="single") return;
+    if(!saved.claimId && saved.orderID) saved.claimId=checkoutClaimId(saved.orderID);
     purchaseVerificationSession=saved;
+    persistPurchaseVerificationSession();
     setPurchaseVerification("purchaseArm","pass","RESTORED");
     if(saved.capture) setPurchaseVerification("purchaseCapture","pass","PASS");
     if(saved.claim) setPurchaseVerification("purchaseClaim","pass",saved.recovered?"RECOVERED":"PASS");
@@ -5933,10 +5935,13 @@ function startCheckout(packId){
         });
         const r=result.response, data=result.data;
         if(!r.ok || !data.id) throw new Error(data.error || "Unable to start PayPal checkout.");
-        safeSessionSet(paypalRecoveryStorageKey("claim",data.id),checkoutClaimId(data.id));
+        const checkoutClaim=checkoutClaimId(data.id);
+        safeSessionSet(paypalRecoveryStorageKey("claim",data.id),checkoutClaim);
         if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
           purchaseVerificationSession.orderID=data.id;
           purchaseVerificationSession.requestId=requestId;
+          purchaseVerificationSession.claimId=checkoutClaim;
+          persistPurchaseVerificationSession();
         }
         return data.id;
       },
