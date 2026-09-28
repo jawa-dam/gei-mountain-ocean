@@ -2195,6 +2195,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
             <div class="purchaseVerificationCheck pending"><span>Test session armed</span><span id="purchaseArm">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>PayPal capture</span><span id="purchaseCapture">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>Replay protection</span><span id="purchaseReplay">WAIT</span></div>
+          <button class="storeBtn purchaseReplayBtn" id="purchaseReplayBtn" type="button" hidden>🔒 VERIFY REPLAY SHIELD · NO NEW CHARGE</button>
             <div class="purchaseVerificationCheck pending"><span>Entitlement claim</span><span id="purchaseClaim">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>FL OZ credit</span><span id="purchaseCredit">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>Purchase History</span><span id="purchaseHistoryCheck">WAIT</span></div>
@@ -5729,14 +5730,17 @@ function armProductionPurchaseVerification(pack){
     flOz:Number(pack.flOz),
     walletBefore:Number(state.totalFlOz)||0,
     historyBefore:state.purchaseHistory.length,
-    orderID:null,
     requestId:null,
     songsBefore:state.unlockedSongs.length,
     armedAt:Date.now(),
     capture:false,
     claim:false,
     credit:false,
-    recovered:false
+    recovered:false,
+    orderID:null,
+    captureID:null,
+    claimToken:null,
+    claimId:null
   };
   const arm=$("purchaseArm");
   if(arm){ arm.textContent="ARMED"; const row=arm.closest(".purchaseVerificationCheck"); row.classList.remove("pending"); row.classList.add("pass"); }
@@ -5749,6 +5753,36 @@ function setPurchaseVerification(id,stateName,label){
   el.textContent=label;
   const row=el.closest(".purchaseVerificationCheck");
   if(row){ row.classList.remove("pending","pass"); row.classList.add(stateName); }
+}
+
+async function verifyProductionReplayShield(){
+  const s=purchaseVerificationSession;
+  if(!s || !s.claimToken || !s.captureID || !s.claimId){
+    const meta=$("purchaseVerificationMeta");
+    if(meta) meta.textContent="Complete a successful production purchase first.";
+    return;
+  }
+  const walletBefore=Number(state.totalFlOz)||0;
+  const result=await paypalFetchJson("/api/paypal/claim-entitlement",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      claimToken:s.claimToken,
+      captureID:s.captureID,
+      claimId:s.claimId
+    })
+  });
+  const response=result.response, data=result.data;
+  const walletAfter=Number(state.totalFlOz)||0;
+  if(!response.ok || !data.ok || data.alreadyClaimed!==true || walletAfter!==walletBefore){
+    setPurchaseVerification("purchaseReplay","pending","CHECK");
+    const meta=$("purchaseVerificationMeta");
+    if(meta) meta.textContent="⚠️ Replay check did not return the expected already-claimed result.";
+    return;
+  }
+  setPurchaseVerification("purchaseReplay","pass","LOCKED · NO 2X CREDIT");
+  const meta=$("purchaseVerificationMeta");
+  if(meta) meta.textContent="🔒 REPLAY SHIELD VERIFIED · same claim replayed safely with no second FL OZ credit.";
 }
 
 function updateProductionPurchaseVerification(){
@@ -5784,9 +5818,9 @@ function safeSessionSet(key,value){
 function safeSessionRemove(key){
   try { sessionStorage.removeItem(key); } catch(e){}
 }
-function clearCheckoutRecovery(packId,orderID){
+function clearCheckoutRecovery(packId,orderID,keepClaim=false){
   safeSessionRemove(paypalRecoveryStorageKey("request",packId));
-  if(orderID) safeSessionRemove(paypalRecoveryStorageKey("claim",orderID));
+  if(orderID && !keepClaim) safeSessionRemove(paypalRecoveryStorageKey("claim",orderID));
 }
 function checkoutRequestId(packId){
   const key=paypalRecoveryStorageKey("request",packId);
@@ -5884,10 +5918,16 @@ function startCheckout(packId){
         }
         if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
           purchaseVerificationSession.capture=true;
+          purchaseVerificationSession.orderID=data.orderID;
+          purchaseVerificationSession.captureID=result.captureID;
+          purchaseVerificationSession.claimToken=result.claimToken;
           setPurchaseVerification("purchaseCapture","pass","PASS");
         }
 
         const claimId=checkoutClaimId(data.orderID);
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.claimId=claimId;
+        }
         const claimResult=await paypalFetchJson("/api/paypal/claim-entitlement",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
@@ -5924,7 +5964,9 @@ function startCheckout(packId){
         if(credited.ok) showToast("💧 +"+fmt(credited.credited)+" FL OZ added");
         else showToast("💧 Your FL OZ entitlement is already in this game.");
         showPayPalReceipt(pack, credited.ok ? credited.credited : claim.entitlement.flOz, claim.entitlement.captureID);
-        clearCheckoutRecovery(packId,data.orderID);
+        clearCheckoutRecovery(packId,data.orderID,true);
+        const replayBtn=$("purchaseReplayBtn");
+        if(replayBtn) replayBtn.hidden=false;
         renderStore();
         setTimeout(closePayPalCheckout,5000);
       },
@@ -6721,6 +6763,11 @@ function renderPurchaseHistory(){
   }).join("");
 }
 
+const replayBtn=document.getElementById("purchaseReplayBtn");
+if(replayBtn && !replayBtn.dataset.bound){
+  replayBtn.dataset.bound="1";
+  replayBtn.addEventListener("click",verifyProductionReplayShield);
+}
 const runtimeBtn=document.getElementById("paypalRuntimeRun");
 if(runtimeBtn && !runtimeBtn.dataset.bound){
   runtimeBtn.dataset.bound="1";
