@@ -1,4 +1,4 @@
-import { ECONOMY_AUTHORITY_VERSION, validateEntitlementAuthority, auditReceipt } from "./economy-authority.js";
+import { ECONOMY_AUTHORITY_VERSION, validateEntitlementAuthority, auditReceipt, reconcileEntitlementAuthority } from "./economy-authority.js";
 
 const LEDGER_TTL_SECONDS = 60 * 60 * 24 * 365;
 
@@ -26,6 +26,17 @@ async function redisCommand(command) {
   return data.result;
 }
 
+function reconciled(record) {
+  const result = reconcileEntitlementAuthority(record);
+  if (!result.ok) {
+    const error = new Error("Economy authority drift detected.");
+    error.code = "ECONOMY_DRIFT_DETECTED";
+    error.reconciliation = result;
+    throw error;
+  }
+  return result;
+}
+
 export async function recordEntitlement({
   eventId,
   orderID,
@@ -40,7 +51,9 @@ export async function recordEntitlement({
     throw new Error("Incomplete PayPal entitlement record.");
   }
 
-  if (!validateEntitlementAuthority({ packId, flOz, amount, currency })) throw new Error("Economy authority validation failed.");
+  if (!validateEntitlementAuthority({ packId, flOz, amount, currency })) {
+    throw new Error("Economy authority validation failed.");
+  }
 
   const eventKey = "gei:paypal:event:" + eventId;
   const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
@@ -81,9 +94,39 @@ export async function recordEntitlement({
     record
   ]);
 
+  const parsed = result?.[1] ? JSON.parse(result[1]) : null;
+  if (parsed) reconciled(parsed);
+
   return {
     created: Number(result?.[0]) === 1,
-    record: result?.[1] ? JSON.parse(result[1]) : null
+    record: parsed
+  };
+}
+
+export async function getEntitlement(invoiceId, captureID = null) {
+  if (!invoiceId) throw new Error("Missing entitlement identity.");
+
+  const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
+  const raw = await redisCommand(["GET", entitlementKey]);
+  if (!raw) return { ok: false, reason: "NOT_FOUND" };
+
+  let record;
+  try {
+    record = JSON.parse(raw);
+  } catch {
+    return { ok: false, reason: "CORRUPT_RECORD" };
+  }
+
+  if (captureID && record.captureID !== captureID) {
+    return { ok: false, reason: "CAPTURE_MISMATCH", record };
+  }
+
+  const reconciliation = reconcileEntitlementAuthority(record);
+  return {
+    ok: reconciliation.ok,
+    driftDetected: reconciliation.driftDetected,
+    reconciliation,
+    record
   };
 }
 
@@ -91,6 +134,16 @@ export async function claimEntitlement(invoiceId, captureID, claimId) {
   if (!invoiceId || !captureID || !claimId) throw new Error("Missing entitlement claim information.");
 
   const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
+  const preflight = await getEntitlement(invoiceId, captureID);
+  if (!preflight.ok) {
+    if (preflight.reason === "NOT_FOUND") return { ok: false, alreadyClaimed: false, reason: "NOT_FOUND" };
+    if (preflight.reason === "CAPTURE_MISMATCH") return { ok: false, alreadyClaimed: false, reason: "CAPTURE_MISMATCH" };
+    const error = new Error("Economy authority drift detected.");
+    error.code = "ECONOMY_DRIFT_DETECTED";
+    error.reconciliation = preflight.reconciliation;
+    throw error;
+  }
+
   const now = new Date().toISOString();
 
   const script = `
@@ -120,22 +173,33 @@ export async function claimEntitlement(invoiceId, captureID, claimId) {
     String(LEDGER_TTL_SECONDS)
   ]);
 
-  if (Number(result?.[0]) === 1) {
-    return { ok: true, alreadyClaimed: false, record: JSON.parse(result[1]) };
-  }
-
-  if (Number(result?.[0]) === 2) {
-    return { ok: true, alreadyClaimed: true, record: JSON.parse(result[1]) };
+  if (Number(result?.[0]) === 1 || Number(result?.[0]) === 2) {
+    const record = JSON.parse(result[1]);
+    reconciled(record);
+    return {
+      ok: true,
+      alreadyClaimed: Number(result?.[0]) === 2,
+      record
+    };
   }
 
   return { ok: false, alreadyClaimed: false, reason: result?.[1] || "NOT_FOUND" };
 }
 
-
 export async function fulfillEntitlement(invoiceId, captureID, fulfillmentId) {
   if (!invoiceId || !captureID || !fulfillmentId) throw new Error("Missing entitlement fulfillment information.");
 
   const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
+  const preflight = await getEntitlement(invoiceId, captureID);
+  if (!preflight.ok) {
+    if (preflight.reason === "NOT_FOUND") return { ok: false, alreadyFulfilled: false, reason: "NOT_FOUND" };
+    if (preflight.reason === "CAPTURE_MISMATCH") return { ok: false, alreadyFulfilled: false, reason: "CAPTURE_MISMATCH" };
+    const error = new Error("Economy authority drift detected.");
+    error.code = "ECONOMY_DRIFT_DETECTED";
+    error.reconciliation = preflight.reconciliation;
+    throw error;
+  }
+
   const now = new Date().toISOString();
 
   const script = `
@@ -167,12 +231,14 @@ export async function fulfillEntitlement(invoiceId, captureID, fulfillmentId) {
     String(LEDGER_TTL_SECONDS)
   ]);
 
-  if (Number(result?.[0]) === 1) {
-    return { ok: true, alreadyFulfilled: false, record: JSON.parse(result[1]) };
-  }
-
-  if (Number(result?.[0]) === 2) {
-    return { ok: true, alreadyFulfilled: true, record: JSON.parse(result[1]) };
+  if (Number(result?.[0]) === 1 || Number(result?.[0]) === 2) {
+    const record = JSON.parse(result[1]);
+    reconciled(record);
+    return {
+      ok: true,
+      alreadyFulfilled: Number(result?.[0]) === 2,
+      record
+    };
   }
 
   return { ok: false, alreadyFulfilled: false, reason: result?.[1] || "NOT_FOUND" };
