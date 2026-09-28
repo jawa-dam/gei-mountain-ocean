@@ -5262,7 +5262,10 @@ function renderHud(){
    OCEAN + LOOP COMPLETE
 ========================================================= */
 function reachOcean(){
-  triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});\n  showDamIteComboFlash("DAM-ITE FLOW MASTERED",true);\n  resetDamIteCombo("level-complete");\n  triggerDamItePersonality("level",{level:state.level});
+  triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});
+  showDamIteComboFlash("DAM-ITE FLOW MASTERED",true);
+  resetDamIteCombo("level-complete");
+  triggerDamItePersonality("level",{level:state.level});
   oceanGroup.classList.add("reached");
   playOceanSound();
   world.classList.add("flash");
@@ -5912,7 +5915,8 @@ function spinDamMachine(){
   if(!reduced) dmSfx(() => playBonusSpinSounds(lastDur));
   dmSfx(() => playWaterNoise(0.8, 180, 1600, 0.14));    // hydraulic whoosh on launch
   livingMachineHook("onSpin", token, ids, durs);        // V2.1.12: pressure + anticipation (presentation only)
-  triggerDamIteHydraulicReaction("wheel",{index:MILL_INDEX,power:3,source:"machine"});\n  resetDamIteCombo("machine-spin");
+  triggerDamIteHydraulicReaction("wheel",{index:MILL_INDEX,power:3,source:"machine"});
+  resetDamIteCombo("machine-spin");
 
   durs.forEach((dur, i) => {
     const filler = [];
@@ -9184,9 +9188,13 @@ function runLivingWorldSelfTest(){
     const before = pick(); triggerLivingEvent("pressureRelease"); triggerLivingEvent("machinePuff"); runSkinAccent(); return pick() === before;
   });
   t("V2.1.12: living-world code never references economy authority", () => {
-    const src = [spawnAmbientParticle, triggerLivingEvent, rollLivingEvent, runSkinAccent, spawnTapAccent, playTapTexture, livingWorldMilestone, showLivingBadge, revealSkinWhenReady, startLivingWorld, damVoice, damNoise, livingMachineHook, livingSpotlightHook].map(f => f.toString()).join("\n") +
-      Object.values(LIVING_WORLD_EVENTS).map(e => e.run.toString()).join("\n") +
-      Object.keys(livingMachine).map(k => String(livingMachine[k])).join("\n") + Object.keys(livingSpotlight).map(k => String(livingSpotlight[k])).join("\n");
+    const src = [spawnAmbientParticle, triggerLivingEvent, rollLivingEvent, runSkinAccent, spawnTapAccent, playTapTexture, livingWorldMilestone, showLivingBadge, revealSkinWhenReady, startLivingWorld, damVoice, damNoise, livingMachineHook, livingSpotlightHook].map(f => f.toString()).join("
+") +
+      Object.values(LIVING_WORLD_EVENTS).map(e => e.run.toString()).join("
+") +
+      Object.keys(livingMachine).map(k => String(livingMachine[k])).join("
+") + Object.keys(livingSpotlight).map(k => String(livingSpotlight[k])).join("
+");
     return !/totalFlOz|levelFlOz|safeAddFlOz|commitDamResult|creditPack|awardDay|saveGame|unlockItem|purchase|entitlement|paypal/i.test(src);
   });
   t("V2.1.12: ambient particles are capped", () => { for(let i = 0; i < 30; i++) spawnAmbientParticle(); return $("livingWorldLayer").querySelectorAll(".lwP").length <= LIVING_MAX_AMBIENT + 8; });
