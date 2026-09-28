@@ -1039,6 +1039,17 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .paypalRuntimeCheck.pending{ border:1px solid rgba(255,255,255,.14); }
 .paypalRuntimeRun{ width:100%; margin-top:9px; }
 .paypalRuntimeMeta{ margin-top:8px; min-height:1.2em; font-size:.78rem; text-align:center; opacity:.72; }
+.purchaseVerification{ margin-top:12px; padding:14px; border-radius:18px; background:linear-gradient(160deg,rgba(255,215,106,.10),rgba(47,210,255,.08)); border:1.5px solid rgba(255,215,106,.25); }
+.purchaseVerificationTitle{ font-size:1rem; font-weight:950; letter-spacing:.07em; text-align:center; color:var(--gold); }
+.purchaseVerificationSub{ margin:5px 0 10px; font-size:.86rem; line-height:1.35; text-align:center; opacity:.84; }
+.purchaseVerificationChecks{ display:grid; gap:6px; }
+.purchaseVerificationCheck{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border-radius:12px; background:rgba(0,0,0,.22); font-size:.9rem; font-weight:850; }
+.purchaseVerificationCheck span:last-child{ white-space:nowrap; }
+.purchaseVerificationCheck.pass{ border:1px solid rgba(47,210,255,.42); }
+.purchaseVerificationCheck.pending{ border:1px solid rgba(255,255,255,.14); }
+.purchaseVerificationCheck.manual{ border:1px solid rgba(255,215,106,.35); }
+.purchaseVerificationMeta{ margin-top:8px; min-height:1.2em; font-size:.78rem; text-align:center; opacity:.72; }
+
 
 .paypalButtons{ min-height:42px; }
 .paypalReceipt{ margin:10px 0 2px; padding:14px 14px 12px; border-radius:16px; background:linear-gradient(145deg,rgba(32,220,160,.13),rgba(41,198,255,.14)); border:1.5px solid rgba(126,255,214,.55); text-align:center; box-shadow:0 0 22px rgba(32,220,160,.12); }
@@ -2176,6 +2187,19 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="purchaseHistory" id="purchaseHistory">
           <div class="purchaseHistoryTitle">🧾 Purchase History</div>
           <div class="purchaseHistoryList" id="purchaseHistoryList"></div>
+        </div>
+        <div class="purchaseVerification" id="purchaseVerification">
+          <div class="purchaseVerificationTitle">🧾 V2.0.21 PURCHASE VERIFICATION</div>
+          <div class="purchaseVerificationSub">Arm the $1 test, complete one real production purchase, then verify the entitlement reaches the FL OZ wallet and Song Vault.</div>
+          <div class="purchaseVerificationChecks" id="purchaseVerificationChecks">
+            <div class="purchaseVerificationCheck pending"><span>Test session armed</span><span id="purchaseArm">WAIT</span></div>
+            <div class="purchaseVerificationCheck pending"><span>PayPal capture</span><span id="purchaseCapture">WAIT</span></div>
+            <div class="purchaseVerificationCheck pending"><span>Entitlement claim</span><span id="purchaseClaim">WAIT</span></div>
+            <div class="purchaseVerificationCheck pending"><span>FL OZ credit</span><span id="purchaseCredit">WAIT</span></div>
+            <div class="purchaseVerificationCheck pending"><span>Purchase History</span><span id="purchaseHistoryCheck">WAIT</span></div>
+            <div class="purchaseVerificationCheck manual"><span>Song Vault unlock</span><span id="purchaseSong">MANUAL</span></div>
+          </div>
+          <div class="purchaseVerificationMeta" id="purchaseVerificationMeta" aria-live="polite">Select the $1 pack to arm the production test.</div>
         </div>
         <div class="paypalRuntime" id="paypalRuntime">
           <div class="paypalRuntimeTitle">🩺 PRODUCTION RUNTIME</div>
@@ -5694,13 +5718,61 @@ function closePayPalCheckout(){
   clearPayPalReceipt();
 }
 
-async function startCheckout(packId){
+async let purchaseVerificationSession = null;
+
+function armProductionPurchaseVerification(pack){
+  if(!pack || pack.id !== "single") return;
+  purchaseVerificationSession = {
+    packId:pack.id,
+    amount:Number(pack.priceUsd),
+    flOz:Number(pack.flOz),
+    walletBefore:Number(state.totalFlOz)||0,
+    historyBefore:state.purchaseHistory.length,
+    songsBefore:state.unlockedSongs.length,
+    armedAt:Date.now(),
+    capture:false,
+    claim:false,
+    credit:false
+  };
+  const arm=$("purchaseArm");
+  if(arm){ arm.textContent="ARMED"; const row=arm.closest(".purchaseVerificationCheck"); row.classList.remove("pending"); row.classList.add("pass"); }
+  const meta=$("purchaseVerificationMeta");
+  if(meta) meta.textContent="Production $1 verification armed · complete this checkout once.";
+}
+
+function setPurchaseVerification(id,stateName,label){
+  const el=$(id); if(!el) return;
+  el.textContent=label;
+  const row=el.closest(".purchaseVerificationCheck");
+  if(row){ row.classList.remove("pending","pass"); row.classList.add(stateName); }
+}
+
+function updateProductionPurchaseVerification(){
+  const s=purchaseVerificationSession;
+  if(!s) return;
+  const walletDelta=(Number(state.totalFlOz)||0)-s.walletBefore;
+  const historyDelta=state.purchaseHistory.length-s.historyBefore;
+  const songDelta=state.unlockedSongs.length-s.songsBefore;
+  if(s.credit){
+    setPurchaseVerification("purchaseCredit",walletDelta===s.flOz?"pass":"pending",walletDelta===s.flOz?"PASS":"CHECK");
+    setPurchaseVerification("purchaseHistoryCheck",historyDelta>=1?"pass":"pending",historyDelta>=1?"PASS":"WAIT");
+    if(songDelta>=1) setPurchaseVerification("purchaseSong","pass","PASS");
+  }
+  const complete=s.capture&&s.claim&&s.credit&&walletDelta===s.flOz&&historyDelta>=1&&songDelta>=1;
+  const meta=$("purchaseVerificationMeta");
+  if(meta) meta.textContent=complete
+    ? "🎉 PRODUCTION PURCHASE VERIFIED · payment → entitlement → wallet → Song Vault"
+    : "Production purchase session active · unlock the next Song Vault song to finish the manual proof.";
+}
+
+function startCheckout(packId){
   const pack = STORE_PACKS.find(p => p.id === packId);
   if(!pack) return;
 
   const box=$("storeCheckout"), item=$("paypalCheckoutItem"), status=$("paypalCheckoutStatus"), buttons=$("paypalButtons");
   if(!box || !item || !status || !buttons) return;
 
+  armProductionPurchaseVerification(pack);
   box.hidden=false;
   item.textContent=pack.label+" — $"+Number(pack.priceUsd).toFixed(2)+" USD";
   buttons.innerHTML="";
@@ -5751,6 +5823,10 @@ async function startCheckout(packId){
         if(!r.ok || !result.ok || result.status!=="COMPLETED" || !result.claimToken){
           throw new Error(result.error || "Payment could not be confirmed.");
         }
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.capture=true;
+          setPurchaseVerification("purchaseCapture","pass","PASS");
+        }
 
         const claimId="checkout-"+crypto.randomUUID();
         const claimResponse=await fetch("/api/paypal/claim-entitlement",{
@@ -5766,6 +5842,10 @@ async function startCheckout(packId){
         if(!claimResponse.ok || !claim.ok || !claim.entitlement){
           throw new Error(claim.error || "Payment was confirmed but the durable entitlement could not be claimed.");
         }
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.claim=true;
+          setPurchaseVerification("purchaseClaim","pass","PASS");
+        }
 
         const credited=creditPack(claim.entitlement.packId,claim.entitlement.captureID, {
           orderID: claim.entitlement.orderID,
@@ -5773,6 +5853,11 @@ async function startCheckout(packId){
         });
         if(!credited.ok && credited.message!=="Receipt already credited."){
           throw new Error(credited.message || "Payment was confirmed but the reward could not be added.");
+        }
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.credit=true;
+          setPurchaseVerification("purchaseCredit","pass","PASS");
+          updateProductionPurchaseVerification();
         }
 
         status.textContent="✅ Payment complete — your FL OZ entitlement is secured!";
@@ -6637,7 +6722,11 @@ $("storePanel").addEventListener("click", e => {
     const why = purchaseFailureHumor("songs", next.id);
     const res = purchaseItem("songs", next.id);
     setStoreMsg(res.ok ? `🎵 Unlocked “${next.title}” — ${getDamHumor("songPurchase")}` : `${why} ${res.message}`.trim());
-    if(res.ok){ playSongUnlockSound(); renderStore(); }
+    if(res.ok){
+      playSongUnlockSound();
+      renderStore();
+      updateProductionPurchaseVerification();
+    }
     return;
   }
   const packBtn = e.target.closest("[data-pack]");
