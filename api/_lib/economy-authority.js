@@ -2,10 +2,12 @@ export const ECONOMY_AUTHORITY_VERSION = "2.0.25";
 export const ECONOMY_RECONCILIATION_VERSION = "2.0.26";
 export const ECONOMY_MAX_FL_OZ = 1000000000;
 
+/* V2.1.13 — authoritative store pricing.
+   Pack IDs and FL OZ fulfillment remain unchanged; USD prices are now $6 / $12 / $18. */
 export const PACKS = Object.freeze({
-  single: Object.freeze({ label:"1 Song", price:"1.00", flOz:6660 }),
-  ten: Object.freeze({ label:"10 Songs", price:"3.00", flOz:66600 }),
-  twentyfive: Object.freeze({ label:"25 Songs", price:"6.00", flOz:166500 })
+  single: Object.freeze({ label:"1 Song", price:"6.00", flOz:6660 }),
+  ten: Object.freeze({ label:"10 Songs", price:"12.00", flOz:66600 }),
+  twentyfive: Object.freeze({ label:"25 Songs", price:"18.00", flOz:166500 })
 });
 
 export function getPack(packId) {
