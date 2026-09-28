@@ -2939,7 +2939,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="brandTag">SAVE THE -ITES. SAVE THE WATER.</div>
         </div>
         <div class="hudRight">
-          <button class="iconBtn navMenuBtn" id="navMenuBtn" aria-label="Game menu" aria-expanded="false" aria-controls="navSheet" title="Game menu">☰</button>
+          <button class="iconBtn navMenuBtn" id="navMenuBtn" aria-label="Open settings menu" aria-expanded="false" aria-controls="navSheet" title="Settings">⚙️</button>
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
         </div>
       </div>
@@ -2970,16 +2970,12 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       <div class="loopBadge">Loops completed: <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
     </div>
 
-    <!-- v2.6.2: CONSOLIDATED NAVIGATION — one ☰ menu, five destinations.
+    <!-- V2.1.30: SIMPLE SETTINGS MENU — focused destinations only.
          Rows only call the existing togglePanel()/openDamMachine() entry functions;
          the panels themselves are unchanged. No state is saved. -->
     <nav class="navSheet" id="navSheet" aria-label="Game navigation">
-      <div class="navTitle" aria-hidden="true">DAM-ITE COMMAND MENU</div>
-      <button class="navRow" id="navHowBtn" aria-label="Open How to Play and Rules"><span class="navRowIcon" aria-hidden="true">📖</span><span class="navRowText"><strong>How to Play</strong><small>Rules · taps · levels · bonuses</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-      <button class="navRow" id="navCharactersBtn" aria-label="Open character roster"><span class="navRowIcon" aria-hidden="true">👤</span><span class="navRowText"><strong>Characters</strong><small>Choose · purchase · unlock</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-      <button class="navRow" id="navProfileBtn" aria-label="Open player profile"><span class="navRowIcon" aria-hidden="true">📊</span><span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-      <button class="navRow" id="navTribesBtn" aria-label="Open tribes list"><span class="navRowIcon" aria-hidden="true">🚢</span><span class="navRowText"><strong>-ites</strong><small>Rescue record · preserved names</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-      <button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <div class="navTitle" aria-hidden="true">⚙️ DAM-ITE SETTINGS</div>
+      <button class="navRow" id="navHowBtn" aria-label="Open How to Play and Rules"><span class="navRowIcon" aria-hidden="true">📖</span><span class="navRowText"><strong>How to Play</strong><small>Rules · taps · levels · bonuses</small></span><span class="navRowChevron" aria-hidden="true">›</span></button><button class="navRow" id="navProfileBtn" aria-label="Open player profile"><span class="navRowIcon" aria-hidden="true">📊</span><span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span><span class="navRowChevron" aria-hidden="true">›</span></button><button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
     <button class="dmStoreFloatBtn" id="dmStoreFloatBtn" type="button" aria-label="Open BUY-ites shop">
       <span class="dmStoreFloatTitle" aria-hidden="true">🛒</span>
@@ -2992,7 +2988,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 
     <div class="preGameCard" id="preGameCard" role="dialog" aria-modal="true" aria-labelledby="preGameTitle">
       <div class="preGameInner">
-        <button class="preGameClose" id="preGameClose" type="button" aria-label="Close guide" hidden>✕</button>
+        <button class="preGameClose" id="preGameClose" type="button" aria-label="Close guide">✕</button>
         <div class="preGameTitle" id="preGameTitle">💧 DAM-ITE COMMAND GUIDE</div>
         <div class="preGameSub">Learn the flow, choose your avatar, then start the hydraulic system.</div>
         <div class="preGameTabs" role="tablist" aria-label="Command guide sections">
@@ -3008,14 +3004,12 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="preGameRule">💧 <strong>Earn FL OZ.</strong> Every finished day adds 111 FL OZ to your wallet — 666 FL OZ for a full level.</div>
           <div class="preGameRule">🎡 <strong>Bonus Waterwheel.</strong> Complete a level to spin it for FL OZ, songs, characters, or free DAM MACHINE plays.</div>
           <div class="preGameRule">🎰 <strong>DAM MACHINE.</strong> When you win a free play, the 🎰 button flashes <strong>BONUS READY</strong> on the left side of the game. Tap it to play.</div>
-          <div class="preGameRule">👤 <strong>Characters.</strong> Two starters are free. Buy the rest with FL OZ in 👤 Characters, or win them in the bonus games.</div>
+          <div class="preGameRule">👤 <strong>Characters.</strong> Two starters are free. Buy the rest with FL OZ in 🛒 BUY-ites, or win them in the bonus games.</div>
           <div class="preGameRule">📈 <strong>Progression.</strong> Each level asks for more taps, saves another -ite, and grows your mill. Big celebrations wait at milestone levels.</div>
         </div></section>
         <section class="preGamePane" data-guide-pane="rules"><div class="preGameList" id="guideRulesList"></div></section>
         <section class="preGamePane" data-guide-pane="avatar"><div class="preGameWallet" id="preGameWallet"></div><div class="preGameAvatarGrid" id="preGameAvatarGrid"></div></section>
-        <div class="preGameMsg" id="preGameMsg" aria-live="polite"></div>
-        <div class="preGameFoot"><input id="preGameNever" type="checkbox"><label for="preGameNever">Never show again</label></div>
-        <button class="lcBtn preGameStart" id="preGameStart" type="button">🚀 START GAME</button>
+        <div class="preGameMsg" id="preGameMsg" aria-live="polite"></div><button class="lcBtn preGameStart" id="preGameStart" type="button">🚀 START GAME</button>
         <button class="preGameHowBtn" id="preGameChooseBtn" type="button">👤 CHOOSE YOUR AVATAR</button>
       </div>
     </div>
@@ -3262,38 +3256,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         <div class="purchaseHistory" id="purchaseHistory">
           <div class="purchaseHistoryTitle">🧾 Purchase History</div>
           <div class="purchaseHistoryList" id="purchaseHistoryList"></div>
-        </div>
-        <div class="purchaseVerification" id="purchaseVerification">
-          <div class="purchaseVerificationTitle">🧾 V2.1.13 PRODUCTION PURCHASE VERIFICATION</div>
-          <div class="purchaseVerificationSub">Verify the live $6 / $12 / $18 store prices, then complete one real production purchase. The PayPal order amount must match the selected pack before capture.</div>
-          <div class="purchaseVerificationChecks" id="purchaseVerificationChecks">
-            <div class="purchaseVerificationCheck pending"><span>Test session armed</span><span id="purchaseArm">WAIT</span></div>
-            <div class="purchaseVerificationCheck pending"><span>PayPal order price</span><span id="purchasePrice">WAIT</span></div>
-            <div class="purchaseVerificationCheck pending"><span>PayPal capture</span><span id="purchaseCapture">WAIT</span></div>
-            <div class="purchaseVerificationCheck pending"><span>Replay protection</span><span id="purchaseReplay">WAIT</span></div>
-          <button class="storeBtn purchaseReplayBtn" id="purchaseReplayBtn" type="button" hidden>🔒 VERIFY REPLAY SHIELD · NO NEW CHARGE</button>
-            <div class="purchaseVerificationCheck pending"><span>Entitlement claim</span><span id="purchaseClaim">WAIT</span></div>
-            <div class="purchaseVerificationCheck pending"><span>FL OZ credit</span><span id="purchaseCredit">WAIT</span></div>
-            <div class="purchaseVerificationCheck pending"><span>Purchase History</span><span id="purchaseHistoryCheck">WAIT</span></div>
-            <div class="purchaseVerificationCheck manual"><span>Song Vault unlock</span><span id="purchaseSong">MANUAL</span></div>
-          </div>
-          <div class="purchaseVerificationMeta" id="purchaseVerificationMeta" aria-live="polite">Select any store pack to arm the production verification.</div>
-        </div>
-        <div class="paypalRuntime" id="paypalRuntime">
-          <div class="paypalRuntimeTitle">🩺 PRODUCTION RUNTIME</div>
-          <div class="paypalRuntimeSub">Verify the live Vercel payment runtime before testing a real checkout. No charge is created by this diagnostic.</div>
-          <div class="paypalRuntimeChecks" id="paypalRuntimeChecks">
-            <div class="paypalRuntimeCheck pending"><span>Production host</span><span id="runtimeHost">WAIT</span></div>
-            <div class="paypalRuntimeCheck pending"><span>PayPal config endpoint</span><span id="runtimeConfig">WAIT</span></div>
-            <div class="paypalRuntimeCheck pending"><span>PayPal SDK probe</span><span id="runtimeSdkProbe">WAIT</span></div>
-            <div class="paypalRuntimeCheck pending"><span>Live credential probe</span><span id="runtimeCredProbe">WAIT</span></div>
-            <div class="paypalRuntimeCheck pending"><span>PayPal Buttons API</span><span id="runtimeButtons">WAIT</span></div>
-            <div class="paypalRuntimeCheck pending"><span>Real $6 / $12 / $18 checkout</span><span>MANUAL</span></div>
-          </div>
-          <button class="storeBtn paypalRuntimeRun" id="paypalRuntimeRun" type="button">RUN PRODUCTION HEALTH CHECK</button>
-          <div class="paypalRuntimeMeta" id="paypalRuntimeMeta" aria-live="polite"></div>
-        </div>
-        <div class="paypalCheckout" id="storeCheckout" hidden>
+        </div><div class="paypalCheckout" id="storeCheckout" hidden>
           <div class="paypalCheckoutTitle">💳 SECURE PAYPAL CHECKOUT</div>
           <div class="paypalCheckoutItem" id="paypalCheckoutItem"></div>
           <div class="paypalCheckoutStatus" id="paypalCheckoutStatus" aria-live="polite"></div>
@@ -8093,6 +8056,7 @@ fullscreenBtn.addEventListener("click", toggleFullscreen);
    TRIBES PANEL
 ========================================================= */
 function anyPanelOpen(){ return Object.values(PANELS).some(p => p.classList.contains("open")); }
+function closeAllWindows(){ try{ closeNavMenu(); }catch(e){} try{ closeDamMachine(); }catch(e){} try{ closeCharacterSpotlight(); }catch(e){} try{ Object.values(PANELS).forEach(p=>p.classList.remove("open")); }catch(e){} try{ const b=$("bonusCard"); if(b) b.classList.remove("show"); }catch(e){} syncTimerPause(); }
 function closePanels(){
   const wasOpen = Object.values(PANELS).some(p => p.classList.contains("open"));
   Object.values(PANELS).forEach(p => p.classList.remove("open"));
@@ -8121,7 +8085,10 @@ const navMenuBtn = $("navMenuBtn"), navSheet = $("navSheet");
 var navOpen = false;
 var preGameOpen = false;
 function openNavMenu(){
-  if(damMachine.open || damMachine.spinning) return;      // the machine always stays on top
+  if(damMachine.open || damMachine.spinning) return;
+  closePanels();
+  closeCharacterSpotlight();
+  const b=$("bonusCard"); if(b) b.classList.remove("show");
   navOpen = true;
   navSheet.classList.add("open");
   navMenuBtn.setAttribute("aria-expanded", "true");
@@ -8136,25 +8103,19 @@ function closeNavMenu(){
   navMenuBtn.setAttribute("aria-expanded", "false");
 }
 navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMenu(); });
-$("dmStoreFloatBtn").addEventListener("click", ()=>{
-  closeDamMachine();
-  closeNavMenu();
-  togglePanel("store");
-});
-[["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navCharactersBtn","characters"]].forEach(([rowId, panelName])=>{
-  $(rowId).addEventListener("click", ()=>{ closeNavMenu(); togglePanel(panelName); });
-});
+$("dmStoreFloatBtn").addEventListener("click", ()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); togglePanel("store"); });
+[["navProfileBtn","profile"],["navRadioBtn","radio"]].forEach(([rowId, panelName])=>{ const row=$(rowId); if(!row) return; row.addEventListener("click", ()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); togglePanel(panelName); }); });
 $("songVaultStoreBtn").addEventListener("click", ()=>{ closePanels(); togglePanel("store"); });
-$("navHowBtn").addEventListener("click", ()=>{ closeNavMenu(); openGameGuide(true); });
-$("dmFloatBtn").addEventListener("click", ()=>openDamMachine());
-$("bonusBtn").addEventListener("click", ()=>{ if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
+$("navHowBtn").addEventListener("click", ()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); openGameGuide(true); });
+$("dmFloatBtn").addEventListener("click", ()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); openDamMachine(); });
+$("bonusBtn").addEventListener("click", ()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
 
 /* V2.0.7 — COMMAND GUIDE. One card, three tabs. Character rules come from the canonical
    CHARACTERS catalog + isUnlocked()/purchaseItem()/setActiveCharacter() — no second roster. */
 const GUIDE_SEEN_KEY = "yalltooDamGame.guideSeen";
 var guideSelection = null;          // first run: nothing preselected until the player taps an unlocked avatar
-function guideNeverShow(){ return storageGet(GUIDE_SEEN_KEY) === "1"; }
-function setGuideNeverShow(on){ if(on) storageSet(GUIDE_SEEN_KEY, "1"); else { try { localStorage.removeItem(GUIDE_SEEN_KEY); } catch(e){} } }
+function guideNeverShow(){ return false; }
+function setGuideNeverShow(on){ return; }
 function characterNeedText(c){
   const short = c.cost - state.totalFlOz;
   return short > 0 ? `NEED ${fmt(short)} MORE FL OZ` : `PURCHASE · ${fmt(c.cost)} FL OZ`;
