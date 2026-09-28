@@ -6429,7 +6429,7 @@ function playDamMachineMomentumSound(level){
   const base=170 + n*28;
   playWaterNoise(0.18 + n*0.025, 170 + n*35, 760 + n*180, 0.045 + n*0.008);
   playTone(base,0.12,"triangle");
-  setTimeout(() => playTone(base*1.5,0.10,"sine",), 55);
+  setTimeout(() => playTone(base*1.5,0.10,"sine"), 55);
   if(n>=DAM_AUTO_MOMENTUM_MAX){
     setTimeout(() => playTone(1046,0.18,"triangle"),120);
   }
