@@ -5460,7 +5460,10 @@ function purchaseItem(category, id, opts = {}){
 function creditPack(packId, receiptId, meta = {}){
   const pack = STORE_PACKS.find(p => p.id === packId);
   if(!pack) return { ok:false, message:"Unknown pack." };
-  if(typeof receiptId !== "string" || !receiptId) return { ok:false, message:"A receipt id is required." };
+  if(typeof receiptId !== "string" || !receiptId) return { ok:false, message:"A fulfillment receipt id is required." };
+  if(meta.serverAuthorized !== true || meta.fulfillmentId !== receiptId || !meta.captureID){
+    return { ok:false, message:"Server fulfillment authorization is required." };
+  }
   if(state.processedReceipts.includes(receiptId)) return { ok:false, message:"Receipt already credited." };
   state.processedReceipts.push(receiptId);
   state.totalFlOz += pack.flOz;
@@ -5469,12 +5472,15 @@ function creditPack(packId, receiptId, meta = {}){
     flOz: pack.flOz,
     amount: Number(pack.priceUsd).toFixed(2),
     receiptId,
+    captureID: String(meta.captureID),
+    orderID: meta.orderID ? String(meta.orderID) : "",
+    fulfillmentStatus: "SERVER_AUTHORIZED",
     purchasedAt: Date.now()
   });
   state.purchaseHistory = state.purchaseHistory.slice(-20);
   saveGame(); renderStore(); renderRadio();
   showToast(`+${fmt(pack.flOz)} FL OZ added`);
-  return { ok:true, credited: pack.flOz };
+  return { ok:true, credited: pack.flOz, receiptId };
 }
 
 let paypalSdkPromise = null;
@@ -5875,6 +5881,14 @@ function checkoutClaimId(orderID){
   safeSessionSet(key,id);
   return id;
 }
+function checkoutFulfillmentId(captureID){
+  const key=paypalRecoveryStorageKey("fulfillment",captureID);
+  const existing=safeSessionGet(key);
+  if(existing) return existing;
+  const id="GEI-FULFILL-"+String(captureID || "").replace(/[^A-Za-z0-9._:-]/g,"-");
+  safeSessionSet(key,id);
+  return id;
+}
 async function paypalFetchJson(url, options={}, attempts=3){
   let lastError=null;
   for(let attempt=1; attempt<=attempts; attempt++){
@@ -5989,12 +6003,28 @@ function startCheckout(packId){
           persistPurchaseVerificationSession();
         }
 
-        const credited=creditPack(claim.entitlement.packId,claim.entitlement.captureID, {
-          orderID: claim.entitlement.orderID,
-          amount: claim.entitlement.amount
+        const fulfillmentId=checkoutFulfillmentId(claim.entitlement.captureID);
+        const fulfillmentResult=await paypalFetchJson("/api/paypal/fulfill-entitlement",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            claimToken:result.claimToken,
+            captureID:result.captureID,
+            fulfillmentId
+          })
+        });
+        const fulfillmentResponse=fulfillmentResult.response, fulfillment=fulfillmentResult.data;
+        if(!fulfillmentResponse.ok || !fulfillment.ok || !fulfillment.receipt || fulfillment.receipt.fulfillmentId!==fulfillmentId){
+          throw new Error(fulfillment.error || "Payment was confirmed but the economy fulfillment authorization failed.");
+        }
+        const credited=creditPack(fulfillment.receipt.packId, fulfillment.receipt.fulfillmentId, {
+          orderID: fulfillment.receipt.orderID,
+          captureID: fulfillment.receipt.captureID,
+          serverAuthorized:true,
+          fulfillmentId: fulfillment.receipt.fulfillmentId
         });
         if(!credited.ok && credited.message!=="Receipt already credited."){
-          throw new Error(credited.message || "Payment was confirmed but the reward could not be added.");
+          throw new Error(credited.message || "Payment was confirmed but the economy credit could not be applied.");
         }
         if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
           purchaseVerificationSession.credit=true;
@@ -6077,6 +6107,27 @@ window.YalltooDamEconomy = {
     unlockedSongs: state.unlockedSongs.slice(), unlockedSkins: state.unlockedSkins.slice(), unlockedCharacters: state.unlockedCharacters.slice() }),
   packs: STORE_PACKS.map(p => ({ ...p }))
 };
+
+/* V2.0.23 — Economy Integrity Layer
+   The browser wallet remains device-local, but every PayPal credit now requires a durable
+   server fulfillment receipt. The same receipt can recover after refresh without a second
+   server fulfillment or a second local credit.
+*/
+function runEconomyIntegritySelfTest(){
+  const results=[];
+  const t=(name,ok)=>results.push({name,ok:!!ok});
+  t("credit: requires server authorization", creditPack("single","GEI-FULFILL-selftest",{captureID:"capture-test"}) .message === "Server fulfillment authorization is required.");
+  t("credit: requires matching fulfillment identity", creditPack("single","GEI-FULFILL-selftest",{serverAuthorized:true,fulfillmentId:"GEI-FULFILL-other",captureID:"capture-test"}).message === "Server fulfillment authorization is required.");
+  t("credit: rejects unknown pack", creditPack("bogus","GEI-FULFILL-selftest",{serverAuthorized:true,fulfillmentId:"GEI-FULFILL-selftest",captureID:"capture-test"}).message === "Unknown pack.");
+  t("fulfillment id format is canonical", /^GEI-FULFILL-[A-Za-z0-9._:-]{8,120}$/.test("GEI-FULFILL-capture-test"));
+  t("wallet credit constants remain canonical", DAY_REWARD_FL_OZ===111 && LEVEL_REWARD_FL_OZ===666 && UNLOCK_COST_FL_OZ===6660);
+  t("purchase history carries server authorization fields", ["captureID","fulfillmentStatus"].every(k=>cachesPurchaseHistoryField(k)));
+  const pass=results.filter(r=>r.ok).length;
+  return {pass,fail:results.length-pass,results};
+}
+function cachesPurchaseHistoryField(key){
+  return state.purchaseHistory.every(x => !x || key in x);
+}
 
 /* V1.7 — each revealed name keeps one portrait forever (stored as an index into the pool). */
 function sanitizeTribePortraits(raw){
