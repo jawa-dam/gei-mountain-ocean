@@ -1683,9 +1683,149 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes geiProgress{to{width:100%}}
 @media (max-width:520px){.geiSplashWorld{height:52vh}.geiSplashLabel{font-size:.62rem;letter-spacing:.1em}.geiSplashBrand{top:12%}.geiSplashMountain{bottom:23%}.geiSplashDam{bottom:22%}.geiSplashMill{bottom:23%}.geiSplashWheel{bottom:24%}.geiSplashOcean{bottom:15%}.geiSplashIte{width:min(78vw,330px);height:min(36vh,235px)}.geiSplashIteFrame{width:min(84vw,365px);height:min(42vh,270px)}}
 @media (prefers-reduced-motion:reduce){#geiSplash *{animation-duration:.001ms!important;animation-delay:0ms!important;animation-iteration-count:1!important}.geiSplashProgress i{width:100%}}
+
+/* =========================================================
+   V2.0.19 — PRODUCTION HOST GUARD
+   GitHub Pages is a static repository preview. Live checkout
+   and server-side PayPal routes require the Vercel production host.
+========================================================= */
+#productionHostGuard{
+  position:fixed; inset:0; z-index:100000;
+  display:none; place-items:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(47,210,255,.18),transparent 32%),
+    radial-gradient(circle at 50% 90%,rgba(241,16,186,.16),transparent 40%),
+    #030711;
+  color:#fff;
+  font-family:Inter,system-ui,sans-serif;
+  text-align:center;
+}
+#productionHostGuard.isVisible{display:grid}
+.productionGuardCard{
+  width:min(100%,520px);
+  max-height:calc(100dvh - 48px);
+  overflow:auto;
+  padding:28px 22px 24px;
+  border:1.5px solid rgba(255,255,255,.24);
+  border-radius:26px;
+  background:rgba(6,11,28,.94);
+  box-shadow:0 0 34px rgba(47,210,255,.18),inset 0 1px 0 rgba(255,255,255,.1);
+  backdrop-filter:blur(18px);
+}
+.productionGuardIcon{
+  font-size:clamp(2.7rem,12vw,4.5rem);
+  line-height:1;
+  margin-bottom:14px;
+  filter:drop-shadow(0 0 16px rgba(47,210,255,.5));
+}
+.productionGuardEyebrow{
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.14em;
+  color:#2fd2ff;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.productionGuardTitle{
+  font-size:clamp(1.55rem,7vw,2.25rem);
+  line-height:1.08;
+  font-weight:950;
+  margin-bottom:12px;
+}
+.productionGuardText{
+  font-size:clamp(1rem,4.2vw,1.15rem);
+  line-height:1.55;
+  color:rgba(255,255,255,.82);
+  margin:0 auto 20px;
+  max-width:42ch;
+}
+.productionGuardStatus{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 13px;
+  border:1px solid rgba(47,210,255,.35);
+  border-radius:999px;
+  background:rgba(47,210,255,.08);
+  color:#eafcff;
+  font-size:.86rem;
+  font-weight:850;
+  margin-bottom:18px;
+}
+.productionGuardStatus i{
+  width:9px;height:9px;border-radius:50%;
+  background:#2fd2ff;
+  box-shadow:0 0 12px #2fd2ff;
+}
+.productionGuardEnter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:52px;
+  width:100%;
+  padding:12px 18px;
+  border-radius:16px;
+  border:1.5px solid rgba(255,255,255,.28);
+  background:linear-gradient(135deg,#2fd2ff,#3d3dea 55%,#f310ba);
+  color:#fff;
+  text-decoration:none;
+  font-size:clamp(1rem,4.5vw,1.12rem);
+  font-weight:950;
+  letter-spacing:.04em;
+  box-shadow:0 0 20px rgba(47,210,255,.22),inset 0 1px 0 rgba(255,255,255,.35);
+}
+.productionGuardEnter:active{transform:scale(.98)}
+.productionGuardUrl{
+  margin-top:12px;
+  font-size:.76rem;
+  line-height:1.4;
+  color:rgba(255,255,255,.48);
+  overflow-wrap:anywhere;
+}
+@media (prefers-reduced-motion:reduce){
+  #productionHostGuard *{transition:none!important;animation:none!important}
+}
+
 </style>
 </head>
 <body>
+
+<!-- V2.0.19 — Production Host Guard -->
+<div id="productionHostGuard" role="dialog" aria-modal="true" aria-labelledby="productionGuardTitle" aria-describedby="productionGuardText">
+  <div class="productionGuardCard">
+    <div class="productionGuardIcon" aria-hidden="true">💧⚙️</div>
+    <div class="productionGuardEyebrow">DAM NATION PRODUCTION</div>
+    <div class="productionGuardTitle" id="productionGuardTitle">ENTER THE PRODUCTION DAM</div>
+    <p class="productionGuardText" id="productionGuardText">
+      You're viewing the static GitHub Pages edition. Live PayPal checkout, purchases, FL OZ credits, and Song Vault features run on the production dam.
+    </p>
+    <div class="productionGuardStatus"><i aria-hidden="true"></i> LIVE PAYMENT SYSTEM ONLINE</div>
+    <a class="productionGuardEnter" href="https://gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app/">
+      ENTER PRODUCTION DAM →
+    </a>
+    <div class="productionGuardUrl">gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app</div>
+  </div>
+</div>
+<script>
+/* V2.0.19 — guard only the GitHub Pages host; localhost and Vercel remain usable. */
+(function(){
+  var host=String(window.location.hostname||"").toLowerCase();
+  var isGitHubPages=/\.github\.io$/i.test(host);
+  if(!isGitHubPages)return;
+  window.__GEI_PRODUCTION_GUARD__=true;
+  var guard=document.getElementById("productionHostGuard");
+  if(guard)guard.classList.add("isVisible");
+  document.documentElement.style.overflow="hidden";
+  document.body.style.overflow="hidden";
+  var splash=document.getElementById("geiSplash");
+  if(splash){
+    splash.style.display="none";
+    splash.setAttribute("aria-hidden","true");
+  }
+})();
+</script>
+
 <div id="geiSplash" aria-label="Genesis Engineered opening sequence">
   <div class="geiSplashNoise"></div><div class="geiSplashGlow"></div><div class="geiSplashWater"></div>
   <div class="geiSplashIteFrame" aria-hidden="true"></div>
