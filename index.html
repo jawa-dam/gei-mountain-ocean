@@ -2046,8 +2046,15 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   filter:drop-shadow(0 0 10px color-mix(in srgb, var(--water-bright) 60%, transparent)); }
 .dmSymIcon{ width:62%; height:62%; display:block; }
 .dmMsg{ min-height:1.4em; font-size:.95rem; font-weight:900; font-style:italic; margin:8px 0 10px; }
-.dmSpinBtn{ flex:0 0 auto; min-height:54px; }
+.dmSpinBtn{ flex:1 1 0; min-height:54px; }
+.dmAutoBtn{ flex:1 1 0; min-height:54px; border:1.5px solid color-mix(in srgb,var(--water-bright) 55%,transparent); background:linear-gradient(135deg,color-mix(in srgb,var(--water-bright) 18%,transparent),color-mix(in srgb,var(--juicy-violet) 22%,transparent)); }
+.dmAutoBtn.active{ border-color:var(--gold); background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 24%,transparent),color-mix(in srgb,var(--juicy-pink) 20%,transparent)); box-shadow:0 0 18px color-mix(in srgb,var(--gold) 32%,transparent); }
+.dmAutoBtn:disabled{ opacity:.55; cursor:default; }
 .dmSpinBtn:disabled{ opacity:.55; cursor:default; }
+.dmAutoControls{ width:100%; display:flex; gap:8px; margin-top:2px; }
+.dmAutoControls .lcBtn{ font-size:.88rem; font-weight:900; letter-spacing:.02em; }
+.dmAutoStatus{ min-height:1.2em; margin-top:6px; font-size:.72rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--foam); opacity:.88; }
+.dmAutoStatus[hidden]{ display:none; }
 .dmNoPlays{ font-size:.86rem; font-weight:800; color:var(--gold); margin-top:10px; line-height:1.4; }
 .dmNoPlays[hidden]{ display:none; }
 /* --- result --- */
@@ -3278,7 +3285,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="dmPipe dmPipeR"></div>
         </div>
         <div class="dmMsg" id="dmMsg"></div>
-        <button class="lcBtn dmSpinBtn" id="dmSpinBtn">SPIN THE DAM</button>
+        <div class="dmAutoControls" role="group" aria-label="DAM MACHINE spin controls">
+          <button class="lcBtn dmSpinBtn" id="dmSpinBtn" type="button">SPIN THE DAM</button>
+          <button class="lcBtn dmAutoBtn" id="dmAutoBtn" type="button" aria-pressed="false">⚡ AUTO SPIN</button>
+        </div>
+        <div class="dmAutoStatus" id="dmAutoStatus" role="status" aria-live="polite" hidden></div>
         <div class="dmNoPlays" id="dmNoPlays" hidden>NO FREE PLAYS — complete bonus activities to earn another spin.</div>
         <div class="dmResult" id="dmResult" hidden>
           <div class="dmCardCat staged" id="dmCardCat">💧 DAM MACHINE</div>
@@ -5703,7 +5714,7 @@ const DAM_REEL_MS_REDUCED = [450, 600, 750];       // reduced motion: short tran
 const DAM_MACHINE_MAX_PLAYS = 999;
 
 /* Runtime only — never saved. `var` (not let/const) so isTimerBlocked can probe it safely. */
-var damMachine = { open:false, spinning:false, revealed:false, presenting:false, presToken:0, presTimers:[], presentCount:0, forcedResult:null, spinToken:0, timers:[], reelIds:["water","wheel","millpond"] };
+var damMachine = { open:false, spinning:false, revealed:false, presenting:false, presToken:0, presTimers:[], presentCount:0, forcedResult:null, spinToken:0, timers:[], reelIds:["water","wheel","millpond"], autoSpin:false, autoTimer:null, autoToken:0, autoStopReason:"" };
 
 /* ---------- ONE canonical symbol renderer: custom image → CSS icon → emoji fallback.
    Reel logic calls this and never checks for images itself. ---------- */
@@ -5876,13 +5887,84 @@ function renderDamMachineHeader(){
     $("dmFloatLabel").textContent = plays > 0 ? "BONUS READY" : "DAM MACHINE";
   }
   const btn = $("dmSpinBtn");
-  const busy = damMachine.spinning || damMachine.presenting;   // v2.6.3: no spin while a result is being presented
-  btn.disabled = busy || plays <= 0;
-  if(!busy) btn.textContent = plays > 0 ? "SPIN THE DAM" : "NO FREE PLAYS";
+  const autoBtn = $("dmAutoBtn");
+  const autoStatus = $("dmAutoStatus");
+  const busy = damMachine.spinning || damMachine.presenting;   // v2.6.3: no manual spin while a result is being presented
+  btn.disabled = busy || damMachine.autoSpin || plays <= 0;
+  if(!busy && !damMachine.autoSpin) btn.textContent = plays > 0 ? "SPIN THE DAM" : "NO FREE PLAYS";
+  else if(damMachine.autoSpin) btn.textContent = damMachine.spinning ? "AUTO RUNNING…" : "AUTO SPIN ON";
+  if(autoBtn){
+    autoBtn.disabled = !damMachine.open || plays <= 0 || damMachine.spinning || damMachine.presenting;
+    autoBtn.classList.toggle("active", damMachine.autoSpin);
+    autoBtn.setAttribute("aria-pressed", damMachine.autoSpin ? "true" : "false");
+    autoBtn.textContent = damMachine.autoSpin ? "🛑 STOP AUTO" : "⚡ AUTO SPIN";
+  }
+  if(autoStatus){
+    const show = damMachine.autoSpin || damMachine.autoStopReason;
+    autoStatus.hidden = !show;
+    autoStatus.textContent = damMachine.autoSpin
+      ? "⚡ AUTO SPINNING — each completed result advances the next spin"
+      : (damMachine.autoStopReason ? "AUTO STOPPED — " + damMachine.autoStopReason : "");
+  }
   $("dmNoPlays").hidden = plays > 0;
 }
 
-function openDamMachine(){
+const DAM_AUTO_SPIN_DELAY_MS = 700;
+function damMachineAutoStopReason(res){
+  if(!res) return "";
+  if(res.jackpot) return "JACKPOT — review the celebration";
+  if(res.kind === "song") return "NEW SONG — review the unlock";
+  if(res.kind === "character") return "NEW OPERATOR — review the unlock";
+  return "";
+}
+function stopDamMachineAutoSpin(reason="manual"){
+  damMachine.autoSpin = false;
+  damMachine.autoStopReason = reason || "";
+  damMachine.autoToken++;
+  if(damMachine.autoTimer !== null){
+    clearTimeout(damMachine.autoTimer);
+    damMachine.autoTimer = null;
+  }
+  renderDamMachineHeader();
+}
+function scheduleDamMachineAutoSpin(){
+  if(!damMachine.autoSpin || !damMachine.open) return;
+  if(state.damMachineFreePlays <= 0){
+    stopDamMachineAutoSpin("NO FREE PLAYS");
+    return;
+  }
+  const token = damMachine.autoToken;
+  if(damMachine.autoTimer !== null) clearTimeout(damMachine.autoTimer);
+  damMachine.autoTimer = setTimeout(() => {
+    damMachine.autoTimer = null;
+    if(token !== damMachine.autoToken || !damMachine.autoSpin || !damMachine.open) return;
+    if(state.damMachineFreePlays <= 0){
+      stopDamMachineAutoSpin("NO FREE PLAYS");
+      return;
+    }
+    if(damMachine.spinning || damMachine.presenting) return;
+    if(damMachine.revealed) continueDamMachine({auto:true});
+    if(damMachine.autoSpin && damMachine.open && state.damMachineFreePlays > 0) spinDamMachine();
+  }, DAM_AUTO_SPIN_DELAY_MS);
+}
+function startDamMachineAutoSpin(){
+  if(!damMachine.open || damMachine.spinning || damMachine.presenting || state.damMachineFreePlays <= 0) return false;
+  damMachine.autoSpin = true;
+  damMachine.autoStopReason = "";
+  damMachine.autoToken++;
+  renderDamMachineHeader();
+  spinDamMachine();
+  return true;
+}
+function toggleDamMachineAutoSpin(){
+  if(damMachine.autoSpin){
+    stopDamMachineAutoSpin("MANUAL STOP");
+    return false;
+  }
+  return startDamMachineAutoSpin();
+}
+
+function openDamMachine()
   /* V2.1.4 — the station stays visible, but cannot open until a free play exists. */
   if(state.damMachineFreePlays <= 0) return;
   if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
@@ -5918,6 +6000,7 @@ function openDamMachine(){
 
 function closeDamMachine(){
   if(!damMachine.open || damMachine.spinning) return;   // no abandoning a spin mid-flow
+  stopDamMachineAutoSpin("MACHINE CLOSED");
   cancelDamPresentation();                              // v2.6.3: close cancels a celebration cleanly
   damMachine.open = false;
   dmCard().classList.remove("show", "jackpotWin", "hasResult", "fxGlow", "fxFlash");
@@ -5995,6 +6078,7 @@ function revealDamResult(token, ids){
   const won = !!combo;
   const res = won ? commitDamResult(combo, ids) : null; // commit runs once, before any presentation
   if(!res) recordDamMachineNoFlow(ids);
+  damMachine.autoStopReason = damMachine.autoSpin ? damMachineAutoStopReason(res) : "";
   damMachine.spinning = false;
   damMachine.revealed = true;
   damMachine.timers = [];                               // all spin timers have fired; release them
@@ -6147,10 +6231,14 @@ function settleDamPresentation(){
   damMachine.presenting = false;                        // spin available again; card stays until Continue
   $("dmContinueBtn").disabled = false;
   renderDamMachineHeader();
+  if(damMachine.autoSpin){
+    if(damMachine.autoStopReason) stopDamMachineAutoSpin(damMachine.autoStopReason);
+    else scheduleDamMachineAutoSpin();
+  }
 }
 
 /* CONTINUE: dismiss the result card and return the machine to its idle state. */
-function continueDamMachine(){
+function continueDamMachine(options={}){
   if(!damMachine.revealed || damMachine.spinning) return;
   cancelDamPresentation();
   const card = dmCard();
@@ -6160,6 +6248,9 @@ function continueDamMachine(){
   $("dmResult").className = "dmResult";
   $("dmResult").querySelectorAll(".staged").forEach(el => el.classList.remove("show"));
   renderDamMachineHeader();
+  if(!options.auto){
+    try { $("dmSpinBtn").focus({ preventScroll:true }); } catch(e){}
+  }
 }
 
 function cancelDamPresentation(){
@@ -6190,6 +6281,7 @@ function presentDamMachineNoFlow(){
   $("dmMsg").textContent = getDamHumor("machineLose");
   $("dmStatus").textContent = "Dam Machine result: no combination.";
   renderDamMachineHeader();
+  if(damMachine.autoSpin) scheduleDamMachineAutoSpin();
 }
 
 /* water burst — same particle idea as the waterwheel's, inside the machine card */
@@ -6265,7 +6357,8 @@ function playDamMachinePunSound(){ playPunSound(); }
    Attaching to the removed row threw and stopped every line after this one. */
 $("dmCloseBtn").addEventListener("click", closeDamMachine);
 $("dmSpinBtn").addEventListener("click", () => spinDamMachine());
-$("dmContinueBtn").addEventListener("click", () => { continueDamMachine(); try { $("dmSpinBtn").focus({ preventScroll:true }); } catch(e){} });
+$("dmAutoBtn").addEventListener("click", () => toggleDamMachineAutoSpin());
+$("dmContinueBtn").addEventListener("click", () => continueDamMachine());
 document.addEventListener("keydown", e => {
   if(e.key === "Escape"){
     if(damMachine.open) closeDamMachine();
@@ -6318,6 +6411,12 @@ function runDamMachineSelfTest(){
     t("humor: " + k + " non-empty", Array.isArray(DAM_HUMOR[k]) && DAM_HUMOR[k].length > 0));
   t("waterwheel: dam-play prize present, weights still 100", BONUS_WATERWHEEL_PRIZES.some(p => p.kind === "damPlay") && BONUS_WATERWHEEL_PRIZES.reduce((a, p) => a + p.weight, 0) === 100);
   t("presentation: centralized pipeline exists (present/continue/cancel)", typeof presentDamMachineWin === "function" && typeof continueDamMachine === "function" && typeof cancelDamPresentation === "function");
+  t("V2.1.25: auto-spin controls exist", !!$("dmAutoBtn") && !!$("dmAutoStatus"));
+  t("V2.1.25: auto-spin reuses canonical spin authority", /spinDamMachine\(\)/.test(startDamMachineAutoSpin.toString()) && /damMachineFreePlays/.test(spinDamMachine.toString()));
+  t("V2.1.25: auto-spin never calls reward authority directly", !/commitDamResult|safeAddFlOz|purchase|entitlement|paypal/i.test(startDamMachineAutoSpin.toString()+scheduleDamMachineAutoSpin.toString()+toggleDamMachineAutoSpin.toString()));
+  t("V2.1.25: jackpot stops auto-spin", damMachineAutoStopReason({jackpot:true,kind:"flOz"}) === "JACKPOT — review the celebration");
+  t("V2.1.25: song/character unlocks stop auto-spin", damMachineAutoStopReason({jackpot:false,kind:"song"}) && damMachineAutoStopReason({jackpot:false,kind:"character"}));
+  t("V2.1.25: ordinary result continues auto-spin", damMachineAutoStopReason({jackpot:false,kind:"flOz"}) === "" && damMachineAutoStopReason(null) === "");
   const P = damPresentationFor;
   t("presentation: 111 map", (() => { const x = P({ kind:"flOz", amount:DAY_REWARD_FL_OZ, title:"WATER TRIPLE!", detail:"d", humor:"h", jackpot:false, fallback:false, combo:null, unlockedId:null }); return x.title === "WATER RELEASED" && x.rarity === "common"; })());
   t("presentation: 666 map", (() => { const x = P({ kind:"flOz", amount:LEVEL_REWARD_FL_OZ, title:"t", detail:"d", humor:"h", jackpot:false, fallback:false, combo:null, unlockedId:null }); return x.title === "PRESSURE RELEASED" && x.rarity === "rare"; })());
