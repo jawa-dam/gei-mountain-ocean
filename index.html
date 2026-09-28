@@ -1328,6 +1328,19 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes tapWaterFlash{0%{transform:translate(-50%,-50%) scale(.4);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
 @media (prefers-reduced-motion:reduce){.tapWaterRipple,.tapWaterDrop,.tapWaterFlash{animation-duration:.001ms !important}}
 
+/* V2.1.21 — DAM-ITE COMBO REACTIONS: momentum feedback, presentation-only. */
+.damIteCombo{display:flex;align-items:center;gap:10px;margin:8px 0 0;padding:7px 10px;border:1px solid color-mix(in srgb,var(--water-bright) 38%,transparent);border-radius:14px;background:linear-gradient(90deg,rgba(0,20,35,.7),rgba(20,5,35,.52));box-shadow:0 0 16px color-mix(in srgb,var(--water-bright) 18%,transparent);opacity:.78;transform:translateY(0) scale(.99);transition:opacity .2s ease,transform .2s ease,box-shadow .2s ease}
+.damIteCombo.active{opacity:1;transform:translateY(-1px) scale(1);box-shadow:0 0 24px color-mix(in srgb,var(--juicy-blue) 34%,transparent)}
+.damIteCombo.hot{border-color:color-mix(in srgb,var(--juicy-magenta) 65%,transparent);box-shadow:0 0 30px color-mix(in srgb,var(--juicy-magenta) 38%,transparent)}
+.damIteComboLabel{font-size:.68rem;font-weight:1000;letter-spacing:.1em;color:var(--foam);white-space:nowrap}
+.damIteComboCount{font-size:1rem;font-weight:1000;line-height:1;color:var(--water-bright);min-width:48px;text-align:center}
+.damIteComboTrack{height:7px;flex:1;min-width:70px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.damIteComboFill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--juicy-blue),var(--water-bright),var(--juicy-magenta));box-shadow:0 0 12px color-mix(in srgb,var(--water-bright) 55%,transparent);transition:width .18s cubic-bezier(.2,.8,.2,1)}
+.damIteComboFlash{position:fixed;left:50%;top:34%;z-index:120;pointer-events:none;transform:translate(-50%,-50%) scale(.72);opacity:0;font-size:clamp(1.15rem,5vw,2rem);font-weight:1000;letter-spacing:.06em;text-shadow:0 0 18px color-mix(in srgb,var(--juicy-magenta) 80%,transparent),0 0 30px color-mix(in srgb,var(--water-bright) 70%,transparent);white-space:nowrap}
+.damIteComboFlash.show{animation:damIteComboFlash .7s cubic-bezier(.12,.78,.18,1) forwards}
+.damIteComboFlash.peak{font-size:clamp(1.4rem,6vw,2.45rem)}
+@keyframes damIteComboFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.72)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:0;transform:translate(-50%,-65%) scale(1.02)}}
+@media (prefers-reduced-motion:reduce){.damIteComboFlash{animation-duration:.001ms !important}.damIteCombo,.damIteComboFill{transition-duration:.001ms !important}}
 /* V2.1.20 — DAM-ITE HYDRAULIC REACTIONS: environmental game-feel layer. Presentation only. */
 .hydraulicReactionBurst{position:absolute;width:10px;height:18px;border-radius:70% 70% 55% 55%;background:linear-gradient(160deg,var(--foam),var(--water-bright) 55%,var(--juicy-blue));box-shadow:0 0 14px color-mix(in srgb,var(--water-bright) 72%,transparent);pointer-events:none;transform:translate(-50%,-50%);animation:damIteHydraulicBurst .72s cubic-bezier(.12,.72,.18,1) forwards}
 .hydraulicReactionBurst.ring{width:26px;height:26px;border:3px solid var(--water-bright);background:transparent;border-radius:50%;box-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 65%,transparent);animation:damIteHydraulicRing .82s cubic-bezier(.18,.78,.2,1) forwards}
@@ -2829,6 +2842,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       </div>
       <div class="timerBar" id="timerBar"><i id="timerFill"></i></div>
       <div class="progressRow" id="progressRow"></div>
+      <div class="damIteCombo" id="damIteCombo" aria-label="DAM-ITE flow combo" aria-live="polite">
+        <span class="damIteComboLabel">FLOW COMBO</span>
+        <strong class="damIteComboCount" id="damIteComboCount">x0</strong>
+        <span class="damIteComboTrack" aria-hidden="true"><i class="damIteComboFill" id="damIteComboFill"></i></span>
+      </div>
       <!-- DAM NATION V1.0: current -ite rescue (rendered by renderIteRescue) -->
       <div class="iteHud" id="iteHud">
         <div class="iteHudAvatar" id="iteHudAvatar"></div>
@@ -4948,7 +4966,8 @@ world.addEventListener("click", (e)=>{
     const hydraulicContext = getTapWaterPointerContext();
   const hydraulicPower = state.tapCount >= getRequiredTaps(state.level) ? 3 : state.tapCount / getRequiredTaps(state.level) >= .75 ? 2 : 1;
   triggerDamIteHydraulicReaction(hydraulicContext,{index:state.currentStep,power:hydraulicPower});
-  triggerDamItePersonality("tap",{hydraulic:hydraulicContext});
+  registerDamIteCombo(hydraulicContext,hydraulicPower);
+  triggerDamItePersonality("tap",{hydraulic:hydraulicContext,combo:damIteCombo.count});
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
 
@@ -4996,6 +5015,7 @@ function flowSegment(index){
   setTimeout(()=>{
     state.busy = false;
     state.tapCount = 0;
+    resetDamIteCombo("day-complete");
     if(index < STEPS.length - 1){
       beginDay(index + 1);
     } else {
@@ -5012,6 +5032,7 @@ function beginDay(index){
   if(index === 0 && !state.iteRescueStats.currentIteId) selectCurrentIte();   // DAM NATION V1.0: new cycle → next trapped -ite
   state.currentStep = index;
   state.tapCount = 0;
+  resetDamIteCombo("new-day");
   state.phase = "playing";
   activateStation(index);
   updateProgressDots();
@@ -5241,8 +5262,7 @@ function renderHud(){
    OCEAN + LOOP COMPLETE
 ========================================================= */
 function reachOcean(){
-  triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});
-  triggerDamItePersonality("level",{level:state.level});
+  triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});\n  showDamIteComboFlash("DAM-ITE FLOW MASTERED",true);\n  resetDamIteCombo("level-complete");\n  triggerDamItePersonality("level",{level:state.level});
   oceanGroup.classList.add("reached");
   playOceanSound();
   world.classList.add("flash");
@@ -5892,7 +5912,7 @@ function spinDamMachine(){
   if(!reduced) dmSfx(() => playBonusSpinSounds(lastDur));
   dmSfx(() => playWaterNoise(0.8, 180, 1600, 0.14));    // hydraulic whoosh on launch
   livingMachineHook("onSpin", token, ids, durs);        // V2.1.12: pressure + anticipation (presentation only)
-  triggerDamIteHydraulicReaction("wheel",{index:MILL_INDEX,power:3,source:"machine"});
+  triggerDamIteHydraulicReaction("wheel",{index:MILL_INDEX,power:3,source:"machine"});\n  resetDamIteCombo("machine-spin");
 
   durs.forEach((dur, i) => {
     const filler = [];
@@ -7465,6 +7485,76 @@ function getTapWaterPointerContext(){
   if(state.phase==="ready"||state.phase==="timeout")return getTapWaterContext({index});
   return "ocean";
 }
+/* V2.1.21 — DAM-ITE COMBO REACTION ENGINE.
+   Consecutive player actions build visible hydraulic momentum.
+   Presentation-only: combo state never awards FL OZ, XP, purchases, or unlocks. */
+const DAM_ITE_COMBO_WINDOW_MS=1350;
+const DAM_ITE_COMBO_MAX=12;
+const damIteCombo={count:0,lastAt:0,peak:0,timer:0,flashTimer:0};
+function renderDamIteCombo(){
+  const box=$("damIteCombo"),count=$("damIteComboCount"),fill=$("damIteComboFill");
+  if(!box||!count||!fill)return;
+  const n=Math.max(0,damIteCombo.count);
+  count.textContent="x"+n;
+  fill.style.width=(Math.min(DAM_ITE_COMBO_MAX,n)/DAM_ITE_COMBO_MAX*100)+"%";
+  box.classList.toggle("active",n>=2);
+  box.classList.toggle("hot",n>=6);
+  box.setAttribute("aria-label",n>=2?"DAM-ITE flow combo x"+n:"DAM-ITE flow combo ready");
+}
+function showDamIteComboFlash(text,peak=false){
+  let node=$("damIteComboFlash");
+  if(!node){
+    node=document.createElement("div"); node.id="damIteComboFlash"; node.className="damIteComboFlash";
+    node.setAttribute("aria-hidden","true"); document.body.appendChild(node);
+  }
+  clearTimeout(damIteCombo.flashTimer);
+  node.textContent=text; node.classList.remove("show","peak"); void node.offsetWidth;
+  if(peak)node.classList.add("peak");
+  node.classList.add("show");
+  damIteCombo.flashTimer=setTimeout(()=>node.classList.remove("show","peak"),760);
+}
+function resetDamIteCombo(reason="reset"){
+  clearTimeout(damIteCombo.timer);
+  damIteCombo.count=0; damIteCombo.lastAt=0; renderDamIteCombo();
+}
+function registerDamIteCombo(context,power=1){
+  const now=performance.now();
+  const continuing=damIteCombo.count>0 && now-damIteCombo.lastAt<=DAM_ITE_COMBO_WINDOW_MS;
+  damIteCombo.count=continuing?Math.min(DAM_ITE_COMBO_MAX,damIteCombo.count+1):1;
+  damIteCombo.lastAt=now;
+  damIteCombo.peak=Math.max(damIteCombo.peak,damIteCombo.count);
+  clearTimeout(damIteCombo.timer);
+  damIteCombo.timer=setTimeout(()=>resetDamIteCombo("timeout"),DAM_ITE_COMBO_WINDOW_MS+80);
+  renderDamIteCombo();
+  const n=damIteCombo.count;
+  if(n>=2){
+    triggerDamIteHydraulicReaction(context,{index:state.currentStep,power:Math.max(power,n>=6?3:n>=3?2:1),combo:n});
+  }
+  if(n===2||n===4||n===6||n===8||n===10||n===12){
+    const tier=n>=8?"DAM-ITE OVERDRIVE":n>=6?"HYDRAULIC RUSH":"FLOW COMBO";
+    showDamIteComboFlash(tier+" x"+n,n>=6);
+    try{
+      const freq=n>=8?880:n>=6?660:520;
+      playTone(freq,n>=6?.16:.1,n>=6?"square":"triangle");
+      if(n>=6)playWaterNoise(.14,180,1100,.055);
+    }catch(e){}
+    triggerDamItePersonality("tap",{hydraulic:context,combo:n});
+  }
+  return n;
+}
+function runDamIteComboSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  const before=JSON.stringify({totalFlOz:state.totalFlOz,level:state.level,levelFlOz:state.levelFlOz,completedLevels:state.completedLevels,freePlays:state.damMachineFreePlays});
+  const old={count:damIteCombo.count,lastAt:damIteCombo.lastAt,peak:damIteCombo.peak};
+  t("V2.1.21: combo UI exists",()=>!!$("damIteCombo")&&!!$("damIteComboCount")&&!!$("damIteComboFill"));
+  t("V2.1.21: combo window and cap are valid",()=>DAM_ITE_COMBO_WINDOW_MS>=900&&DAM_ITE_COMBO_WINDOW_MS<=2000&&DAM_ITE_COMBO_MAX>=8);
+  t("V2.1.21: consecutive taps build combo",()=>{damIteCombo.count=0;damIteCombo.lastAt=0;const a=registerDamIteCombo("dam",1),b=registerDamIteCombo("dam",1);return a===1&&b===2});
+  t("V2.1.21: combo state is presentation-only",()=>JSON.stringify({totalFlOz:state.totalFlOz,level:state.level,levelFlOz:state.levelFlOz,completedLevels:state.completedLevels,freePlays:state.damMachineFreePlays})===before);
+  t("V2.1.21: combo does not call economy authority",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(registerDamIteCombo.toString()));
+  damIteCombo.count=old.count; damIteCombo.lastAt=old.lastAt; damIteCombo.peak=old.peak; renderDamIteCombo();
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
+
 /* V2.1.20 — DAM-ITE HYDRAULIC REACTION ENGINE.
    Presentation-only: the environment answers the player without changing economy or progression. */
 const DAM_ITE_HYDRAULIC_REACTIONS=Object.freeze({
