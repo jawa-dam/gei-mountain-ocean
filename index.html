@@ -1325,7 +1325,10 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .preGameStart{width:100%;margin-top:10px;min-height:56px;font-size:1.1rem}.preGameMsg{min-height:1.2em;margin-top:8px;font-size:.9rem;font-weight:800;color:var(--gold)}
 .preGameHowBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:900}
 .dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent);isolation:isolate;overflow:visible;will-change:transform,box-shadow,filter}
-.dmFloatBtn[hidden]{display:none}
+/* V2.1.4 — the DAM Machine is a permanent station. Zero plays means inactive, never hidden. */
+.dmFloatBtn.inactive{cursor:default;opacity:.62;filter:saturate(.45);box-shadow:0 0 10px color-mix(in srgb,var(--water-bright) 18%,transparent);}
+.dmFloatBtn.inactive::before{opacity:.35;animation-duration:8s}
+.dmFloatBtn.inactive::after{opacity:.25;animation-duration:7s}
 .dmFloatBtn::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--water-bright) 78%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--water-bright) 55%,transparent),inset 0 0 8px color-mix(in srgb,var(--juicy-pink) 22%,transparent);pointer-events:none;z-index:-1;animation:dmHydraulicRing 4.8s linear infinite}
 .dmFloatBtn::after{content:"";position:absolute;inset:-13px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--water-bright) 35%,transparent) 0%,transparent 66%);pointer-events:none;z-index:-2;animation:dmHydraulicGlow 3.6s ease-in-out infinite}
 .dmFloatBtn.ready{animation:dmHydraulicBreath 3.8s ease-in-out infinite,dmPressureRelease 7.5s ease-in-out infinite}
@@ -1986,7 +1989,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store"><span class="navRowIcon" aria-hidden="true">🛒</span><span class="navRowText"><strong>Store</strong><small>FL OZ · songs · skins · packs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
-    <button class="dmFloatBtn" id="dmFloatBtn" type="button" hidden aria-label="Open DAM MACHINE when a free play is ready">🎰<span class="dmIdleFx" aria-hidden="true"><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmSpark"></i></span><span class="dmFloatLabel" id="dmFloatLabel">BONUS READY</span></button>
+    <button class="dmFloatBtn inactive" id="dmFloatBtn" type="button" aria-disabled="true" aria-label="DAM MACHINE — no free plays yet">🎰<span class="dmIdleFx" aria-hidden="true"><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmSpark"></i></span><span class="dmFloatLabel" id="dmFloatLabel">BONUS READY</span></button>
 
     <div class="preGameCard" id="preGameCard" role="dialog" aria-modal="true" aria-labelledby="preGameTitle">
       <div class="preGameInner">
@@ -4891,9 +4894,13 @@ function renderDamMachineHeader(){
   pill.classList.toggle("none", plays <= 0);
   const float = $("dmFloatBtn");
   if(float){
-    float.hidden=plays<=0;
-    float.classList.toggle("ready",plays>0);
-    float.setAttribute("aria-label",plays>0?`Open DAM MACHINE — ${fmt(plays)} free play${plays===1?"":"s"} ready`:"DAM MACHINE not ready");
+    /* V2.1.4 — persistent station: visible at zero, interactive only when charged. */
+    float.hidden = false;
+    float.classList.toggle("ready", plays > 0);
+    float.classList.toggle("inactive", plays <= 0);
+    float.setAttribute("aria-disabled", plays <= 0 ? "true" : "false");
+    float.setAttribute("aria-label", plays > 0 ? `Open DAM MACHINE — ${fmt(plays)} free play${plays===1?"":"s"} ready` : "DAM MACHINE — no free plays yet");
+    $("dmFloatLabel").textContent = plays > 0 ? "BONUS READY" : "DAM MACHINE";
   }
   const btn = $("dmSpinBtn");
   const busy = damMachine.spinning || damMachine.presenting;   // v2.6.3: no spin while a result is being presented
@@ -4903,6 +4910,8 @@ function renderDamMachineHeader(){
 }
 
 function openDamMachine(){
+  /* V2.1.4 — the station stays visible, but cannot open until a free play exists. */
+  if(state.damMachineFreePlays <= 0) return;
   if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
   closePanels();
   closeNavMenu();                                       // v2.6.2: dismiss the consolidated menu
@@ -6683,9 +6692,9 @@ function runCommandCenterSelfTest(){
     t("menu: floating DAM MACHINE button exists outside the menu", () => !!$("dmFloatBtn") && !$("dmFloatBtn").closest("#navSheet"));
     /* floating machine */
     state.damMachineFreePlays = 0; renderDamMachineHeader();
-    t("machine: hidden with no free plays", () => $("dmFloatBtn").hidden);
+    t("machine: persistent station stays visible with no free plays", () => !$("dmFloatBtn").hidden && $("dmFloatBtn").classList.contains("inactive") && $("dmFloatBtn").getAttribute("aria-disabled") === "true");
     awardDamMachinePlay(1);
-    t("machine: a free play shows BONUS READY at once", () => !$("dmFloatBtn").hidden && $("dmFloatBtn").classList.contains("ready") && /BONUS READY/.test($("dmFloatBtn").textContent));
+    t("machine: a free play activates BONUS READY at once", () => !$("dmFloatBtn").hidden && !$("dmFloatBtn").classList.contains("inactive") && $("dmFloatBtn").classList.contains("ready") && /BONUS READY/.test($("dmFloatBtn").textContent));
     t("machine: ready state animates", () => getComputedStyle($("dmFloatBtn")).animationName !== "none");
     const before = state.totalFlOz, pair = commitDamResult(evaluateDamCombination(["wheel","wheel","pun"]), ["wheel","wheel","pun"]);
     t("machine: water prize is credited", () => pair.amount === 555 && state.totalFlOz === before + 555);
