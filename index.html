@@ -1216,7 +1216,8 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
   box-shadow:inset 0 10px 14px rgba(0,0,0,.5), inset 0 -10px 14px rgba(0,0,0,.5); }
 .dmReel.stopped{ border-color:color-mix(in srgb, var(--water-bright) 65%, transparent); box-shadow:inset 0 10px 14px rgba(0,0,0,.5), 0 0 14px color-mix(in srgb, var(--water-bright) 55%, transparent); }
 .dmSeam{ flex:0 0 3px; border-radius:2px; background:linear-gradient(180deg, transparent, var(--water-bright), transparent); opacity:.7; }
-.dmStrip{ position:absolute; inset:0; display:flex; flex-direction:column; will-change:transform; }
+/* V2.1.3 — the strip must be as tall as all reel cells; otherwise the transform only travels inside one reel-height box and the symbols never visibly scroll. */
+.dmStrip{ position:absolute; top:0; left:0; right:0; height:calc(100% * var(--dmCells)); display:flex; flex-direction:column; will-change:transform; }
 .dmCell{ flex:0 0 auto; height:calc(100% / var(--dmCells)); display:flex; align-items:center; justify-content:center; }
 .dmSym{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; }
 .dmSymEmoji{ font-size:clamp(2rem, 10vw, 3rem); line-height:1;
