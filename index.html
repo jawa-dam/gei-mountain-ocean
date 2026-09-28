@@ -1379,6 +1379,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .characterSpotlightFallback{position:relative;z-index:1;max-width:90%;padding:18px;border-radius:18px;background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.3);font-size:1.15rem;font-weight:1000}
 .characterSpotlightName{font-size:clamp(1.65rem,7vw,2.35rem);font-weight:1000;line-height:1.05;color:#fff;text-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 55%,transparent)}
 .characterSpotlightPun{margin-top:6px;font-size:1rem;font-weight:900;line-height:1.3;color:var(--gold);overflow-wrap:anywhere}
+.characterSpotlightQuipLabel{margin-top:12px;font-size:.68rem;font-weight:950;letter-spacing:.13em;text-transform:uppercase;color:var(--juicy-blue)}
+.characterSpotlightQuip{margin-top:4px;min-height:2.6em;padding:9px 10px;border-radius:13px;background:rgba(0,0,0,.22);border:1px solid color-mix(in srgb,var(--juicy-blue) 38%,transparent);font-size:.94rem;font-weight:850;line-height:1.35;color:#fff;overflow-wrap:anywhere}
+.characterSpotlightPunBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid color-mix(in srgb,var(--juicy-magenta) 48%,rgba(255,255,255,.22));background:linear-gradient(135deg,color-mix(in srgb,var(--juicy-magenta) 18%,transparent),color-mix(in srgb,var(--juicy-blue) 16%,transparent));color:#fff;font:900 .82rem/1.15 Inter,system-ui,sans-serif;cursor:pointer}
+.characterSpotlightPunBtn:active{transform:scale(.98)}
+.characterSpotlightPunBtn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .characterSpotlightStatus{margin:9px auto 0;width:fit-content;max-width:100%;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);font-size:.82rem;font-weight:900;line-height:1.2}
 .characterSpotlightActions{display:grid;gap:8px;margin-top:13px}
 .characterSpotlightActions button{width:100%;min-height:52px}
@@ -2052,6 +2057,9 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="characterSpotlightStage" id="characterSpotlightStage"></div>
         <div class="characterSpotlightName" id="characterSpotlightName">—</div>
         <div class="characterSpotlightPun" id="characterSpotlightPun"></div>
+        <div class="characterSpotlightQuipLabel">💧 DAM-PUN OF THE MOMENT</div>
+        <div class="characterSpotlightQuip" id="characterSpotlightQuip" aria-live="polite"></div>
+        <button class="characterSpotlightPunBtn" id="characterSpotlightPunBtn" type="button">😂 ANOTHER DAM-PUN</button>
         <div class="characterSpotlightStatus" id="characterSpotlightStatus"></div>
         <div class="characterSpotlightActions" id="characterSpotlightActions"></div>
         <div class="characterSpotlightMeta" id="characterSpotlightMeta">Inspect the operator, then choose what you want to do.</div>
@@ -6631,6 +6639,16 @@ function closeCharacterSpotlight(){
   card.classList.remove("show");
   const stage = $("characterSpotlightStage");
   if(stage) stage.innerHTML = "";
+  const quip = $("characterSpotlightQuip");
+  if(quip) quip.textContent = "";
+}
+
+function renderCharacterSpotlightPun(id){
+  const quip = $("characterSpotlightQuip");
+  if(!quip) return false;
+  const text = getCharacterHumor(id) || "That's a DAM good operator.";
+  quip.textContent = text;
+  return true;
 }
 
 function openCharacterSpotlight(id){
@@ -6651,6 +6669,7 @@ function openCharacterSpotlight(id){
 
   $("characterSpotlightName").textContent = c.name;
   $("characterSpotlightPun").textContent = damTitle(c.id) || "A DAM GOOD OPERATOR";
+  renderCharacterSpotlightPun(c.id);
   $("characterSpotlightStatus").textContent =
     active ? "⭐ ACTIVE OPERATOR" :
     starter ? "⭐ STARTER · UNLOCKED" :
@@ -6695,6 +6714,10 @@ function openCharacterSpotlight(id){
   try { playTone(880, 0.08, "triangle"); } catch(e){}
   return true;
 }
+
+$("characterSpotlightPunBtn").addEventListener("click", () => {
+  if(characterSpotlightId) renderCharacterSpotlightPun(characterSpotlightId);
+});
 
 function selectGuideCharacter(id){
   const c = CHARACTERS.find(x => x.id === id); if(!c) return false;
@@ -6777,7 +6800,7 @@ $("preGameAvatarGrid").addEventListener("click", e => {          // V2.1.6 — o
 $("preGameAvatarGrid").addEventListener("keydown", e => {
   if(e.key !== "Enter" && e.key !== " ") return;
   const card = e.target.closest(".preGameAvatar");
-  if(!card) return;
+  if(!card || e.target !== card) return;
   e.preventDefault();
   openCharacterSpotlight(card.dataset.charId);
 });
@@ -6788,12 +6811,7 @@ $("characterSpotlight").addEventListener("click", e => {
 document.addEventListener("keydown", e => {
   if(e.key === "Escape" && $("characterSpotlight").classList.contains("show")) closeCharacterSpotlight();
 });
-/* V2.1.6 — keyboard activation follows the same spotlight path as touch/click. */
-$("preGameAvatarGrid").addEventListener("keydown", e => {
-  if(e.key !== "Enter" && e.key !== " ") return;
-  const card = e.target.closest(".preGameAvatar");
-  if(card && e.target === card){ e.preventDefault(); openCharacterSpotlight(card.dataset.charId); }
-});
+/* V2.1.7 — one keyboard path for character spotlight; no duplicate handlers. */
 /* ---------- V2.0.7 self-test: guide, characters, menu, floating machine, prizes, UI.
    runCommandCenterSelfTest() → { pass, fail, results:[…] }. Console only. Live state, the save,
    and the guide preference are snapshotted first and restored afterwards. ---------- */
@@ -6831,8 +6849,22 @@ function runCommandCenterSelfTest(){
     t("guide: tapping an unlocked avatar opens its spotlight", () => {
       document.querySelector('.preGameAvatar[data-char-id="wilbert-dam-guide"]').click();
       return $("characterSpotlight").classList.contains("show") &&
-        $("characterSpotlightName").textContent === "Wilbert The DAM Guide" &&
+        $("characterSpotlightName").textContent === "Wilbert the DAM Guide" &&
         /OPERATOR SPOTLIGHT/i.test($("characterSpotlight").textContent);
+    });
+    t("V2.1.7: spotlight uses the canonical character DAM-pun engine", () => {
+      const q = $("characterSpotlightQuip");
+      const title = $("characterSpotlightPun").textContent;
+      return !!q && q.textContent.length > 0 &&
+        title === damTitle("wilbert-dam-guide") &&
+        DAM_HUMOR_CHARACTER["wilbert-dam-guide"].includes(q.textContent);
+    });
+    t("V2.1.7: another DAM-pun uses the same canonical pool", () => {
+      const before = $("characterSpotlightQuip").textContent;
+      $("characterSpotlightPunBtn").click();
+      const after = $("characterSpotlightQuip").textContent;
+      return after.length > 0 && DAM_HUMOR_CHARACTER["wilbert-dam-guide"].includes(after) &&
+        DAM_HUMOR_CHARACTER["wilbert-dam-guide"].length === 4 && before.length > 0;
     });
     t("guide: spotlight keeps canonical selection in one action", () => {
       const use = $("characterSpotlightActions").querySelector("button:not(:disabled)");
