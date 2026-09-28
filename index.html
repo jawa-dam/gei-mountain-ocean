@@ -2380,6 +2380,7 @@ const DAY_REWARD_FL_OZ   = 111;
 const DAYS_PER_LEVEL     = 6;
 const LEVEL_REWARD_FL_OZ = DAY_REWARD_FL_OZ * DAYS_PER_LEVEL; // 666
 const UNLOCK_COST_FL_OZ  = 6660;                              // THE unlock price: any song, paid character or skin (10 levels)
+const ECONOMY_MAX_FL_OZ  = 1000000000;                         // Hard client-side ceiling; server receipts remain the payment authority.
 const DAY_TIME_LIMIT_MS  = 6000;                              // Levels 1–60
 const ADVANCED_DAY_TIME_LIMIT_MS = 10000;                     // Level 61+ after Level 60 is mastered
 function getRequiredTaps(level){ return Math.ceil(Math.max(1, level) / 6) * 6; }
@@ -3610,7 +3611,79 @@ function sanitizeIds(list, catalog){
 }
 function daysDoneThisLevel(){ return Math.min(DAYS_PER_LEVEL, Math.floor(state.levelFlOz / DAY_REWARD_FL_OZ)); }
 
+function normalizeEconomyCollections(){
+  state.processedReceipts = [...new Set(
+    Array.isArray(state.processedReceipts)
+      ? state.processedReceipts.filter(r => typeof r === "string" && r.length >= 8 && r.length <= 180)
+      : []
+  )].slice(-200);
+
+  const seenReceipts = new Set();
+  state.purchaseHistory = (Array.isArray(state.purchaseHistory) ? state.purchaseHistory : [])
+    .filter(x => {
+      if(!x || typeof x !== "object") return false;
+      if(typeof x.packId !== "string" || !STORE_PACKS.some(p => p.id === x.packId)) return false;
+      if(typeof x.receiptId !== "string" || !x.receiptId || seenReceipts.has(x.receiptId)) return false;
+      seenReceipts.add(x.receiptId);
+      return true;
+    })
+    .map(x => {
+      const pack = STORE_PACKS.find(p => p.id === x.packId);
+      return {
+        packId: pack.id,
+        flOz: pack.flOz,
+        amount: Number(pack.priceUsd).toFixed(2),
+        receiptId: x.receiptId,
+        captureID: typeof x.captureID === "string" ? x.captureID : "",
+        orderID: typeof x.orderID === "string" ? x.orderID : "",
+        fulfillmentStatus: typeof x.fulfillmentStatus === "string" ? x.fulfillmentStatus : "LEGACY",
+        purchasedAt: Number.isFinite(Number(x.purchasedAt)) ? Number(x.purchasedAt) : Date.now()
+      };
+    }).slice(-20);
+
+  state.processedReceipts = [...new Set([
+    ...state.processedReceipts,
+    ...state.purchaseHistory.map(x => x.receiptId)
+  ])].slice(-200);
+}
+
+function normalizeEconomyNumbers(){
+  state.totalFlOz = toInt(state.totalFlOz, 0, ECONOMY_MAX_FL_OZ, 0);
+  state.levelFlOz = toInt(state.levelFlOz, 0, LEVEL_REWARD_FL_OZ, 0);
+  state.completedLevels = toInt(state.completedLevels, 0, 1000000, 0);
+}
+
+function economyInvariant(){
+  normalizeEconomyNumbers();
+  normalizeEconomyCollections();
+  const arraysOk =
+    Array.isArray(state.processedReceipts) &&
+    Array.isArray(state.purchaseHistory) &&
+    Array.isArray(state.unlockedSongs) &&
+    Array.isArray(state.unlockedSkins) &&
+    Array.isArray(state.unlockedCharacters);
+  const unlocksOk =
+    state.unlockedSongs.every(id => SONGS.some(x => x.id === id)) &&
+    state.unlockedSkins.every(id => PREMIUM_SKINS.some(x => x.id === id)) &&
+    state.unlockedCharacters.every(id => CHARACTERS.some(x => x.id === id));
+  const receiptsUnique = new Set(state.processedReceipts).size === state.processedReceipts.length;
+  const historyUnique = new Set(state.purchaseHistory.map(x => x.receiptId)).size === state.purchaseHistory.length;
+  return arraysOk && unlocksOk && receiptsUnique && historyUnique &&
+    Number.isInteger(state.totalFlOz) && state.totalFlOz >= 0 && state.totalFlOz <= ECONOMY_MAX_FL_OZ &&
+    Number.isInteger(state.levelFlOz) && state.levelFlOz >= 0 && state.levelFlOz <= LEVEL_REWARD_FL_OZ;
+}
+
+function safeAddFlOz(amount){
+  if(!Number.isInteger(amount) || amount < 0) return false;
+  if(amount > ECONOMY_MAX_FL_OZ || state.totalFlOz > ECONOMY_MAX_FL_OZ - amount) return false;
+  state.totalFlOz += amount;
+  return true;
+}
+
 function saveGame(){
+  normalizeEconomyNumbers();
+  normalizeEconomyCollections();
+  if(!economyInvariant()) return false;
   const data = {
     version: SAVE_VERSION,
     savedAt: Date.now(),
@@ -3663,7 +3736,7 @@ function loadGame(){
   const days            = toInt(d.levelFlOz, 0, LEVEL_REWARD_FL_OZ, 0) / DAY_REWARD_FL_OZ | 0;
   state.levelFlOz       = days * DAY_REWARD_FL_OZ;
   state.currentStep     = Math.min(days, DAYS_PER_LEVEL - 1);
-  state.totalFlOz       = toInt(d.totalFlOz, 0, 1e9, 0);
+  state.totalFlOz       = toInt(d.totalFlOz, 0, ECONOMY_MAX_FL_OZ, 0);
   state.completedLevels = toInt(d.completedLevels ?? d.loopCount, 0, 1e6, 0);
   state.millStage       = toInt(d.millStage, 0, 1e6, 0);
   state.unlockedSongs   = sanitizeIds(d.unlockedSongs, SONGS);
@@ -3680,7 +3753,7 @@ function loadGame(){
     .slice(-20)
     .map(x => ({
       packId: x.packId,
-      flOz: toInt(x.flOz, 0, 1e9, 0),
+      flOz: toInt(x.flOz, 0, ECONOMY_MAX_FL_OZ, 0),
       amount: typeof x.amount === "string" ? x.amount : Number(x.amount || 0).toFixed(2),
       receiptId: x.receiptId,
       captureID: typeof x.captureID === "string" ? x.captureID : "",
@@ -3688,6 +3761,8 @@ function loadGame(){
       fulfillmentStatus: typeof x.fulfillmentStatus === "string" ? x.fulfillmentStatus : "LEGACY",
       purchasedAt: Number.isFinite(Number(x.purchasedAt)) ? Number(x.purchasedAt) : Date.now()
     })) : [];
+  normalizeEconomyNumbers();
+  normalizeEconomyCollections();
   state.tribesFound     = Array.isArray(d.tribesFound) ? d.tribesFound.map(tribeByName).filter(Boolean) : [];
   state.lastTribe       = tribeByName(d.lastTribe);
   /* v2.6.4 — Dam Machine history migration: missing/malformed fields get safe defaults. */
@@ -4021,7 +4096,7 @@ function beginDay(index){
 function awardDay(index){
   if(state.levelFlOz !== index * DAY_REWARD_FL_OZ) return false;
   state.levelFlOz += DAY_REWARD_FL_OZ;
-  state.totalFlOz += DAY_REWARD_FL_OZ;
+  if(!safeAddFlOz(DAY_REWARD_FL_OZ)) return false;
   if(index === DAYS_PER_LEVEL - 1){
     // Level is banked in the same save as the final 111, so a refresh can't lose or repeat it.
     state.completedLevels++;
@@ -4434,7 +4509,7 @@ function commitBonusPrize(prize){
   } else {
     res.title = "😂 DAM PUN!"; res.detail = "";
   }
-  state.totalFlOz += res.amount;                                // amount ≥ 0 always
+  if(!safeAddFlOz(res.amount)) return res;
   if(state.totalFlOz < before) state.totalFlOz = before;        // belt and braces: a spin never reduces the wallet
   res.humor = getDamHumor(prize.humor);
   if(prize.kind !== "freeSpin"){ advanceLevel(); res.final = true; }
@@ -4747,7 +4822,7 @@ function commitDamResult(combo, ids=null){
     state.damMachineFreePlays = Math.min(DAM_MACHINE_MAX_PLAYS, state.damMachineFreePlays + 1);
   }
   if(!res.title) res.title = combo.title;
-  state.totalFlOz += res.amount;
+  if(!safeAddFlOz(res.amount)) return res;
   if(state.totalFlOz < before) state.totalFlOz = before;
 
   /* v2.6.4 — history commits with the reward, before presentation begins. */
@@ -5451,6 +5526,8 @@ function purchaseItem(category, id, opts = {}){
   if(isUnlocked(category, id)) return { ok:false, message:"Already unlocked." };
   if(item.rescueOnly) return { ok:false, message:"Rescue this -ite to add them to your crew." };
   const cost = Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
+  if(!Number.isInteger(cost) || cost < 0 || cost > ECONOMY_MAX_FL_OZ) return { ok:false, message:"Invalid unlock cost." };
+  if(!Number.isInteger(state.totalFlOz) || state.totalFlOz < 0) return { ok:false, message:"Wallet integrity check failed." };
   if(state.totalFlOz < cost) return { ok:false, message:`Need ${fmt(cost)} FL OZ — you have ${fmt(state.totalFlOz)}.` };
   state.totalFlOz -= cost;
   state[UNLOCK_STATE_KEY[category]].push(id);
@@ -5468,8 +5545,9 @@ function creditPack(packId, receiptId, meta = {}){
     return { ok:false, message:"Server fulfillment authorization is required." };
   }
   if(state.processedReceipts.includes(receiptId)) return { ok:false, message:"Receipt already credited." };
+  if(!Number.isInteger(pack.flOz) || pack.flOz <= 0 || pack.flOz > ECONOMY_MAX_FL_OZ) return { ok:false, message:"Pack economy data is invalid." };
+  if(!safeAddFlOz(pack.flOz)) return { ok:false, message:"Wallet integrity limit reached." };
   state.processedReceipts.push(receiptId);
-  state.totalFlOz += pack.flOz;
   state.purchaseHistory.push({
     packId: pack.id,
     flOz: pack.flOz,
@@ -6160,7 +6238,14 @@ function runEconomyIntegritySelfTest(){
   t("credit: rejects unknown pack", creditPack("bogus","GEI-FULFILL-selftest",{serverAuthorized:true,fulfillmentId:"GEI-FULFILL-selftest",captureID:"capture-test"}).message === "Unknown pack.");
   t("fulfillment id format is canonical", /^GEI-FULFILL-[A-Za-z0-9._:-]{8,120}$/.test("GEI-FULFILL-capture-test"));
   t("wallet credit constants remain canonical", DAY_REWARD_FL_OZ===111 && LEVEL_REWARD_FL_OZ===666 && UNLOCK_COST_FL_OZ===6660);
+  t("wallet ceiling is finite and non-negative", Number.isInteger(ECONOMY_MAX_FL_OZ) && ECONOMY_MAX_FL_OZ > 0);
+  t("wallet invariant holds", economyInvariant());
   t("purchase history schema accepts legacy and server-authorized records", state.purchaseHistory.every(x=>x && typeof x.receiptId==="string" && typeof x.fulfillmentStatus==="string"));
+  t("purchase receipts are unique", new Set(state.purchaseHistory.map(x=>x.receiptId)).size === state.purchaseHistory.length);
+  t("processed receipts are unique", new Set(state.processedReceipts).size === state.processedReceipts.length);
+  t("catalog pack values are canonical", STORE_PACKS.every(p => Number.isInteger(p.flOz) && p.flOz > 0 && Number(p.priceUsd) > 0));
+  t("negative wallet credit is rejected", safeAddFlOz(-1) === false);
+  t("fractional wallet credit is rejected", safeAddFlOz(1.5) === false);
   const pass=results.filter(r=>r.ok).length;
   return {pass,fail:results.length-pass,results};
 }
