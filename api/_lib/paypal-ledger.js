@@ -1,3 +1,5 @@
+import { ECONOMY_AUTHORITY_VERSION, validateEntitlementAuthority, auditReceipt } from "./economy-authority.js";
+
 const LEDGER_TTL_SECONDS = 60 * 60 * 24 * 365;
 
 function ledgerConfig() {
@@ -38,10 +40,14 @@ export async function recordEntitlement({
     throw new Error("Incomplete PayPal entitlement record.");
   }
 
+  if (!validateEntitlementAuthority({ packId, flOz, amount, currency })) throw new Error("Economy authority validation failed.");
+
   const eventKey = "gei:paypal:event:" + eventId;
   const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
   const record = JSON.stringify({
     status: "FULFILLABLE",
+    auditVersion: ECONOMY_AUTHORITY_VERSION,
+    audit: auditReceipt({ packId, flOz, amount, currency }),
     orderID,
     captureID,
     invoiceId,
