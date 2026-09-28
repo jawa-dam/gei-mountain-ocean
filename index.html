@@ -2190,10 +2190,11 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         </div>
         <div class="purchaseVerification" id="purchaseVerification">
           <div class="purchaseVerificationTitle">🧾 V2.0.21 PURCHASE VERIFICATION</div>
-          <div class="purchaseVerificationSub">Arm the $1 test, complete one real production purchase, then verify the entitlement reaches the FL OZ wallet and Song Vault.</div>
+          <div class="purchaseVerificationSub">Retries reuse the same PayPal request ID and entitlement claim ID. A duplicate capture cannot create a second wallet credit.</div>
           <div class="purchaseVerificationChecks" id="purchaseVerificationChecks">
             <div class="purchaseVerificationCheck pending"><span>Test session armed</span><span id="purchaseArm">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>PayPal capture</span><span id="purchaseCapture">WAIT</span></div>
+            <div class="purchaseVerificationCheck pending"><span>Replay protection</span><span id="purchaseReplay">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>Entitlement claim</span><span id="purchaseClaim">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>FL OZ credit</span><span id="purchaseCredit">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>Purchase History</span><span id="purchaseHistoryCheck">WAIT</span></div>
@@ -5728,11 +5729,14 @@ function armProductionPurchaseVerification(pack){
     flOz:Number(pack.flOz),
     walletBefore:Number(state.totalFlOz)||0,
     historyBefore:state.purchaseHistory.length,
+    orderID:null,
+    requestId:null,
     songsBefore:state.unlockedSongs.length,
     armedAt:Date.now(),
     capture:false,
     claim:false,
-    credit:false
+    credit:false,
+    recovered:false
   };
   const arm=$("purchaseArm");
   if(arm){ arm.textContent="ARMED"; const row=arm.closest(".purchaseVerificationCheck"); row.classList.remove("pending"); row.classList.add("pass"); }
@@ -5753,6 +5757,9 @@ function updateProductionPurchaseVerification(){
   const walletDelta=(Number(state.totalFlOz)||0)-s.walletBefore;
   const historyDelta=state.purchaseHistory.length-s.historyBefore;
   const songDelta=state.unlockedSongs.length-s.songsBefore;
+  if(s.capture && s.claim){
+    setPurchaseVerification("purchaseReplay","pass","LOCKED");
+  }
   if(s.credit){
     setPurchaseVerification("purchaseCredit",walletDelta===s.flOz?"pass":"pending",walletDelta===s.flOz?"PASS":"CHECK");
     setPurchaseVerification("purchaseHistoryCheck",historyDelta>=1?"pass":"pending",historyDelta>=1?"PASS":"WAIT");
@@ -5763,6 +5770,45 @@ function updateProductionPurchaseVerification(){
   if(meta) meta.textContent=complete
     ? "🎉 PRODUCTION PURCHASE VERIFIED · payment → entitlement → wallet → Song Vault"
     : "Production purchase session active · unlock the next Song Vault song to finish the manual proof.";
+}
+
+function paypalRecoveryStorageKey(kind, id){
+  return "gei.paypal.v2.0.22." + kind + "." + String(id || "");
+}
+function safeSessionGet(key){
+  try { return sessionStorage.getItem(key); } catch(e){ return null; }
+}
+function safeSessionSet(key,value){
+  try { sessionStorage.setItem(key,value); } catch(e){}
+}
+function checkoutRequestId(packId){
+  const key=paypalRecoveryStorageKey("request",packId);
+  const existing=safeSessionGet(key);
+  if(existing) return existing;
+  const id="gei-"+String(packId)+"-"+crypto.randomUUID();
+  safeSessionSet(key,id);
+  return id;
+}
+function checkoutClaimId(orderID){
+  const key=paypalRecoveryStorageKey("claim",orderID);
+  const existing=safeSessionGet(key);
+  if(existing) return existing;
+  const id="checkout-"+crypto.randomUUID();
+  safeSessionSet(key,id);
+  return id;
+}
+async function paypalFetchJson(url, options={}, attempts=3){
+  let lastError=null;
+  for(let attempt=1; attempt<=attempts; attempt++){
+    try{
+      const response=await fetch(url,options);
+      const data=await response.json().catch(()=>({}));
+      if(response.ok || response.status < 500) return {response,data};
+      lastError=new Error(data.error || ("HTTP "+response.status));
+    }catch(err){ lastError=err; }
+    if(attempt<attempts) await new Promise(resolve=>setTimeout(resolve,350*attempt));
+  }
+  throw lastError || new Error("PayPal request failed.");
 }
 
 function startCheckout(packId){
@@ -5803,23 +5849,29 @@ function startCheckout(packId){
     const instance=paypal.Buttons({
       style:{layout:"vertical",shape:"rect",label:"paypal",height:48},
       createOrder:async()=>{
-        const r=await fetch("/api/paypal/create-order",{
+        const requestId=checkoutRequestId(packId);
+        const result=await paypalFetchJson("/api/paypal/create-order",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({packId})
+          body:JSON.stringify({packId,requestId})
         });
-        const data=await r.json().catch(()=>({}));
+        const r=result.response, data=result.data;
         if(!r.ok || !data.id) throw new Error(data.error || "Unable to start PayPal checkout.");
+        safeSessionSet(paypalRecoveryStorageKey("claim",data.id),checkoutClaimId(data.id));
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.orderID=data.id;
+          purchaseVerificationSession.requestId=requestId;
+        }
         return data.id;
       },
       onApprove:async(data)=>{
         status.textContent="Confirming your payment…";
-        const r=await fetch("/api/paypal/capture-order",{
+        const captureResult=await paypalFetchJson("/api/paypal/capture-order",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({orderID:data.orderID,packId})
         });
-        const result=await r.json().catch(()=>({}));
+        const r=captureResult.response, result=captureResult.data;
         if(!r.ok || !result.ok || result.status!=="COMPLETED" || !result.claimToken){
           throw new Error(result.error || "Payment could not be confirmed.");
         }
@@ -5828,8 +5880,8 @@ function startCheckout(packId){
           setPurchaseVerification("purchaseCapture","pass","PASS");
         }
 
-        const claimId="checkout-"+crypto.randomUUID();
-        const claimResponse=await fetch("/api/paypal/claim-entitlement",{
+        const claimId=checkoutClaimId(data.orderID);
+        const claimResult=await paypalFetchJson("/api/paypal/claim-entitlement",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({
@@ -5838,13 +5890,14 @@ function startCheckout(packId){
             claimId
           })
         });
-        const claim=await claimResponse.json().catch(()=>({}));
+        const claimResponse=claimResult.response, claim=claimResult.data;
         if(!claimResponse.ok || !claim.ok || !claim.entitlement){
           throw new Error(claim.error || "Payment was confirmed but the durable entitlement could not be claimed.");
         }
         if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
           purchaseVerificationSession.claim=true;
-          setPurchaseVerification("purchaseClaim","pass","PASS");
+          purchaseVerificationSession.recovered=claim.alreadyClaimed===true;
+          setPurchaseVerification("purchaseClaim","pass",claim.alreadyClaimed===true?"RECOVERED":"PASS");
         }
 
         const credited=creditPack(claim.entitlement.packId,claim.entitlement.captureID, {
