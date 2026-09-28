@@ -6936,8 +6936,8 @@ function paypalDiagnosticMessage(code, detail){
 async function paypalServerProbe(){
   try{
     const [sdkResult, credentialResult] = await Promise.all([
-      fetch("/api/paypal/sdk-probe", { cache:"no-store" }).then(async r => ({http:r.status,data:await r.json().catch(()=>({}))})),
-      fetch("/api/paypal/credential-probe", { cache:"no-store" }).then(async r => ({http:r.status,data:await r.json().catch(()=>({}))}))
+      fetch((typeof window.__GEI_API_URL__==="function"?window.__GEI_API_URL__("/api/paypal/sdk-probe"):"/api/paypal/sdk-probe"), { cache:"no-store" }).then(async r => ({http:r.status,data:await r.json().catch(()=>({}))})),
+      fetch((typeof window.__GEI_API_URL__==="function"?window.__GEI_API_URL__("/api/paypal/credential-probe"):"/api/paypal/credential-probe"), { cache:"no-store" }).then(async r => ({http:r.status,data:await r.json().catch(()=>({}))}))
     ]);
 
     const sdk=sdkResult.data || {};
@@ -7010,7 +7010,7 @@ async function runProductionRuntimeVerification(){
 
   $("paypalRuntimeMeta").textContent="Running live production diagnostics…";
   try{
-    const configResult=await fetch("/api/paypal/config",{cache:"no-store"});
+    const configResult=await fetch((typeof window.__GEI_API_URL__==="function"?window.__GEI_API_URL__("/api/paypal/config"):"/api/paypal/config"),{cache:"no-store"});
     let config={}; try{config=await configResult.json();}catch(e){}
     checks.config=configResult.ok && !!config.clientId;
     setCheck("runtimeConfig",checks.config?"pass":"fail",checks.config?"PASS":"HTTP "+configResult.status);
@@ -7362,9 +7362,10 @@ function checkoutFulfillmentId(captureID){
 }
 async function paypalFetchJson(url, options={}, attempts=3){
   let lastError=null;
+  const requestUrl=(typeof window.__GEI_API_URL__==="function") ? window.__GEI_API_URL__(url) : url;
   for(let attempt=1; attempt<=attempts; attempt++){
     try{
-      const response=await fetch(url,options);
+      const response=await fetch(requestUrl,options);
       const data=await response.json().catch(()=>({}));
       if(response.ok || response.status < 500) return {response,data};
       lastError=new Error(data.error || ("HTTP "+response.status));
@@ -10070,6 +10071,8 @@ if(state.levelFlOz >= LEVEL_REWARD_FL_OZ){
 broadcastUnlocks();
 preloadCharacter(getActiveCharacter());
 try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); }   // V2.1.12 — presentation only
+  window.__GEI_GAME_BOOTED__=true; // V2.1.36 — gameplay init completed before optional modules
+
 
 /* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
 if(state.level===1 && state.levelFlOz===0 && storageGet("yalltooDamGame.guideSeen")!=="1"){
@@ -10192,24 +10195,15 @@ function restoreVisualProgress(){
 
   <script src="/customer-purchase-experience.js" defer></script>
   <script>
-/* V2.1.34 — GitHub Pages → Vercel API bridge
-   Gameplay stays on GitHub Pages; only backend API calls cross to Vercel. */
+/* V2.1.36 — SAFE HYBRID API ROUTING
+   Never monkey-patch window.fetch. Gameplay owns the browser event loop.
+   PayPal helpers opt into the backend URL through paypalFetchJson/loadPayPalSdk. */
 (function(){
   if(!window.__GEI_HYBRID_STATIC_HOST__) return;
-  var BACKEND="https://gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app";
-  var nativeFetch=window.fetch.bind(window);
-  window.fetch=function(input,init){
-    try{
-      var url=typeof input==="string"?input:(input&&input.url)||"";
-      if(/^\/api\/paypal\//i.test(url)){
-        var target=BACKEND+url;
-        if(input instanceof Request){
-          return nativeFetch(new Request(target,input),init);
-        }
-        return nativeFetch(target,init);
-      }
-    }catch(e){}
-    return nativeFetch(input,init);
+  window.__GEI_API_BACKEND__="https://gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app";
+  window.__GEI_API_URL__=function(path){
+    const p=String(path||"");
+    return /^\/api\/paypal\//i.test(p) ? window.__GEI_API_BACKEND__ + p : p;
   };
 })();
 </script>
