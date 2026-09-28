@@ -8418,7 +8418,7 @@ function renderDamIteIdentityEvolution(){
   if(!stageEl||!stepEl||!descEl||!fillEl||!nextEl) return;
   const ev=getDamIteIdentityEvolution(state.completedLevels);
   const previous=box.getAttribute("data-stage")||"";
-  stageEl.innerHTML='DAM-ITE <span>'+esc(ev.stage.name.replace(/^DAM-ITE\\s+/,""))+'</span>';
+  stageEl.innerHTML='DAM-ITE <span>'+esc(ev.stage.name.replace(/^DAM-ITE\s+/,""))+'</span>';
   stepEl.textContent='STAGE '+(ev.index+1)+' / '+DAM_ITE_IDENTITY_STAGES.length;
   descEl.textContent=ev.stage.desc;
   fillEl.style.width=ev.pct+"%";
