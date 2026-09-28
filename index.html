@@ -1323,9 +1323,30 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .preGameFoot label{font-size:.9rem;font-weight:800;text-align:left;line-height:1.2;cursor:pointer}
 .preGameStart{width:100%;margin-top:10px;min-height:56px;font-size:1.1rem}.preGameMsg{min-height:1.2em;margin-top:8px;font-size:.9rem;font-weight:800;color:var(--gold)}
 .preGameHowBtn{width:100%;min-height:44px;margin-top:8px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:900}
-.dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent)}
-.dmFloatBtn[hidden]{display:none}.dmFloatBtn.ready{animation:dmFloatReady 1.15s ease-in-out infinite}.dmFloatBtn span{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);width:62px;white-space:normal;text-align:center;line-height:1.05;padding:4px 3px;border-radius:10px;background:rgba(2,6,14,.92);border:1px solid var(--gold);color:var(--gold);font-size:.72rem;font-weight:900;letter-spacing:.02em}
-.dmFloatBtn.ready span{animation:dmFloatBlink 1.15s ease-in-out infinite}
+.dmFloatBtn{position:absolute;left:7px;top:53%;z-index:82;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,.7);background:linear-gradient(145deg,var(--gold),#fff0a5);color:var(--juicy-navy);font-size:1.55rem;box-shadow:0 0 18px color-mix(in srgb,var(--gold) 65%,transparent),0 0 38px color-mix(in srgb,var(--water-bright) 30%,transparent);isolation:isolate;overflow:visible;will-change:transform,box-shadow,filter}
+.dmFloatBtn[hidden]{display:none}
+.dmFloatBtn::before{content:"";position:absolute;inset:-7px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--water-bright) 78%,transparent);box-shadow:0 0 16px color-mix(in srgb,var(--water-bright) 55%,transparent),inset 0 0 8px color-mix(in srgb,var(--juicy-pink) 22%,transparent);pointer-events:none;z-index:-1;animation:dmHydraulicRing 4.8s linear infinite}
+.dmFloatBtn::after{content:"";position:absolute;inset:-13px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--water-bright) 35%,transparent) 0%,transparent 66%);pointer-events:none;z-index:-2;animation:dmHydraulicGlow 3.6s ease-in-out infinite}
+.dmFloatBtn.ready{animation:dmHydraulicBreath 3.8s ease-in-out infinite,dmPressureRelease 7.5s ease-in-out infinite}
+.dmFloatBtn span.dmFloatLabel{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);width:74px;white-space:normal;text-align:center;line-height:1.05;padding:5px 4px;border-radius:10px;background:rgba(2,6,14,.92);border:1px solid color-mix(in srgb,var(--gold) 85%,transparent);color:var(--gold);font-size:.76rem;font-weight:900;letter-spacing:.02em;pointer-events:none;z-index:4;animation:dmReadyIndicator 3.8s ease-in-out infinite}
+.dmIdleFx{position:absolute;inset:0;pointer-events:none;z-index:3}
+.dmDrop,.dmSpark{position:absolute;display:block;pointer-events:none}
+.dmDrop{left:50%;bottom:7px;width:4px;height:8px;border-radius:70% 70% 55% 55%;background:linear-gradient(180deg,var(--foam),var(--water-bright));box-shadow:0 0 7px color-mix(in srgb,var(--water-bright) 75%,transparent);opacity:0;animation:dmWaterDrop 5.8s ease-out infinite}
+.dmDrop:nth-child(2){left:28%;animation-delay:2.1s;animation-duration:6.6s}
+.dmDrop:nth-child(3){left:72%;animation-delay:4.1s;animation-duration:6.1s}
+.dmSpark{left:76%;top:14%;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 8px var(--foam),0 0 16px var(--water-bright);opacity:0;animation:dmJackpotSpark 8.2s ease-in-out infinite}
+@keyframes dmHydraulicBreath{0%,100%{transform:scale(1)}45%{transform:scale(1.025)}60%{transform:scale(1.015)}}
+@keyframes dmHydraulicRing{0%{transform:rotate(0deg) scale(.94);opacity:.35}50%{transform:rotate(180deg) scale(1.02);opacity:.9}100%{transform:rotate(360deg) scale(.94);opacity:.35}}
+@keyframes dmHydraulicGlow{0%,100%{transform:scale(.82);opacity:.28}50%{transform:scale(1.12);opacity:.72}}
+@keyframes dmPressureRelease{0%,88%,100%{translate:0 0;rotate:0deg}89%{translate:-1px 0;rotate:-1.2deg}90%{translate:2px 0;rotate:1.2deg}91%{translate:-1px 0;rotate:-.7deg}92%{translate:0 0;rotate:0deg}}
+@keyframes dmWaterDrop{0%{transform:translate(-50%,0) scale(.65);opacity:0}14%{opacity:.9}72%{opacity:.5}100%{transform:translate(-50%,-30px) scale(.9);opacity:0}}
+@keyframes dmJackpotSpark{0%,72%,100%{transform:scale(.3) rotate(0);opacity:0}76%{transform:scale(1.35) rotate(45deg);opacity:1}82%{transform:scale(.8) rotate(90deg);opacity:.7}88%{transform:scale(.2) rotate(135deg);opacity:0}}
+@keyframes dmReadyIndicator{0%,100%{opacity:.62}45%,62%{opacity:1}53%{filter:brightness(1.25)}}
+@media (prefers-reduced-motion: reduce){
+  .dmFloatBtn.ready,.dmFloatBtn::before,.dmFloatBtn::after,.dmFloatBtn span.dmFloatLabel,.dmDrop,.dmSpark{animation:none!important}
+  .dmFloatBtn.ready{transform:none}
+}
+
 @keyframes dmFloatBlink{0%,100%{opacity:1}50%{opacity:.55}}
 .preGameFoot input{width:24px;height:24px;flex:0 0 24px;accent-color:var(--gold)}
 .preGameChain{text-align:center;font-weight:900;font-size:.92rem;line-height:1.5}
@@ -1964,7 +1985,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store"><span class="navRowIcon" aria-hidden="true">🛒</span><span class="navRowText"><strong>Store</strong><small>FL OZ · songs · skins · packs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
-    <button class="dmFloatBtn" id="dmFloatBtn" type="button" hidden aria-label="Open DAM MACHINE when a free play is ready">🎰<span id="dmFloatLabel">BONUS READY</span></button>
+    <button class="dmFloatBtn" id="dmFloatBtn" type="button" hidden aria-label="Open DAM MACHINE when a free play is ready">🎰<span class="dmIdleFx" aria-hidden="true"><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmDrop"></i><i class="dmSpark"></i></span><span class="dmFloatLabel" id="dmFloatLabel">BONUS READY</span></button>
 
     <div class="preGameCard" id="preGameCard" role="dialog" aria-modal="true" aria-labelledby="preGameTitle">
       <div class="preGameInner">
