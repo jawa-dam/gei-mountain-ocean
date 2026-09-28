@@ -1,6 +1,9 @@
 import { recordEntitlement } from "../_lib/paypal-ledger.js";
+import { PACKS, ECONOMY_AUTHORITY_VERSION, validateEntitlementAuthority } from "../_lib/economy-authority.js";
 
-const PACKS = {
+
+/* V2.0.25 — server economy authority */
+
   single: { label: "1 Song", price: "1.00", flOz: 6660 },
   ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
   twentyfive: { label: "25 Songs", price: "6.00", flOz: 166500 }
@@ -60,7 +63,7 @@ export default async function handler(req, res) {
     );
     const order = await check.json();
 
-    if (!check.ok || !validOrder(order, packId)) {
+    if (!check.ok || !validOrder(order, packId) || !validateEntitlementAuthority({ packId, flOz: PACKS[packId].flOz, amount: PACKS[packId].price, currency: "USD" })) {
       return res.status(400).json({ error: "PayPal order validation failed." });
     }
 
@@ -86,7 +89,8 @@ export default async function handler(req, res) {
         packId,
         flOz: PACKS[packId].flOz,
         claimToken: invoiceId,
-        fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE"
+        fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE",
+      economyAuthorityVersion: ECONOMY_AUTHORITY_VERSION
       });
     }
 
@@ -134,7 +138,8 @@ export default async function handler(req, res) {
           packId,
           flOz: PACKS[packId].flOz,
           claimToken: retryInvoiceId,
-          fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE"
+          fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE",
+          economyAuthorityVersion: ECONOMY_AUTHORITY_VERSION
         });
       }
 
