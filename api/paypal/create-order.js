@@ -28,7 +28,11 @@ export default async function handler(req, res) {
   }
   try {
     const packId = req.body && req.body.packId;
+    const requestId = req.body && req.body.requestId;
     const pack = PACKS[packId];
+    if (!requestId || typeof requestId !== "string" || !/^[A-Za-z0-9._:-]{8,100}$/.test(requestId)) {
+      return res.status(400).json({ error: "A valid checkout request id is required." });
+    }
     if (!pack) return res.status(400).json({ error: "Unknown FL OZ pack." });
 
     const invoiceId = "GEI-" + crypto.randomUUID();
@@ -38,6 +42,7 @@ export default async function handler(req, res) {
       headers: {
         Authorization: "Bearer " + token,
         "Content-Type": "application/json",
+        "PayPal-Request-Id": requestId,
         Prefer: "return=representation"
       },
       body: JSON.stringify({
@@ -64,7 +69,8 @@ export default async function handler(req, res) {
       packId,
       amount: pack.price,
       currency: "USD",
-      claimToken: invoiceId
+      claimToken: invoiceId,
+      requestId
     });
   } catch (err) {
     console.error("[PayPal create-order]", err);
