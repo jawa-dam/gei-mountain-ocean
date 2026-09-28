@@ -1028,6 +1028,18 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .paypalCheckoutTitle{ font-size:1rem; font-weight:900; letter-spacing:.06em; color:var(--foam); text-align:center; }
 .paypalCheckoutItem{ margin:6px 0 10px; font-size:1rem; font-weight:900; color:var(--gold); text-align:center; }
 .paypalCheckoutStatus{ min-height:1.3em; margin:5px 0 8px; font-size:.92rem; font-weight:800; text-align:center; }
+.paypalRuntime{ margin-top:12px; padding:14px; border-radius:18px; background:linear-gradient(160deg,rgba(47,210,255,.10),rgba(241,16,186,.10)); border:1.5px solid rgba(255,255,255,.18); }
+.paypalRuntimeTitle{ font-size:1rem; font-weight:950; letter-spacing:.07em; text-align:center; color:var(--foam); }
+.paypalRuntimeSub{ margin:5px 0 10px; font-size:.86rem; line-height:1.35; text-align:center; opacity:.84; }
+.paypalRuntimeChecks{ display:grid; gap:6px; }
+.paypalRuntimeCheck{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; border-radius:12px; background:rgba(0,0,0,.22); font-size:.9rem; font-weight:850; }
+.paypalRuntimeCheck span:last-child{ white-space:nowrap; }
+.paypalRuntimeCheck.pass{ border:1px solid rgba(47,210,255,.42); }
+.paypalRuntimeCheck.fail{ border:1px solid rgba(255,94,122,.48); }
+.paypalRuntimeCheck.pending{ border:1px solid rgba(255,255,255,.14); }
+.paypalRuntimeRun{ width:100%; margin-top:9px; }
+.paypalRuntimeMeta{ margin-top:8px; min-height:1.2em; font-size:.78rem; text-align:center; opacity:.72; }
+
 .paypalButtons{ min-height:42px; }
 .paypalReceipt{ margin:10px 0 2px; padding:14px 14px 12px; border-radius:16px; background:linear-gradient(145deg,rgba(32,220,160,.13),rgba(41,198,255,.14)); border:1.5px solid rgba(126,255,214,.55); text-align:center; box-shadow:0 0 22px rgba(32,220,160,.12); }
 .paypalReceipt[hidden]{ display:none; }
@@ -2164,6 +2176,20 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <div class="purchaseHistory" id="purchaseHistory">
           <div class="purchaseHistoryTitle">🧾 Purchase History</div>
           <div class="purchaseHistoryList" id="purchaseHistoryList"></div>
+        </div>
+        <div class="paypalRuntime" id="paypalRuntime">
+          <div class="paypalRuntimeTitle">🩺 PRODUCTION RUNTIME</div>
+          <div class="paypalRuntimeSub">Verify the live Vercel payment runtime before testing a real checkout. No charge is created by this diagnostic.</div>
+          <div class="paypalRuntimeChecks" id="paypalRuntimeChecks">
+            <div class="paypalRuntimeCheck pending"><span>Production host</span><span id="runtimeHost">WAIT</span></div>
+            <div class="paypalRuntimeCheck pending"><span>PayPal config endpoint</span><span id="runtimeConfig">WAIT</span></div>
+            <div class="paypalRuntimeCheck pending"><span>PayPal SDK probe</span><span id="runtimeSdkProbe">WAIT</span></div>
+            <div class="paypalRuntimeCheck pending"><span>Live credential probe</span><span id="runtimeCredProbe">WAIT</span></div>
+            <div class="paypalRuntimeCheck pending"><span>PayPal Buttons API</span><span id="runtimeButtons">WAIT</span></div>
+            <div class="paypalRuntimeCheck pending"><span>Real $1 checkout</span><span>MANUAL</span></div>
+          </div>
+          <button class="storeBtn paypalRuntimeRun" id="paypalRuntimeRun" type="button">RUN PRODUCTION HEALTH CHECK</button>
+          <div class="paypalRuntimeMeta" id="paypalRuntimeMeta" aria-live="polite"></div>
         </div>
         <div class="paypalCheckout" id="storeCheckout" hidden>
           <div class="paypalCheckoutTitle">💳 SECURE PAYPAL CHECKOUT</div>
@@ -5485,6 +5511,65 @@ async function paypalServerProbe(){
   }
 }
 
+
+async function runProductionRuntimeVerification(){
+  const host=String(window.location.hostname||"").toLowerCase();
+  const checks={
+    host:/\\.vercel\\.app$/i.test(host) || host === "gei-mountain-ocean.com" || host === "www.gei-mountain-ocean.com",
+    config:false,
+    sdkProbe:false,
+    credProbe:false,
+    buttons:false
+  };
+  const setCheck=(id,state,label)=>{
+    const el=$(id);
+    if(!el) return;
+    const row=el.closest(".paypalRuntimeCheck");
+    if(row){
+      row.classList.remove("pass","fail","pending");
+      row.classList.add(state);
+    }
+    el.textContent=label;
+  };
+  setCheck("runtimeHost",checks.host?"pass":"fail",checks.host?"PASS":"WRONG HOST");
+  if(!checks.host){
+    setCheck("runtimeConfig","fail","SKIP");
+    setCheck("runtimeSdkProbe","fail","SKIP");
+    setCheck("runtimeCredProbe","fail","SKIP");
+    setCheck("runtimeButtons","fail","SKIP");
+    $("paypalRuntimeMeta").textContent="Open the Vercel production URL to run the live runtime check.";
+    return {ok:false,checks};
+  }
+
+  $("paypalRuntimeMeta").textContent="Running live production diagnostics…";
+  try{
+    const configResult=await fetch("/api/paypal/config",{cache:"no-store"});
+    let config={}; try{config=await configResult.json();}catch(e){}
+    checks.config=configResult.ok && !!config.clientId;
+    setCheck("runtimeConfig",checks.config?"pass":"fail",checks.config?"PASS":"HTTP "+configResult.status);
+
+    const probe=await paypalServerProbe();
+    checks.sdkProbe=probe.ok && /SDK CDN returned HTTP 200/.test(probe.summary);
+    checks.credProbe=probe.ok && /authenticate successfully/.test(probe.summary);
+    setCheck("runtimeSdkProbe",checks.sdkProbe?"pass":"fail",checks.sdkProbe?"PASS":"FAIL");
+    setCheck("runtimeCredProbe",checks.credProbe?"pass":"fail",checks.credProbe?"PASS":"FAIL");
+
+    try{
+      const paypal=await loadPayPalSdk(false);
+      checks.buttons=!!(paypal && typeof paypal.Buttons==="function");
+    }catch(e){ checks.buttons=false; }
+    setCheck("runtimeButtons",checks.buttons?"pass":"fail",checks.buttons?"PASS":"FAIL");
+
+    const all=checks.host&&checks.config&&checks.sdkProbe&&checks.credProbe&&checks.buttons;
+    $("paypalRuntimeMeta").textContent=(all?"✅ RUNTIME HEALTH PASS":"⚠️ RUNTIME CHECK NEEDS ATTENTION")+
+      " · "+new Date().toLocaleTimeString();
+    return {ok:all,checks};
+  }catch(err){
+    $("paypalRuntimeMeta").textContent="⚠️ Diagnostic request failed · "+new Date().toLocaleTimeString();
+    return {ok:false,checks};
+  }
+}
+
 function ensurePayPalRetryButton(status, retryFn){
   let btn = document.getElementById("paypalRetryBtn");
   if(!btn){
@@ -6489,6 +6574,11 @@ function renderPurchaseHistory(){
   }).join("");
 }
 
+const runtimeBtn=document.getElementById("paypalRuntimeRun");
+if(runtimeBtn && !runtimeBtn.dataset.bound){
+  runtimeBtn.dataset.bound="1";
+  runtimeBtn.addEventListener("click",runProductionRuntimeVerification);
+}
 function renderStore(){
   renderCharactersPanel();
   renderPurchaseHistory();
