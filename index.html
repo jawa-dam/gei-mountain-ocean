@@ -5515,7 +5515,7 @@ async function paypalServerProbe(){
 async function runProductionRuntimeVerification(){
   const host=String(window.location.hostname||"").toLowerCase();
   const checks={
-    host:/\\.vercel\\.app$/i.test(host) || host === "gei-mountain-ocean.com" || host === "www.gei-mountain-ocean.com",
+    host:/\.vercel\.app$/i.test(host) || host === "gei-mountain-ocean.com" || host === "www.gei-mountain-ocean.com",
     config:false,
     sdkProbe:false,
     credProbe:false,
