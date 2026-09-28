@@ -6827,8 +6827,28 @@ function runCommandCenterSelfTest(){
     t("guide: opens with title and 3 tabs", () => preGameOpen && $("preGameCard").classList.contains("show") && /DAM NATION COMMAND GUIDE/.test($("preGameTitle").textContent) && document.querySelectorAll("[data-guide-tab]").length === 3);
     t("guide: rules describe the live tap requirement", () => $("guideRulesList").textContent.includes(fmt(getRequiredTaps(state.level)) + " taps"));
     t("guide: START without a selection is refused", () => !beginFromGuide() && preGameOpen && /Choose an unlocked character to begin/.test($("preGameMsg").textContent));
-    t("guide: tapping an unlocked avatar selects it", () => { document.querySelector('.preGameAvatar[data-char-id="wilbert-dam-guide"]').click(); return guideSelection === "wilbert-dam-guide" && !!document.querySelector('.preGameAvatar.selected[data-char-id="wilbert-dam-guide"]'); });
-    t("guide: tapping a locked avatar does not select it", () => { document.querySelector('.preGameAvatar[data-char-id="operator-moses"]').click(); return guideSelection === "wilbert-dam-guide" && /LOCKED|locked/.test($("preGameMsg").textContent); });
+    t("guide: tapping an unlocked avatar opens its spotlight", () => {
+      document.querySelector('.preGameAvatar[data-char-id="wilbert-dam-guide"]').click();
+      return $("characterSpotlight").classList.contains("show") &&
+        $("characterSpotlightName").textContent === "Wilbert The DAM Guide" &&
+        /OPERATOR SPOTLIGHT/i.test($("characterSpotlight").textContent);
+    });
+    t("guide: spotlight keeps canonical selection in one action", () => {
+      const use = $("characterSpotlightActions").querySelector("button:not(:disabled)");
+      if(!use) return false;
+      use.click();
+      return guideSelection === "wilbert-dam-guide" &&
+        !!document.querySelector('.preGameAvatar.selected[data-char-id="wilbert-dam-guide"]') &&
+        !$("characterSpotlight").classList.contains("show");
+    });
+    t("guide: locked avatar opens spotlight without selecting it", () => {
+      document.querySelector('.preGameAvatar[data-char-id="operator-moses"]').click();
+      const locked = $("characterSpotlight").classList.contains("show") &&
+        $("characterSpotlightName").textContent === "Operator Moses" &&
+        /LOCKED/i.test($("characterSpotlightStatus").textContent);
+      closeCharacterSpotlight();
+      return locked && guideSelection === "wilbert-dam-guide";
+    });
     $("preGameNever").checked = true;
     t("guide: START GAME works and closes the guide", () => beginFromGuide() && !preGameOpen && !$("preGameCard").classList.contains("show"));
     t("guide: never-show preference persists", () => storageGet(GUIDE_SEEN_KEY) === "1");
