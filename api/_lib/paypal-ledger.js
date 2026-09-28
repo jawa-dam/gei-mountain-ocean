@@ -124,3 +124,50 @@ export async function claimEntitlement(invoiceId, captureID, claimId) {
 
   return { ok: false, alreadyClaimed: false, reason: result?.[1] || "NOT_FOUND" };
 }
+
+
+export async function fulfillEntitlement(invoiceId, captureID, fulfillmentId) {
+  if (!invoiceId || !captureID || !fulfillmentId) throw new Error("Missing entitlement fulfillment information.");
+
+  const entitlementKey = "gei:paypal:entitlement:" + invoiceId;
+  const now = new Date().toISOString();
+
+  const script = `
+    local raw = redis.call("GET", KEYS[1])
+    if not raw then return {0, "NOT_FOUND"} end
+    local obj = cjson.decode(raw)
+    if obj.captureID ~= ARGV[1] then return {0, "CAPTURE_MISMATCH"} end
+    if not obj.claimedAt then return {0, "NOT_CLAIMED"} end
+    if obj.fulfilledAt then
+      if obj.fulfillmentId == ARGV[3] then return {2, raw} end
+      return {0, "ALREADY_FULFILLED"}
+    end
+    obj.fulfilledAt = ARGV[2]
+    obj.fulfillmentId = ARGV[3]
+    obj.status = "FULFILLED"
+    local updated = cjson.encode(obj)
+    redis.call("SET", KEYS[1], updated, "EX", ARGV[4])
+    return {1, updated}
+  `;
+
+  const result = await redisCommand([
+    "EVAL",
+    script,
+    1,
+    entitlementKey,
+    captureID,
+    now,
+    fulfillmentId,
+    String(LEDGER_TTL_SECONDS)
+  ]);
+
+  if (Number(result?.[0]) === 1) {
+    return { ok: true, alreadyFulfilled: false, record: JSON.parse(result[1]) };
+  }
+
+  if (Number(result?.[0]) === 2) {
+    return { ok: true, alreadyFulfilled: true, record: JSON.parse(result[1]) };
+  }
+
+  return { ok: false, alreadyFulfilled: false, reason: result?.[1] || "NOT_FOUND" };
+}
