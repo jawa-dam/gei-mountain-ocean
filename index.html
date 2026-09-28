@@ -2656,6 +2656,21 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   #productionHostGuard *{transition:none!important;animation:none!important}
 }
 
+
+/* V2.1.18 — DAM-ITE PERSONALITY ENGINE: restrained presentation layer. */
+#damItePersonalityLayer{position:fixed;left:50%;top:17%;transform:translate(-50%,-10px);z-index:9500;width:min(92vw,520px);display:flex;justify-content:center;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .22s ease,transform .22s ease,visibility .22s;}
+#damItePersonalityLayer.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.damItePersonalityCard{max-width:100%;padding:11px 17px 12px;border:1px solid color-mix(in srgb,var(--juicy-blue) 65%,white 10%);border-radius:999px;background:linear-gradient(135deg,rgba(4,14,34,.94),rgba(28,4,32,.9));box-shadow:0 0 24px var(--glow-a),0 0 18px var(--glow-b),inset 0 0 18px rgba(255,255,255,.04);backdrop-filter:blur(10px);text-align:center;}
+.damItePersonalityEyebrow{font-size:.64rem;font-weight:1000;letter-spacing:.14em;color:var(--juicy-blue);text-transform:uppercase;line-height:1.1}
+.damItePersonalityText{margin-top:3px;font-size:clamp(.86rem,3.3vw,1.08rem);font-weight:1000;letter-spacing:.02em;color:var(--foam);line-height:1.2}
+#damItePersonalityLayer.tap .damItePersonalityCard{animation:damItePersonalityPulse .55s ease-out}
+#damItePersonalityLayer.breakthrough .damItePersonalityCard{animation:damItePersonalityBreak .8s cubic-bezier(.2,.8,.2,1)}
+#damItePersonalityLayer.machine .damItePersonalityCard{animation:damItePersonalityMachine .7s ease-out}
+#damItePersonalityLayer.level .damItePersonalityCard{animation:damItePersonalityBreak .8s cubic-bezier(.2,.8,.2,1)}
+@keyframes damItePersonalityPulse{0%{transform:scale(.92);filter:brightness(1)}55%{transform:scale(1.04);filter:brightness(1.35)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes damItePersonalityBreak{0%{transform:translateY(14px) scale(.86);opacity:.2}45%{transform:translateY(-2px) scale(1.08);opacity:1}100%{transform:translateY(0) scale(1)}}
+@keyframes damItePersonalityMachine{0%{transform:rotate(-2deg) scale(.9)}35%{transform:rotate(2deg) scale(1.06)}100%{transform:rotate(0) scale(1)}}
+@media (prefers-reduced-motion:reduce){#damItePersonalityLayer,#damItePersonalityLayer.show{transition:none;transform:translate(-50%,0)}#damItePersonalityLayer.tap .damItePersonalityCard,#damItePersonalityLayer.breakthrough .damItePersonalityCard,#damItePersonalityLayer.machine .damItePersonalityCard,#damItePersonalityLayer.level .damItePersonalityCard{animation:none}}
 </style>
 </head>
 <body>
@@ -5886,6 +5901,7 @@ function revealDamResult(token, ids){
   dmCard().classList.toggle("jackpotWin", !!(res && res.jackpot));
   livingMachineHook("onReveal", res, ids);              // V2.1.12: win glow / surge AFTER the single commit above
   if(res) presentDamMachineWin(res);                    // v2.6.3: presentation only — reward already committed above
+  if(res) triggerDamItePersonality("machine",{result:res});
   else presentDamMachineNoFlow();
 }
 
@@ -6370,6 +6386,7 @@ function advanceLevel(){
   const awardedPlays = state.damMachineFreePlays - beforePlays;
 
   renderDamMachineHeader();
+  triggerDamItePersonality("level",{level:completedLevel});
   showToast(
     awardedPlays === DAM_MACHINE_LEVEL_SPIN_REWARD
       ? `🎰 LEVEL ${fmt(completedLevel)} COMPLETE — +${fmt(awardedPlays)} DAM MACHINE SPINS BANKED!`
@@ -7404,6 +7421,7 @@ function spawnHydraulicBreakthrough(index){
   }
   playContextualTapWaterSound(context,3);
   try{livingWorldMilestone(index)}catch(e){}           // V2.1.12: the whole world answers a completed day
+  triggerDamItePersonality("breakthrough",{index});
   return true;
 }
 function getTapWaterPointerContext(){
@@ -7425,7 +7443,9 @@ document.addEventListener("pointerdown",e=>{
     const required=getRequiredTaps(state.level),nextTap=state.tapCount+1;
     if(nextTap>=required)intensity=3; else if(nextTap/required>=.75)intensity=2;
   }
-  spawnTapWaterFeedback(e.clientX,e.clientY,intensity,getTapWaterPointerContext());
+  const tapContext=getTapWaterPointerContext();
+  spawnTapWaterFeedback(e.clientX,e.clientY,intensity,tapContext);
+  triggerDamItePersonality("tap",{hydraulic:tapContext});
 },{capture:true,passive:true});
 
 /* =========================================================
@@ -9040,6 +9060,54 @@ function runLivingWorldCleanupCheck(waitMs){
   }, waitMs || 11000));
 }
 function livingUiSound(kind){ try { DAM_AUDIO.ui[kind](); } catch(e){} }
+
+/* V2.1.18 — centralized DAM-ITE Personality Engine. Presentation only. */
+const DAM_ITE_PERSONALITY_COOLDOWN_MS = 1650;
+const damItePersonality = { lastAt:0, hideTimer:0, node:null, count:0 };
+const DAM_ITE_PERSONALITY_LINES = Object.freeze({
+  tap:Object.freeze({ mountain:["THE MOUNTAIN IS WAKING.","TRIBUTARY PRESSURE DETECTED."], dam:["PRESSURE IS BUILDING.","THE DAM FEELS THAT."], reservoir:["THE RESERVOIR IS BREATHING.","WATER IS FINDING ITS LEVEL."], sluice:["SLUICE RELEASE!","LET THAT WATER MOVE."], wheel:["THE WHEEL IS TURNING.","THAT FLOW HAS RHYTHM."], ocean:["THE OCEAN IS CALLING.","FLOW FOUND ITS WAY HOME."] }),
+  breakthrough:Object.freeze(["DAM-ITE BREAKTHROUGH!","THE SYSTEM JUST OPENED UP.","THAT FLOW JUST GOT DAM-ITED."]),
+  machine:Object.freeze(["THE DAM-ITE MACHINE IS WATCHING.","WELL DAM-ITE!","THE WHEEL KNOWS YOUR NAME."]),
+  level:Object.freeze(["DAM-ITE LEVEL COMPLETE!","THE FLOW IS LEARNING YOU.","ANOTHER LEVEL DAMMED."])
+});
+function damItePersonalityReducedMotion(){ try{return matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false} }
+function damItePersonalityNode(){
+  if(damItePersonality.node && document.body.contains(damItePersonality.node)) return damItePersonality.node;
+  const n=document.createElement("div"); n.id="damItePersonalityLayer"; n.setAttribute("aria-live","polite"); n.setAttribute("aria-atomic","true");
+  n.innerHTML='<div class="damItePersonalityCard"><div class="damItePersonalityEyebrow">DAM-ITE MOMENT</div><div class="damItePersonalityText"></div></div>';
+  document.body.appendChild(n); damItePersonality.node=n; return n;
+}
+function damItePersonalityCharacterLine(context){
+  try{ const c=getActiveCharacter(), line=getCharacterHumor(c.id); if(line && (context==="breakthrough" || context==="machine" || Math.random()<.18)) return line; }catch(e){}
+  return "";
+}
+function triggerDamItePersonality(context, payload={}){
+  const now=performance.now(), important=context==="breakthrough" || context==="machine" || context==="level";
+  if(!important && now-damItePersonality.lastAt<DAM_ITE_PERSONALITY_COOLDOWN_MS) return false;
+  if(damItePersonalityReducedMotion() && !important) return false;
+  const n=damItePersonalityNode(), text=n.querySelector(".damItePersonalityText"); if(!text)return false;
+  let line="";
+  if(payload.text) line=payload.text;
+  else if(!important && context==="tap"){
+    const pool=DAM_ITE_PERSONALITY_LINES.tap[payload.hydraulic]||DAM_ITE_PERSONALITY_LINES.tap.mountain; line=pool[Math.floor(Math.random()*pool.length)];
+  }else{
+    const characterLine=damItePersonalityCharacterLine(context), pool=DAM_ITE_PERSONALITY_LINES[context]||DAM_ITE_PERSONALITY_LINES.level; line=characterLine||pool[Math.floor(Math.random()*pool.length)];
+  }
+  text.textContent=line; n.className=""; void n.offsetWidth; n.className="show "+context; damItePersonality.lastAt=now; damItePersonality.count++;
+  clearTimeout(damItePersonality.hideTimer); damItePersonality.hideTimer=setTimeout(()=>n.classList.remove("show"),important?2100:1450);
+  try{ if(context==="breakthrough") playTone(659,.16,"triangle"); else if(context==="machine") playTone(392,.12,"square"); else if(context==="level") playTone(523,.18,"triangle"); }catch(e){}
+  return true;
+}
+function runDamItePersonalitySelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})}; const snapshot=()=>JSON.stringify(state);
+  t("V2.1.18: personality engine exists",()=>typeof triggerDamItePersonality==="function"&&DAM_ITE_PERSONALITY_COOLDOWN_MS>0);
+  t("V2.1.18: all six hydraulic contexts have personality lines",()=>["mountain","dam","reservoir","sluice","wheel","ocean"].every(k=>Array.isArray(DAM_ITE_PERSONALITY_LINES.tap[k])&&DAM_ITE_PERSONALITY_LINES.tap[k].length>=2));
+  t("V2.1.18: personality is presentation-only",()=>{const before=snapshot();triggerDamItePersonality("tap",{hydraulic:"dam"});triggerDamItePersonality("breakthrough");triggerDamItePersonality("machine");return snapshot()===before});
+  t("V2.1.18: engine never calls economy authority",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(triggerDamItePersonality.toString()));
+  t("V2.1.18: cooldown throttles ordinary moments",()=>{damItePersonality.lastAt=performance.now();return triggerDamItePersonality("tap",{hydraulic:"dam"})===false});
+  t("V2.1.18: character pool remains canonical",()=>{const c=getActiveCharacter();return !!c&&typeof getCharacterHumor(c.id)==="string"});
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
 
 /* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
