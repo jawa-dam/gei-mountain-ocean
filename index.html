@@ -3046,10 +3046,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="purchaseHistoryList" id="purchaseHistoryList"></div>
         </div>
         <div class="purchaseVerification" id="purchaseVerification">
-          <div class="purchaseVerificationTitle">🧾 V2.0.21 PURCHASE VERIFICATION</div>
-          <div class="purchaseVerificationSub">Retries reuse the same PayPal request ID and entitlement claim ID. A duplicate capture cannot create a second wallet credit.</div>
+          <div class="purchaseVerificationTitle">🧾 V2.1.13 PRODUCTION PURCHASE VERIFICATION</div>
+          <div class="purchaseVerificationSub">Verify the live $6 / $12 / $18 store prices, then complete one real production purchase. The PayPal order amount must match the selected pack before capture.</div>
           <div class="purchaseVerificationChecks" id="purchaseVerificationChecks">
             <div class="purchaseVerificationCheck pending"><span>Test session armed</span><span id="purchaseArm">WAIT</span></div>
+            <div class="purchaseVerificationCheck pending"><span>PayPal order price</span><span id="purchasePrice">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>PayPal capture</span><span id="purchaseCapture">WAIT</span></div>
             <div class="purchaseVerificationCheck pending"><span>Replay protection</span><span id="purchaseReplay">WAIT</span></div>
           <button class="storeBtn purchaseReplayBtn" id="purchaseReplayBtn" type="button" hidden>🔒 VERIFY REPLAY SHIELD · NO NEW CHARGE</button>
@@ -3058,7 +3059,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
             <div class="purchaseVerificationCheck pending"><span>Purchase History</span><span id="purchaseHistoryCheck">WAIT</span></div>
             <div class="purchaseVerificationCheck manual"><span>Song Vault unlock</span><span id="purchaseSong">MANUAL</span></div>
           </div>
-          <div class="purchaseVerificationMeta" id="purchaseVerificationMeta" aria-live="polite">Select the $1 pack to arm the production test.</div>
+          <div class="purchaseVerificationMeta" id="purchaseVerificationMeta" aria-live="polite">Select any store pack to arm the production verification.</div>
         </div>
         <div class="paypalRuntime" id="paypalRuntime">
           <div class="paypalRuntimeTitle">🩺 PRODUCTION RUNTIME</div>
@@ -3069,7 +3070,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
             <div class="paypalRuntimeCheck pending"><span>PayPal SDK probe</span><span id="runtimeSdkProbe">WAIT</span></div>
             <div class="paypalRuntimeCheck pending"><span>Live credential probe</span><span id="runtimeCredProbe">WAIT</span></div>
             <div class="paypalRuntimeCheck pending"><span>PayPal Buttons API</span><span id="runtimeButtons">WAIT</span></div>
-            <div class="paypalRuntimeCheck pending"><span>Real $1 checkout</span><span>MANUAL</span></div>
+            <div class="paypalRuntimeCheck pending"><span>Real $6 / $12 / $18 checkout</span><span>MANUAL</span></div>
           </div>
           <button class="storeBtn paypalRuntimeRun" id="paypalRuntimeRun" type="button">RUN PRODUCTION HEALTH CHECK</button>
           <div class="paypalRuntimeMeta" id="paypalRuntimeMeta" aria-live="polite"></div>
@@ -6705,7 +6706,7 @@ function closePayPalCheckout(){
 let purchaseVerificationSession = null;
 
 function armProductionPurchaseVerification(pack){
-  if(!pack || pack.id !== "single") return;
+  if(!pack || !pack.id) return;
   purchaseVerificationSession = {
     packId:pack.id,
     amount:Number(pack.priceUsd),
@@ -6718,6 +6719,7 @@ function armProductionPurchaseVerification(pack){
     capture:false,
     claim:false,
     credit:false,
+    priceVerified:false,
     recovered:false,
     replayVerified:false,
     orderID:null,
@@ -6731,7 +6733,7 @@ function armProductionPurchaseVerification(pack){
   const arm=$("purchaseArm");
   if(arm){ arm.textContent="ARMED"; const row=arm.closest(".purchaseVerificationCheck"); row.classList.remove("pending"); row.classList.add("pass"); }
   const meta=$("purchaseVerificationMeta");
-  if(meta) meta.textContent="Production $1 verification armed · complete this checkout once.";
+  if(meta) meta.textContent="Production " + pack.priceLabel + " verification armed · complete this checkout once.";
 }
 
 function setPurchaseVerification(id,stateName,label){
@@ -6807,6 +6809,9 @@ function updateProductionPurchaseVerification(){
   const walletDelta=(Number(state.totalFlOz)||0)-s.walletBefore;
   const historyDelta=state.purchaseHistory.length-s.historyBefore;
   const songDelta=state.unlockedSongs.length-s.songsBefore;
+  if(s.priceVerified && s.amount){
+    setPurchaseVerification("purchasePrice","pass","$"+Number(s.amount).toFixed(2)+" MATCH");
+  }
   if(s.replayVerified){
     setPurchaseVerification("purchaseReplay","pass","LOCKED · NO 2X CREDIT");
   } else if(s.capture && s.claim){
@@ -6817,7 +6822,7 @@ function updateProductionPurchaseVerification(){
     setPurchaseVerification("purchaseHistoryCheck",historyDelta>=1?"pass":"pending",historyDelta>=1?"PASS":"WAIT");
     if(songDelta>=1) setPurchaseVerification("purchaseSong","pass","PASS");
   }
-  const complete=s.capture&&s.claim&&s.credit&&walletDelta===s.flOz&&historyDelta>=1&&songDelta>=1;
+  const complete=s.priceVerified&&s.capture&&s.claim&&s.credit&&walletDelta===s.flOz&&historyDelta>=1&&songDelta>=1;
   const meta=$("purchaseVerificationMeta");
   if(meta) meta.textContent=complete
     ? "🎉 PRODUCTION PURCHASE VERIFIED · payment → entitlement → wallet → Song Vault"
@@ -6846,11 +6851,12 @@ function restorePurchaseVerificationSession(){
   if(!raw) return;
   try{
     const saved=JSON.parse(raw);
-    if(!saved || saved.packId!=="single") return;
+    if(!saved || !STORE_PACKS.some(pack => pack.id === saved.packId)) return;
     if(!saved.claimId && saved.orderID) saved.claimId=checkoutClaimId(saved.orderID);
     purchaseVerificationSession=saved;
     persistPurchaseVerificationSession();
     setPurchaseVerification("purchaseArm","pass","RESTORED");
+    if(saved.priceVerified && saved.amount) setPurchaseVerification("purchasePrice","pass","$"+Number(saved.amount).toFixed(2)+" MATCH");
     if(saved.capture) setPurchaseVerification("purchaseCapture","pass","PASS");
     if(saved.claim) setPurchaseVerification("purchaseClaim","pass",saved.recovered?"RECOVERED":"PASS");
     if(saved.credit) setPurchaseVerification("purchaseCredit","pass","PASS");
@@ -6956,6 +6962,19 @@ async function startCheckout(packId){
         });
         const r=result.response, data=result.data;
         if(!r.ok || !data.id) throw new Error(data.error || "Unable to start PayPal checkout.");
+        const expectedAmount=Number(pack.priceUsd).toFixed(2);
+        if(data.amount !== expectedAmount || data.currency !== "USD"){
+          if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+            setPurchaseVerification("purchasePrice","pending","MISMATCH");
+          }
+          throw new Error("Production price mismatch: expected $" + expectedAmount + " USD, PayPal returned " + (data.amount || "UNKNOWN") + " " + (data.currency || "UNKNOWN") + ".");
+        }
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.amount=Number(data.amount);
+          purchaseVerificationSession.priceVerified=true;
+          persistPurchaseVerificationSession();
+          setPurchaseVerification("purchasePrice","pass","$"+data.amount+" MATCH");
+        }
         const checkoutClaim=checkoutClaimId(data.id);
         safeSessionSet(paypalRecoveryStorageKey("claim",data.id),checkoutClaim);
         if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
