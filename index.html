@@ -3336,10 +3336,12 @@ const UNLOCK_CATALOG = { songs: SONGS, skins: PREMIUM_SKINS, characters: CHARACT
 const UNLOCK_STATE_KEY = { songs:"unlockedSongs", skins:"unlockedSkins", characters:"unlockedCharacters" };
 
 /* Purchase packs — data + hooks only. No payment processing lives in this file. */
+/* V2.1.13 — STORE PRICE UPDATE: customer-facing prices and server authority are aligned.
+   FL OZ quantities and pack IDs remain unchanged; only USD prices changed. */
 const STORE_PACKS = [
-  { id:"single",     label:"1 Song",   priceLabel:"$1", priceUsd:1, unlocks:1,  flOz:1  * UNLOCK_COST_FL_OZ },   //   6,660
-  { id:"ten",        label:"10 Songs", priceLabel:"$3", priceUsd:3, unlocks:10, flOz:10 * UNLOCK_COST_FL_OZ },   //  66,600
-  { id:"twentyfive", label:"25 Songs", priceLabel:"$6", priceUsd:6, unlocks:25, flOz:25 * UNLOCK_COST_FL_OZ, badge:"BEST OFFER!" }   // 166,500
+  { id:"single",     label:"1 Song",   priceLabel:"$6",  priceUsd:6,  unlocks:1,  flOz:1  * UNLOCK_COST_FL_OZ },   //   6,660
+  { id:"ten",        label:"10 Songs", priceLabel:"$12", priceUsd:12, unlocks:10, flOz:10 * UNLOCK_COST_FL_OZ },   //  66,600
+  { id:"twentyfive", label:"25 Songs", priceLabel:"$18", priceUsd:18, unlocks:25, flOz:25 * UNLOCK_COST_FL_OZ, badge:"BEST OFFER!" }   // 166,500
 ];
 
 /* =========================================================
