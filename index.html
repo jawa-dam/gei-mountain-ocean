@@ -2945,6 +2945,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 </div>
 
 <div class="tapWaterLayer" id="tapWaterLayer" aria-hidden="true"></div>
+<div id="tapFeelPulse" aria-hidden="true"></div>
 <div class="livingSkinBadge" id="livingSkinBadge" role="status" aria-live="polite"></div>
 
 <div class="stage">
@@ -5245,10 +5246,11 @@ world.addEventListener("click", (e)=>{
   const step = STEPS[index];
 
   state.tapCount++;
-    const hydraulicContext = getTapWaterPointerContext();
+  const hydraulicContext = getTapWaterPointerContext();
   const hydraulicPower = state.tapCount >= getRequiredTaps(state.level) ? 3 : state.tapCount / getRequiredTaps(state.level) >= .75 ? 2 : 1;
+  const comboNow = registerDamIteCombo(hydraulicContext,hydraulicPower);
+  try{ triggerTapFeel(e.clientX,e.clientY,hydraulicPower,hydraulicContext,comboNow); }catch(err){}
   triggerDamIteHydraulicReaction(hydraulicContext,{index:state.currentStep,power:hydraulicPower});
-  registerDamIteCombo(hydraulicContext,hydraulicPower);
   triggerDamItePersonality("tap",{hydraulic:hydraulicContext,combo:damIteCombo.count});
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
