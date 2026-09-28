@@ -6788,10 +6788,11 @@ $("characterSpotlight").addEventListener("click", e => {
 document.addEventListener("keydown", e => {
   if(e.key === "Escape" && $("characterSpotlight").classList.contains("show")) closeCharacterSpotlight();
 });
+/* V2.1.6 — keyboard activation follows the same spotlight path as touch/click. */
 $("preGameAvatarGrid").addEventListener("keydown", e => {
   if(e.key !== "Enter" && e.key !== " ") return;
   const card = e.target.closest(".preGameAvatar");
-  if(card && e.target === card){ e.preventDefault(); selectGuideCharacter(card.dataset.charId); }
+  if(card && e.target === card){ e.preventDefault(); openCharacterSpotlight(card.dataset.charId); }
 });
 /* ---------- V2.0.7 self-test: guide, characters, menu, floating machine, prizes, UI.
    runCommandCenterSelfTest() → { pass, fail, results:[…] }. Console only. Live state, the save,
