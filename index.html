@@ -3674,6 +3674,7 @@ function economyInvariant(){
 }
 
 function safeAddFlOz(amount){
+  if(!Number.isInteger(state.totalFlOz) || state.totalFlOz < 0 || state.totalFlOz > ECONOMY_MAX_FL_OZ) return false;
   if(!Number.isInteger(amount) || amount < 0) return false;
   if(amount > ECONOMY_MAX_FL_OZ || state.totalFlOz > ECONOMY_MAX_FL_OZ - amount) return false;
   state.totalFlOz += amount;
@@ -6220,6 +6221,7 @@ function startCheckout(packId){
 
 window.YalltooDamEconomy = {
   creditPack,
+  runIntegritySelfTest: runEconomyIntegritySelfTest,
   getSnapshot: () => ({ level: state.level, totalFlOz: state.totalFlOz, levelFlOz: state.levelFlOz,
     unlockedSongs: state.unlockedSongs.slice(), unlockedSkins: state.unlockedSkins.slice(), unlockedCharacters: state.unlockedCharacters.slice() }),
   packs: STORE_PACKS.map(p => ({ ...p }))
