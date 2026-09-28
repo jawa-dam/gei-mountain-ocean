@@ -2399,7 +2399,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 ===================================================================== */
 .brand{ min-width:0; display:flex; flex-direction:column; gap:2px; }
 .brand .logo{ font-size:clamp(1.05rem,5vw,1.3rem); letter-spacing:.06em; line-height:1.05; }
-.brandTag{ font-size:.7rem; font-weight:900; letter-spacing:.04em; line-height:1.2; color:var(--foam); opacity:.9; }
+.brandTag{ font-size:clamp(.68rem,2.7vw,.78rem); font-weight:900; letter-spacing:.06em; line-height:1.2; color:var(--foam); opacity:.94; }
+/* V2.1.16 — DAM-ITE identity polish: a subtle hydraulic underline keeps the new brand alive without adding layout weight. */
+.brand .logo{ position:relative; display:inline-block; width:max-content; max-width:100%; }
+.brand .logo::after{ content:""; position:absolute; left:2%; right:2%; bottom:-4px; height:2px; border-radius:999px; background:linear-gradient(90deg,transparent,var(--juicy-blue),var(--juicy-magenta),transparent); background-size:200% 100%; opacity:.72; animation:damIteBrandFlow 3.2s ease-in-out infinite; pointer-events:none; }
+@keyframes damIteBrandFlow{ 0%,100%{ background-position:0% 50%; opacity:.42; transform:scaleX(.72); } 50%{ background-position:100% 50%; opacity:.95; transform:scaleX(1); } }
 .iteHud{ display:flex; align-items:center; gap:10px; margin-top:8px; padding:6px 10px; border-radius:14px;
   background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); }
 .iteHud[data-status="saved"], .iteHud[data-status="complete"]{ border-color:color-mix(in srgb, var(--gold) 60%, transparent); }
