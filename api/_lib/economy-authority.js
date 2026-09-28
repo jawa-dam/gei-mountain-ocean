@@ -1,5 +1,7 @@
 export const ECONOMY_AUTHORITY_VERSION = "2.0.25";
+export const ECONOMY_RECONCILIATION_VERSION = "2.0.26";
 export const ECONOMY_MAX_FL_OZ = 1000000000;
+
 export const PACKS = Object.freeze({
   single: Object.freeze({ label:"1 Song", price:"1.00", flOz:6660 }),
   ten: Object.freeze({ label:"10 Songs", price:"3.00", flOz:66600 }),
@@ -60,10 +62,10 @@ export function reconcileEntitlementAuthority(record) {
   if (record?.currency !== "USD") reasons.push("CURRENCY_DRIFT");
   if (pack && record?.amount !== pack.price) reasons.push("AMOUNT_DRIFT");
   if (pack && Number(record?.flOz) !== pack.flOz) reasons.push("FL_OZ_DRIFT");
-  if (record?.auditVersion && record.auditVersion !== ECONOMY_AUTHORITY_VERSION) {
+  if (record?.auditVersion !== ECONOMY_AUTHORITY_VERSION) {
     reasons.push("AUDIT_VERSION_DRIFT");
   }
-  if (record?.audit && record.audit.authoritative !== true) {
+  if (record?.audit?.authoritative !== true) {
     reasons.push("NON_AUTHORITATIVE_AUDIT");
   }
   if (record?.audit && (
@@ -86,6 +88,7 @@ export function reconcileEntitlementAuthority(record) {
     authoritative,
     driftDetected: !authoritative,
     reasons,
+    reconciliationVersion: ECONOMY_RECONCILIATION_VERSION,
     auditVersion: ECONOMY_AUTHORITY_VERSION,
     audit
   };
