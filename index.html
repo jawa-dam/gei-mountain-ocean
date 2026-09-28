@@ -1703,6 +1703,15 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   background:linear-gradient(135deg,rgba(47,210,255,.09),rgba(255,45,196,.08));
   border:1px solid rgba(255,255,255,.13);
 }
+/* V2.1.17 — DAM-ITE Identity Card: presentation-only player identity built from existing state. */
+.damIteIdentityCard{position:relative;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;margin:8px 0 12px;padding:12px;border:1px solid rgba(47,210,255,.28);border-radius:18px;background:linear-gradient(135deg,rgba(47,210,255,.10),rgba(61,61,234,.10) 55%,rgba(243,16,186,.08));overflow:hidden;box-shadow:0 0 18px rgba(47,210,255,.08),inset 0 1px 0 rgba(255,255,255,.08)}
+.damIteIdentityCard::after{content:"";position:absolute;inset:auto -10% 0;height:2px;background:linear-gradient(90deg,transparent,var(--juicy-blue),var(--juicy-magenta),transparent);background-size:200% 100%;animation:damIteBrandFlow 3.2s ease-in-out infinite;opacity:.7}
+.damIteIdentityBadge{width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.65rem;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.16);box-shadow:0 0 14px rgba(47,210,255,.16)}
+.damIteIdentityLabel{font-size:.68rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--juicy-blue)}
+.damIteIdentityName{margin-top:2px;font-size:1.18rem;font-weight:1000;line-height:1.08;overflow-wrap:anywhere}
+.damIteIdentityMeta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.damIteIdentityPill{padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.68rem;font-weight:900;color:rgba(255,255,255,.86)}
+.damIteIdentityPill strong{color:var(--gold)}
 .dmLastResultTitle{ font-size:.82rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--juicy-blue); }
 .dmLastResultMain{ margin-top:3px; font-size:1rem; font-weight:900; line-height:1.2; color:#fff; }
 .dmLastResultSub{ margin-top:4px; font-size:.78rem; font-weight:700; line-height:1.35; color:rgba(255,255,255,.78); overflow-wrap:anywhere; }
@@ -3009,7 +3018,18 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="charTitle" id="profileTitle"></div>
           <div class="profileRank" id="profileRank"></div>
         </div>
-        <div class="profileGrid" id="profileStats"></div>
+<div class="damIteIdentityCard" id="damIteIdentityCard" aria-label="DAM-ITE identity card">
+          <div class="damIteIdentityBadge" id="damIteIdentityBadge" aria-hidden="true">💧</div>
+          <div>
+            <div class="damIteIdentityLabel">DAM-ITE IDENTITY</div>
+            <div class="damIteIdentityName" id="damIteIdentityName">DAM-ITE</div>
+            <div class="damIteIdentityMeta">
+              <span class="damIteIdentityPill" id="damIteIdentityLevel">LEVEL —</span>
+              <span class="damIteIdentityPill" id="damIteIdentityRank">RANK —</span>
+              <span class="damIteIdentityPill" id="damIteIdentityFlow">FLOW —</span>
+            </div>
+          </div>
+        </div>        <div class="profileGrid" id="profileStats"></div>
 
         <!-- DAM NATION V1.0: -ite rescue record + gallery foundation (rendered by renderIteRescueRecord). -->
         <div class="panelGroup">🌊 -ITE RESCUE RECORD</div>
@@ -8149,6 +8169,17 @@ function renderProfile(){
   $("profileName").textContent = c.name;
   $("profileTitle").textContent = damTitle(c.id);
   $("profileRank").innerHTML = `Degree of Dammin': <strong>${esc(damRank(state.completedLevels))}</strong>`;
+  const identityRank = damRank(state.completedLevels);
+  const identityLevel = fmt(state.level);
+  const identityFlow = state.iteRescueStats && state.iteRescueStats.savedCount != null
+    ? fmt(state.iteRescueStats.savedCount) + " -ITES"
+    : fmt(new Set(state.tribesFound.map(t => t.name)).size) + " -ITES";
+  $("damIteIdentityName").textContent = c.name;
+  $("damIteIdentityBadge").textContent = c.id === "yall-too-beaver" ? "🦫" : "💧";
+  $("damIteIdentityLevel").innerHTML = `LEVEL <strong>${esc(identityLevel)}</strong>`;
+  $("damIteIdentityRank").innerHTML = `RANK <strong>${esc(identityRank)}</strong>`;
+  $("damIteIdentityFlow").innerHTML = `FLOW <strong>${esc(identityFlow)}</strong>`;
+
   const day = Math.min(daysDoneThisLevel() + 1, DAYS_PER_LEVEL);
   const ites = new Set(state.tribesFound.map(t => t.name)).size;
   const skinsTotal = Object.keys(SKIN_META).length + PREMIUM_SKINS.length;
