@@ -5894,7 +5894,7 @@ function renderDamMachineHeader(){
   if(!busy && !damMachine.autoSpin) btn.textContent = plays > 0 ? "SPIN THE DAM" : "NO FREE PLAYS";
   else if(damMachine.autoSpin) btn.textContent = damMachine.spinning ? "AUTO RUNNING…" : "AUTO SPIN ON";
   if(autoBtn){
-    autoBtn.disabled = !damMachine.open || plays <= 0 || damMachine.spinning || damMachine.presenting;
+    autoBtn.disabled = !damMachine.open || (!damMachine.autoSpin && (plays <= 0 || damMachine.spinning || damMachine.presenting));
     autoBtn.classList.toggle("active", damMachine.autoSpin);
     autoBtn.setAttribute("aria-pressed", damMachine.autoSpin ? "true" : "false");
     autoBtn.textContent = damMachine.autoSpin ? "🛑 STOP AUTO" : "⚡ AUTO SPIN";
@@ -5970,7 +5970,7 @@ function openDamMachine()
   if(damMachine.open || damMachine.spinning || bonus.open) return;   // never fights the waterwheel
   closePanels();
   closeNavMenu();                                       // v2.6.2: dismiss the consolidated menu
-  damMachine.open = true; damMachine.revealed = false;
+  damMachine.open = true; damMachine.revealed = false; damMachine.autoStopReason = "";
   // note: a forced test result set before opening is intentionally kept — it is consumed by the next spin only.
   const card = dmCard();
   card.classList.remove("show", "jackpotWin");
