@@ -982,6 +982,33 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .rpNext{ margin-top:10px; font-size:.86rem; font-weight:700; }
 .rpNext strong{ color:var(--gold); }
 
+/* =========================================================
+   V2.0.18 — SONG VAULT INTEGRATION
+   Collection-first presentation: purchase FL OZ in Store, intentionally
+   spend FL OZ on songs, then return here to play the unlocked collection.
+========================================================= */
+.songVaultHero{
+  padding:14px; margin-bottom:8px; border-radius:18px;
+  background:linear-gradient(145deg, color-mix(in srgb, var(--juicy-blue) 20%, transparent), color-mix(in srgb, var(--juicy-magenta) 14%, transparent));
+  border:1.5px solid rgba(255,255,255,.2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+}
+.songVaultEyebrow{ font-size:.74rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.songVaultTitle{ margin-top:3px; font-size:1.35rem; font-weight:900; line-height:1.15; overflow-wrap:anywhere; }
+.songVaultCopy{ margin-top:5px; font-size:.84rem; font-weight:700; line-height:1.35; color:rgba(255,255,255,.8); }
+.songVaultStats{ display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px; }
+.songVaultStat{ min-width:0; padding:9px 10px; border-radius:13px; background:rgba(0,0,0,.2); border:1px solid rgba(255,255,255,.12); }
+.songVaultStatLabel{ font-size:.68rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.68); }
+.songVaultStatValue{ margin-top:2px; font-size:1.05rem; font-weight:900; color:#fff; overflow-wrap:anywhere; }
+.songVaultProgress{ height:9px; margin-top:10px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.12); }
+.songVaultProgress i{ display:block; height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,var(--juicy-blue),var(--juicy-violet),var(--juicy-magenta)); transition:width .35s ease; }
+.songVaultNext{ margin-top:8px; padding:10px 11px; border-radius:13px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
+.songVaultNextLabel{ font-size:.7rem; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--juicy-blue); }
+.songVaultNextName{ margin-top:2px; font-size:.96rem; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
+.songVaultNextMeta{ margin-top:3px; font-size:.76rem; font-weight:700; color:rgba(255,255,255,.72); }
+.songVaultStoreBtn{ width:100%; margin-top:8px; }
+.songRow.locked .songMeta{ opacity:.72; }
+
 /* ============ v2.4: DAY GUIDE / STORE ECONOMY / PROFILE ECONOMY ============ */
 .dayGuideItem{ font-weight:900; fill:rgba(255,255,255,.72); stroke:rgba(0,0,0,.7); stroke-width:5px; stroke-linejoin:round; paint-order:stroke; transition:fill .3s; }
 .dayGuideItem .dgWord{ font-size:17px; letter-spacing:.14em; }
@@ -1769,7 +1796,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
       <button class="navRow" id="navCharactersBtn" aria-label="Open character roster"><span class="navRowIcon" aria-hidden="true">👤</span><span class="navRowText"><strong>Characters</strong><small>Choose · purchase · unlock</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navProfileBtn" aria-label="Open player profile"><span class="navRowIcon" aria-hidden="true">📊</span><span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navTribesBtn" aria-label="Open tribes list"><span class="navRowIcon" aria-hidden="true">🚢</span><span class="navRowText"><strong>-ites</strong><small>Rescue record · preserved names</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-      <button class="navRow" id="navRadioBtn" aria-label="Open radio"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Radio</strong><small>Unlocked songs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
+      <button class="navRow" id="navRadioBtn" aria-label="Open song vault"><span class="navRowIcon" aria-hidden="true">🎵</span><span class="navRowText"><strong>Song Vault</strong><small>Unlock · collect · play</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
       <button class="navRow" id="navStoreBtn" aria-label="Open FL OZ store"><span class="navRowIcon" aria-hidden="true">🛒</span><span class="navRowText"><strong>Store</strong><small>FL OZ · songs · skins · packs</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
     </nav>
     <button class="dmFloatBtn" id="dmFloatBtn" type="button" hidden aria-label="Open DAM MACHINE when a free play is ready">🎰<span id="dmFloatLabel">BONUS READY</span></button>
@@ -1908,12 +1935,24 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         </div>
       </div>
 
-      <!-- v2: radio (reads unlock state; locked songs have no playable source) -->
+      <!-- V2.0.18: Song Vault — the collection/playback home for intentionally unlocked songs -->
       <div class="sidePanel" id="radioPanel">
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
-        <div class="panelTitle">🎵 Y'all Too Radio</div>
+        <div class="panelTitle">🎵 SONG VAULT</div>
         <div class="walletLine" id="radioWallet"></div>
         <div class="damQuip panelQuip" id="radioQuip"></div>
+        <div class="songVaultHero">
+          <div class="songVaultEyebrow">Y'ALL TOO MUSIC COLLECTION</div>
+          <div class="songVaultTitle">Collect the flow. Play the vault.</div>
+          <div class="songVaultCopy">Buy FL OZ in the Store, choose a song to unlock, then come back here to play it. Nothing is auto-redeemed.</div>
+          <div class="songVaultStats">
+            <div class="songVaultStat"><div class="songVaultStatLabel">Collection</div><div class="songVaultStatValue" id="songVaultCount">0 / 0</div></div>
+            <div class="songVaultStat"><div class="songVaultStatLabel">Wallet</div><div class="songVaultStatValue" id="songVaultWallet">0 FL OZ</div></div>
+          </div>
+          <div class="songVaultProgress" aria-label="Song collection progress"><i id="songVaultProgress"></i></div>
+          <div class="songVaultNext" id="songVaultNext"></div>
+          <button class="storeBtn songVaultStoreBtn" id="songVaultStoreBtn" type="button">🛒 GO TO STORE</button>
+        </div>
         <div class="radioPlayer" aria-live="polite">
           <div class="rpLabel">Now playing</div>
           <div class="rpTitle" id="rpTitle">Nothing playing</div>
@@ -5793,6 +5832,7 @@ navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMen
 [["navProfileBtn","profile"],["navTribesBtn","tribes"],["navRadioBtn","radio"],["navStoreBtn","store"],["navCharactersBtn","characters"]].forEach(([rowId, panelName])=>{
   $(rowId).addEventListener("click", ()=>{ closeNavMenu(); togglePanel(panelName); });
 });
+$("songVaultStoreBtn").addEventListener("click", ()=>{ closePanels(); togglePanel("store"); });
 $("navHowBtn").addEventListener("click", ()=>{ closeNavMenu(); openGameGuide(true); });
 $("dmFloatBtn").addEventListener("click", ()=>openDamMachine());
 $("bonusBtn").addEventListener("click", ()=>{ if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
@@ -6184,7 +6224,20 @@ let radioQuipText = "";
 let storeQuipText = "";
 function renderRadio(){
   $("radioQuip").textContent = radioQuipText;
-  $("radioWallet").innerHTML = `Unlocked: <strong>${state.unlockedSongs.length} / ${SONGS.length}</strong> songs · Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  const unlockedCount = unlockedSongsInOrder().length;
+  const collectionPct = SONGS.length ? Math.min(100, unlockedCount / SONGS.length * 100) : 0;
+  const nextLockedSong = nextLockedItem("songs");
+  $("radioWallet").innerHTML = `Unlocked: <strong>${unlockedCount} / ${SONGS.length}</strong> songs · Wallet: <strong>${fmt(state.totalFlOz)} FL OZ</strong>`;
+  $("songVaultCount").textContent = `${unlockedCount} / ${SONGS.length}`;
+  $("songVaultWallet").textContent = `${fmt(state.totalFlOz)} FL OZ`;
+  $("songVaultProgress").style.width = collectionPct + "%";
+  $("songVaultNext").innerHTML = nextLockedSong
+    ? `<div class="songVaultNextLabel">Next song in the vault</div><div class="songVaultNextName">🔒 ${esc(nextLockedSong.title)}</div><div class="songVaultNextMeta">${fmt(UNLOCK_COST_FL_OZ)} FL OZ · Unlock intentionally in the Store</div>`
+    : `<div class="songVaultNextLabel">Vault complete</div><div class="songVaultNextName">🎉 Every song is unlocked.</div><div class="songVaultNextMeta">Your full collection is ready to play.</div>`;
+  const vaultStoreBtn = $("songVaultStoreBtn");
+  vaultStoreBtn.textContent = nextLockedSong ? "🛒 GO TO STORE · UNLOCK NEXT SONG" : "🛒 OPEN STORE";
+  vaultStoreBtn.disabled = !nextLockedSong;
+  const playing = radioAudio && !radioAudio.paused ? SONGS.find(s=>s.id === nowPlayingId) : null;
   const playing = radioAudio && !radioAudio.paused ? SONGS.find(s=>s.id === nowPlayingId) : null;
   const current = SONGS.find(s => s.id === nowPlayingId) || null;
   const first = unlockedSongsInOrder()[0] || null;
