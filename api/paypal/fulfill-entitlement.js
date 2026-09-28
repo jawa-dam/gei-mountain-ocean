@@ -1,5 +1,12 @@
-import { fulfillEntitlement } from "../_lib/paypal-ledger.js";
-import { ECONOMY_AUTHORITY_VERSION, auditReceipt, canonicalFulfillmentId } from "../_lib/economy-authority.js";
+import {
+  fulfillEntitlement,
+  recordEconomyIncident
+} from "../_lib/paypal-ledger.js";
+import {
+  ECONOMY_AUTHORITY_VERSION,
+  auditReceipt,
+  canonicalFulfillmentId
+} from "../_lib/economy-authority.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -17,7 +24,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid fulfillment receipt identity." });
     }
 
-    // V2.0.26 — canonical fulfillment identity is owned by the economy authority.
     if (fulfillmentId !== canonicalFulfillmentId(captureID)) {
       return res.status(403).json({ error: "Fulfillment receipt does not match this payment." });
     }
@@ -59,9 +65,21 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error("[PayPal fulfill-entitlement]", err);
     if (err?.code === "ECONOMY_DRIFT_DETECTED") {
+      const incident = await recordEconomyIncident({
+        invoiceId: claimToken,
+        captureID,
+        source: "FULFILLMENT_RECONCILIATION",
+        reconciliation: err.reconciliation,
+        record: null
+      }).catch(incidentError => {
+        console.error("[PayPal fulfill-entitlement] incident recording failed", incidentError);
+        return null;
+      });
       return res.status(409).json({
         error: "Economy authority drift detected.",
         code: "ECONOMY_DRIFT_DETECTED",
+        frozen: true,
+        incident: incident?.incident || null,
         reconciliation: err.reconciliation || null
       });
     }
