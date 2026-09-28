@@ -1,4 +1,7 @@
-const PACKS = {
+import { PACKS, ECONOMY_AUTHORITY_VERSION, validatePackAuthority } from "../_lib/economy-authority.js";
+
+/* V2.0.25 — server economy authority */
+
   single: { label: "1 Song", price: "1.00", flOz: 6660 },
   ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
   twentyfive: { label: "25 Songs", price: "6.00", flOz: 166500 }
@@ -34,6 +37,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "A valid checkout request id is required." });
     }
     if (!pack) return res.status(400).json({ error: "Unknown FL OZ pack." });
+    if (!validatePackAuthority(packId, pack.price, "USD")) return res.status(500).json({ error: "Economy authority configuration failed." });
 
     const invoiceId = "GEI-" + requestId;
     const token = await paypalToken();
@@ -83,7 +87,8 @@ export default async function handler(req, res) {
       amount: pack.price,
       currency: "USD",
       claimToken: returnedInvoiceId,
-      requestId
+      requestId,
+      economyAuthorityVersion: ECONOMY_AUTHORITY_VERSION
     });
   } catch (err) {
     console.error("[PayPal create-order]", err);
