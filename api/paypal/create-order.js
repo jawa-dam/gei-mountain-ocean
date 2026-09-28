@@ -64,12 +64,25 @@ export default async function handler(req, res) {
     if (!response.ok || !data.id) {
       return res.status(response.status || 502).json({ error: data.message || "Unable to create PayPal order." });
     }
+
+    const unit = data.purchase_units?.[0];
+    const returnedPackId = unit?.custom_id;
+    const returnedInvoiceId = unit?.invoice_id;
+    const returnedAmount = unit?.amount;
+    if (returnedPackId !== packId ||
+        returnedInvoiceId !== invoiceId ||
+        !returnedAmount ||
+        returnedAmount.currency_code !== "USD" ||
+        returnedAmount.value !== pack.price) {
+      return res.status(502).json({ error: "PayPal returned an order that does not match the requested pack." });
+    }
+
     return res.status(200).json({
       id: data.id,
       packId,
       amount: pack.price,
       currency: "USD",
-      claimToken: invoiceId,
+      claimToken: returnedInvoiceId,
       requestId
     });
   } catch (err) {
