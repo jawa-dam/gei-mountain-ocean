@@ -1002,6 +1002,12 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .paypalCheckoutItem{ margin:6px 0 10px; font-size:1rem; font-weight:900; color:var(--gold); text-align:center; }
 .paypalCheckoutStatus{ min-height:1.3em; margin:5px 0 8px; font-size:.92rem; font-weight:800; text-align:center; }
 .paypalButtons{ min-height:42px; }
+.paypalReceipt{ margin:10px 0 2px; padding:14px 14px 12px; border-radius:16px; background:linear-gradient(145deg,rgba(32,220,160,.13),rgba(41,198,255,.14)); border:1.5px solid rgba(126,255,214,.55); text-align:center; box-shadow:0 0 22px rgba(32,220,160,.12); }
+.paypalReceipt[hidden]{ display:none; }
+.paypalReceiptTitle{ font-size:1.05rem; font-weight:950; letter-spacing:.08em; color:var(--foam); }
+.paypalReceiptPack{ margin-top:5px; font-size:1rem; font-weight:900; color:var(--gold); }
+.paypalReceiptCredit{ margin-top:4px; font-size:1.45rem; line-height:1.05; font-weight:950; color:var(--water-bright); font-variant-numeric:tabular-nums; }
+.paypalReceiptMeta{ margin-top:7px; font-size:.78rem; line-height:1.35; font-weight:800; color:rgba(255,255,255,.72); }
 .paypalCancel{ width:100%; margin-top:8px; }
 .profileEconomy{ display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
 .peRow{ display:flex; justify-content:space-between; gap:10px; padding:9px 12px; border-radius:12px; background:rgba(255,255,255,.07); font-size:.9rem; font-weight:700; }
@@ -1972,6 +1978,12 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
           <div class="paypalCheckoutItem" id="paypalCheckoutItem"></div>
           <div class="paypalCheckoutStatus" id="paypalCheckoutStatus" aria-live="polite"></div>
           <div class="paypalButtons" id="paypalButtons"></div>
+          <div class="paypalReceipt" id="paypalReceipt" hidden aria-live="polite">
+            <div class="paypalReceiptTitle">✅ PURCHASE COMPLETE</div>
+            <div class="paypalReceiptPack" id="paypalReceiptPack"></div>
+            <div class="paypalReceiptCredit" id="paypalReceiptCredit"></div>
+            <div class="paypalReceiptMeta" id="paypalReceiptMeta"></div>
+          </div>
           <button class="storeBtn paypalCancel" id="paypalCancelBtn" type="button">CANCEL</button>
         </div>
       </div>
@@ -5282,6 +5294,28 @@ function clearPayPalRetryButton(){
   if(btn) btn.remove();
 }
 
+function clearPayPalReceipt(){
+  const receipt=$("paypalReceipt");
+  if(receipt) receipt.hidden=true;
+  const pack=$("paypalReceiptPack");
+  if(pack) pack.textContent="";
+  const credit=$("paypalReceiptCredit");
+  if(credit) credit.textContent="";
+  const meta=$("paypalReceiptMeta");
+  if(meta) meta.textContent="";
+}
+
+function showPayPalReceipt(pack, credited, captureID){
+  const receipt=$("paypalReceipt");
+  if(!receipt) return;
+  $("paypalReceiptPack").textContent=pack.label+" — $"+Number(pack.priceUsd).toFixed(2)+" USD";
+  $("paypalReceiptCredit").textContent="+"+fmt(credited)+" FL OZ";
+  const safeCapture=String(captureID || "");
+  const ref=safeCapture.length>12 ? "•••"+safeCapture.slice(-12) : (safeCapture || "verified");
+  $("paypalReceiptMeta").textContent="PayPal payment verified • Entitlement secured • Ref "+ref;
+  receipt.hidden=false;
+}
+
 function loadPayPalSdk(forceRetry){
   if(window.paypal && typeof window.paypal.Buttons === "function") return Promise.resolve(window.paypal);
   if(paypalSdkPromise && !forceRetry) return paypalSdkPromise;
@@ -5360,6 +5394,7 @@ function closePayPalCheckout(){
   const buttons=$("paypalButtons"); if(buttons) buttons.innerHTML="";
   const status=$("paypalCheckoutStatus"); if(status) status.textContent="";
   clearPayPalRetryButton();
+  clearPayPalReceipt();
 }
 
 async function startCheckout(packId){
@@ -5373,6 +5408,7 @@ async function startCheckout(packId){
   item.textContent=pack.label+" — $"+Number(pack.priceUsd).toFixed(2)+" USD";
   buttons.innerHTML="";
   clearPayPalRetryButton();
+  clearPayPalReceipt();
   status.textContent="Connecting securely to PayPal…";
 
   const retry = ()=>{
@@ -5442,10 +5478,12 @@ async function startCheckout(packId){
         status.textContent="✅ Payment complete — your FL OZ entitlement is secured!";
         if(credited.ok) showToast("💧 +"+fmt(credited.credited)+" FL OZ added");
         else showToast("💧 Your FL OZ entitlement is already in this game.");
+        showPayPalReceipt(pack, credited.ok ? credited.credited : claim.entitlement.flOz, claim.entitlement.captureID);
         renderStore();
-        setTimeout(closePayPalCheckout,1800);
+        setTimeout(closePayPalCheckout,5000);
       },
       onCancel:()=>{
+        clearPayPalReceipt();
         status.textContent="Checkout canceled. Your payment was not captured.";
       },
       onError:(err)=>{
