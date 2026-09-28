@@ -46,11 +46,12 @@ export function auditReceipt(record) {
 
 /*
  * V2.0.26 — Reconcile an existing durable record against the
- * canonical economy authority. This is detection only: it never
- * rewrites the financial record.
+ * canonical economy authority. Detection only: it never rewrites
+ * the financial record.
  */
 export function reconcileEntitlementAuthority(record) {
-  const pack = getPack(record?.packId);
+  const packId = record?.packId || null;
+  const pack = getPack(packId);
   const audit = auditReceipt(record);
   const reasons = [];
 
@@ -66,7 +67,7 @@ export function reconcileEntitlementAuthority(record) {
     reasons.push("NON_AUTHORITATIVE_AUDIT");
   }
   if (record?.audit && (
-    record.audit.packId !== pack?.[record?.packId ? "packId" : ""] ||
+    record.audit.packId !== packId ||
     record.audit.amount !== pack?.price ||
     Number(record.audit.flOz) !== pack?.flOz ||
     record.audit.currency !== "USD"
