@@ -30,6 +30,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       alreadyClaimed: result.alreadyClaimed,
+      recovery: result.alreadyClaimed ? "REPLAY_RECOVERED" : "FIRST_CLAIM",
       entitlement: {
         packId: result.record.packId,
         flOz: result.record.flOz,
