@@ -742,6 +742,29 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes tapWaterFlash{0%{transform:translate(-50%,-50%) scale(.4);opacity:.9}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
 @media (prefers-reduced-motion:reduce){.tapWaterRipple,.tapWaterDrop,.tapWaterFlash{animation-duration:.001ms !important}}
 
+/* V2.1.11 — CONTEXTUAL HYDRAULIC TAP ENGINE. The water now speaks the language of the station. */
+.tapWaterLayer[data-tap-context="mountain"] .tapWaterRipple{border-width:2px;transform:translate(-50%,-50%) scale(.28)}
+.tapWaterLayer[data-tap-context="mountain"] .tapWaterDrop{filter:brightness(1.08);--lift:-18px}
+.tapWaterLayer[data-tap-context="dam"] .tapWaterRipple{border-width:4px;animation-duration:.9s}
+.tapWaterLayer[data-tap-context="dam"] .tapWaterFlash{width:46px;height:46px}
+.tapWaterLayer[data-tap-context="reservoir"] .tapWaterRipple{animation-duration:1.05s}
+.tapWaterLayer[data-tap-context="reservoir"] .tapWaterDrop{opacity:.72}
+.tapWaterLayer[data-tap-context="sluice"] .tapWaterDrop{width:6px;height:15px;border-radius:60% 60% 45% 45%}
+.tapWaterLayer[data-tap-context="sluice"] .tapWaterRipple{transform:translate(-50%,-50%) scale(.25)}
+.tapWaterLayer[data-tap-context="wheel"] .tapWaterRipple{border-style:dashed;animation-name:tapWaterWheelRipple}
+.tapWaterLayer[data-tap-context="wheel"] .tapWaterFlash{width:42px;height:42px;animation-name:tapWaterWheelFlash}
+.tapWaterLayer[data-tap-context="ocean"] .tapWaterRipple{border-width:3px;animation-duration:1.15s}
+.tapWaterLayer[data-tap-context="ocean"] .tapWaterFlash{width:58px;height:58px;animation-duration:.62s}
+.tapWaterContextRing{position:absolute;width:34px;height:34px;border:2px solid var(--water-bright);border-radius:50%;transform:translate(-50%,-50%) scale(.2);opacity:.82;pointer-events:none;box-shadow:0 0 16px color-mix(in srgb,var(--water-bright) 50%,transparent);animation:tapWaterContextRing .9s cubic-bezier(.18,.75,.22,1) forwards}
+.tapWaterContextRing.wheel{border-style:dotted;animation-duration:1s}
+.tapWaterContextRing.ocean{width:54px;height:54px;border-width:3px;animation-duration:1.2s}
+.tapWaterBreakthrough{position:absolute;width:12px;height:22px;border-radius:70% 70% 55% 55%;background:linear-gradient(160deg,var(--foam),var(--water-bright) 55%,var(--juicy-blue));box-shadow:0 0 12px color-mix(in srgb,var(--water-bright) 65%,transparent);transform:translate(-50%,-50%) scale(.6);opacity:0;animation:tapWaterBreakthrough .95s cubic-bezier(.15,.7,.2,1) forwards;pointer-events:none}
+@keyframes tapWaterWheelRipple{0%{transform:translate(-50%,-50%) rotate(0) scale(.35);opacity:.95}100%{transform:translate(-50%,-50%) rotate(180deg) scale(7);opacity:0}}
+@keyframes tapWaterWheelFlash{0%{transform:translate(-50%,-50%) rotate(0) scale(.35);opacity:.95}100%{transform:translate(-50%,-50%) rotate(180deg) scale(3.2);opacity:0}}
+@keyframes tapWaterContextRing{0%{transform:translate(-50%,-50%) scale(.2);opacity:.85}100%{transform:translate(-50%,-50%) scale(4.8);opacity:0}}
+@keyframes tapWaterBreakthrough{0%{transform:translate(-50%,-50%) translate(0,0) scale(.6);opacity:0}12%{opacity:1}100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(.18);opacity:0}}
+@media (prefers-reduced-motion:reduce){.tapWaterContextRing,.tapWaterBreakthrough{animation-duration:.001ms !important}}
+
 /* ============ TRIBE REVEAL CARD ============ */
 .tribeCard{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -4161,7 +4184,8 @@ world.addEventListener("click", (e)=>{
       renderMillStage();
     }
 
-    awardDay(index);
+    const dayAwarded = awardDay(index);
+    if(dayAwarded) spawnHydraulicBreakthrough(index);
     flowSegment(index);
   }
 
@@ -6547,24 +6571,77 @@ function spawnFoamAt(x, y, big){
 /* V2.1.10 — centralized TAP WATER feedback. Presentation-only: no state, XP, FL OZ, or progression changes. */
 let tapWaterPulseCount = 0;
 let lastTapWaterAudioAt = 0;
-function spawnTapWaterFeedback(clientX, clientY, intensity){
-  const layer = $("tapWaterLayer");
-  if(!layer || !Number.isFinite(clientX) || !Number.isFinite(clientY)) return false;
-  const power = Math.max(1, Math.min(3, Number(intensity) || 1));
-  const ripple = document.createElement("div"); ripple.className = "tapWaterRipple"; ripple.style.left = clientX+"px"; ripple.style.top = clientY+"px"; layer.appendChild(ripple);
-  const flash = document.createElement("div"); flash.className = "tapWaterFlash"; flash.style.left = clientX+"px"; flash.style.top = clientY+"px"; layer.appendChild(flash);
-  const count = power >= 3 ? 10 : power >= 2 ? 7 : 4, spread = power >= 3 ? 82 : power >= 2 ? 64 : 48;
+/* V2.1.11 — six canonical hydraulic personalities. Presentation-only: never mutates game/economy state. */
+const TAP_WATER_PROFILES = Object.freeze({
+  mountain:{label:"Mountain pressure",drops:5,spread:44,rise:18,noise:[420,720],tone:[523,659],wave:"triangle"},
+  dam:{label:"Dam pressure",drops:7,spread:58,rise:8,noise:[260,430],tone:[196,247],wave:"sawtooth"},
+  reservoir:{label:"Reservoir rings",drops:6,spread:70,rise:3,noise:[360,560],tone:[392,494],wave:"sine"},
+  sluice:{label:"Sluice release",drops:8,spread:82,rise:14,noise:[520,980],tone:[440,554],wave:"triangle"},
+  wheel:{label:"Waterwheel energy",drops:9,spread:74,rise:10,noise:[300,760],tone:[330,494],wave:"square"},
+  ocean:{label:"Ocean breakthrough",drops:14,spread:116,rise:22,noise:[180,620],tone:[220,330],wave:"sine"}
+});
+function getTapWaterContext(options={}){
+  const index=Number.isInteger(options.index)?options.index:Number(state?.currentStep);
+  if(options.breakthrough||index===MILL_INDEX&&options.finalTap)return "ocean";
+  return ["mountain","dam","reservoir","sluice","wheel","ocean"][Math.max(0,Math.min(5,index))]||"mountain";
+}
+function getTapWaterProfile(context){return TAP_WATER_PROFILES[context]||TAP_WATER_PROFILES.mountain}
+function playContextualTapWaterSound(context,intensity){
+  const p=getTapWaterProfile(context);
+  try{
+    playWaterNoise(.12+intensity*.035,p.noise[0],p.noise[1],.045+intensity*.012);
+    const notes=p.tone; playTone(notes[Math.max(0,Math.min(notes.length-1,intensity-1))],.08+intensity*.015,p.wave);
+  }catch(e){}
+}
+function spawnTapWaterFeedback(clientX,clientY,intensity,context){
+  const layer=$("tapWaterLayer");
+  if(!layer||!Number.isFinite(clientX)||!Number.isFinite(clientY))return false;
+  const power=Math.max(1,Math.min(3,Number(intensity)||1));
+  const resolved=getTapWaterProfile(context),contextId=TAP_WATER_PROFILES[context]?context:"mountain";
+  layer.dataset.tapContext=contextId;
+  const ripple=document.createElement("div"); ripple.className="tapWaterRipple"; ripple.style.left=clientX+"px"; ripple.style.top=clientY+"px"; layer.appendChild(ripple);
+  const flash=document.createElement("div"); flash.className="tapWaterFlash"; flash.style.left=clientX+"px"; flash.style.top=clientY+"px"; layer.appendChild(flash);
+  if(contextId==="wheel"||contextId==="ocean"){
+    const ring=document.createElement("div"); ring.className="tapWaterContextRing "+contextId; ring.style.left=clientX+"px"; ring.style.top=clientY+"px"; layer.appendChild(ring); setTimeout(()=>ring.remove(),1250);
+  }
+  const count=Math.max(3,Math.round(resolved.drops*(power===3?1.45:power===2?1.15:.72)));
+  const spread=resolved.spread*(power===3?1.28:power===2?1.1:.9);
   for(let i=0;i<count;i++){
     const drop=document.createElement("div"); drop.className="tapWaterDrop";
-    const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.5, distance=spread*(.55+Math.random()*.65);
+    const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.5,distance=spread*(.62+Math.random()*.6);
     drop.style.left=clientX+"px"; drop.style.top=clientY+"px";
-    drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-power*8)+"px");
-    drop.style.animationDelay=Math.random()*.05+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),820);
+    drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-resolved.rise)+"px");
+    drop.style.animationDelay=Math.random()*.06+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),900);
   }
-  setTimeout(()=>{ripple.remove();flash.remove()},800);
+  setTimeout(()=>{ripple.remove();flash.remove()},1200);
   tapWaterPulseCount++; const now=performance.now();
-  if(now-lastTapWaterAudioAt>55){lastTapWaterAudioAt=now;try{playWaterTap(tapWaterPulseCount)}catch(e){}}
+  if(now-lastTapWaterAudioAt>55){lastTapWaterAudioAt=now;playContextualTapWaterSound(contextId,power)}
   return true;
+}
+function spawnHydraulicBreakthrough(index){
+  const layer=$("tapWaterLayer"); if(!layer)return false;
+  const context=getTapWaterContext({index,breakthrough:true}),rect=world?.getBoundingClientRect?.();
+  const x=rect?rect.left+rect.width*.5:innerWidth*.5,y=rect?rect.top+rect.height*.68:innerHeight*.68;
+  const shown=spawnTapWaterFeedback(x,y,3,context); if(!shown)return false;
+  const p=getTapWaterProfile(context);
+  for(let i=0;i<p.drops+8;i++){
+    const drop=document.createElement("div"); drop.className="tapWaterBreakthrough";
+    const angle=(i/(p.drops+8))*Math.PI*2,distance=p.spread*(.8+Math.random()*.75);
+    drop.style.left=x+"px"; drop.style.top=y+"px";
+    drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-p.rise*2)+"px");
+    drop.style.animationDelay=Math.random()*.12+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),1150);
+  }
+  playContextualTapWaterSound(context,3); return true;
+}
+function getTapWaterPointerContext(){
+  if(!state)return "mountain";
+  const index=Number(state.currentStep);
+  if(state.phase==="playing"){
+    const required=getRequiredTaps(state.level),nextTap=state.tapCount+1;
+    return index===MILL_INDEX&&nextTap>=required?"ocean":getTapWaterContext({index});
+  }
+  if(state.phase==="ready"||state.phase==="timeout")return getTapWaterContext({index});
+  return "ocean";
 }
 document.addEventListener("pointerdown",e=>{
   if(e.button!==undefined&&e.button!==0)return;
@@ -6572,10 +6649,10 @@ document.addEventListener("pointerdown",e=>{
   if(target&&target.closest("#tapWaterLayer, script, style"))return;
   let intensity=1;
   if(state&&state.phase==="playing"){
-    const required=getRequiredTaps(state.level), nextTap=state.tapCount+1;
+    const required=getRequiredTaps(state.level),nextTap=state.tapCount+1;
     if(nextTap>=required)intensity=3; else if(nextTap/required>=.75)intensity=2;
   }
-  spawnTapWaterFeedback(e.clientX,e.clientY,intensity);
+  spawnTapWaterFeedback(e.clientX,e.clientY,intensity,getTapWaterPointerContext());
 },{capture:true,passive:true});
 
 /* =========================================================
@@ -7117,7 +7194,28 @@ function runCommandCenterSelfTest(){
       return [111,222,333,444,555,666,777,1110,2220,6660].every(v => vals.has(v));
     });
     /* V2.1.10 — TAP WATER */
-    t("V2.1.10: global tap-water layer exists", () => !!$("tapWaterLayer"));
+    t("V2.1.11: six canonical hydraulic profiles exist", () => {
+    return ["mountain","dam","reservoir","sluice","wheel","ocean"].every(id => !!TAP_WATER_PROFILES[id]);
+  });
+  t("V2.1.11: six gameplay steps resolve to hydraulic contexts", () => {
+    const expected=["mountain","dam","reservoir","sluice","wheel","ocean"];
+    return expected.every((id,index) => getTapWaterContext({index}) === id);
+  });
+  t("V2.1.11: contextual tap feedback remains presentation-only", () => {
+    const beforeOz=state.totalFlOz,beforeTap=state.tapCount,beforeLevel=state.level;
+    const shown=spawnTapWaterFeedback(120,160,2,"dam");
+    return shown && state.totalFlOz===beforeOz && state.tapCount===beforeTap && state.level===beforeLevel;
+  });
+  t("V2.1.11: final Mill tap resolves to Ocean breakthrough context", () => {
+    const before=state.currentStep;
+    const resolved=getTapWaterContext({index:MILL_INDEX,finalTap:true});
+    return before===state.currentStep && resolved==="ocean";
+  });
+  t("V2.1.11: contextual profiles change presentation parameters", () => {
+    return getTapWaterProfile("mountain").spread !== getTapWaterProfile("ocean").spread
+      && getTapWaterProfile("dam").noise[0] !== getTapWaterProfile("sluice").noise[0];
+  });
+  t("V2.1.10: global tap-water layer exists", () => !!$("tapWaterLayer"));
     t("V2.1.10: tap-water feedback is presentation-only", () => {
       const beforeOz=state.totalFlOz,beforeTap=state.tapCount,beforeLevel=state.level,beforeNodes=$("tapWaterLayer")?.childElementCount||0;
       const shown=spawnTapWaterFeedback(120,160,2),afterNodes=$("tapWaterLayer")?.childElementCount||0;
