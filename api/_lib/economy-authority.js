@@ -43,3 +43,49 @@ export function auditReceipt(record) {
     currency: "USD"
   };
 }
+
+/*
+ * V2.0.26 — Reconcile an existing durable record against the
+ * canonical economy authority. This is detection only: it never
+ * rewrites the financial record.
+ */
+export function reconcileEntitlementAuthority(record) {
+  const pack = getPack(record?.packId);
+  const audit = auditReceipt(record);
+  const reasons = [];
+
+  if (!record) reasons.push("MISSING_RECORD");
+  if (!pack) reasons.push("UNKNOWN_PACK");
+  if (record?.currency !== "USD") reasons.push("CURRENCY_DRIFT");
+  if (pack && record?.amount !== pack.price) reasons.push("AMOUNT_DRIFT");
+  if (pack && Number(record?.flOz) !== pack.flOz) reasons.push("FL_OZ_DRIFT");
+  if (record?.auditVersion && record.auditVersion !== ECONOMY_AUTHORITY_VERSION) {
+    reasons.push("AUDIT_VERSION_DRIFT");
+  }
+  if (record?.audit && record.audit.authoritative !== true) {
+    reasons.push("NON_AUTHORITATIVE_AUDIT");
+  }
+  if (record?.audit && (
+    record.audit.packId !== pack?.[record?.packId ? "packId" : ""] ||
+    record.audit.amount !== pack?.price ||
+    Number(record.audit.flOz) !== pack?.flOz ||
+    record.audit.currency !== "USD"
+  )) {
+    reasons.push("AUDIT_RECORD_DRIFT");
+  }
+  if (record?.captureID && record?.fulfillmentId &&
+      record.fulfillmentId !== canonicalFulfillmentId(record.captureID)) {
+    reasons.push("FULFILLMENT_ID_DRIFT");
+  }
+
+  const authoritative = reasons.length === 0 && audit.authoritative === true;
+
+  return {
+    ok: authoritative,
+    authoritative,
+    driftDetected: !authoritative,
+    reasons,
+    auditVersion: ECONOMY_AUTHORITY_VERSION,
+    audit
+  };
+}
