@@ -5483,12 +5483,34 @@ function showLevelComplete(opts = {}){
 
 lcBtn.addEventListener("click", openBonusWheel);   // v2.5: level card → Bonus Waterwheel → next level
 
+/* V2.1.5 — every redeemed level banks six DAM MACHINE spins.
+   This is the level-completion grant, not a prize/economy reward: it never touches FL OZ.
+   Because commitBonusPrize() calls advanceLevel() only for a final (non-free-spin) Waterwheel
+   result, the six-spin grant happens once per completed level and naturally accumulates. */
+const DAM_MACHINE_LEVEL_SPIN_REWARD = 6;
+
 function advanceLevel(){
+  const completedLevel = state.level;
+
   state.level++;
   state.levelFlOz = 0;
   state.currentStep = 0;
   state.tapCount = 0;
   state.phase = "redeemed";
+
+  const beforePlays = state.damMachineFreePlays;
+  state.damMachineFreePlays = Math.min(
+    DAM_MACHINE_MAX_PLAYS,
+    state.damMachineFreePlays + DAM_MACHINE_LEVEL_SPIN_REWARD
+  );
+  const awardedPlays = state.damMachineFreePlays - beforePlays;
+
+  renderDamMachineHeader();
+  showToast(
+    awardedPlays === DAM_MACHINE_LEVEL_SPIN_REWARD
+      ? `🎰 LEVEL ${fmt(completedLevel)} COMPLETE — +${fmt(awardedPlays)} DAM MACHINE SPINS BANKED!`
+      : `🎰 LEVEL ${fmt(completedLevel)} COMPLETE — ${fmt(awardedPlays)} DAM MACHINE SPINS BANKED (MAX BANK REACHED)`
+  );
 }
 
 function continueToNextLevel(){
