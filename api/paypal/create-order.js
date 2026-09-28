@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     }
     if (!pack) return res.status(400).json({ error: "Unknown FL OZ pack." });
 
-    const invoiceId = "GEI-" + crypto.randomUUID();
+    const invoiceId = "GEI-" + requestId;
     const token = await paypalToken();
     const response = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
       method: "POST",
