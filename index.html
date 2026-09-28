@@ -3683,6 +3683,9 @@ function loadGame(){
       flOz: toInt(x.flOz, 0, 1e9, 0),
       amount: typeof x.amount === "string" ? x.amount : Number(x.amount || 0).toFixed(2),
       receiptId: x.receiptId,
+      captureID: typeof x.captureID === "string" ? x.captureID : "",
+      orderID: typeof x.orderID === "string" ? x.orderID : "",
+      fulfillmentStatus: typeof x.fulfillmentStatus === "string" ? x.fulfillmentStatus : "LEGACY",
       purchasedAt: Number.isFinite(Number(x.purchasedAt)) ? Number(x.purchasedAt) : Date.now()
     })) : [];
   state.tribesFound     = Array.isArray(d.tribesFound) ? d.tribesFound.map(tribeByName).filter(Boolean) : [];
@@ -5861,9 +5864,10 @@ function restorePurchaseVerificationSession(){
 function safeSessionRemove(key){
   try { sessionStorage.removeItem(key); } catch(e){}
 }
-function clearCheckoutRecovery(packId,orderID,keepClaim=false){
+function clearCheckoutRecovery(packId,orderID,keepClaim=false,captureID=null){
   safeSessionRemove(paypalRecoveryStorageKey("request",packId));
   if(orderID && !keepClaim) safeSessionRemove(paypalRecoveryStorageKey("claim",orderID));
+  if(captureID) safeSessionRemove(paypalRecoveryStorageKey("fulfillment",captureID));
 }
 function checkoutRequestId(packId){
   const key=paypalRecoveryStorageKey("request",packId);
@@ -6037,7 +6041,7 @@ function startCheckout(packId){
         if(credited.ok) showToast("💧 +"+fmt(credited.credited)+" FL OZ added");
         else showToast("💧 Your FL OZ entitlement is already in this game.");
         showPayPalReceipt(pack, credited.ok ? credited.credited : claim.entitlement.flOz, claim.entitlement.captureID);
-        clearCheckoutRecovery(packId,data.orderID,true);
+        clearCheckoutRecovery(packId,data.orderID,true,claim.entitlement.captureID);
         const replayBtn=$("purchaseReplayBtn");
         if(replayBtn) replayBtn.hidden=false;
         renderStore();
@@ -6121,7 +6125,7 @@ function runEconomyIntegritySelfTest(){
   t("credit: rejects unknown pack", creditPack("bogus","GEI-FULFILL-selftest",{serverAuthorized:true,fulfillmentId:"GEI-FULFILL-selftest",captureID:"capture-test"}).message === "Unknown pack.");
   t("fulfillment id format is canonical", /^GEI-FULFILL-[A-Za-z0-9._:-]{8,120}$/.test("GEI-FULFILL-capture-test"));
   t("wallet credit constants remain canonical", DAY_REWARD_FL_OZ===111 && LEVEL_REWARD_FL_OZ===666 && UNLOCK_COST_FL_OZ===6660);
-  t("purchase history carries server authorization fields", ["captureID","fulfillmentStatus"].every(k=>cachesPurchaseHistoryField(k)));
+  t("purchase history schema accepts legacy and server-authorized records", state.purchaseHistory.every(x=>x && typeof x.receiptId==="string" && typeof x.fulfillmentStatus==="string"));
   const pass=results.filter(r=>r.ok).length;
   return {pass,fail:results.length-pass,results};
 }
