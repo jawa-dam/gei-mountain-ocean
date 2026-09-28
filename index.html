@@ -5737,6 +5737,7 @@ function armProductionPurchaseVerification(pack){
     claim:false,
     credit:false,
     recovered:false,
+    replayVerified:false,
     orderID:null,
     captureID:null,
     claimToken:null,
@@ -5781,6 +5782,8 @@ async function verifyProductionReplayShield(){
     if(meta) meta.textContent="⚠️ Replay check did not return the expected already-claimed result.";
     return;
   }
+  s.replayVerified=true;
+  persistPurchaseVerificationSession();
   setPurchaseVerification("purchaseReplay","pass","LOCKED · NO 2X CREDIT");
   const meta=$("purchaseVerificationMeta");
   if(meta) meta.textContent="🔒 REPLAY SHIELD VERIFIED · same claim replayed safely with no second FL OZ credit.";
@@ -5792,8 +5795,10 @@ function updateProductionPurchaseVerification(){
   const walletDelta=(Number(state.totalFlOz)||0)-s.walletBefore;
   const historyDelta=state.purchaseHistory.length-s.historyBefore;
   const songDelta=state.unlockedSongs.length-s.songsBefore;
-  if(s.capture && s.claim){
-    setPurchaseVerification("purchaseReplay","pass","LOCKED");
+  if(s.replayVerified){
+    setPurchaseVerification("purchaseReplay","pass","LOCKED · NO 2X CREDIT");
+  } else if(s.capture && s.claim){
+    setPurchaseVerification("purchaseReplay","pending","VERIFY");
   }
   if(s.credit){
     setPurchaseVerification("purchaseCredit",walletDelta===s.flOz?"pass":"pending",walletDelta===s.flOz?"PASS":"CHECK");
@@ -5835,10 +5840,11 @@ function restorePurchaseVerificationSession(){
     if(saved.capture) setPurchaseVerification("purchaseCapture","pass","PASS");
     if(saved.claim) setPurchaseVerification("purchaseClaim","pass",saved.recovered?"RECOVERED":"PASS");
     if(saved.credit) setPurchaseVerification("purchaseCredit","pass","PASS");
-    const replayBtn=$(\"purchaseReplayBtn\");
+    if(saved.replayVerified) setPurchaseVerification("purchaseReplay","pass","LOCKED · NO 2X CREDIT");
+    const replayBtn=$("purchaseReplayBtn");
     if(replayBtn && saved.captureID && saved.claimToken && saved.claimId) replayBtn.hidden=false;
     updateProductionPurchaseVerification();
-    const meta=$(\"purchaseVerificationMeta\");
+    const meta=$("purchaseVerificationMeta");
     if(meta) meta.textContent="🔄 V2.0.22 verification state restored after refresh.";
   }catch(e){
     clearPersistedPurchaseVerificationSession();
