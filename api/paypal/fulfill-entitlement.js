@@ -16,6 +16,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Invalid fulfillment receipt identity." });
     }
 
+    // V2.0.24 — the fulfillment receipt is bound to the PayPal capture identity.
+    const canonicalFulfillmentId = "GEI-FULFILL-" + String(captureID).replace(/[^A-Za-z0-9._:-]/g, "-");
+    if (fulfillmentId !== canonicalFulfillmentId) {
+      return res.status(403).json({ error: "Fulfillment receipt does not match this payment." });
+    }
+
     const result = await fulfillEntitlement(claimToken, captureID, fulfillmentId);
 
     if (!result.ok) {
