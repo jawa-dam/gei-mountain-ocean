@@ -5750,7 +5750,9 @@ function armProductionPurchaseVerification(pack){
     orderID:null,
     captureID:null,
     claimToken:null,
-    claimId:null
+    claimId:null,
+    fulfillmentId:null,
+    fulfillment:false
   };
   persistPurchaseVerificationSession();
   const arm=$("purchaseArm");
@@ -5784,18 +5786,46 @@ async function verifyProductionReplayShield(){
     })
   });
   const response=result.response, data=result.data;
-  const walletAfter=Number(state.totalFlOz)||0;
-  if(!response.ok || !data.ok || data.alreadyClaimed!==true || walletAfter!==walletBefore){
+  const walletAfterClaim=Number(state.totalFlOz)||0;
+  if(!response.ok || !data.ok || data.alreadyClaimed!==true || walletAfterClaim!==walletBefore){
     setPurchaseVerification("purchaseReplay","pending","CHECK");
     const meta=$("purchaseVerificationMeta");
-    if(meta) meta.textContent="⚠️ Replay check did not return the expected already-claimed result.";
+    if(meta) meta.textContent="⚠️ Claim replay check did not return the expected already-claimed result.";
     return;
   }
+
+  if(!s.fulfillmentId){
+    setPurchaseVerification("purchaseReplay","pending","CHECK");
+    const meta=$("purchaseVerificationMeta");
+    if(meta) meta.textContent="⚠️ Fulfillment receipt identity is missing from this verification session.";
+    return;
+  }
+
+  const fulfillmentResult=await paypalFetchJson("/api/paypal/fulfill-entitlement",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      claimToken:s.claimToken,
+      captureID:s.captureID,
+      fulfillmentId:s.fulfillmentId
+    })
+  });
+  const fulfillmentResponse=fulfillmentResult.response, fulfillment=fulfillmentResult.data;
+  const walletAfterFulfillment=Number(state.totalFlOz)||0;
+  if(!fulfillmentResponse.ok || !fulfillment.ok || fulfillment.alreadyFulfilled!==true ||
+     !fulfillment.receipt || fulfillment.receipt.fulfillmentId!==s.fulfillmentId ||
+     walletAfterFulfillment!==walletBefore){
+    setPurchaseVerification("purchaseReplay","pending","CHECK");
+    const meta=$("purchaseVerificationMeta");
+    if(meta) meta.textContent="⚠️ Economy fulfillment replay did not return the expected already-fulfilled result.";
+    return;
+  }
+
   s.replayVerified=true;
   persistPurchaseVerificationSession();
   setPurchaseVerification("purchaseReplay","pass","LOCKED · NO 2X CREDIT");
   const meta=$("purchaseVerificationMeta");
-  if(meta) meta.textContent="🔒 REPLAY SHIELD VERIFIED · same claim replayed safely with no second FL OZ credit.";
+  if(meta) meta.textContent="🔒 ECONOMY INTEGRITY VERIFIED · claim + fulfillment replayed safely with no second FL OZ credit.";
 }
 
 function updateProductionPurchaseVerification(){
@@ -6020,6 +6050,11 @@ function startCheckout(packId){
         const fulfillmentResponse=fulfillmentResult.response, fulfillment=fulfillmentResult.data;
         if(!fulfillmentResponse.ok || !fulfillment.ok || !fulfillment.receipt || fulfillment.receipt.fulfillmentId!==fulfillmentId){
           throw new Error(fulfillment.error || "Payment was confirmed but the economy fulfillment authorization failed.");
+        }
+        if(purchaseVerificationSession && purchaseVerificationSession.packId===packId){
+          purchaseVerificationSession.fulfillmentId=fulfillment.receipt.fulfillmentId;
+          purchaseVerificationSession.fulfillment=true;
+          persistPurchaseVerificationSession();
         }
         const credited=creditPack(fulfillment.receipt.packId, fulfillment.receipt.fulfillmentId, {
           orderID: fulfillment.receipt.orderID,
