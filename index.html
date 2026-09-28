@@ -1375,7 +1375,26 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 .characterSpotlightEyebrow{font-size:.72rem;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:var(--juicy-blue)}
 .characterSpotlightStage{height:min(42vh,270px);margin:8px 0 4px;display:flex;align-items:flex-end;justify-content:center;position:relative}
 .characterSpotlightStage::before{content:"";position:absolute;width:78%;height:78%;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--water-bright) 22%,transparent),transparent 68%);filter:blur(8px);animation:characterSpotlightGlow 2.8s ease-in-out infinite}
-.characterSpotlightImg{position:relative;z-index:1;width:auto;height:100%;max-width:92%;object-fit:contain;display:block;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--water-bright) 65%,transparent));animation:characterSpotlightFloat 3.2s ease-in-out infinite}
+.characterSpotlightImg{position:relative;z-index:1;width:auto;height:100%;max-width:92%;object-fit:contain;display:block;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--water-bright) 65%,transparent));animation:characterSpotlightFloat 3.2s ease-in-out infinite;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-drag:none}
+.characterSpotlightImg:focus-visible{outline:4px solid var(--spot-accent,var(--water-bright));outline-offset:8px;border-radius:24px}
+.characterSpotlightTapHint{margin:0 auto 2px;width:fit-content;max-width:100%;padding:5px 10px;border-radius:999px;background:color-mix(in srgb,var(--spot-accent,var(--water-bright)) 12%,transparent);border:1px solid color-mix(in srgb,var(--spot-accent,var(--water-bright)) 34%,transparent);color:#fff;font-size:.68rem;font-weight:950;letter-spacing:.12em;text-transform:uppercase;animation:spotlightTapHint 2.2s ease-in-out infinite}
+.characterSpotlightStage.is-reacting::before{animation:spotlightTapGlow .55s ease-out both}
+.characterSpotlightInner[data-spot-motion="bounce"] .characterSpotlightImg.characterTap{animation:spotlightTapBounce .55s cubic-bezier(.34,1.56,.64,1) both}
+.characterSpotlightInner[data-spot-motion="shake"] .characterSpotlightImg.characterTap{animation:spotlightTapShake .5s ease-out both}
+.characterSpotlightInner[data-spot-motion="rise"] .characterSpotlightImg.characterTap{animation:spotlightTapRise .58s cubic-bezier(.22,1,.36,1) both}
+.characterSpotlightInner[data-spot-motion="pulse"] .characterSpotlightImg.characterTap{animation:spotlightTapPulse .52s ease-out both}
+.characterSpotlightInner[data-spot-motion="jolly"] .characterSpotlightImg.characterTap{animation:spotlightTapJolly .6s cubic-bezier(.34,1.56,.64,1) both}
+.characterSpotlightInner[data-spot-motion="steady"] .characterSpotlightImg.characterTap{animation:spotlightTapSteady .52s ease-out both}
+.characterSpotlightTapBurst{position:absolute;left:50%;top:48%;z-index:3;pointer-events:none;font-size:1.35rem;filter:drop-shadow(0 0 8px var(--spot-accent,var(--water-bright)));animation:spotlightTapBurst .7s ease-out forwards}
+@keyframes spotlightTapHint{0%,100%{opacity:.55;transform:scale(.98)}50%{opacity:1;transform:scale(1.03)}}
+@keyframes spotlightTapGlow{0%{opacity:.65;transform:scale(.7)}100%{opacity:1;transform:scale(1.16)}}
+@keyframes spotlightTapBounce{0%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-16px) rotate(-3deg) scale(1.06)}70%{transform:translateY(4px) rotate(3deg) scale(.98)}100%{transform:translateY(0) rotate(0) scale(1)}}
+@keyframes spotlightTapShake{0%,100%{transform:translateX(0) rotate(0) scale(1)}20%{transform:translateX(-10px) rotate(-4deg) scale(1.03)}40%{transform:translateX(10px) rotate(4deg) scale(1.03)}60%{transform:translateX(-7px) rotate(-3deg)}80%{transform:translateX(5px) rotate(2deg)}}
+@keyframes spotlightTapRise{0%{transform:translateY(0) scale(1)}45%{transform:translateY(-20px) scale(1.07)}100%{transform:translateY(0) scale(1)}}
+@keyframes spotlightTapPulse{0%{transform:scale(1)}35%{transform:scale(1.12)}65%{transform:scale(.96)}100%{transform:scale(1)}}
+@keyframes spotlightTapJolly{0%{transform:rotate(0) scale(1)}25%{transform:rotate(-7deg) scale(1.06)}50%{transform:rotate(7deg) scale(1.08)}75%{transform:rotate(-4deg) scale(1.03)}100%{transform:rotate(0) scale(1)}}
+@keyframes spotlightTapSteady{0%{transform:scale(1)}45%{transform:scale(1.08) rotate(-2deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes spotlightTapBurst{0%{opacity:0;transform:translate(-50%,-20%) scale(.5) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--burst-x)),var(--burst-y)) scale(1.25) rotate(var(--burst-r))}}
 .characterSpotlightFallback{position:relative;z-index:1;max-width:90%;padding:18px;border-radius:18px;background:rgba(0,0,0,.3);border:1.5px solid rgba(255,255,255,.3);font-size:1.15rem;font-weight:1000}
 .characterSpotlightName{font-size:clamp(1.65rem,7vw,2.35rem);font-weight:1000;line-height:1.05;color:#fff;text-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 55%,transparent)}
 .characterSpotlightPun{margin-top:6px;font-size:1rem;font-weight:900;line-height:1.3;color:var(--gold);overflow-wrap:anywhere}
@@ -2076,6 +2095,7 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
         <button class="characterSpotlightClose" id="characterSpotlightClose" type="button" aria-label="Close character spotlight">✕</button>
         <div class="characterSpotlightEyebrow">👤 DAM NATION OPERATOR SPOTLIGHT</div>
         <div class="characterSpotlightStage" id="characterSpotlightStage"></div>
+        <div class="characterSpotlightTapHint" id="characterSpotlightTapHint">👆 TAP THE OPERATOR</div>
         <div class="characterSpotlightName" id="characterSpotlightName">—</div>
         <div class="characterSpotlightPun" id="characterSpotlightPun"></div>
         <div class="characterSpotlightQuipLabel">💧 DAM-PUN OF THE MOMENT</div>
@@ -6672,6 +6692,59 @@ function renderCharacterSpotlightPun(id){
   return true;
 }
 
+/* V2.1.9 — direct character interaction is presentation-only. It never changes unlocks, selection, FL OZ, or progression. */
+let characterSpotlightTapCount = 0;
+function playCharacterSpotlightTapSound(id){
+  const p = CHARACTER_SPOTLIGHT_PROFILES[id] || CHARACTER_SPOTLIGHT_PROFILES[DEFAULT_CHARACTER_ID];
+  try{
+    const first = p.notes[1] || p.notes[0] || 440;
+    const second = p.notes[3] || p.notes[2] || first * 1.25;
+    playTone(first, 0.11, p.wave);
+    setTimeout(() => playTone(second, 0.14, p.wave), 62);
+    if(p.motion === "rise" || p.motion === "bounce" || p.motion === "pulse"){
+      setTimeout(() => playWaterNoise(0.16, 420, 1050, 0.035), 35);
+    }
+  }catch(e){ safeWarn("Character spotlight tap sound skipped: " + e); }
+}
+function spawnCharacterSpotlightTapBursts(stage){
+  const glyphs = ["💧","✨","💦","💫"];
+  for(let i=0;i<4;i++){
+    const burst = document.createElement("span");
+    burst.className = "characterSpotlightTapBurst";
+    burst.textContent = glyphs[i % glyphs.length];
+    burst.style.setProperty("--burst-x", ((Math.random()-.5)*150).toFixed(0) + "px");
+    burst.style.setProperty("--burst-y", (-35 - Math.random()*80).toFixed(0) + "px");
+    burst.style.setProperty("--burst-r", ((Math.random()-.5)*50).toFixed(0) + "deg");
+    stage.appendChild(burst);
+    setTimeout(() => burst.remove(), 760);
+  }
+}
+function reactCharacterSpotlight(id){
+  if(characterSpotlightId !== id) return false;
+  const stage = $("characterSpotlightStage");
+  const inner = $("characterSpotlight")?.querySelector(".characterSpotlightInner");
+  const img = stage?.querySelector(".characterSpotlightImg");
+  if(!stage || !inner || !img) return false;
+  characterSpotlightTapCount++;
+  stage.classList.remove("is-reacting");
+  img.classList.remove("characterTap");
+  void stage.offsetWidth;
+  stage.classList.add("is-reacting");
+  img.classList.add("characterTap");
+  spawnCharacterSpotlightTapBursts(stage);
+  renderCharacterSpotlightPun(id);
+  const hint = $("characterSpotlightTapHint");
+  if(hint) hint.textContent = "💧 OPERATOR RESPONDED · TAP " + fmt(characterSpotlightTapCount);
+  playCharacterSpotlightTapSound(id);
+  setTimeout(() => {
+    if(characterSpotlightId === id){
+      stage.classList.remove("is-reacting");
+      img.classList.remove("characterTap");
+    }
+  }, 700);
+  return true;
+}
+
 function openCharacterSpotlight(id){
   const c = CHARACTERS.find(x => x.id === id);
   const card = $("characterSpotlight");
@@ -6686,7 +6759,16 @@ function openCharacterSpotlight(id){
   const stage = $("characterSpotlightStage");
   stage.innerHTML = "";
   const img = characterImage(c, "characterSpotlightImg");
-  img.alt = c.name + " character spotlight";
+  img.alt = c.name + " character spotlight — tap to interact";
+  img.tabIndex = 0;
+  img.setAttribute("role", "button");
+  img.setAttribute("aria-label", "Tap " + c.name + " to activate their spotlight reaction");
+  img.addEventListener("click", () => reactCharacterSpotlight(c.id));
+  img.addEventListener("keydown", e => {
+    if(e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    reactCharacterSpotlight(c.id);
+  });
   stage.appendChild(img);
 
   $("characterSpotlightName").textContent = c.name;
@@ -6731,6 +6813,9 @@ function openCharacterSpotlight(id){
     actions.appendChild(buy);
   }
 
+  characterSpotlightTapCount = 0;
+  const hint = $("characterSpotlightTapHint");
+  if(hint) hint.textContent = "👆 TAP THE OPERATOR";
   card.classList.add("show");
   try { $("characterSpotlightClose").focus({ preventScroll:true }); } catch(e){}
   playCharacterSpotlightSound(c.id);
@@ -6936,6 +7021,23 @@ function runCommandCenterSelfTest(){
         inner.dataset.spotMotion === CHARACTER_SPOTLIGHT_PROFILES["operator-moses"].motion;
       closeCharacterSpotlight();
       return applied && state.activeCharacter === "wilbert-dam-guide";
+    });
+    t("V2.1.9: spotlight character is directly interactive", () => {
+      openCharacterSpotlight("operator-moses");
+      const img = $("characterSpotlightStage").querySelector(".characterSpotlightImg");
+      const before = characterSpotlightTapCount;
+      const reacted = !!img && img.getAttribute("role") === "button" && img.tabIndex === 0 && reactCharacterSpotlight("operator-moses");
+      const after = characterSpotlightTapCount;
+      closeCharacterSpotlight();
+      return reacted && after === before + 1 && state.activeCharacter === "wilbert-dam-guide";
+    });
+    t("V2.1.9: character interaction remains presentation-only", () => {
+      const beforeOz = state.totalFlOz;
+      const beforeSelection = state.activeCharacter;
+      openCharacterSpotlight("operator-moses");
+      reactCharacterSpotlight("operator-moses");
+      closeCharacterSpotlight();
+      return state.totalFlOz === beforeOz && state.activeCharacter === beforeSelection;
     });
     t("guide: spotlight keeps canonical selection in one action", () => {
       const use = $("characterSpotlightActions").querySelector("button:not(:disabled)");
