@@ -68,7 +68,7 @@ export default async function handler(req, res) {
     const invoiceId = order.purchase_units?.[0]?.invoice_id;
 
     if (order.status === "COMPLETED" && existing && invoiceId) {
-      await recordEntitlement({
+      const ledgerResult = await recordEntitlement({
         eventId: "capture:" + existing.id,
         orderID,
         captureID: existing.id,
@@ -116,7 +116,7 @@ export default async function handler(req, res) {
 
       const retryInvoiceId = retryOrder.purchase_units?.[0]?.invoice_id;
       if (retryCheck.ok && retryOrder.status === "COMPLETED" && retryCapture && retryInvoiceId) {
-        await recordEntitlement({
+        const ledgerResult = await recordEntitlement({
           eventId: "capture:" + retryCapture.id,
           orderID,
           captureID: retryCapture.id,
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
           packId,
           flOz: PACKS[packId].flOz,
           claimToken: retryInvoiceId,
-          fulfillmentStatus: "FULFILLABLE"
+          fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE"
         });
       }
 
@@ -157,7 +157,7 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: "Payment completed but entitlement token was missing." });
     }
 
-    await recordEntitlement({
+    const ledgerResult = await recordEntitlement({
       eventId: "capture:" + payment.id,
       orderID,
       captureID: payment.id,
@@ -176,7 +176,7 @@ export default async function handler(req, res) {
       packId,
       flOz: PACKS[packId].flOz,
       claimToken: finalInvoiceId,
-      fulfillmentStatus: "FULFILLABLE"
+      fulfillmentStatus: ledgerResult.record?.status || "FULFILLABLE"
     });
   } catch (err) {
     console.error("[PayPal capture-order]", err);
