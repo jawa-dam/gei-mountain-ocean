@@ -1,4 +1,5 @@
 import { fulfillEntitlement } from "../_lib/paypal-ledger.js";
+import { ECONOMY_AUTHORITY_VERSION, auditReceipt } from "../_lib/economy-authority.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -50,7 +51,9 @@ export default async function handler(req, res) {
         flOz: result.record.flOz,
         captureID: result.record.captureID,
         orderID: result.record.orderID,
-        status: result.record.status
+        status: result.record.status,
+        auditVersion: ECONOMY_AUTHORITY_VERSION,
+        authoritative: auditReceipt(result.record).authoritative
       }
     });
   } catch (err) {
