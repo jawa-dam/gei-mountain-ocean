@@ -1876,6 +1876,58 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .songVaultStoreBtn{ width:100%; margin-top:8px; }
 .songRow.locked .songMeta{ opacity:.72; }
 
+/* V2.1.66 — ORGANIZED BUY-ites STORE FRONT
+   The store behaves like a compact selection deck: wallet stays visible,
+   category tabs stay reachable, and only the selected shelf is expanded. */
+#storePanel{overflow-x:hidden}
+#storePanel .storeFrontHero{position:relative;padding:13px 13px 12px}
+#storePanel .storeFrontHeroTitle{font-size:clamp(1.18rem,5.2vw,1.5rem);letter-spacing:.025em}
+#storePanel .storeFrontHeroCopy{max-width:38rem}
+#storePanel .storeQuickNav{
+  position:sticky;top:-2px;z-index:8;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;padding:10px 0 12px;margin:0 0 12px;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+#storePanel .storeQuickBtn{
+  min-height:50px;padding:8px 9px;border-radius:15px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;line-height:1.08;letter-spacing:.045em;
+  white-space:normal;overflow-wrap:anywhere;
+}
+#storePanel .storeQuickBtn:last-child{grid-column:1 / -1}
+#storePanel .storeQuickBtn.active{
+  transform:translateY(-1px);
+  box-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 18%,transparent),inset 0 1px 0 rgba(255,255,255,.12);
+}
+#storePanel .storeQuickBtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#storePanel .storeSection{
+  display:none;
+  margin-bottom:12px;
+  animation:storeShelfIn .22s ease-out both;
+}
+#storePanel .storeSection.storeSectionActive{display:block}
+@keyframes storeShelfIn{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:none}
+}
+#storePanel .walletBlock{position:relative;z-index:2}
+#storePanel .storeCharGrid{gap:10px}
+#storePanel .storeCharCard{min-height:92px}
+#storePanel .storeCharThumb{flex-basis:72px;width:72px;height:72px}
+#storePanel .storeCharName{font-size:1rem}
+#storePanel .storeCharMeta{font-size:.8rem}
+#storePanel .storeCharCard .storeBtn{min-height:40px;font-size:.78rem}
+@media(max-width:430px){
+  #storePanel .storeQuickBtn{min-height:48px;font-size:.78rem}
+  #storePanel .storeCharThumb{flex-basis:64px;width:64px;height:64px}
+  #storePanel .storeCharCard{min-height:86px}
+  #storePanel .storeCharName{font-size:.95rem}
+}
+@media(prefers-reduced-motion:reduce){
+  #storePanel .storeSection{animation:none}
+}
+/* ================================================================ */
 /* ============ v2.4: DAY GUIDE / STORE ECONOMY / PROFILE ECONOMY ============ */
 .dayGuideItem{ font-weight:900; fill:rgba(255,255,255,.72); stroke:rgba(0,0,0,.7); stroke-width:5px; stroke-linejoin:round; paint-order:stroke; transition:fill .3s; }
 .dayGuideItem .dgWord{ font-size:17px; letter-spacing:.14em; }
@@ -3229,7 +3281,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       <div class="loopBadge">Loops completed: <strong id="loopCount">0</strong> — tap anywhere to act on the glowing station</div>
     </div>
 
-    <!-- V2.1.30: SIMPLE SETTINGS MENU — focused destinations only.
+    <!-- V2.1.66: TOP COMMAND DOCK — guide/profile are direct HUD actions; no settings menu.
          Rows only call the existing togglePanel()/openDamMachine() entry functions;
          the panels themselves are unchanged. No state is saved. -->
     
@@ -3495,7 +3547,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         <div class="profileGrid dmHistoryGrid" id="dmHistoryStats"></div>
         <div class="dmLastResult" id="dmLastResult" aria-live="polite"></div>
 
-        <!-- v2.6.2: the Dam Machine entry moved to the consolidated ☰ navigation menu. -->
+        <!-- v2.1.66: Dam Machine remains a dedicated floating action; no navigation menu entry. -->
 
         <div class="panelGroup">💧 How FL OZ works</div>
         <div class="profileEconomy" id="profileEconomy"></div>
@@ -3507,13 +3559,13 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         <div class="panelTitle">🛒 BUY-ites STORE</div>
         <div class="storeFrontHero">
           <div class="storeFrontHeroTitle">💧 POWER THE FLOW</div>
-          <div class="storeFrontHeroCopy">Choose your next DAM-ITE destination. Unlock characters, grab special characters, collect music, or power your wallet with FL OZ.</div>
+          <div class="storeFrontHeroCopy">Pick one shelf at a time. Your wallet stays visible while you move smoothly between characters, special characters, music, FL OZ, and history.</div>
         <div class="storeQuickNav" role="navigation" aria-label="Store sections">
-          <button type="button" class="storeQuickBtn active" data-store-jump="storeCharactersSection">👤 CHARACTERS</button>
-          <button type="button" class="storeQuickBtn" data-store-jump="storeSpecialSection">✨ SPECIAL</button>
-          <button type="button" class="storeQuickBtn" data-store-jump="storeMusicSection">🎵 MUSIC</button>
-          <button type="button" class="storeQuickBtn" data-store-jump="storeOzSection">💧 FL OZ</button>
-          <button type="button" class="storeQuickBtn" data-store-jump="storeHistorySection">🧾 HISTORY</button>
+          <button type="button" class="storeQuickBtn active" data-store-jump="storeCharactersSection" aria-controls="storeCharactersSection" aria-selected="true">👤 CHARACTERS</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeSpecialSection" aria-controls="storeSpecialSection" aria-selected="false">✨ SPECIAL</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeMusicSection" aria-controls="storeMusicSection" aria-selected="false">🎵 MUSIC</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeOzSection" aria-controls="storeOzSection" aria-selected="false">💧 FL OZ</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeHistorySection" aria-controls="storeHistorySection" aria-selected="false">🧾 HISTORY</button>
         </div>
         </div>
         <div class="walletBlock">
@@ -9034,14 +9086,31 @@ $("songVaultStoreBtn").addEventListener("click",()=>{ closePanels(); togglePanel
 $("songVaultFloatBtn").addEventListener("click",()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); togglePanel("radio"); });
 $("dmFloatBtn").addEventListener("click",()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); openDamMachine(); });
 $("bonusBtn").addEventListener("click",()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
+/* V2.1.66 — Store category deck: one shelf at a time for faster selection. */
+function showStoreSection(id, smooth=true){
+  const target=$(id);
+  if(!target)return false;
+  document.querySelectorAll("#storePanel .storeSection").forEach(section=>{
+    section.classList.toggle("storeSectionActive",section===target);
+  });
+  document.querySelectorAll("#storePanel .storeQuickBtn").forEach(btn=>{
+    const active=btn.getAttribute("data-store-jump")===id;
+    btn.classList.toggle("active",active);
+    btn.setAttribute("aria-selected",active?"true":"false");
+  });
+  if(smooth){
+    const panel=$("storePanel");
+    if(panel)panel.scrollTo({top:0,behavior:"smooth"});
+  }
+  return true;
+}
 document.querySelectorAll(".storeQuickBtn").forEach(btn=>{
+  btn.setAttribute("aria-selected",btn.classList.contains("active")?"true":"false");
   btn.addEventListener("click",()=>{
-    const id=btn.getAttribute("data-store-jump"), target=id&&$(id);
-    if(!target)return;
-    document.querySelectorAll(".storeQuickBtn").forEach(b=>b.classList.toggle("active",b===btn));
-    target.scrollIntoView({behavior:"smooth",block:"start"});
+    showStoreSection(btn.getAttribute("data-store-jump"),true);
   });
 });
+showStoreSection("storeCharactersSection",false);
 
 
 /* V2.0.7 — COMMAND GUIDE. One card, three tabs. Character rules come from the canonical
@@ -11979,8 +12048,8 @@ const GEI_CHARACTER_PERSONALITIES=Object.freeze({
   "operator-santa-claus":{id:"santa",label:"FLOW GIVER",emoji:"🎅",style:"gift",greeting:"Ho-ho-flow!",tap:"gift",milestone:"gift"},
   "operator-woman":{id:"woman",label:"DAM NATION",emoji:"👩",style:"celebrate",greeting:"Keep it flowing!",tap:"celebrate",milestone:"celebrate"},
   "operator-man":{id:"man",label:"DAM NATION",emoji:"👨",style:"celebrate",greeting:"That's DAM good!",tap:"celebrate",milestone:"celebrate"},
-  "character-8":{id:"character8",label:"BURGER FLOW",emoji:"💧",style:"wave",greeting:"Ride the wave!",tap:"wave",milestone:"wave"},
-  "character-7":{id:"character7",label:"POOL FLOW",emoji:"⚡",style:"energy",greeting:"Bring the pressure!",tap:"energy",milestone:"surge"},
+  "character-8":{id:"character8",label:"DAM DOUBLE BURGER &",emoji:"🍔",style:"wave",greeting:"Double the burger, double the flow!",tap:"wave",milestone:"wave"},
+  "character-7":{id:"character7",label:"DAM POOL",emoji:"🏊",style:"energy",greeting:"Make a splash!",tap:"energy",milestone:"surge"},
   "character-6":{id:"character6",label:"FLOW CREW",emoji:"🌱",style:"nature",greeting:"Let it flow!",tap:"nature",milestone:"bloom"},
   "character-5":{id:"character5",label:"FLOW CREW",emoji:"🎵",style:"rhythm",greeting:"Catch the rhythm!",tap:"rhythm",milestone:"song"},
   "character-4":{id:"character4",label:"FLOW CREW",emoji:"🔧",style:"mechanic",greeting:"System check!",tap:"mechanic",milestone:"machine"},
