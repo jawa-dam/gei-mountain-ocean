@@ -2774,6 +2774,10 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .birdCompanion.respond .birdNote{opacity:1;transform:translateY(-4px) scale(1)}
 .birdCompanion.listen .birdBody{animation:birdListen .55s ease-in-out 1}
 .birdCompanion.flee{opacity:0;transform:translate(20px,-12px) scale(.82)}
+.birdCompanion.duet .birdBody{animation:birdDuet .9s ease-in-out 1}
+.birdCompanion.duet .birdNote{opacity:1;transform:translateY(-6px) scale(1.08)}
+@keyframes birdDuet{0%,100%{transform:translateY(0) rotate(-3deg) scale(1)}30%{transform:translateY(-7px) rotate(5deg) scale(1.08)}60%{transform:translateY(-2px) rotate(-7deg) scale(1.02)}}
+@media (prefers-reduced-motion:reduce){.birdCompanion.duet .birdBody{animation:none}}
 @keyframes birdIdle{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-4px) rotate(3deg)}}
 @keyframes birdRespond{0%{transform:translateY(0) rotate(-4deg) scale(1)}35%{transform:translateY(-8px) rotate(7deg) scale(1.08)}70%{transform:translateY(1px) rotate(-5deg) scale(.98)}100%{transform:translateY(0) rotate(-3deg) scale(1)}}
 @keyframes birdListen{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.06)}}
@@ -8040,6 +8044,9 @@ function registerDamIteCombo(context,power=1){
 }
 function runDamIteComboSelfTest(){
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.45: duet configuration exists",()=>GEI_BIRD_DUET.version==="V2.1.45"&&GEI_BIRD_DUET.maxNotes===5&&GEI_BIRD_DUET.cooldownMs>=5000);
+  t("V2.1.45: duet rhythm source stays bounded",()=>geiBirdDuetState.joins>=0&&geiBirdDuetState.lastJoinAt>=0);
+  t("V2.1.45: duet remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdDuetMaybeJoin.toString()+geiBirdDuetVisual.toString()));
   const before=JSON.stringify({totalFlOz:state.totalFlOz,level:state.level,levelFlOz:state.levelFlOz,completedLevels:state.completedLevels,freePlays:state.damMachineFreePlays});
   const old={count:damIteCombo.count,lastAt:damIteCombo.lastAt,peak:damIteCombo.peak};
   t("V2.1.21: combo UI exists",()=>!!$("damIteCombo")&&!!$("damIteComboCount")&&!!$("damIteComboFill"));
@@ -10174,6 +10181,7 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     geiBirdCompanionState.learnedTaps++;
     geiBirdMemoryLearn();
     geiBirdSongbookLearn(context);
+    geiBirdDuetMaybeJoin(context,intensity,combo);
     if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
     const confidence=geiBirdRhythmConfidence();
     const intentional=confidence>=.72&&geiBirdCompanionState.intervals.length>=3;
@@ -10193,6 +10201,80 @@ function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(c
 function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
 function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
 function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+
+/* V2.1.45 — BIRD DUET MODE 🐦🎵💧
+   The bird occasionally joins the player's live rhythm instead of only answering it.
+   Presentation-only: no gameplay, XP, purchase, entitlement, or economy mutation. */
+const GEI_BIRD_DUET=Object.freeze({
+  version:"V2.1.45",
+  minIntervals:3,
+  cooldownMs:7600,
+  baseChance:.13,
+  intentionalBoost:.18,
+  comboBoost:.05,
+  intensityBoost:.05,
+  maxNotes:5,
+  startDelayMs:55
+});
+let geiBirdDuetState={lastJoinAt:0,joins:0};
+
+function geiBirdDuetVisual(mode="duet"){
+  const el=geiBirdCompanionEnsureVisual(); if(!el)return;
+  el.classList.remove("duet","respond","listen","flee");
+  if(mode==="duet"){
+    el.classList.add("duet");
+    const note=el.querySelector(".birdNote"); if(note)note.textContent=geiBirdPersonality(geiNatureState.scene).note;
+  }else{
+    el.classList.add(mode);
+  }
+}
+
+function geiBirdDuetMaybeJoin(context,intensity=1,combo=0){
+  if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;
+  const intervals=geiBirdCompanionState.intervals.slice(-GEI_BIRD_DUET.maxNotes);
+  if(intervals.length<GEI_BIRD_DUET.minIntervals)return false;
+  const now=performance.now();
+  if(now-geiBirdDuetState.lastJoinAt<GEI_BIRD_DUET.cooldownMs)return false;
+
+  const confidence=geiBirdRhythmConfidence();
+  const intentional=confidence>=.72;
+  const chance=Math.min(.46,GEI_BIRD_DUET.baseChance+
+    (intentional?GEI_BIRD_DUET.intentionalBoost:0)+
+    (combo>=4?GEI_BIRD_DUET.comboBoost:0)+
+    (intensity>=3?GEI_BIRD_DUET.intensityBoost:0));
+  if(Math.random()>=chance)return false;
+
+  geiBirdDuetState.lastJoinAt=now;
+  geiBirdDuetState.joins++;
+  geiBirdDuetVisual("duet");
+
+  const scene=geiNatureScene(context);
+  const personality=geiBirdPersonality(context);
+  const live=intervals.slice();
+  const memory=(geiBirdMemorySignatureReady()&&geiBirdMemoryState.motif.length>=3)
+    ?geiBirdMemoryState.motif.slice(-GEI_BIRD_DUET.maxNotes):live;
+  const source=memory.length>=3?memory:live;
+  const avg=source.reduce((sum,n)=>sum+n,0)/source.length;
+  const root=(scene.root||1500)*(scene.pitch||1);
+  const steps=personality.steps||[1,.9,1.15];
+  const noteCount=Math.min(GEI_BIRD_DUET.maxNotes,source.length);
+  let elapsed=GEI_BIRD_DUET.startDelayMs/1000;
+
+  for(let i=0;i<noteCount;i++){
+    const interval=Math.max(GEI_BIRD_COMPANION.minTapMs,Math.min(GEI_BIRD_COMPANION.maxTapMs,source[i%source.length]));
+    const gap=Math.max(.11,Math.min(.7,interval/1000*.62));
+    if(i>0)elapsed+=gap;
+    const liveShape=live[i%live.length]||avg;
+    const ratio=Math.max(.78,Math.min(1.42,avg/liveShape));
+    const step=steps[i%steps.length]||1;
+    const contour=1+(i%2?.045:-.025);
+    const freq=root*step*ratio*contour;
+    const pan=Math.max(-.82,Math.min(.82,(scene.pan||0)+(i%2?-.18:.18)));
+    geiBirdNote(freq,.105+Math.min(.065,(intensity||1)*.014),elapsed,pan,
+      GEI_NATURE_AUDIO.birdChirpGain*(.78+(confidence*.18)));
+  }
+  return true;
+}
 
 /* V2.1.44 — BIRD SONGBOOK
    The companion keeps a tiny evolving library of player-shaped motifs.
