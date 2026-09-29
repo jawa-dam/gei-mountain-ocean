@@ -38,6 +38,7 @@
     night:   {start:["night"], peak:["swell"], tail:["drip"]},
     light:   {start:["shimmer"], peak:["rush"], tail:["splash"]},
     jesus:   {start:["waterPulse"], peak:["rush"], tail:["splash"]},
+    blackJesus:{start:["waterPulse"], peak:["rush"], tail:["splash"]},
     devil:   {start:["spooky"], peak:["surge"], tail:["release"]},
     crew:    {start:["rush"], peak:["splash"], tail:["drip"]}
   });
