@@ -8044,6 +8044,10 @@ function registerDamIteCombo(context,power=1){
 }
 function runDamIteComboSelfTest(){
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.46: duet memory configuration exists",()=>GEI_BIRD_DUET_MEMORY.version==="V2.1.46"&&GEI_BIRD_DUET_MEMORY.maxMemories===6);
+  t("V2.1.46: memory motifs stay bounded",()=>geiBirdDuetMemoryState.memories.every(m=>Array.isArray(m.motif)&&m.motif.length<=GEI_BIRD_DUET_MEMORY.motifSize));
+  t("V2.1.46: similarity stays bounded",()=>geiBirdDuetMemorySimilarity([180,220,180],[180,220,180])>=0&&geiBirdDuetMemorySimilarity([180,220,180],[180,220,180])<=1);
+  t("V2.1.46: duet memory remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdDuetMemoryLearn.toString()+geiBirdDuetMemoryRecognize.toString()+geiBirdDuetMemoryRecallPhrase.toString()));
   t("V2.1.45: duet configuration exists",()=>GEI_BIRD_DUET.version==="V2.1.45"&&GEI_BIRD_DUET.maxNotes===5&&GEI_BIRD_DUET.cooldownMs>=5000);
   t("V2.1.45: duet rhythm source stays bounded",()=>geiBirdDuetState.joins>=0&&geiBirdDuetState.lastJoinAt>=0);
   t("V2.1.45: duet remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdDuetMaybeJoin.toString()+geiBirdDuetVisual.toString()));
@@ -10181,7 +10185,9 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     geiBirdCompanionState.learnedTaps++;
     geiBirdMemoryLearn();
     geiBirdSongbookLearn(context);
-    geiBirdDuetMaybeJoin(context,intensity,combo);
+    geiBirdDuetMemoryLearn(context);
+    const duetRemembered=geiBirdDuetMemoryMaybeRecognize(context,intensity);
+    if(!duetRemembered)geiBirdDuetMaybeJoin(context,intensity,combo);
     if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
     const confidence=geiBirdRhythmConfidence();
     const intentional=confidence>=.72&&geiBirdCompanionState.intervals.length>=3;
@@ -10200,11 +10206,138 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
 function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
 function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
-function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdDuetMemoryLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
 
 /* V2.1.45 — BIRD DUET MODE 🐦🎵💧
    The bird occasionally joins the player's live rhythm instead of only answering it.
    Presentation-only: no gameplay, XP, purchase, entitlement, or economy mutation. */
+/* V2.1.46 — BIRD DUET MEMORY 🐦🧠🎵
+   Recognizes familiar player rhythms and changes the duet response.
+   Presentation-only; local storage only. */
+const GEI_BIRD_DUET_MEMORY=Object.freeze({
+  version:"V2.1.46",
+  storageKey:"geiBirdDuetMemoryV2146",
+  motifSize:5,
+  similarityThreshold:.82,
+  minIntervals:3,
+  recognitionCooldownMs:5200,
+  maxMemories:6
+});
+let geiBirdDuetMemoryState={memories:[],recognitions:0,lastRecognizedAt:0,lastContext:"mountain",familiarity:0};
+
+function geiBirdDuetMemoryClean(motif){
+  return (Array.isArray(motif)?motif:[]).filter(n=>Number.isFinite(n))
+    .slice(-GEI_BIRD_DUET_MEMORY.motifSize)
+    .map(n=>Math.max(GEI_BIRD_COMPANION.minTapMs,Math.min(GEI_BIRD_MEMORY.maxMotifMs,n)));
+}
+function geiBirdDuetMemoryNormalize(motif){
+  const clean=geiBirdDuetMemoryClean(motif);
+  if(!clean.length)return [];
+  const avg=clean.reduce((sum,n)=>sum+n,0)/clean.length;
+  return clean.map(n=>Math.max(.45,Math.min(1.75,n/Math.max(1,avg))));
+}
+function geiBirdDuetMemorySimilarity(a,b){
+  const x=geiBirdDuetMemoryNormalize(a),y=geiBirdDuetMemoryNormalize(b);
+  if(x.length<GEI_BIRD_DUET_MEMORY.minIntervals||y.length<GEI_BIRD_DUET_MEMORY.minIntervals)return 0;
+  const count=Math.min(x.length,y.length);
+  let error=0;
+  for(let i=0;i<count;i++)error+=Math.min(1,Math.abs(x[i]-y[i])/1.25);
+  return Math.max(0,Math.min(1,1-error/count));
+}
+function geiBirdDuetMemorySave(){
+  try{localStorage.setItem(GEI_BIRD_DUET_MEMORY.storageKey,JSON.stringify({
+    memories:geiBirdDuetMemoryState.memories.slice(-GEI_BIRD_DUET_MEMORY.maxMemories),
+    recognitions:geiBirdDuetMemoryState.recognitions,
+    lastContext:geiBirdDuetMemoryState.lastContext,
+    familiarity:geiBirdDuetMemoryState.familiarity
+  }))}catch(e){}
+}
+function geiBirdDuetMemoryLoad(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(GEI_BIRD_DUET_MEMORY.storageKey)||"null");
+    if(!saved)return;
+    geiBirdDuetMemoryState.memories=Array.isArray(saved.memories)?saved.memories
+      .filter(m=>m&&Array.isArray(m.motif)).slice(-GEI_BIRD_DUET_MEMORY.maxMemories):[];
+    geiBirdDuetMemoryState.recognitions=Math.max(0,Number(saved.recognitions)||0);
+    geiBirdDuetMemoryState.lastContext=String(saved.lastContext||"mountain");
+    geiBirdDuetMemoryState.familiarity=Math.max(0,Math.min(1,Number(saved.familiarity)||0));
+  }catch(e){}
+}
+function geiBirdDuetMemoryLearn(context){
+  const motif=geiBirdDuetMemoryClean(geiBirdCompanionState.intervals);
+  if(motif.length<GEI_BIRD_DUET_MEMORY.minIntervals)return;
+  const key=String(context||"mountain").toLowerCase();
+  let best=null,bestScore=0;
+  geiBirdDuetMemoryState.memories.forEach(m=>{
+    const score=geiBirdDuetMemorySimilarity(m.motif,motif);
+    if(score>bestScore){bestScore=score;best=m;}
+  });
+  if(best&&bestScore>=GEI_BIRD_DUET_MEMORY.similarityThreshold){
+    best.motif=geiBirdDuetMemoryClean(motif);
+    best.context=key;
+    best.confidence=Math.max(.45,Math.min(1,(Number(best.confidence)||0)*.82+bestScore*.18));
+    best.seen=Math.max(0,Number(best.seen)||0)+1;
+    best.lastSeen=Date.now();
+  }else{
+    geiBirdDuetMemoryState.memories.push({
+      motif,
+      context:key,
+      confidence:Math.max(.45,Math.min(1,geiBirdRhythmConfidence())),
+      seen:1,
+      lastSeen:Date.now()
+    });
+    geiBirdDuetMemoryState.memories=geiBirdDuetMemoryState.memories
+      .sort((a,b)=>(b.seen||0)-(a.seen||0)).slice(0,GEI_BIRD_DUET_MEMORY.maxMemories);
+  }
+  geiBirdDuetMemoryState.lastContext=key;
+  geiBirdDuetMemorySave();
+}
+function geiBirdDuetMemoryRecognize(context){
+  const motif=geiBirdDuetMemoryClean(geiBirdCompanionState.intervals);
+  if(motif.length<GEI_BIRD_DUET_MEMORY.minIntervals||!geiBirdDuetMemoryState.memories.length)return null;
+  const now=performance.now();
+  if(now-geiBirdDuetMemoryState.lastRecognizedAt<GEI_BIRD_DUET_MEMORY.recognitionCooldownMs)return null;
+  let best=null,bestScore=0;
+  geiBirdDuetMemoryState.memories.forEach(m=>{
+    const score=geiBirdDuetMemorySimilarity(m.motif,motif);
+    if(score>bestScore){bestScore=score;best=m;}
+  });
+  if(!best||bestScore<GEI_BIRD_DUET_MEMORY.similarityThreshold)return null;
+  geiBirdDuetMemoryState.lastRecognizedAt=now;
+  geiBirdDuetMemoryState.recognitions++;
+  geiBirdDuetMemoryState.familiarity=Math.max(0,Math.min(1,
+    geiBirdDuetMemoryState.familiarity*.78+bestScore*.22));
+  best.seen=Math.max(0,Number(best.seen)||0)+1;
+  best.lastSeen=Date.now();
+  geiBirdDuetMemorySave();
+  return {memory:best,score:bestScore};
+}
+function geiBirdDuetMemoryRecallPhrase(context,recognition,intensity=1){
+  if(!recognition)return false;
+  const p=geiBirdPersonality(context),scene=geiNatureScene(context);
+  const root=(scene.root||1500)*(scene.pitch||1);
+  const ratios=p.steps||[1,.9,1.15];
+  const motif=geiBirdDuetMemoryClean(recognition.memory.motif);
+  for(let i=0;i<motif.length;i++){
+    const ratio=Math.max(.72,Math.min(1.45,motif[i]/Math.max(1,motif.reduce((a,n)=>a+n,0)/motif.length)));
+    const freq=root*(ratios[i%ratios.length]||1)*ratio;
+    const delay=.06+i*Math.max(.12,Math.min(.58,motif[i]/1000*.56));
+    geiBirdNote(freq,.115+Math.min(.06,(intensity||1)*.012),delay,
+      Math.max(-.82,Math.min(.82,(scene.pan||0)+(i%2?-.16:.16))),
+      GEI_NATURE_AUDIO.birdChirpGain*(.88+Math.min(.12,recognition.score*.12)));
+  }
+  geiBirdDuetVisual("duet");
+  return true;
+}
+function geiBirdDuetMemoryMaybeRecognize(context,intensity=1){
+  const recognition=geiBirdDuetMemoryRecognize(context);
+  if(!recognition)return false;
+  if(Math.random()<Math.min(.72,.42+recognition.score*.28)){
+    return geiBirdDuetMemoryRecallPhrase(context,recognition,intensity);
+  }
+  return false;
+}
+
 const GEI_BIRD_DUET=Object.freeze({
   version:"V2.1.45",
   minIntervals:3,
