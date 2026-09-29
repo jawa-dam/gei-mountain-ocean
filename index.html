@@ -3777,7 +3777,7 @@ const DAY_TIME_LIMIT_MS  = 6000;                              // Levels 1–60
 const ADVANCED_DAY_TIME_LIMIT_MS = 10000;                     // Level 61+ after Level 60 is mastered
 function getRequiredTaps(level){ return Math.ceil(Math.max(1, level) / 6) * 6; }
 function getDayTimeLimitMs(level){ return level > 60 ? ADVANCED_DAY_TIME_LIMIT_MS : DAY_TIME_LIMIT_MS; }
-function isMajorMilestone(level){ return level >= 6 && (level - 6) % 30 === 0; }
+function isMajorMilestone(level){ return level >= 6 && level % 6 === 0; }
 /* Pressure phases are presentation of the same clock (no second timer). */
 const PRESSURE_PHASES = [
   { key:"normal",   label:"Normal flow",          aboveMs:4000 },
