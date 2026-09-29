@@ -7833,6 +7833,7 @@ function triggerTapFeel(clientX,clientY,intensity,context,combo=0){
   }catch(e){}
   tapFeelState.lastX=x;tapFeelState.lastY=y;tapFeelState.lastAt=performance.now();tapFeelState.lastContext=context||"mountain";
   playRandomTapTone(context,intensity,combo);
+  try{geiNatureTapReaction(context,intensity,combo)}catch(e){}
   return true;
 }
 let tapWaterPulseCount = 0;
@@ -7937,6 +7938,7 @@ function spawnHydraulicBreakthrough(index){
     drop.style.animationDelay=Math.random()*.12+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),1150);
   }
   playTapBreakthroughAccent();
+  try{geiNatureBreakthrough("ocean")}catch(e){}
   try{livingWorldMilestone(index)}catch(e){}
   triggerDamItePersonality("breakthrough",{index});
   return true;
@@ -9988,11 +9990,11 @@ function getDamIteOperatorVoice(id, context){
 function playDamIteOperatorVoice(id, context){
   const profile=DAM_ITE_OPERATOR_VOICES[id] || DAM_ITE_OPERATOR_VOICES["wilbert-dam-guide"];
   try{
-    profile.notes.forEach((freq,index)=>{
-      setTimeout(()=>playTone(freq,index===profile.notes.length-1 ? .24 : .14,profile.wave),index*58);
-    });
-    if(context==="breakthrough") setTimeout(()=>playWaterNoise(.32,180,900,.045),90);
-    if(context==="machine") setTimeout(()=>playTone(profile.notes[0]*.5,.12,"square"),120);
+    /* V2.1.39 — nature-first character response for routine moments. */
+    if(context==="tap"){ geiBirdChirp(getTapWaterContext({index:Number(state?.currentStep)||0}),1.05); return; }
+    if(context==="breakthrough"){ geiNatureBreakthrough("ocean"); return; }
+    profile.notes.forEach((freq,index)=>{ setTimeout(()=>playTone(freq,index===profile.notes.length-1 ? .18 : .11,profile.wave),index*58); });
+    if(context==="machine") setTimeout(()=>playWaterNoise(.28,180,900,.035),90);
   }catch(e){}
 }
 function damItePersonalityCharacterLine(context){
@@ -10044,6 +10046,24 @@ function runDamItePersonalitySelfTest(){
   return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
 }
 
+/* V2.1.39 — LIVING NATURE AUDIO
+   First impressions are randomized. Gameplay audio favors a living hydraulic
+   soundscape: friendly bird phrases + water textures, with musical tones kept
+   as subtle accents for special moments. Presentation-only. */
+const GEI_NATURE_AUDIO=Object.freeze({enabled:true,minChirpGapMs:360,birdChirpGain:.012,ambienceGain:.010,tapChance:.34});
+const GEI_BIRD_PHRASES=Object.freeze([[0,90,210,305],[0,80,155,250,335],[0,115,225],[0,70,175,285,365],[0,105,205,330]]);
+const GEI_BIRD_ROOTS=Object.freeze([1120,1280,1380,1510,1630,1760]);
+const GEI_NATURE_SCENES=Object.freeze({mountain:{name:"Morning Ridge",root:1510,pitch:1,pan:.28},dam:{name:"Creekside Dam",root:1320,pitch:.94,pan:-.18},reservoir:{name:"Reservoir Birds",root:1450,pitch:.88,pan:.34},sluice:{name:"Release Meadow",root:1570,pitch:1.05,pan:-.28},wheel:{name:"Mill Creek",root:1220,pitch:.91,pan:.15},ocean:{name:"Ocean Calls",root:980,pitch:.78,pan:-.12}});
+const geiNatureState={lastChirpAt:0,lastPhraseAt:0,scene:"mountain",started:false};
+function geiNatureReducedMotion(){try{return !!matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}}
+function geiNatureScene(context){return GEI_NATURE_SCENES[context]||GEI_NATURE_SCENES.mountain}
+function geiBirdNote(freq,dur,when,pan,gain){try{const c=getAudio(),o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+Math.max(0,when),f=Math.max(420,Number(freq)||1200),d=Math.max(.035,Number(dur)||.12);o.type="sine";o.frequency.setValueAtTime(f*.92,t);o.frequency.exponentialRampToValueAtTime(f*1.28,t+d*.42);o.frequency.exponentialRampToValueAtTime(f*.82,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,Number(gain)||GEI_NATURE_AUDIO.birdChirpGain),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=Math.max(-1,Math.min(1,Number(pan)||0));o.connect(g);g.connect(p);p.connect(c.destination);o.start(t);o.stop(t+d+.025)}catch(e){}}
+function geiBirdPhrase(context,boost=1){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now(),scene=geiNatureScene(context);if(now-geiNatureState.lastPhraseAt<2200)return false;geiNatureState.lastPhraseAt=now;const phrase=GEI_BIRD_PHRASES[Math.floor(Math.random()*GEI_BIRD_PHRASES.length)],root=GEI_BIRD_ROOTS[Math.floor(Math.random()*GEI_BIRD_ROOTS.length)]*(scene.pitch||1),direction=Math.random()<.5?-1:1;phrase.forEach((step,i)=>{const jitter=1+(Math.random()-.5)*.08,freq=root*Math.pow(1.07,direction*step/48)*jitter,dur=.095+Math.random()*.055,delay=i*.11+Math.random()*.035,pan=Math.max(-.9,Math.min(.9,(scene.pan||0)+(Math.random()-.5)*.32));geiBirdNote(freq,dur,delay,pan,GEI_NATURE_AUDIO.birdChirpGain*(boost||1)*(i===0?.82:1))});return true}
+function geiBirdChirp(context,intensity=1,force=false){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now();if(!force&&now-geiNatureState.lastChirpAt<GEI_NATURE_AUDIO.minChirpGapMs)return false;const scene=geiNatureScene(context);geiNatureState.lastChirpAt=now;const root=(scene.root||1500)*(1+(Math.random()-.5)*.12),span=.11+Math.random()*.07;geiBirdNote(root,span,0,(scene.pan||0)+(Math.random()-.5)*.45,GEI_NATURE_AUDIO.birdChirpGain*(.8+Math.min(1.8,Number(intensity)||1)*.35));if(Math.random()<.48)setTimeout(()=>geiBirdNote(root*1.28,span*.82,.10,(scene.pan||0)*-.7,.009),0);return true}
+function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
+function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
+function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
+function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
 /* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
 ========================================================= */
@@ -10120,6 +10140,7 @@ broadcastUnlocks();
 preloadCharacter(getActiveCharacter());
 try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); }   // V2.1.12 — presentation only
   window.__GEI_GAME_BOOTED__=true; // V2.1.36 — gameplay init completed before optional modules
+  try{geiNatureStartup("mountain")}catch(e){}
 
 
 /* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
