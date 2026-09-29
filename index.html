@@ -8996,10 +8996,10 @@ function togglePanel(name){
   syncTimerPause();                                  // open panel pauses the day clock
 }
 /* =========================================================
-   v2.6.2 — CONSOLIDATED NAVIGATION (entry points only)
-   One ☰ menu holds every destination. Rows call the EXISTING togglePanel()/
-   openDamMachine() functions, so panel behavior, quips and timer pausing are
-   untouched. Runtime-only UI state — nothing here is saved or tied to economy.
+   V2.1.65 — TOP COMMAND DOCK
+   The old Settings menu is removed from the visible HUD. Guide and Profile are
+   now direct top-level actions; store navigation uses smooth section jumps.
+   Runtime-only UI state — nothing here is saved or tied to economy.
 ========================================================= */
 const navMenuBtn = null, navSheet = null;
 var navOpen = false;
@@ -9504,7 +9504,7 @@ function runCommandCenterSelfTest(){
     t("guide: START GAME works and closes the guide", () => beginFromGuide() && !preGameOpen && !$("preGameCard").classList.contains("show"));
     t("guide: no removed never-show control dependency", () => !guideNeverBox() && typeof syncGuideNeverPreference === "function");
     openGameGuide(true); closeGameGuide();
-    t("guide: closes from the menu", () => !preGameOpen && !$("preGameCard").classList.contains("show"));
+    t("guide: closes cleanly after direct top-level launch", () => !preGameOpen && !$("preGameCard").classList.contains("show"));
     /* V2.1.37 — regression: the guide must open, draw its avatars and close even without the never-show checkbox. */
     t("V2.1.37: guide opens with avatars and START releases the board", () => {
       openGameGuide(false);
