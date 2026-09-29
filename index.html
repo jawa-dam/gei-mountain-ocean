@@ -3749,15 +3749,15 @@ const CHARACTERS = [
   { id:"lion", name:"Lion", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-3-kSPwRK9aeNJBeCaz.png", cost:UNLOCK_COST_FL_OZ },
   { id:"nite", name:"Nite", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-2-FPeHSJnA5Oa68mkG.png", cost:UNLOCK_COST_FL_OZ },
   { id:"lite", name:"Lite", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-1-A1JeCEEcM7kG4AFC.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"jesus", name:"Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:0, special:true, specialPurchaseId:"special-jesus" },
-  { id:"dam-black-jesus", name:"DAM Black Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:0, special:true, specialPurchaseId:"special-dam-black-jesus" },
-  { id:"devil", name:"Devil", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-4-0uOG99jJJKAPpaKB.png", cost:0, special:true, specialPurchaseId:"special-devil" }
+  { id:"jesus", name:"Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:null, special:true, cashOnly:true, machineEligible:false, specialPurchaseId:"special-jesus" },
+  { id:"dam-black-jesus", name:"DAM Black Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:null, special:true, cashOnly:true, machineEligible:false, specialPurchaseId:"special-dam-black-jesus" },
+  { id:"devil", name:"Devil", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-4-0uOG99jJJKAPpaKB.png", cost:null, special:true, cashOnly:true, machineEligible:false, specialPurchaseId:"special-devil" }
 ].map(c => ({ ...c, img: c.img || CHARACTER_BASE + c.file }));
 
 const SPECIAL_CHARACTER_PRODUCTS = Object.freeze([
-  { id:"special-jesus", label:"Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"jesus", specialCharacter:true, specialBadge:"✝️ SPECIAL CHARACTER" },
-  { id:"special-dam-black-jesus", label:"DAM Black Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"dam-black-jesus", specialCharacter:true, specialBadge:"✝️ DAM BLACK JESUS" },
-  { id:"special-devil", label:"Devil", priceLabel:"$6", priceUsd:6, flOz:0, kind:"special-character", characterId:"devil", specialCharacter:true, specialBadge:"😈 SPECIAL CHARACTER" }
+  { id:"special-jesus", label:"Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"jesus", specialCharacter:true, cashOnly:true, machineEligible:false, specialBadge:"✝️ SPECIAL CHARACTER" },
+  { id:"special-dam-black-jesus", label:"DAM Black Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"dam-black-jesus", specialCharacter:true, cashOnly:true, machineEligible:false, specialBadge:"✝️ DAM BLACK JESUS" },
+  { id:"special-devil", label:"Devil", priceLabel:"$6", priceUsd:6, flOz:0, kind:"special-character", characterId:"devil", specialCharacter:true, cashOnly:true, machineEligible:false, specialBadge:"😈 SPECIAL CHARACTER" }
 ]);
 /* Premium skins for the future. The 7 built-in skins stay free and random, as before. */
 const PREMIUM_SKINS = [];
@@ -5086,6 +5086,7 @@ function loadGame(){
       fulfillmentStatus: typeof x.fulfillmentStatus === "string" ? x.fulfillmentStatus : "LEGACY",
       purchasedAt: Number.isFinite(Number(x.purchasedAt)) ? Number(x.purchasedAt) : Date.now()
     })) : [];
+  sanitizeSpecialCharacterOwnership();
   normalizeEconomyNumbers();
   normalizeEconomyCollections();
   state.tribesFound     = Array.isArray(d.tribesFound) ? d.tribesFound.map(tribeByName).filter(Boolean) : [];
@@ -7181,7 +7182,37 @@ function spawnLevelBurst(count){
    v2 — WALLET / UNLOCKS (songs, skins, characters)
 ========================================================= */
 function isUnlocked(category, id){ return (state[UNLOCK_STATE_KEY[category]] || []).includes(id); }
-function nextLockedItem(category){ return (UNLOCK_CATALOG[category] || []).find(it => !it.rescueOnly && !isUnlocked(category, it.id)) || null; }
+function isCashOnlyCharacter(item){
+  return !!(item && item.special && item.cashOnly);
+}
+function nextLockedItem(category){
+  return (UNLOCK_CATALOG[category] || []).find(it =>
+    !it.rescueOnly &&
+    !isUnlocked(category, it.id) &&
+    !(category === "characters" && isCashOnlyCharacter(it))
+  ) || null;
+}
+function hasCashEntitlementForSpecialCharacter(id){
+  const character = CHARACTERS.find(c => c.id === id && c.special && c.cashOnly);
+  if(!character || !character.specialPurchaseId) return false;
+  return state.purchaseHistory.some(entry =>
+    entry &&
+    entry.packId === character.specialPurchaseId &&
+    entry.fulfillmentStatus === "SERVER_AUTHORIZED_SPECIAL_CHARACTER" &&
+    entry.receiptId
+  );
+}
+function sanitizeSpecialCharacterOwnership(){
+  const specialIds = new Set(CHARACTERS.filter(c => c.special && c.cashOnly).map(c => c.id));
+  const before = state.unlockedCharacters.slice();
+  state.unlockedCharacters = state.unlockedCharacters.filter(id =>
+    !specialIds.has(id) || hasCashEntitlementForSpecialCharacter(id)
+  );
+  if(!state.unlockedCharacters.includes(state.activeCharacter)){
+    state.activeCharacter = DEFAULT_CHARACTER_ID;
+  }
+  return before.length !== state.unlockedCharacters.length;
+}
 
 /* Generic purchase: never lets the wallet go negative, never unlocks twice. */
 function purchaseItem(category, id, opts = {}){
@@ -7191,8 +7222,11 @@ function purchaseItem(category, id, opts = {}){
   if(!item) return { ok:false, message:"That item doesn't exist." };
   if(isUnlocked(category, id)) return { ok:false, message:"Already unlocked." };
   if(item.rescueOnly) return { ok:false, message:"Rescue this -ite to add them to your crew." };
+  if(category === "characters" && isCashOnlyCharacter(item)){
+    return { ok:false, message:"🔒 CASH PURCHASE REQUIRED — this special character cannot be unlocked with FL OZ." };
+  }
   const cost = Number.isInteger(item.cost) ? item.cost : UNLOCK_COST_FL_OZ;
-  if(!Number.isInteger(cost) || cost < 0 || cost > ECONOMY_MAX_FL_OZ) return { ok:false, message:"Invalid unlock cost." };
+  if(!Number.isInteger(cost) || cost <= 0 || cost > ECONOMY_MAX_FL_OZ) return { ok:false, message:"Invalid unlock cost." };
   if(!Number.isInteger(state.totalFlOz) || state.totalFlOz < 0) return { ok:false, message:"Wallet integrity check failed." };
   if(state.totalFlOz < cost) return { ok:false, message:`Need ${fmt(cost)} FL OZ — you have ${fmt(state.totalFlOz)}.` };
   state.totalFlOz -= cost;
@@ -7213,9 +7247,10 @@ function creditPack(packId, receiptId, meta = {}){
   if(state.processedReceipts.includes(receiptId)) return { ok:false, message:"Receipt already credited." };
 
   if(pack.specialCharacter){
+    if(pack.cashOnly !== true || pack.machineEligible !== false) return { ok:false, message:"Special character cash-only policy is invalid." };
     const characterId = String(meta.characterId || pack.characterId || "");
-    const character = CHARACTERS.find(c => c.id === characterId && c.special);
-    if(!character) return { ok:false, message:"Special character entitlement data is invalid." };
+    const character = CHARACTERS.find(c => c.id === characterId && c.special && c.cashOnly && c.machineEligible === false);
+    if(!character || character.specialPurchaseId !== pack.id) return { ok:false, message:"Special character entitlement data is invalid." };
     if(isUnlocked("characters", characterId)) return { ok:false, message:"Receipt already credited." };
     state.unlockedCharacters.push(characterId);
     state.processedReceipts.push(receiptId);
