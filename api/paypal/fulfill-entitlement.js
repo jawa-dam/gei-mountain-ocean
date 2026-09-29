@@ -54,6 +54,8 @@ export default async function handler(req, res) {
         fulfillmentId: result.record.fulfillmentId,
         packId: result.record.packId,
         flOz: result.record.flOz,
+        productType: result.record.productType || "fl-oz",
+        characterId: result.record.characterId || null,
         captureID: result.record.captureID,
         orderID: result.record.orderID,
         status: result.record.status,
