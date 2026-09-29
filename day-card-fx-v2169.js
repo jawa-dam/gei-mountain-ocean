@@ -204,7 +204,11 @@
       fx.cards.forEach((_,i)=>roll(i));
     }
     if(p.done>fx.lastDone){
-      for(let i=fx.lastDone;i<p.done;i++)burst(i);
+      if(fx.lastLevel===null){
+        for(let i=0;i<p.done;i++)fx.cards[i].g.classList.add("mastered");
+      }else{
+        for(let i=fx.lastDone;i<p.done;i++)burst(i);
+      }
     }
     fx.cards.forEach((c,i)=>c.g.classList.toggle("mastered",i<p.done));
     if(fx.online)fx.online.classList.toggle("show",p.done===DAYS);
@@ -216,7 +220,7 @@
       ["layer mounted in worldSVG",!!(root&&root.ownerSVGElement&&root.ownerSVGElement.id==="worldSVG")],
       ["six Day cards render",!!(root&&root.querySelectorAll(".dc").length===DAYS)],
       ["decorative layer is non-interactive",!!(root&&getComputedStyle(root).pointerEvents==="none")],
-      ["mastered state mirrors progression",fx.cards.every((c,i)=>c.g.classList.contains("mastered")===i<p.done)],
+      ["mastered state mirrors progression",fx.cards.every((c,i)=>c.g.classList.contains("mastered") === (i < p.done))],
       ["online state requires all six Days",!!(fx.online&&fx.online.classList.contains("show")===(p.done===DAYS))]
     ];
     return {version:VERSION,pass:results.filter(x=>x[1]).length,fail:results.filter(x=>!x[1]).length,results};
