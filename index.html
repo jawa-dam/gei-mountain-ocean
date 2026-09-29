@@ -6676,7 +6676,7 @@ function runNavSelfTest(){
   const results = [];
   const t = (name, ok) => results.push({ name, ok:!!ok });
   t("menu button exists and controls the sheet", !!$("navMenuBtn") && !!navSheet && $("navMenuBtn").getAttribute("aria-controls") === "navSheet");
-  t("sheet holds command destinations", ["navHowBtn","navCharactersBtn","navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn"].every(id => !!$(id)));
+  t("sheet holds command destinations", ["navHowBtn","navProfileBtn"].every(id => !!$(id)) && !$("navCharactersBtn") && !$("navTribesBtn") && !$("navRadioBtn") && !$("navStoreBtn"));
   t("HUD consolidated: old per-panel buttons removed", !$("#profileBtn") && !$("#tribesBtn") && !$("#radioBtn") && !$("#storeBtn"));
   t("fullscreen stays a direct HUD button", !!$("fullscreenBtn"));
   t("DAM MACHINE removed from menu; floating entry exists", !$("dmOpenBtn") && !!$("dmFloatBtn"));
@@ -8658,7 +8658,11 @@ function runCommandCenterSelfTest(){
       return drawn && started && !preGameOpen && !$("preGameCard").classList.contains("show");
     });
     /* menu */
-    t("menu: How to Play + Characters rows in the menu", () => !!$("navHowBtn") && !!$("navCharactersBtn") && !!$("navHowBtn").closest("#navSheet") && !!$("navCharactersBtn").closest("#navSheet"));
+    /* V2.1.38 — menu regression: Characters intentionally lives in BUY-ites, not Settings. */
+    t("menu: Settings contains only How to Play + Profile", () =>
+      !!$("navHowBtn") && !!$("navProfileBtn") &&
+      !!$("navHowBtn").closest("#navSheet") && !!$("navProfileBtn").closest("#navSheet") &&
+      !$("navCharactersBtn") && !$("navTribesBtn") && !$("navRadioBtn") && !$("navStoreBtn"));
     t("menu: DAM MACHINE menu entry removed", () => !$("dmOpenBtn") && !/DAM MACHINE/i.test($("navSheet").textContent));
     t("menu: floating DAM MACHINE button exists outside the menu", () => !!$("dmFloatBtn") && !$("dmFloatBtn").closest("#navSheet"));
     /* floating machine */
