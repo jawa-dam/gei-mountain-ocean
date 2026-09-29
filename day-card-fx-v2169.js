@@ -150,6 +150,26 @@
     fx.cards.forEach((_,i)=>roll(i));
     return true;
   }
+
+  function isolateGradients(i){
+    const card=fx.cards[i]; if(!card)return;
+    const cs=getComputedStyle(card.g);
+    const vals={c1:cs.getPropertyValue("--c1").trim(),c2:cs.getPropertyValue("--c2").trim(),c3:cs.getPropertyValue("--c3").trim(),ink:cs.getPropertyValue("--ink").trim()};
+    let defs=card.g.querySelector("defs.dcDefs");
+    if(!defs){defs=document.createElementNS(NS,"defs");defs.setAttribute("class","dcDefs");card.g.insertBefore(defs,card.g.firstChild);}
+    defs.innerHTML='<linearGradient id="dcFillCard'+i+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+vals.c1+'"/><stop offset=".55" stop-color="'+vals.ink+'"/><stop offset="1" stop-color="'+vals.c2+'"/></linearGradient><linearGradient id="dcEdgeCard'+i+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+vals.c1+'"/><stop offset=".5" stop-color="'+vals.c3+'"/><stop offset="1" stop-color="'+vals.c2+'"/></linearGradient><linearGradient id="dcSweepCard'+i+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+vals.c3+'" stop-opacity="0"/><stop offset=".5" stop-color="'+vals.c3+'" stop-opacity=".55"/><stop offset="1" stop-color="'+vals.c3+'" stop-opacity="0"/></linearGradient>';
+    const tint=card.g.querySelector(".tint"),edge=card.g.querySelector(".edge"),sweep=card.g.querySelector(".sweep");
+    if(tint)tint.style.setProperty("fill","url(#dcFillCard"+i+")");
+    if(edge)edge.style.setProperty("stroke","url(#dcEdgeCard"+i+")");
+    if(sweep)sweep.style.setProperty("fill","url(#dcSweepCard"+i+")");
+    const clipId="dcClipCard"+i;
+    let clip=defs.querySelector("#"+clipId);
+    if(!clip){clip=document.createElementNS(NS,"clipPath");clip.setAttribute("id",clipId);clip.appendChild(document.createElementNS(NS,"path"));defs.appendChild(clip);}
+    clip.firstChild.setAttribute("d",card.g.querySelector(".plate").getAttribute("d"));
+    const visualGroup=card.g.querySelector("g[clip-path]");
+    if(visualGroup)visualGroup.setAttribute("clip-path","url(#"+clipId+")");
+  }
+
   function roll(i){
     const t=theme(i),[id,c1,c2,c3,ink]=t,card=fx.cards[i];
     fx.themes[i]=t;
@@ -157,6 +177,7 @@
     const stops=[["dcS1",c1],["dcS0",ink],["dcS2",c2],["dcE1",c1],["dcE2",c3],["dcE3",c2],["dcW0",c3],["dcW1",c3],["dcW2",c3]];
     stops.forEach(([id,v])=>{const n=document.getElementById(id);if(n)n.setAttribute("stop-color",v);});
     card.g.dataset.theme=id;
+    isolateGradients(i);
   }
   function particles(card){
     card.particles.replaceChildren();
