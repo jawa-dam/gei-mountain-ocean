@@ -1,11 +1,6 @@
 import { PACKS, ECONOMY_AUTHORITY_VERSION, validatePackAuthority } from "../_lib/economy-authority.js";
 
-/* V2.0.25 — server economy authority */
-
-  single: { label: "1 Song", price: "1.00", flOz: 6660 },
-  ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
-  twentyfive: { label: "25 Songs", price: "6.00", flOz: 166500 }
-};
+/* V2.1.59 — server checkout reads the canonical authority from economy-authority.js. */
 
 async function paypalToken() {
   const id = process.env.PAYPAL_CLIENT_ID;
