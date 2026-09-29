@@ -44,6 +44,7 @@
     "nite":                    {name:"THE NIGHT GLIDE",        emoji:"🌙", cls:"night",   line:"Night flow."},
     "lite":                    {name:"THE LIGHT BURST",        emoji:"💡", cls:"light",   line:"Light the flow!"},
     "jesus":                   {name:"THE LIVING FLOW",         emoji:"✝️", cls:"jesus",   line:"Let the living water flow."},
+    "dam-black-jesus":         {name:"THE BLACK JESUS FLOW",      emoji:"✝🏿", cls:"blackJesus", line:"Let the living water move."},
     "devil":                   {name:"THE TEMPTATION SURGE",    emoji:"😈", cls:"devil",   line:"Pressure meets resistance."}
   });
 
@@ -149,6 +150,7 @@
       .geiSignatureMoment.lion .sigEmoji{animation:sigLion .72s ease-out .04s 1}
       .geiSignatureMoment.night .sigEmoji{animation:sigNight .95s ease-in-out .04s 1}
       .geiSignatureMoment.light .sigEmoji{animation:sigLight .76s ease-out .04s 1}
+      .geiSignatureMoment.blackJesus .sigEmoji{animation:sigJesus .9s ease-out .05s 1}
 
       @keyframes geiSignatureCard{
         0%{opacity:0;transform:translate(-50%,-50%) scale(.78)}
