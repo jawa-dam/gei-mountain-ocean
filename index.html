@@ -2792,6 +2792,53 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
  box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 42px rgba(255,215,106,.38)
 }
 .geiCharacterSpotlight.milestone .spotFlow i{background:var(--gold);box-shadow:0 0 12px var(--gold)}
+/* V2.1.55 — personality motion language + DAM NATION moment pulse */
+.geiCharacterSpotlight.personalityPulse{animation:geiPersonalityCardPulse .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="guide"] .spotAvatar{animation:geiGuideReact .62s ease-out 1}
+.geiCharacterSpotlight[data-personality="builder"] .spotAvatar{animation:geiBuilderReact .68s ease-out 1}
+.geiCharacterSpotlight[data-personality="rescue"] .spotAvatar{animation:geiRescueReact .56s ease-out 1}
+.geiCharacterSpotlight[data-personality="command"] .spotAvatar{animation:geiCommandReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="heart"] .spotAvatar{animation:geiHeartReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="watch"] .spotAvatar{animation:geiWatchReact .62s ease-out 1}
+.geiCharacterSpotlight[data-personality="spooky"] .spotAvatar{animation:geiSpookyReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="gift"] .spotAvatar{animation:geiGiftReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="celebrate"] .spotAvatar{animation:geiCelebrateReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="wave"] .spotAvatar{animation:geiWaveReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="energy"] .spotAvatar{animation:geiEnergyReact .5s ease-out 1}
+.geiCharacterSpotlight[data-personality="nature"] .spotAvatar{animation:geiNatureReact .82s ease-out 1}
+.geiCharacterSpotlight[data-personality="rhythm"] .spotAvatar{animation:geiRhythmReact .72s ease-out 1}
+.geiCharacterSpotlight[data-personality="mechanic"] .spotAvatar{animation:geiMechanicReact .62s ease-out 1}
+.geiCharacterSpotlight[data-personality="ocean"] .spotAvatar{animation:geiOceanReact .86s ease-out 1}
+.geiCharacterSpotlight[data-personality="spark"] .spotAvatar{animation:geiSparkReact .62s ease-out 1}
+.geiCharacterSpotlight[data-personality="mountain"] .spotAvatar{animation:geiMountainReact .82s ease-out 1}
+.geiCharacterSpotlight[data-personality="roar"] .spotAvatar{animation:geiRoarReact .62s ease-out 1}
+.geiCharacterSpotlight[data-personality="night"] .spotAvatar{animation:geiNightReact .82s ease-out 1}
+.geiCharacterSpotlight[data-personality="light"] .spotAvatar{animation:geiLightReact .62s ease-out 1}
+.geiCharacterSpotlight[data-moment="milestone"],.geiCharacterSpotlight[data-moment="level"]{border-color:rgba(255,215,106,.46)}
+@keyframes geiPersonalityCardPulse{0%{filter:brightness(1)}35%{filter:brightness(1.25)}100%{filter:brightness(1)}}
+@keyframes geiGuideReact{35%{transform:translateY(-5px) rotate(-6deg)}70%{transform:translateY(1px) rotate(5deg)}}
+@keyframes geiBuilderReact{35%{transform:translateY(-6px) rotate(9deg) scale(1.08)}70%{transform:translateY(1px) rotate(-7deg)}}
+@keyframes geiRescueReact{35%{transform:translateX(5px) rotate(8deg) scale(1.08)}70%{transform:translateX(-4px) rotate(-5deg)}}
+@keyframes geiCommandReact{35%{transform:translateY(-5px) scale(1.13)}70%{transform:translateY(2px) scale(.97)}}
+@keyframes geiHeartReact{35%{transform:scale(1.14) translateY(-3px)}70%{transform:scale(.98)}}
+@keyframes geiWatchReact{35%{transform:translateX(-5px) rotate(-4deg)}70%{transform:translateX(5px) rotate(4deg)}}
+@keyframes geiSpookyReact{25%{transform:scale(.9) rotate(-8deg)}55%{transform:scale(1.14) rotate(8deg)}100%{transform:scale(1)}}
+@keyframes geiGiftReact{35%{transform:translateY(-8px) scale(1.08)}70%{transform:translateY(2px)}}
+@keyframes geiCelebrateReact{30%{transform:translateY(-8px) rotate(-7deg) scale(1.08)}60%{transform:translateY(1px) rotate(7deg)}}
+@keyframes geiWaveReact{35%{transform:translateY(-6px) rotate(-8deg) scale(1.06)}70%{transform:translateY(2px) rotate(8deg)}}
+@keyframes geiEnergyReact{25%{transform:scale(1.16)}50%{transform:scale(.92)}75%{transform:scale(1.1)}}
+@keyframes geiNatureReact{30%{transform:translateY(-7px) rotate(-3deg)}65%{transform:translateY(2px) rotate(3deg)}}
+@keyframes geiRhythmReact{25%,75%{transform:translateY(-4px) rotate(-6deg)}50%{transform:translateY(2px) rotate(6deg)}}
+@keyframes geiMechanicReact{35%{transform:rotate(12deg) scale(1.05)}70%{transform:rotate(-8deg)}}
+@keyframes geiOceanReact{35%{transform:translateY(-8px) scale(1.1)}70%{transform:translateY(2px) scale(.98)}}
+@keyframes geiSparkReact{35%{transform:scale(1.16) rotate(5deg)}70%{transform:scale(.96) rotate(-5deg)}}
+@keyframes geiMountainReact{35%{transform:translateY(-7px) scale(1.06)}70%{transform:translateY(1px)}}
+@keyframes geiRoarReact{30%{transform:scale(1.16) translateY(-3px)}55%{transform:scale(.94)}80%{transform:scale(1.08)}}
+@keyframes geiNightReact{40%{transform:translateY(-5px) rotate(-3deg);filter:brightness(1.35)}70%{transform:translateY(1px)}}
+@keyframes geiLightReact{30%{transform:scale(1.12);filter:brightness(1.55)}65%{transform:scale(.97);filter:brightness(1.1)}}
+@media(prefers-reduced-motion:reduce){
+ .geiCharacterSpotlight.personalityPulse{animation:none}
+}
 @keyframes geiSpotIdle{
  0%,100%{transform:translateY(0) rotate(-2deg)}
  50%{transform:translateY(-3px) rotate(2deg)}
@@ -11700,6 +11747,80 @@ function geiCharacterSpotlightContext(){
     return d?String(d.station||"hydraulic flow").toLowerCase():"hydraulic flow";
   }catch(e){return "hydraulic flow";}
 }
+/* V2.1.55 — CHARACTER PERSONALITY REACTION ENGINE / DAM NATION MOMENTS
+   Character identity is presentation-only. No profile below can alter ownership,
+   FL OZ, progression, activeCharacter, purchases, or economy authority. */
+const GEI_CHARACTER_PERSONALITIES=Object.freeze({
+  "wilbert-dam-guide":{id:"guide",label:"DAM GUIDE",emoji:"🧭",style:"guide",greeting:"Flow check!",tap:"guiding",milestone:"guide"},
+  "yall-too-beaver":{id:"beaver",label:"DAM BUILDER",emoji:"🦫",style:"builder",greeting:"Let's build!",tap:"build",milestone:"builder"},
+  "operator-fireman":{id:"fireman",label:"FLOW RESCUE",emoji:"🚒",style:"rescue",greeting:"Pressure check!",tap:"rescue",milestone:"alarm"},
+  "operator-moses":{id:"moses",label:"WATER WALKER",emoji:"🌊",style:"command",greeting:"Part the flow!",tap:"command",milestone:"part"},
+  "operator-valentine":{id:"valentine",label:"FLOW HEART",emoji:"💗",style:"heart",greeting:"Love the flow!",tap:"heart",milestone:"heart"},
+  "operator-sam":{id:"sam",label:"FLOW WATCH",emoji:"👀",style:"watch",greeting:"I see you!",tap:"watch",milestone:"watch"},
+  "operator-jack-o-lantern":{id:"pumpkin",label:"SPOOKY FLOW",emoji:"🎃",style:"spooky",greeting:"DAMN spooky!",tap:"spooky",milestone:"spooky"},
+  "operator-santa-claus":{id:"santa",label:"FLOW GIVER",emoji:"🎅",style:"gift",greeting:"Ho-ho-flow!",tap:"gift",milestone:"gift"},
+  "operator-woman":{id:"woman",label:"DAM NATION",emoji:"👩",style:"celebrate",greeting:"Keep it flowing!",tap:"celebrate",milestone:"celebrate"},
+  "operator-man":{id:"man",label:"DAM NATION",emoji:"👨",style:"celebrate",greeting:"That's DAM good!",tap:"celebrate",milestone:"celebrate"},
+  "character-8":{id:"character8",label:"FLOW CREW",emoji:"💧",style:"wave",greeting:"Ride the wave!",tap:"wave",milestone:"wave"},
+  "character-7":{id:"character7",label:"FLOW CREW",emoji:"⚡",style:"energy",greeting:"Bring the pressure!",tap:"energy",milestone:"surge"},
+  "character-6":{id:"character6",label:"FLOW CREW",emoji:"🌱",style:"nature",greeting:"Let it flow!",tap:"nature",milestone:"bloom"},
+  "character-5":{id:"character5",label:"FLOW CREW",emoji:"🎵",style:"rhythm",greeting:"Catch the rhythm!",tap:"rhythm",milestone:"song"},
+  "character-4":{id:"character4",label:"FLOW CREW",emoji:"🔧",style:"mechanic",greeting:"System check!",tap:"mechanic",milestone:"machine"},
+  "character-3":{id:"character3",label:"FLOW CREW",emoji:"🌊",style:"ocean",greeting:"Send it downstream!",tap:"ocean",milestone:"ocean"},
+  "character-2":{id:"character2",label:"FLOW CREW",emoji:"✨",style:"spark",greeting:"Make it shine!",tap:"spark",milestone:"spark"},
+  "character-1":{id:"character1",label:"FLOW CREW",emoji:"🏔️",style:"mountain",greeting:"Mountain to ocean!",tap:"mountain",milestone:"summit"},
+  "lion":{id:"lion",label:"DAM LION",emoji:"🦁",style:"roar",greeting:"Hear the flow!",tap:"roar",milestone:"roar"},
+  "nite":{id:"nite",label:"NITE OPERATOR",emoji:"🌙",style:"night",greeting:"Night flow.",tap:"night",milestone:"moon"},
+  "lite":{id:"lite",label:"LITE OPERATOR",emoji:"💡",style:"light",greeting:"Light the flow!",tap:"light",milestone:"light"}
+});
+const GEI_DAM_NATION_MOMENTS=Object.freeze({
+  tap:["FLOW CHECK","WATER MOVING","DAM NATION","PRESSURE UP"],
+  rapid:["FLOW RISING","HYDRAULIC MOMENTUM","KEEP THE WATER MOVING"],
+  milestone:["DAM NATION MOMENT","HYDRAULIC MILESTONE","THE SYSTEM IS ALIVE"],
+  level:["FLOW MASTERED","MOUNTAIN → OCEAN","DAM NATION LEVEL COMPLETE"]
+});
+let geiCharacterMomentState={lastAt:0,lastText:"",moments:0};
+function geiCharacterPersonality(){
+  const c=geiCharacterSpotlightState.character;
+  if(!c)return GEI_CHARACTER_PERSONALITIES["wilbert-dam-guide"];
+  return GEI_CHARACTER_PERSONALITIES[c.id]||{
+    id:"crew",label:"DAM NATION",emoji:"💧",style:"crew",
+    greeting:"Keep the flow moving!",tap:"flow",milestone:"moment"
+  };
+}
+function geiDamNationMoment(kind="tap",strength=1){
+  const box=$("geiCharacterSpotlight"); if(!box)return false;
+  const p=geiCharacterPersonality(),now=performance.now();
+  const gap=kind==="level"?1800:kind==="milestone"?950:kind==="rapid"?520:850;
+  if(now-geiCharacterMomentState.lastAt<gap)return false;
+  geiCharacterMomentState.lastAt=now;geiCharacterMomentState.moments++;
+  const pool=GEI_DAM_NATION_MOMENTS[kind]||GEI_DAM_NATION_MOMENTS.tap;
+  const text=pool[Math.floor(Math.random()*pool.length)];
+  geiCharacterMomentState.lastText=text;
+  box.dataset.personality=p.style;
+  box.dataset.moment=kind;
+  box.classList.remove("reacting","milestone","personalityPulse","momentFlash");
+  void box.offsetWidth;
+  box.classList.add(kind==="level"||kind==="milestone"?"milestone":"personalityPulse");
+  const name=box.querySelector(".spotName"),kicker=box.querySelector(".spotKicker");
+  if(name)name.textContent=(p.emoji+" "+(p.greeting||p.label));
+  if(kicker)kicker.textContent=p.label+" · "+text;
+  setTimeout(()=>{
+    if(name)name.textContent=geiCharacterSpotlightState.character?.name||"DAM NATION CREW";
+    if(kicker)kicker.textContent="SESSION SPOTLIGHT";
+    box.classList.remove("personalityPulse","momentFlash");
+  },kind==="level"?1500:900);
+  return true;
+}
+function geiCharacterSpotlightPersonalityReaction(kind="tap",strength=1){
+  const p=geiCharacterPersonality();
+  const box=$("geiCharacterSpotlight");if(!box)return false;
+  box.dataset.personality=p.style;
+  const ok=geiCharacterSpotlightReact(kind,strength);
+  if(ok)geiDamNationMoment(kind==="level"?"level":kind==="milestone"?"milestone":kind==="rapid"?"rapid":"tap",strength);
+  return ok;
+}
+
 function geiCharacterSpotlightReact(kind="tap",strength=1){
   const box=$("geiCharacterSpotlight");
   if(!box)return false;
@@ -11745,7 +11866,7 @@ document.addEventListener("pointerdown",function(e){
   if(!geiCharacterSpotlightState.started||document.hidden)return;
   const target=e.target;
   if(target&&target.closest&&target.closest("#geiCharacterSpotlight"))return;
-  geiCharacterSpotlightReact("tap",1);
+  geiCharacterSpotlightPersonalityReaction("tap",1);
 },{passive:true});
 /* Hydraulic milestones give the spotlight a stronger reaction. */
 (function(){
@@ -11753,7 +11874,7 @@ document.addEventListener("pointerdown",function(e){
   if(typeof originalReachOcean==="function"){
     window.reachOcean=function(){
       const out=originalReachOcean.apply(this,arguments);
-      try{geiCharacterSpotlightReact("level",1.4)}catch(e){}
+      try{geiCharacterSpotlightPersonalityReaction("level",1.4)}catch(e){}
       return out;
     };
   }
