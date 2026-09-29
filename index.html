@@ -4395,7 +4395,7 @@ function runIteRescueSelfTest(){
   t("economy: six-day reward values unchanged", () =>
     DAY_REWARD_FL_OZ === 111 && DAYS_PER_LEVEL === 6 && LEVEL_REWARD_FL_OZ === 666 && UNLOCK_COST_FL_OZ === 6660 &&
     DAM_DAYS.length === 6 && DAM_DAYS.every(d => d.reward === 111));
-  t("nav: command destinations present, machine is a floating button", () => ["navHowBtn","navCharactersBtn","navProfileBtn","navTribesBtn","navRadioBtn","navStoreBtn","dmFloatBtn"].every(id => !!document.getElementById(id)) && !document.getElementById("dmOpenBtn"));
+  t("nav: current command destinations match the live UI", () => ["navHowBtn","navProfileBtn","dmFloatBtn"].every(id => !!document.getElementById(id)) && !document.getElementById("navCharactersBtn") && !document.getElementById("navTribesBtn") && !document.getElementById("navRadioBtn") && !document.getElementById("navStoreBtn") && !document.getElementById("dmOpenBtn"));
   t("hooks: event + action functions exist", () => [selectCurrentIte, setIteInFlow, saveCurrentIte, renderIteRescue, renderIteRescueRecord, onIteEvent].every(f => typeof f === "function"));
   t("hooks: listeners receive events; failures are contained", () => {
     let got = null;
@@ -8436,7 +8436,6 @@ function openGameGuide(fromMenu){
   guideSelection = fromMenu ? state.activeCharacter : null;
   $("preGameCard").classList.add("show");
   $("preGameClose").hidden = !fromMenu;
-  if(guideNeverBox()) guideNeverBox().checked = guideNeverShow();
   $("preGameStart").textContent = fromMenu ? "🚀 BACK TO THE GAME" : "🚀 START GAME";
   $("preGameMsg").textContent = "";
   closeCharacterSpotlight();
@@ -8646,9 +8645,9 @@ function runCommandCenterSelfTest(){
     });
     if(guideNeverBox()) guideNeverBox().checked = true;
     t("guide: START GAME works and closes the guide", () => beginFromGuide() && !preGameOpen && !$("preGameCard").classList.contains("show"));
-    t("guide: never-show preference persists", () => !guideNeverBox() || storageGet(GUIDE_SEEN_KEY) === "1");
-    openGameGuide(true); if(guideNeverBox()) guideNeverBox().checked = false; closeGameGuide();
-    t("guide: closes from the menu and the preference can be cleared", () => !preGameOpen && (!guideNeverBox() || storageGet(GUIDE_SEEN_KEY) !== "1"));
+    t("guide: no removed never-show control dependency", () => !guideNeverBox() && typeof syncGuideNeverPreference === "function");
+    openGameGuide(true); closeGameGuide();
+    t("guide: closes from the menu", () => !preGameOpen && !$("preGameCard").classList.contains("show"));
     /* V2.1.37 — regression: the guide must open, draw its avatars and close even without the never-show checkbox. */
     t("V2.1.37: guide opens with avatars and START releases the board", () => {
       openGameGuide(false);
@@ -10089,6 +10088,7 @@ if(window.visualViewport) window.visualViewport.addEventListener("resize", ()=>s
 /* =========================================================
    INIT
 ========================================================= */
+/* V2.1.38 — TAP/STARTUP REGRESSION CLEANUP */
 document.querySelectorAll(".costText").forEach(el => { el.textContent = `${fmt(UNLOCK_COST_FL_OZ)} FL OZ`; });
 document.querySelectorAll(".groupPrice").forEach(el => { el.innerHTML = el.innerHTML.replace("${DAY_REWARD}", `${DAY_REWARD_FL_OZ} FL OZ`); });
 loadGame();
