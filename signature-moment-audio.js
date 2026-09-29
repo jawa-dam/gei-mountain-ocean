@@ -145,9 +145,9 @@
       const after=old.getCount();
       if(result && after>before){
         try{
-          const cls=document.getElementById("geiSignatureMoment")?.className||"";
-          const match=cls.match(/(?:^| )([a-z]+)$/);
-          play(match?match[1]:"crew");
+          const box=document.getElementById("geiCharacterSpotlight");
+          const cls=box?.dataset?.signature||"crew";
+          play(cls);
         }catch(e){play("crew");}
       }
       return result;
