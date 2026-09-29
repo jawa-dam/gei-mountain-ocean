@@ -2114,6 +2114,14 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .storeFrontHero{padding:12px 13px;margin-bottom:10px;border-radius:17px;border:1.5px solid color-mix(in srgb,var(--gold) 55%,transparent);background:linear-gradient(145deg,rgba(255,191,54,.12),rgba(20,150,170,.09));box-shadow:0 0 18px color-mix(in srgb,var(--water-bright) 12%,transparent)}
 .storeFrontHeroTitle{font-size:clamp(1.1rem,5vw,1.35rem);font-weight:1000;line-height:1.05}
 .storeFrontHeroCopy{margin-top:4px;font-size:.78rem;line-height:1.4;font-weight:750;color:rgba(255,255,255,.78)}
+.storeQuickNav{position:sticky;top:-1px;z-index:6;display:flex;gap:6px;overflow-x:auto;padding:7px 0 8px;margin:0 -2px 10px;scrollbar-width:none;background:linear-gradient(180deg,color-mix(in srgb,var(--juicy-navy) 98%,#000),color-mix(in srgb,var(--juicy-navy) 88%,transparent));backdrop-filter:blur(14px)}
+.storeQuickNav::-webkit-scrollbar{display:none}
+.storeQuickBtn{flex:0 0 auto;min-height:38px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.055);color:#fff;font-size:.68rem;font-weight:950;letter-spacing:.035em;white-space:nowrap;cursor:pointer}
+.storeQuickBtn.active,.storeQuickBtn:focus-visible{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 13%,rgba(255,255,255,.055));box-shadow:0 0 12px color-mix(in srgb,var(--gold) 18%,transparent);outline:none}
+.storeSection{scroll-margin-top:58px;margin-bottom:12px;padding:10px;border-radius:17px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(0,0,0,.08))}
+.storeSection>.panelGroup{margin-top:2px}
+.sidePanel#storePanel{width:min(94%,430px);padding:14px 12px 24px}
+.sidePanel#storePanel .panelTitle{position:sticky;top:0;z-index:7;margin:-2px 0 5px;padding:4px 0 8px;background:color-mix(in srgb,var(--juicy-navy) 96%,#000)}
 .storeCharGrid{display:flex;flex-direction:column;gap:8px}
 .storeCharCard{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:14px;background:rgba(255,255,255,.055);border:1.5px solid rgba(255,255,255,.16)}
 .storeCharCard.locked{border-left:3px solid var(--gold)}
@@ -2204,7 +2212,9 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .dmCard.jackpotWin .dmFlashFx{ animation:dmFlash 0.9s ease-out 1; }
 @keyframes dmFlash{ 0%{ opacity:.85; } 100%{ opacity:0; } }
 /* --- v2.6.2: consolidated navigation sheet (entry points only) --- */
-.navMenuBtn{ position:relative; z-index:2; }
+.navMenuBtn{display:none!important}
+.damTopAction{position:relative;z-index:2;min-width:44px;min-height:44px}
+.damTopAction:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .navSheet{ position:absolute; top:66px; right:10px; z-index:89; width:min(78vw, 290px); max-height:70vh; overflow:auto;
   padding:8px; border-radius:18px; display:none; text-align:left;
   background:color-mix(in srgb, var(--juicy-navy) 97%, #000); backdrop-filter:blur(20px);
@@ -3091,8 +3101,8 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
     {name:"Operator Santa Claus",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/operator-santa-claus-eyMjBlQqWCVDRsc2.png"},
     {name:"Operator Woman",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/operator-woman-SBXOdIurIocbRsrx.png"},
     {name:"Operator Man",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/operator-man-iOjCPh1RTtpl4t40.png"},
-    {name:"Character 8",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png"},
-    {name:"Character 7",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png"},
+    {name:"DAM Double Burger &",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png"},
+    {name:"DAM Pool",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png"},
     {name:"DAM Double Burger",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-6-tIItWTvyZSAcXRqM.png"},
     {name:"DAM Light",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-5-J0CAEYtL5ydwiJmX.png"},
     {name:"DAM Unicorn",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-4-SXcOzsVgiHtGDhDY.png"},
@@ -3177,7 +3187,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="brandTag">SAVE THE -ITES. SAVE THE WATER.</div>
         </div>
         <div class="hudRight">
-          <button class="iconBtn navMenuBtn" id="navMenuBtn" aria-label="Open settings menu" aria-expanded="false" aria-controls="navSheet" title="Settings">⚙️</button>
+          <button class="iconBtn damTopAction" id="guideTopBtn" aria-label="Open DAM-ITE Command Guide" title="DAM-ITE Command Guide">📖</button><button class="iconBtn damTopAction" id="profileTopBtn" aria-label="Open player profile" title="Player Profile">👤</button>
           <button class="iconBtn" id="fullscreenBtn" aria-label="Toggle fullscreen">⛶</button>
         </div>
       </div>
@@ -3211,10 +3221,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
     <!-- V2.1.30: SIMPLE SETTINGS MENU — focused destinations only.
          Rows only call the existing togglePanel()/openDamMachine() entry functions;
          the panels themselves are unchanged. No state is saved. -->
-    <nav class="navSheet" id="navSheet" aria-label="Game navigation">
-      <div class="navTitle" aria-hidden="true">⚙️ DAM-ITE SETTINGS</div>
-      <button class="navRow" id="navHowBtn" aria-label="Open How to Play and Rules"><span class="navRowIcon" aria-hidden="true">📖</span><span class="navRowText"><strong>How to Play</strong><small>Rules · taps · levels · bonuses</small></span><span class="navRowChevron" aria-hidden="true">›</span></button><button class="navRow" id="navProfileBtn" aria-label="Open player profile"><span class="navRowIcon" aria-hidden="true">📊</span><span class="navRowText"><strong>Profile</strong><small>Operator · stats · wallet</small></span><span class="navRowChevron" aria-hidden="true">›</span></button>
-    </nav>
+    
     <button class="dmStoreFloatBtn" id="dmStoreFloatBtn" type="button" aria-label="Open BUY-ites shop">
       <span class="dmStoreFloatTitle" aria-hidden="true">🛒</span>
       <span class="dmStoreFloatSub">BUY-ites</span>
@@ -3490,6 +3497,13 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         <div class="storeFrontHero">
           <div class="storeFrontHeroTitle">💧 POWER THE FLOW</div>
           <div class="storeFrontHeroCopy">Use your FL OZ to unlock characters and music. Buy FL OZ packs below when you need more flow.</div>
+        <div class="storeQuickNav" role="navigation" aria-label="Store sections">
+          <button type="button" class="storeQuickBtn active" data-store-jump="storeCharactersSection">👤 CHARACTERS</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeSpecialSection">✨ SPECIAL</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeMusicSection">🎵 MUSIC</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeOzSection">💧 FL OZ</button>
+          <button type="button" class="storeQuickBtn" data-store-jump="storeHistorySection">🧾 HISTORY</button>
+        </div>
         </div>
         <div class="walletBlock">
           <div class="wbLabel">💧 FL OZ Wallet</div>
@@ -3497,26 +3511,26 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="wbCost">Unlock cost: <strong class="costText"></strong></div>
         </div>
         <div class="damQuip panelQuip" id="storeQuip"></div>
-        <div class="panelGroup">👤 Character FL OZ</div>
+        <section class="storeSection" id="storeCharactersSection"><div class="panelGroup">👤 Character FL OZ</div>
         <div class="groupPrice">Unlock operators with FL OZ. Your purchase uses the existing character unlock authority.</div>
         <div class="storeCharGrid" id="storeCharactersGrid"></div>
-        <div class="storeCharMsg" id="storeCharactersMsg" aria-live="polite"></div>
-        <div class="panelGroup specialCharacterStoreTitle">✨ Special Characters</div>
-        <div class="groupPrice specialCharacterStoreCopy">These two special characters are separate from the 6,660 FL OZ collection. Cash purchase only.</div>
+        <div class="storeCharMsg" id="storeCharactersMsg" aria-live="polite"></div></section>
+        <section class="storeSection" id="storeSpecialSection"><div class="panelGroup specialCharacterStoreTitle">✨ Special Characters</div>
+        <div class="groupPrice specialCharacterStoreCopy">These three special characters are separate from the 6,660 FL OZ collection. Cash purchase only.</div>
         <div class="storeCharGrid specialCharacterGrid" id="storeSpecialCharactersGrid"></div>
-        <div class="storeCharMsg" id="storeSpecialCharactersMsg" aria-live="polite"></div>
-        <div class="panelGroup">🎵 Music FL OZ</div>
+        <div class="storeCharMsg" id="storeSpecialCharactersMsg" aria-live="polite"></div></section>
+        <section class="storeSection" id="storeMusicSection"><div class="panelGroup">🎵 Music FL OZ</div>
         <div class="groupPrice"><span class="costText"></span> each</div>
-        <div id="storeRedeem"></div>
-        <div class="panelGroup">🎨 Skins</div>
+        <div id="storeRedeem"></div></section>
+        <section class="storeSection" id="storeOzSection"><div class="panelGroup">🎨 Skins</div>
         <div class="emptyNote">Premium skins will cost <span class="costText"></span> each. The built-in living skins stay free.</div>
         <div class="panelGroup">Get FL OZ</div>
         <div class="groupPrice">Earn it through gameplay (${DAY_REWARD} per day) — or grab a pack</div>
-        <div id="storePacks"></div>
-        <div class="purchaseHistory" id="purchaseHistory">
+        <div id="storePacks"></div></section>
+        <section class="storeSection" id="storeHistorySection"><div class="purchaseHistory" id="purchaseHistory">
           <div class="purchaseHistoryTitle">🧾 Purchase History</div>
           <div class="purchaseHistoryList" id="purchaseHistoryList"></div>
-        </div><div class="paypalCheckout" id="storeCheckout" hidden>
+        </div></section><div class="paypalCheckout" id="storeCheckout" hidden>
           <div class="paypalCheckoutTitle">💳 SECURE PAYPAL CHECKOUT</div>
           <div class="paypalCheckoutItem" id="paypalCheckoutItem"></div>
           <div class="paypalCheckoutStatus" id="paypalCheckoutStatus" aria-live="polite"></div>
@@ -3778,8 +3792,8 @@ const CHARACTERS = [
   { id:"operator-santa-claus",    name:"Operator Santa Claus",    file:"operator-santa-claus-eyMjBlQqWCVDRsc2.png",    cost:UNLOCK_COST_FL_OZ },
   { id:"operator-woman",          name:"Operator Woman",          file:"operator-woman-SBXOdIurIocbRsrx.png",          cost:UNLOCK_COST_FL_OZ },
   { id:"operator-man",            name:"Operator Man",            file:"operator-man-iOjCPh1RTtpl4t40.png",            cost:UNLOCK_COST_FL_OZ },
-  { id:"character-8", name:"Character 8", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-7", name:"Character 7", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png", cost:UNLOCK_COST_FL_OZ },
+  { id:"character-8", name:"DAM Double Burger &", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png", cost:UNLOCK_COST_FL_OZ },
+  { id:"character-7", name:"DAM Pool", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png", cost:UNLOCK_COST_FL_OZ },
   { id:"character-6", name:"DAM Double Burger", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-6-tIItWTvyZSAcXRqM.png", cost:UNLOCK_COST_FL_OZ },
   { id:"character-5", name:"DAM Light", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-5-J0CAEYtL5ydwiJmX.png", cost:UNLOCK_COST_FL_OZ },
   { id:"character-4", name:"DAM Unicorn", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-4-SXcOzsVgiHtGDhDY.png", cost:UNLOCK_COST_FL_OZ },
@@ -4241,8 +4255,8 @@ const DAM_HUMOR_TITLES = {
   "operator-santa-claus":    "Santa Dam Claus",
   "operator-woman":          "The Dam Woman",
   "operator-man":            "The Dam Man",
-  "character-8":             "Character 8 on Flow Duty",
-  "character-7":             "Character 7 on Flow Duty",
+  "character-8":             "DAM Double Burger & on Flow Duty",
+  "character-7":             "DAM Pool on Flow Duty",
   "character-6":             "DAM Double Burger on Flow Duty",
   "character-5":             "DAM Light on Flow Duty",
   "character-4":             "DAM Unicorn on Flow Duty",
@@ -4266,8 +4280,8 @@ const DAM_HUMOR_CHARACTER = {
   "operator-santa-claus":    ["Ho ho hold the flow!", "Santa checked the list. The dam made the nice list.", "Sleigh the pressure!", "Dam-cember came early."],
   "operator-woman":          ["The Dam Woman runs a tight reservoir.", "She built that. Dam right.", "Flow boss, reporting in."],
   "operator-man":            ["The Dam Man has entered the chat.", "Hard hat on. Water under control.", "The Dam Man can. And did."],
-  "character-8":             ["Character 8 is on the flow.", "Eight is looking great in the dam.", "Character 8: pressure approved."],
-  "character-7":             ["Character 7 is keeping the water moving.", "Seven steps closer to the perfect flow.", "Character 7 says: dam right."],
+  "character-8":             ["DAM Double Burger & is on the flow.", "DAM Double Burger & is looking great in the dam.", "DAM Double Burger &: pressure approved."],
+  "character-7":             ["DAM Pool is keeping the water moving.", "DAM Pool is one step closer to the perfect flow.", "DAM Pool says: dam right."],
   "character-6":             ["DAM Double Burger is ready for the next surge.", "Six on shift. Flow on point.", "DAM Double Burger has the pressure handled."],
   "character-5":             ["DAM Light has entered the flow.", "Five-star hydraulic work.", "DAM Light says: keep it flowing."],
   "character-4":             ["DAM Unicorn is watching the gates.", "Four the love of water, keep tapping.", "DAM Unicorn has pressure under control."],
@@ -4743,7 +4757,7 @@ function runIteRescueSelfTest(){
   t("economy: six-day reward values unchanged", () =>
     DAY_REWARD_FL_OZ === 111 && DAYS_PER_LEVEL === 6 && LEVEL_REWARD_FL_OZ === 666 && UNLOCK_COST_FL_OZ === 6660 &&
     DAM_DAYS.length === 6 && DAM_DAYS.every(d => d.reward === 111));
-  t("nav: current command destinations match the live UI", () => ["navHowBtn","navProfileBtn","dmFloatBtn"].every(id => !!document.getElementById(id)) && !document.getElementById("navCharactersBtn") && !document.getElementById("navTribesBtn") && !document.getElementById("navRadioBtn") && !document.getElementById("navStoreBtn") && !document.getElementById("dmOpenBtn"));
+  t("nav: top actions match the live UI", () => ["guideTopBtn","profileTopBtn","dmFloatBtn"].every(id => !!document.getElementById(id)) && !document.getElementById("navMenuBtn") && !document.getElementById("navHowBtn") && !document.getElementById("navProfileBtn") && !document.getElementById("dmOpenBtn"));
   t("hooks: event + action functions exist", () => [selectCurrentIte, setIteInFlow, saveCurrentIte, renderIteRescue, renderIteRescueRecord, onIteEvent].every(f => typeof f === "function"));
   t("hooks: listeners receive events; failures are contained", () => {
     let got = null;
@@ -5502,7 +5516,7 @@ buildWorldDynamicGraphics();
 world.addEventListener("click", (e)=>{
   // composedPath() is fixed at dispatch time, so it still sees the panel even if a panel button
   // re-rendered itself (and detached e.target) before the click bubbled up to the world.
-  if(e.composedPath().some(n => n instanceof Element && n.matches(".sidePanel, .tribeCard, .gameOverCard, .hud, .navSheet"))) return;
+  if(e.composedPath().some(n => n instanceof Element && n.matches(".sidePanel, .tribeCard, .gameOverCard, .hud"))) return;
   if(navOpen){ closeNavMenu(); return; }                // v2.6.2: tapping the board dismisses the menu
   if(anyPanelOpen()){ closePanels(); return; }          // tapping the board closes an open panel
   if(state.busy) return;
@@ -7025,8 +7039,8 @@ function runDamMachineSelfTest(){
 function runNavSelfTest(){
   const results = [];
   const t = (name, ok) => results.push({ name, ok:!!ok });
-  t("menu button exists and controls the sheet", !!$("navMenuBtn") && !!navSheet && $("navMenuBtn").getAttribute("aria-controls") === "navSheet");
-  t("sheet holds command destinations", ["navHowBtn","navProfileBtn"].every(id => !!$(id)) && !$("navCharactersBtn") && !$("navTribesBtn") && !$("navRadioBtn") && !$("navStoreBtn"));
+  t("top guide + profile actions exist", !!$("guideTopBtn") && !!$("profileTopBtn") && !$("navMenuBtn"));
+  t("settings menu removed from visible HUD", !$("navMenuBtn") && !$("navSheet"));
   t("HUD consolidated: old per-panel buttons removed", !$("#profileBtn") && !$("#tribesBtn") && !$("#radioBtn") && !$("#storeBtn"));
   t("fullscreen stays a direct HUD button", !!$("fullscreenBtn"));
   t("DAM MACHINE removed from menu; floating entry exists", !$("dmOpenBtn") && !!$("dmFloatBtn"));
@@ -8987,35 +9001,37 @@ function togglePanel(name){
    openDamMachine() functions, so panel behavior, quips and timer pausing are
    untouched. Runtime-only UI state — nothing here is saved or tied to economy.
 ========================================================= */
-const navMenuBtn = $("navMenuBtn"), navSheet = $("navSheet");
+const navMenuBtn = null, navSheet = null;
 var navOpen = false;
 var preGameOpen = false;
-function openNavMenu(){
-  if(damMachine.open || damMachine.spinning) return;
-  closePanels();
-  closeCharacterSpotlight();
+function openNavMenu(){ return false; }
+function closeNavMenu(){ navOpen=false; return true; }
+function openTopProfile(){
+  closeDamMachine(); closeCharacterSpotlight(); closePanels();
   const b=$("bonusCard"); if(b) b.classList.remove("show");
-  navOpen = true;
-  navSheet.classList.add("open");
-  navMenuBtn.setAttribute("aria-expanded", "true");
-  renderDamMachineHeader();                               // keep the free-plays line fresh
-  const first = navSheet.querySelector("button");
-  try { if(first) first.focus({ preventScroll:true }); } catch(e){}
+  togglePanel("profile");
 }
-function closeNavMenu(){
-  if(!navOpen) return;
-  navOpen = false;
-  navSheet.classList.remove("open");
-  navMenuBtn.setAttribute("aria-expanded", "false");
+function openTopGuide(){
+  closeDamMachine(); closeCharacterSpotlight(); closePanels();
+  const b=$("bonusCard"); if(b) b.classList.remove("show");
+  openGameGuide(true);
 }
-navMenuBtn.addEventListener("click", ()=>{ navOpen ? closeNavMenu() : openNavMenu(); });
-$("dmStoreFloatBtn").addEventListener("click", ()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); togglePanel("store"); });
-[["navProfileBtn","profile"]].forEach(([rowId, panelName])=>{ const row=$(rowId); if(!row) return; row.addEventListener("click", ()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); togglePanel(panelName); }); });
-$("songVaultStoreBtn").addEventListener("click", ()=>{ closePanels(); togglePanel("store"); });
-$("songVaultFloatBtn").addEventListener("click", ()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); togglePanel("radio"); });
-$("navHowBtn").addEventListener("click", ()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); openGameGuide(true); });
-$("dmFloatBtn").addEventListener("click", ()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); openDamMachine(); });
-$("bonusBtn").addEventListener("click", ()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
+$("guideTopBtn").addEventListener("click",openTopGuide);
+$("profileTopBtn").addEventListener("click",openTopProfile);
+$("dmStoreFloatBtn").addEventListener("click",()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); togglePanel("store"); });
+$("songVaultStoreBtn").addEventListener("click",()=>{ closePanels(); togglePanel("store"); });
+$("songVaultFloatBtn").addEventListener("click",()=>{ closeNavMenu(); closeDamMachine(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); togglePanel("radio"); });
+$("dmFloatBtn").addEventListener("click",()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); const b=$("bonusCard"); if(b) b.classList.remove("show"); openDamMachine(); });
+$("bonusBtn").addEventListener("click",()=>{ closeNavMenu(); closePanels(); closeCharacterSpotlight(); if(bonus.awaiting === "spin") spinBonusWheel(); else if(bonus.awaiting === "continue") continueFromBonus(); });
+document.querySelectorAll(".storeQuickBtn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    const id=btn.getAttribute("data-store-jump"), target=id&&$(id);
+    if(!target)return;
+    document.querySelectorAll(".storeQuickBtn").forEach(b=>b.classList.toggle("active",b===btn));
+    target.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+});
+
 
 /* V2.0.7 — COMMAND GUIDE. One card, three tabs. Character rules come from the canonical
    CHARACTERS catalog + isUnlocked()/purchaseItem()/setActiveCharacter() — no second roster. */
@@ -9499,12 +9515,10 @@ function runCommandCenterSelfTest(){
     });
     /* menu */
     /* V2.1.38 — menu regression: Characters intentionally lives in BUY-ites, not Settings. */
-    t("menu: Settings contains only How to Play + Profile", () =>
-      !!$("navHowBtn") && !!$("navProfileBtn") &&
-      !!$("navHowBtn").closest("#navSheet") && !!$("navProfileBtn").closest("#navSheet") &&
-      !$("navCharactersBtn") && !$("navTribesBtn") && !$("navRadioBtn") && !$("navStoreBtn"));
-    t("menu: DAM MACHINE menu entry removed", () => !$("dmOpenBtn") && !/DAM MACHINE/i.test($("navSheet").textContent));
-    t("menu: floating DAM MACHINE button exists outside the menu", () => !!$("dmFloatBtn") && !$("dmFloatBtn").closest("#navSheet"));
+    t("menu: How to Play removed; dedicated top actions exist", () =>
+      !!$("guideTopBtn") && !!$("profileTopBtn") && !$("navHowBtn") && !$("navProfileBtn"));
+    t("menu: DAM MACHINE menu entry removed", () => !$("dmOpenBtn") && !$("navSheet"));
+    t("menu: floating DAM MACHINE button remains independent", () => !!$("dmFloatBtn") && !$("navSheet"));
     /* floating machine */
     state.damMachineFreePlays = 0; renderDamMachineHeader();
     t("machine: persistent station stays visible with no free plays", () => !$("dmFloatBtn").hidden && $("dmFloatBtn").classList.contains("inactive") && $("dmFloatBtn").getAttribute("aria-disabled") === "true");
@@ -10868,17 +10882,17 @@ const DAM_ITE_OPERATOR_VOICES = Object.freeze({
     machine:["The Dam Man is watching the reels.","Let's see what the machine delivers."],
     level:["The Dam Man approves the level.","Hard hat on. Next level."]
   }},
-  "character-8": { name:"Character 8", wave:"sine", notes:[330,415,523], lines:{
-    tap:["Character 8 is on flow duty.","Pressure check: Character 8 ready."],
-    breakthrough:["Character 8 has reached breakthrough.","The flow is wide open."],
-    machine:["Character 8 says: spin it.","Let's see what the dam machine delivers."],
-    level:["Character 8 clears the level.","Flow secured. Next level."]
+  "character-8": { name:"DAM Double Burger &", wave:"sine", notes:[330,415,523], lines:{
+    tap:["DAM Double Burger & is on flow duty.","Pressure check: DAM Double Burger & ready."],
+    breakthrough:["DAM Double Burger & has reached breakthrough.","The flow is wide open."],
+    machine:["DAM Double Burger & says: spin it.","Let's see what the dam machine delivers."],
+    level:["DAM Double Burger & clears the level.","Flow secured. Next level."]
   }},
-  "character-7": { name:"Character 7", wave:"triangle", notes:[349,440,554], lines:{
-    tap:["Character 7 is keeping the flow moving.","Pressure looks good."],
-    breakthrough:["Character 7 says: breakthrough!","Flow released."],
-    machine:["Character 7 is watching the reels.","Spin the machine."],
-    level:["Character 7 clears the level.","Seven on shift. Next level."]
+  "character-7": { name:"DAM Pool", wave:"triangle", notes:[349,440,554], lines:{
+    tap:["DAM Pool is keeping the flow moving.","Pressure looks good."],
+    breakthrough:["DAM Pool says: breakthrough!","Flow released."],
+    machine:["DAM Pool is watching the reels.","Spin the machine."],
+    level:["DAM Pool clears the level.","Seven on shift. Next level."]
   }},
   "character-6": { name:"DAM Double Burger", wave:"sine", notes:[392,494,587], lines:{
     tap:["DAM Double Burger has pressure under control.","Steady flow, steady work."],
@@ -11954,8 +11968,8 @@ const GEI_CHARACTER_PERSONALITIES=Object.freeze({
   "operator-santa-claus":{id:"santa",label:"FLOW GIVER",emoji:"🎅",style:"gift",greeting:"Ho-ho-flow!",tap:"gift",milestone:"gift"},
   "operator-woman":{id:"woman",label:"DAM NATION",emoji:"👩",style:"celebrate",greeting:"Keep it flowing!",tap:"celebrate",milestone:"celebrate"},
   "operator-man":{id:"man",label:"DAM NATION",emoji:"👨",style:"celebrate",greeting:"That's DAM good!",tap:"celebrate",milestone:"celebrate"},
-  "character-8":{id:"character8",label:"FLOW CREW",emoji:"💧",style:"wave",greeting:"Ride the wave!",tap:"wave",milestone:"wave"},
-  "character-7":{id:"character7",label:"FLOW CREW",emoji:"⚡",style:"energy",greeting:"Bring the pressure!",tap:"energy",milestone:"surge"},
+  "character-8":{id:"character8",label:"BURGER FLOW",emoji:"💧",style:"wave",greeting:"Ride the wave!",tap:"wave",milestone:"wave"},
+  "character-7":{id:"character7",label:"POOL FLOW",emoji:"⚡",style:"energy",greeting:"Bring the pressure!",tap:"energy",milestone:"surge"},
   "character-6":{id:"character6",label:"FLOW CREW",emoji:"🌱",style:"nature",greeting:"Let it flow!",tap:"nature",milestone:"bloom"},
   "character-5":{id:"character5",label:"FLOW CREW",emoji:"🎵",style:"rhythm",greeting:"Catch the rhythm!",tap:"rhythm",milestone:"song"},
   "character-4":{id:"character4",label:"FLOW CREW",emoji:"🔧",style:"mechanic",greeting:"System check!",tap:"mechanic",milestone:"machine"},
