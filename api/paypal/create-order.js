@@ -53,7 +53,7 @@ export default async function handler(req, res) {
         intent: "CAPTURE",
         purchase_units: [{
           custom_id: packId,
-          description: "DAM NATION " + pack.label + " — FL OZ water points",
+          description: pack.kind === "special-character" ? "DAM NATION " + pack.label + " — character entitlement" : "DAM NATION " + pack.label + " — FL OZ water points",
           invoice_id: invoiceId,
           amount: { currency_code: "USD", value: pack.price }
         }],
