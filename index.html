@@ -26,6 +26,14 @@
 })();
 </script>
 <style>
+/* V2.1.50 — DAM NATION SOUND DESIGN */
+.damNationAudioPulse{position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;mix-blend-mode:screen;background:radial-gradient(circle at 50% 55%,rgba(47,210,255,.34),transparent 58%);transform:scale(.72)}
+.damNationAudioPulse.active{animation:damNationAudioPulse .34s ease-out 1}
+.damNationAudioPulse.voice{background:radial-gradient(circle at 50% 50%,rgba(255,215,106,.42),transparent 62%);animation:damNationVoicePulse .62s ease-out 1}
+@keyframes damNationAudioPulse{0%{opacity:0;transform:scale(.72)}22%{opacity:.72}100%{opacity:0;transform:scale(1.08)}}
+@keyframes damNationVoicePulse{0%{opacity:0;transform:scale(.72)}24%{opacity:.9}100%{opacity:0;transform:scale(1.16)}}
+@media (prefers-reduced-motion:reduce){.damNationAudioPulse.active,.damNationAudioPulse.voice{animation:none;opacity:0}}
+</style><style>
 
 :root{
   --water-deep:#03203f;
@@ -997,8 +1005,7 @@ html.skin-floodlight{
   --juicy-magenta:#00e0ff;
   --juicy-pink:#b8f2ff;
   --gold:#fff27a;
-  --danger:#ff4f6a;
-  --panel:rgba(4,24,64,.9);
+  --danger:#ff4f6a;  --panel:rgba(4,24,64,.9);
   --radius:22px;
   --page-bg-a:#1a6ad8;
   --page-bg-b:#031a4a;
@@ -1997,8 +2004,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   }
 }
 .bwCelebrationArt{ position:relative; width:min(96%, 330px); aspect-ratio:16/9; margin:-2px auto 8px; border-radius:20px; overflow:hidden; border:2px solid var(--gold); box-shadow:0 0 34px color-mix(in srgb, var(--gold) 55%, transparent); background:rgba(0,0,0,.3); animation:jackpotArtIn .7s cubic-bezier(.34,1.7,.64,1) both; }
-.bwCelebrationArt img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block; }
-.bwCelebrationArt .bwArtOverlay{ transform:scale(.9); animation:bwArtFloat 2.2s ease-in-out infinite; }
+.bwCelebrationArt img{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block; }.bwCelebrationArt .bwArtOverlay{ transform:scale(.9); animation:bwArtFloat 2.2s ease-in-out infinite; }
 .bwCelebrationArt[hidden]{ display:none; }
 @keyframes jackpotArtIn{ 0%{ opacity:0; transform:scale(.72) rotate(-2deg); } 70%{ transform:scale(1.04) rotate(.5deg); } 100%{ opacity:1; transform:scale(1) rotate(0); } }
 
@@ -2997,8 +3003,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="preGameRule">📊 <strong>Watch the HUD.</strong> It shows your level, day, FL OZ, the countdown timer, and the -ite you're rescuing.</div>
           <div class="preGameRule">🏆 <strong>Complete all six days.</strong> Finish each station before the timer runs out to move the water from the Mountain to the Ocean.</div>
           <div class="preGameRule">💧 <strong>Earn FL OZ.</strong> Every finished day adds 111 FL OZ to your wallet — 666 FL OZ for a full level.</div>
-          <div class="preGameRule">🎡 <strong>Bonus Waterwheel.</strong> Complete a level to spin it for FL OZ, songs, characters, or free DAM MACHINE plays.</div>
-          <div class="preGameRule">🎰 <strong>DAM MACHINE.</strong> When you win a free play, the 🎰 button flashes <strong>BONUS READY</strong> on the left side of the game. Tap it to play.</div>
+          <div class="preGameRule">🎡 <strong>Bonus Waterwheel.</strong> Complete a level to spin it for FL OZ, songs, characters, or free DAM MACHINE plays.</div>          <div class="preGameRule">🎰 <strong>DAM MACHINE.</strong> When you win a free play, the 🎰 button flashes <strong>BONUS READY</strong> on the left side of the game. Tap it to play.</div>
           <div class="preGameRule">👤 <strong>Characters.</strong> Two starters are free. Buy the rest with FL OZ in 🛒 BUY-ites, or win them in the bonus games.</div>
           <div class="preGameRule">📈 <strong>Progression.</strong> Each level asks for more taps, saves another -ite, and grows your mill. Big celebrations wait at milestone levels.</div>
         </div></section>
@@ -3997,8 +4002,7 @@ function getDamHumor(category){
 function fillDamHumor(line){
   const w = (typeof state === "object" && state) ? state.totalFlOz : 0;
   return String(line).replace(/\{cost\}/g, `${fmt(UNLOCK_COST_FL_OZ)} FL OZ`)
-                     .replace(/\{short\}/g, `${fmt(Math.max(0, UNLOCK_COST_FL_OZ - w))} FL OZ`);
-}
+                     .replace(/\{short\}/g, `${fmt(Math.max(0, UNLOCK_COST_FL_OZ - w))} FL OZ`);}
 function getCharacterHumor(id){
   const pool = DAM_HUMOR_CHARACTER[id];
   return pool && pool.length ? pickDamLine("char:" + id, pool) : "";
@@ -4997,8 +5001,7 @@ function layoutStationLabels(){
     el.setAttribute("font-size", size);
     const x = (LABEL_COL_LEFT + LABEL_RIGHT) / 2, lh = size * 1.02;
     const top = cy - (spans.length * lh) / 2 + size * 0.82;
-    spans.forEach((t, i) => { t.setAttribute("x", x); t.setAttribute("y", (top + i * lh).toFixed(1)); });
-  });
+    spans.forEach((t, i) => { t.setAttribute("x", x); t.setAttribute("y", (top + i * lh).toFixed(1)); });  });
 }
 
 /* V2.1.27 — WORLD RENDER RECOVERY
@@ -5997,8 +6000,7 @@ function evaluateDamCombination(ids){
       case "fl-666":   return { ...oz(2220),               title:"666 TRIPLE!",       humorKey:"machineWin", detail:"+2,220 FL OZ" };
       case "fl-6660":  return { ...oz(UNLOCK_COST_FL_OZ),  title:"DAM JACKPOT",       humorKey:"machineJackpot", jackpot:true, detail:`+${fmt(UNLOCK_COST_FL_OZ)} FL OZ` };
       case "song":     return { kind:"song",     title:"🎵 FREE SONG!",         humorKey:"machineSong",     detail:"The next locked song joins the radio. No FL OZ spent." };
-      case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };
-      case "pun":      return { kind:"pun",      title:"😂 DAM PUN!",           humorKey:"machinePun",      detail:"The machine has jokes." };
+      case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };      case "pun":      return { kind:"pun",      title:"😂 DAM PUN!",           humorKey:"machinePun",      detail:"The machine has jokes." };
       default:         return { ...oz(DAY_REWARD_FL_OZ),   title:"TRIPLE FLOW!",      humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
     }
   }
@@ -6997,8 +6999,7 @@ async function paypalServerProbe(){
     const cred=credentialResult.data || {};
 
     let sdkSummary;
-    if(sdkResult.http !== 200){
-      sdkSummary="SDK probe HTTP " + sdkResult.http;
+    if(sdkResult.http !== 200){      sdkSummary="SDK probe HTTP " + sdkResult.http;
     }else if(sdk.ok && sdk.paypalHttpStatus === 200){
       sdkSummary="PayPal SDK CDN returned HTTP 200 (client fingerprint " +
         String(sdk.clientIdFingerprint || "unknown") + ")";
@@ -7997,8 +7998,7 @@ function getTapWaterPointerContext(){
   const index=Number(state.currentStep);
   if(state.phase==="playing"){
     const required=getRequiredTaps(state.level),nextTap=state.tapCount+1;
-    return index===MILL_INDEX&&nextTap>=required?"ocean":getTapWaterContext({index});
-  }
+    return index===MILL_INDEX&&nextTap>=required?"ocean":getTapWaterContext({index});  }
   if(state.phase==="ready"||state.phase==="timeout")return getTapWaterContext({index});
   return "ocean";
 }
@@ -8997,8 +8997,7 @@ const DAMMING_SINCE_KEY = "yalltooDamGame.dammingSince";
 function getDammingSince(){
   let raw=storageGet(DAMMING_SINCE_KEY);
   if(!raw){ raw=new Date().toISOString(); storageSet(DAMMING_SINCE_KEY,raw); }
-  const d=new Date(raw); return isNaN(d.getTime()) ? new Date() : d;
-}
+  const d=new Date(raw); return isNaN(d.getTime()) ? new Date() : d;}
 function formatDammingSince(d){
   return String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0")+"/"+String(d.getFullYear()).slice(-2);
 }
@@ -9997,8 +9996,7 @@ const DAM_ITE_OPERATOR_VOICES = Object.freeze({
     breakthrough:["BREAKTHROUGH! Release the water!","Pressure handled. Flow moving."],
     machine:["Station alarm: the machine is spinning.","Eyes on the reels!"],
     level:["Level secured. Pressure under control.","Good work, operator. Keep the flow moving."]
-  }},
-  "operator-moses": { name:"Moses", wave:"triangle", notes:[261,329,392], lines:{
+  }},  "operator-moses": { name:"Moses", wave:"triangle", notes:[261,329,392], lines:{
     tap:["The water has been released.","Let the water find its course."],
     breakthrough:["The waters have opened.","The path is clear. Move forward."],
     machine:["The wheel turns in its appointed course.","Let us see what the machine reveals."],
@@ -10110,6 +10108,17 @@ function runDamItePersonalitySelfTest(){
    First impressions are randomized. Gameplay audio favors a living hydraulic
    soundscape: friendly bird phrases + water textures, with musical tones kept
    as subtle accents for special moments. Presentation-only. */
+/* V2.1.50 — DAM NATION SOUND DESIGN */
+const GEI_DAM_NATION_AUDIO=Object.freeze({version:"V2.1.50",enabled:true,master:.16,minGapMs:46,maxVoices:8,voiceCooldownMs:1450,contexts:Object.freeze({
+mountain:{body:72,tink:190,noise:180,release:620,pan:-.12},dam:{body:92,tink:220,noise:260,release:760,pan:-.04},reservoir:{body:68,tink:260,noise:420,release:900,pan:.12},sluice:{body:82,tink:310,noise:720,release:1350,pan:-.08},wheel:{body:76,tink:230,noise:520,release:1080,pan:.08},ocean:{body:58,tink:175,noise:340,release:720,pan:.16}})});
+let geiDamNationAudioState={ctx:null,noiseBuffer:null,lastTapAt:0,lastVoiceAt:0,voices:0};
+function geiDamNationAudioContext(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;if(!geiDamNationAudioState.ctx)geiDamNationAudioState.ctx=new A();if(geiDamNationAudioState.ctx.state==="suspended")geiDamNationAudioState.ctx.resume().catch(()=>{});return geiDamNationAudioState.ctx}catch(e){return null}}
+function geiDamNationNoiseBuffer(c){if(geiDamNationAudioState.noiseBuffer)return geiDamNationAudioState.noiseBuffer;const n=Math.floor(c.sampleRate*.18),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n*.18);return geiDamNationAudioState.noiseBuffer=b}
+function geiDamNationTone(c,f,d,gain,when,type,pan){const o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+when;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=pan||0;o.connect(g);g.connect(p);p.connect(c.destination);o.start(t);o.stop(t+d+.02)}
+function geiDamNationWater(c,scene,when,intensity){const d=GEI_DAM_NATION_AUDIO.contexts[scene]||GEI_DAM_NATION_AUDIO.contexts.mountain,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+when;s.buffer=geiDamNationNoiseBuffer(c);f.type="bandpass";f.Q.value=.72;f.frequency.setValueAtTime(d.noise*.72,t);f.frequency.exponentialRampToValueAtTime(d.release,t+.11);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(GEI_DAM_NATION_AUDIO.master*(.32+Math.min(1.5,intensity||1)*.09),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+.12);p.pan.value=d.pan;s.connect(f);f.connect(g);g.connect(p);p.connect(c.destination);s.start(t);s.stop(t+.15)}
+function geiDamNationPulse(kind){try{const w=document.getElementById("world");if(!w)return;let e=w.querySelector(".damNationAudioPulse");if(!e){e=document.createElement("div");e.className="damNationAudioPulse";w.appendChild(e)}e.classList.remove("active","voice");void e.offsetWidth;e.classList.add(kind==="voice"?"voice":"active")}catch(e){}}
+function geiDamNationTapSound(context="mountain",intensity=1,combo=0){const n=performance.now();if(n-geiDamNationAudioState.lastTapAt<GEI_DAM_NATION_AUDIO.minGapMs||geiDamNationAudioState.voices>=GEI_DAM_NATION_AUDIO.maxVoices)return false;const c=geiDamNationAudioContext();if(!c)return false;const d=GEI_DAM_NATION_AUDIO.contexts[context]||GEI_DAM_NATION_AUDIO.contexts.mountain,j=1+(Math.random()-.5)*.12,b=1+Math.min(1.2,combo*.045);geiDamNationAudioState.lastTapAt=n;geiDamNationAudioState.voices++;geiDamNationTone(c,d.tink*j,.055,GEI_DAM_NATION_AUDIO.master*.34*b,0,"triangle",d.pan);geiDamNationTone(c,d.body*j,.105,GEI_DAM_NATION_AUDIO.master*.44*b,.008,"sine",d.pan);geiDamNationWater(c,context,.018,intensity);setTimeout(()=>geiDamNationAudioState.voices=Math.max(0,geiDamNationAudioState.voices-1),180);geiDamNationPulse("tap");return true}
+function geiDamNationVoice(context="dam",intensity=1){const n=performance.now();if(n-geiDamNationAudioState.lastVoiceAt<GEI_DAM_NATION_AUDIO.voiceCooldownMs)return false;const c=geiDamNationAudioContext();if(!c)return false;const d=GEI_DAM_NATION_AUDIO.contexts[context]||GEI_DAM_NATION_AUDIO.contexts.dam;geiDamNationAudioState.lastVoiceAt=n;geiDamNationTone(c,118,.075,.067,0,"triangle",d.pan);geiDamNationTone(c,178,.24,.058,.055,"sine",d.pan);geiDamNationTone(c,356,.19,.024,.075,"sine",d.pan);geiDamNationTone(c,136,.25,.061,.23,"sine",d.pan);geiDamNationWater(c,context,.26,Math.max(1,intensity*.75));geiDamNationPulse("voice");return true}
 const GEI_NATURE_AUDIO=Object.freeze({enabled:true,minChirpGapMs:360,birdChirpGain:.012,ambienceGain:.010,tapChance:.34});
 const GEI_BIRD_PHRASES=Object.freeze([[0,90,210,305],[0,80,155,250,335],[0,115,225],[0,70,175,285,365],[0,105,205,330]]);
 const GEI_BIRD_ROOTS=Object.freeze([1120,1280,1380,1510,1630,1760]);
@@ -10230,8 +10239,8 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
   geiBirdCompanionState.lastTapAt=now;
 }
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
-function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
-function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);geiBirdMoodReaction("celebrate",context,2,8);setTimeout(()=>geiBirdChirp(context,2,true),430)}
+function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;try{geiDamNationTapSound(context,intensity,combo)}catch(e){}geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
+function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;try{geiDamNationVoice(context,2)}catch(e){}geiBirdPhrase(context,1.45);geiBirdMoodReaction("celebrate",context,2,8);setTimeout(()=>geiBirdChirp(context,2,true),430)}
 function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdDuetMemoryLoad();geiBirdMoodLoad();geiBirdMoodApply();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);geiBirdMoodReactionScheduleIdle(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
 
 /* V2.1.45 — BIRD DUET MODE 🐦🎵💧
@@ -10997,8 +11006,7 @@ function restoreVisualProgress(){
   window.__GEI_API_URL__=function(path){
     const p=String(path||"");
     return /^\/api\/paypal\//i.test(p) ? window.__GEI_API_BACKEND__ + p : p;
-  };
-})();
+  };})();
 </script>
 <script src="/customer-purchase-recovery.js" defer></script>
 </body>
