@@ -4232,6 +4232,8 @@ const DAM_HUMOR_CHARACTER = {
   "character-3":             ["DAM Water is riding the current.", "Three cheers for that flow.", "DAM Water says: let it flow."],
   "character-2":             ["DAM Lollipop is ready for action.", "Two much flow? Never.", "DAM Lollipop says: dam good tapping."],
   "character-1":             ["DAM Sundaes has joined the crew.", "One tap at a time, one dam at a time.", "DAM Sundaes says: start the flow."],
+  "jesus":                    ["Jesus is in the flow.", "Let the living water move.", "The water keeps flowing."],
+  "devil":                    ["Devil has entered the pressure zone.", "Resistance makes the system react.", "Pressure meets pressure."]
   "lion":                    ["The Dam Lion is guarding the flow.", "Hear that roar? That's hydraulic pressure.", "The Lion is on dam duty."],
   "nite":                    ["Nite shift is officially open.", "Nite knows how to handle dark water.", "The Nite Operator is watching the flow."],
   "lite":                    ["Lite up the flow!", "The Lite Operator sees the pressure.", "Bright flow. Dam good timing."]
@@ -4941,13 +4943,13 @@ function normalizeEconomyCollections(){
   state.purchaseHistory = (Array.isArray(state.purchaseHistory) ? state.purchaseHistory : [])
     .filter(x => {
       if(!x || typeof x !== "object") return false;
-      if(typeof x.packId !== "string" || !STORE_PACKS.some(p => p.id === x.packId)) return false;
+      if(typeof x.packId !== "string" || !(STORE_PACKS.some(p => p.id === x.packId) || SPECIAL_CHARACTER_PRODUCTS.some(p => p.id === x.packId))) return false;
       if(typeof x.receiptId !== "string" || !x.receiptId || seenReceipts.has(x.receiptId)) return false;
       seenReceipts.add(x.receiptId);
       return true;
     })
     .map(x => {
-      const pack = STORE_PACKS.find(p => p.id === x.packId);
+      const pack = STORE_PACKS.find(p => p.id === x.packId) || SPECIAL_CHARACTER_PRODUCTS.find(p => p.id === x.packId);
       return {
         packId: pack.id,
         flOz: pack.flOz,
@@ -9954,8 +9956,8 @@ function renderPurchaseHistory(){
     return;
   }
   list.innerHTML=entries.map(entry=>{
-    const pack=STORE_PACKS.find(p=>p.id===entry.packId);
-    const label=pack ? pack.label : "FL OZ Pack";
+    const pack=STORE_PACKS.find(p=>p.id===entry.packId) || SPECIAL_CHARACTER_PRODUCTS.find(p=>p.id===entry.packId);
+    const label=pack ? (pack.specialCharacter ? "✨ "+pack.label+" Special Character" : pack.label) : "Purchase";
     const when=new Date(entry.purchasedAt).toLocaleString([], {month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
     const ref=String(entry.receiptId || "");
     const safeRef=ref.length>10 ? "•••"+esc(ref.slice(-10)) : esc(ref || "verified");
@@ -10830,6 +10832,18 @@ const DAM_ITE_OPERATOR_VOICES = Object.freeze({
     machine:["DAM Lollipop is watching the machine.","Spin the reels."],
     level:["DAM Lollipop clears the level.","Hydraulic work complete."]
   }},
+  "jesus": { name:"Jesus", wave:"sine", notes:[392,523,659], lines:{
+    tap:["Jesus is in the flow.","Let the living water move."],
+    breakthrough:["The living flow breaks through.","Water is moving."],
+    machine:["Jesus says: keep the flow moving.","The system is flowing."],
+    level:["Jesus clears the level.","Keep the living water flowing."]
+  },
+  "devil": { name:"Devil", wave:"sawtooth", notes:[196,233,277], lines:{
+    tap:["Devil is in the pressure zone.","Resistance is building."],
+    breakthrough:["Pressure breaks through.","The surge is moving."],
+    machine:["Devil says: spin it.","Let's test the pressure."],
+    level:["Devil clears the level.","Pressure handled."]
+  },
   "character-1": { name:"DAM Sundaes", wave:"triangle", notes:[261,329,392], lines:{
     tap:["DAM Sundaes has joined the flow.","Let's get moving."],
     breakthrough:["DAM Sundaes opens the path.","Breakthrough secured."],
