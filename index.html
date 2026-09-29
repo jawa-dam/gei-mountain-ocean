@@ -10276,7 +10276,7 @@ function geiBirdSongbookPlay(context,intensity=1,force=false){
   geiBirdCompanionState.lastAnswerAt=now;geiBirdSongbookState.recalls++;
   const count=Math.min(5,song.motif.length);
   for(let i=0;i<count;i++){
-    const ratio=d.ratios[i%d.ratios.length]*Math.max(.74,Math.min(1.5,avg/song.motif[i]);
+    const ratio=d.ratios[i%d.ratios.length]*Math.max(.74,Math.min(1.5,avg/song.motif[i]));
     const freq=root*ratio;
     const delay=i===0?.02:Math.min(.6,song.motif[i-1]/1000*.56*i);
     const pan=Math.max(-.86,Math.min(.86,(scene.pan||0)+(i%2?-.13:.13)));
