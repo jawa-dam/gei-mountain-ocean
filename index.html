@@ -10055,15 +10055,87 @@ const GEI_BIRD_PHRASES=Object.freeze([[0,90,210,305],[0,80,155,250,335],[0,115,2
 const GEI_BIRD_ROOTS=Object.freeze([1120,1280,1380,1510,1630,1760]);
 const GEI_NATURE_SCENES=Object.freeze({mountain:{name:"Morning Ridge",root:1510,pitch:1,pan:.28},dam:{name:"Creekside Dam",root:1320,pitch:.94,pan:-.18},reservoir:{name:"Reservoir Birds",root:1450,pitch:.88,pan:.34},sluice:{name:"Release Meadow",root:1570,pitch:1.05,pan:-.28},wheel:{name:"Mill Creek",root:1220,pitch:.91,pan:.15},ocean:{name:"Ocean Calls",root:980,pitch:.78,pan:-.12}});
 const geiNatureState={lastChirpAt:0,lastPhraseAt:0,scene:"mountain",started:false};
+const GEI_BIRD_COMPANION=Object.freeze({
+  version:"V2.1.40",
+  storageKey:"geiBirdCompanionV2140",
+  minTapMs:180,
+  maxTapMs:1800,
+  memorySize:12,
+  answerCooldownMs:4200,
+  baseAnswerChance:.10
+});
+const geiBirdCompanionState={lastTapAt:0,intervals:[],emaMs:420,lastAnswerAt:0,learnedTaps:0,songTier:1,seed:Math.random()};
 function geiNatureReducedMotion(){try{return !!matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}}
 function geiNatureScene(context){return GEI_NATURE_SCENES[context]||GEI_NATURE_SCENES.mountain}
 function geiBirdNote(freq,dur,when,pan,gain){try{const c=getAudio(),o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+Math.max(0,when),f=Math.max(420,Number(freq)||1200),d=Math.max(.035,Number(dur)||.12);o.type="sine";o.frequency.setValueAtTime(f*.92,t);o.frequency.exponentialRampToValueAtTime(f*1.28,t+d*.42);o.frequency.exponentialRampToValueAtTime(f*.82,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,Number(gain)||GEI_NATURE_AUDIO.birdChirpGain),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=Math.max(-1,Math.min(1,Number(pan)||0));o.connect(g);g.connect(p);p.connect(c.destination);o.start(t);o.stop(t+d+.025)}catch(e){}}
 function geiBirdPhrase(context,boost=1){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now(),scene=geiNatureScene(context);if(now-geiNatureState.lastPhraseAt<2200)return false;geiNatureState.lastPhraseAt=now;const phrase=GEI_BIRD_PHRASES[Math.floor(Math.random()*GEI_BIRD_PHRASES.length)],root=GEI_BIRD_ROOTS[Math.floor(Math.random()*GEI_BIRD_ROOTS.length)]*(scene.pitch||1),direction=Math.random()<.5?-1:1;phrase.forEach((step,i)=>{const jitter=1+(Math.random()-.5)*.08,freq=root*Math.pow(1.07,direction*step/48)*jitter,dur=.095+Math.random()*.055,delay=i*.11+Math.random()*.035,pan=Math.max(-.9,Math.min(.9,(scene.pan||0)+(Math.random()-.5)*.32));geiBirdNote(freq,dur,delay,pan,GEI_NATURE_AUDIO.birdChirpGain*(boost||1)*(i===0?.82:1))});return true}
 function geiBirdChirp(context,intensity=1,force=false){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now();if(!force&&now-geiNatureState.lastChirpAt<GEI_NATURE_AUDIO.minChirpGapMs)return false;const scene=geiNatureScene(context);geiNatureState.lastChirpAt=now;const root=(scene.root||1500)*(1+(Math.random()-.5)*.12),span=.11+Math.random()*.07;geiBirdNote(root,span,0,(scene.pan||0)+(Math.random()-.5)*.45,GEI_NATURE_AUDIO.birdChirpGain*(.8+Math.min(1.8,Number(intensity)||1)*.35));if(Math.random()<.48)setTimeout(()=>geiBirdNote(root*1.28,span*.82,.10,(scene.pan||0)*-.7,.009),0);return true}
+function geiBirdCompanionLoad(){
+  try{
+    const raw=localStorage.getItem(GEI_BIRD_COMPANION.storageKey); if(!raw)return;
+    const saved=JSON.parse(raw);
+    if(saved&&Array.isArray(saved.intervals)) geiBirdCompanionState.intervals=saved.intervals.filter(n=>Number.isFinite(n)).slice(-GEI_BIRD_COMPANION.memorySize);
+    if(saved&&Number.isFinite(saved.emaMs)) geiBirdCompanionState.emaMs=Math.max(GEI_BIRD_COMPANION.minTapMs,Math.min(GEI_BIRD_COMPANION.maxTapMs,saved.emaMs));
+    geiBirdCompanionState.learnedTaps=geiBirdCompanionState.intervals.length;
+  }catch(e){}
+}
+function geiBirdCompanionSave(){
+  try{localStorage.setItem(GEI_BIRD_COMPANION.storageKey,JSON.stringify({intervals:geiBirdCompanionState.intervals.slice(-GEI_BIRD_COMPANION.memorySize),emaMs:geiBirdCompanionState.emaMs}));}catch(e){}
+}
+function geiBirdCompanionTempo(){
+  const a=geiBirdCompanionState.intervals; if(!a.length)return geiBirdCompanionState.emaMs;
+  const s=a.slice(-5).slice().sort((x,y)=>x-y); return s[Math.floor(s.length/2)]||geiBirdCompanionState.emaMs;
+}
+function geiBirdCompanionAnswer(context,intensity=1,combo=0){
+  if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;
+  const now=performance.now(),tempo=geiBirdCompanionTempo(),scene=geiNatureScene(context);
+  if(now-geiBirdCompanionState.lastAnswerAt<GEI_BIRD_COMPANION.answerCooldownMs)return false;
+  if(geiBirdCompanionState.learnedTaps<3)return false;
+  geiBirdCompanionState.lastAnswerAt=now;
+  const tier=Math.max(1,Math.min(6,Number(state?.currentStep||0)+1+Math.floor(geiBirdCompanionState.learnedTaps/6)));
+  geiBirdCompanionState.songTier=tier;
+  const roots=[1,1.12,1.26,1.5,1.68,2.0],root=(scene.root||1500)*(scene.pitch||1),dir=Math.random()<.5?1:-1;
+  const source=geiBirdCompanionState.intervals.slice(-4),delays=[0];
+  for(let i=1;i<4;i++) delays[i]=delays[i-1]+Math.max(.09,Math.min(.52,(source[i-1]||tempo)*.72/1000));
+  const noteCount=3+Math.min(3,Math.floor(tier/2));
+  for(let i=0;i<noteCount;i++){
+    const d=delays[Math.min(i,delays.length-1)]+(i>=4?(i-3)*.12:0),ratio=roots[(i+tier)%roots.length],freq=root*ratio*(dir<0?Math.pow(2,-(i%3)/5):1),pan=Math.max(-.85,Math.min(.85,(scene.pan||0)+(Math.random()-.5)*.22));
+    geiBirdNote(freq,.105+Math.min(.08,tempo/7000),d,pan,GEI_NATURE_AUDIO.birdChirpGain*(.78+(intensity||1)*.10)*(i===0?.72:1));
+  }
+  return true;
+}
+function geiBirdLearnTap(context,intensity=1,combo=0){
+  if(!GEI_NATURE_AUDIO.enabled)return;
+  const now=performance.now(),prev=geiBirdCompanionState.lastTapAt;
+  if(prev>0){
+    const delta=Math.max(GEI_BIRD_COMPANION.minTapMs,Math.min(GEI_BIRD_COMPANION.maxTapMs,now-prev));
+    geiBirdCompanionState.intervals.push(delta);
+    if(geiBirdCompanionState.intervals.length>GEI_BIRD_COMPANION.memorySize)geiBirdCompanionState.intervals.shift();
+    geiBirdCompanionState.emaMs=geiBirdCompanionState.emaMs*.72+delta*.28;
+    geiBirdCompanionState.learnedTaps++;
+    if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
+    const chance=GEI_BIRD_COMPANION.baseAnswerChance+(combo>=4?.08:0)+(intensity>=3?.06:0)+(geiBirdCompanionState.learnedTaps>=9?.06:0);
+    if(now-geiBirdCompanionState.lastAnswerAt>GEI_BIRD_COMPANION.answerCooldownMs&&Math.random()<chance)geiBirdCompanionAnswer(context,intensity,combo);
+  }
+  geiBirdCompanionState.lastTapAt=now;
+}
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
-function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
+function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
 function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
-function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+
+/* V2.1.40 — ADAPTIVE BIRD COMPANION SELF-TEST
+   Rhythm memory and song generation are presentation-only. */
+function runBirdCompanionSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.40: companion configuration exists",()=>GEI_BIRD_COMPANION.version==="V2.1.40"&&GEI_BIRD_COMPANION.memorySize>=8);
+  t("V2.1.40: rhythm memory is bounded",()=>geiBirdCompanionState.intervals.length<=GEI_BIRD_COMPANION.memorySize);
+  t("V2.1.40: learned rhythm stays presentation-only",()=>{const before=JSON.stringify(state);const a=geiBirdCompanionState.intervals.slice();geiBirdLearnTap("mountain",1,0);const same=JSON.stringify(state)===before;geiBirdCompanionState.intervals=a;return same});
+  t("V2.1.40: companion never references economy authority",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdCompanionAnswer.toString()+geiBirdLearnTap.toString()+geiBirdCompanionSave.toString()));
+  t("V2.1.40: song tier remains within six hydraulic stages",()=>geiBirdCompanionState.songTier>=1&&geiBirdCompanionState.songTier<=6);
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
+
 /* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
 ========================================================= */
@@ -10140,7 +10212,7 @@ broadcastUnlocks();
 preloadCharacter(getActiveCharacter());
 try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); }   // V2.1.12 — presentation only
   window.__GEI_GAME_BOOTED__=true; // V2.1.36 — gameplay init completed before optional modules
-  try{geiNatureStartup("mountain")}catch(e){}
+  try{geiNatureStartup("mountain")}catch(e){} // V2.1.40 — adaptive bird companion
 
 
 /* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
