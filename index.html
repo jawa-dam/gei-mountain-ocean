@@ -5167,12 +5167,16 @@ world.addEventListener("click", (e)=>{
   const step = STEPS[index];
 
   state.tapCount++;
-  const hydraulicContext = getTapWaterPointerContext();
-  const hydraulicPower = state.tapCount >= getRequiredTaps(state.level) ? 3 : state.tapCount / getRequiredTaps(state.level) >= .75 ? 2 : 1;
-  const comboNow = registerDamIteCombo(hydraulicContext,hydraulicPower);
-  try{ triggerTapFeel(e.clientX,e.clientY,hydraulicPower,hydraulicContext,comboNow); }catch(err){}
-  triggerDamIteHydraulicReaction(hydraulicContext,{index:state.currentStep,power:hydraulicPower});
-  triggerDamItePersonality("tap",{hydraulic:hydraulicContext,combo:damIteCombo.count});
+  /* V2.1.37 — presentation is fenced off: a visual/audio error must never abort a counted tap. */
+  try{
+    const hydraulicContext = getTapWaterPointerContext();
+    const hydraulicPower = state.tapCount >= getRequiredTaps(state.level) ? 3 : state.tapCount / getRequiredTaps(state.level) >= .75 ? 2 : 1;
+    let comboNow = 0;
+    try{ comboNow = registerDamIteCombo(hydraulicContext,hydraulicPower); }catch(err){}
+    try{ triggerTapFeel(e.clientX,e.clientY,hydraulicPower,hydraulicContext,comboNow); }catch(err){}
+    try{ triggerDamIteHydraulicReaction(hydraulicContext,{index:state.currentStep,power:hydraulicPower}); }catch(err){}
+    try{ triggerDamItePersonality("tap",{hydraulic:hydraulicContext,combo:damIteCombo.count}); }catch(err){}
+  }catch(err){ safeWarn("Tap presentation skipped: " + err); }
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
 
@@ -5197,7 +5201,7 @@ world.addEventListener("click", (e)=>{
     }
 
     const dayAwarded = awardDay(index);
-    if(dayAwarded) spawnHydraulicBreakthrough(index);
+    if(dayAwarded){ try{ spawnHydraulicBreakthrough(index); }catch(err){ safeWarn("Breakthrough effect skipped: " + err); } }   // V2.1.37
     flowSegment(index);
   }
 
@@ -7837,6 +7841,24 @@ let tapWaterPulseCount = 0;
    Fast taps share one lightweight audio lane. Visual effects can remain expressive,
    while sound stays clean, rhythmic, and responsive instead of stacking noise buffers. */
 const TAP_AUDIO_BUS = Object.freeze({minGapMs:72});
+/* V2.1.37 — restored. V2.1.32 accidentally deleted these V2.1.11 definitions while adding the audio bus,
+   but the gameplay tap handler, the audio bus, breakthroughs and self-tests all still call them.
+   The missing getTapWaterContext threw inside the board's tap handler right after tapCount++,
+   so taps counted but no day could ever complete. Presentation-only: never mutates game/economy state. */
+const TAP_WATER_PROFILES = Object.freeze({
+  mountain:{label:"Mountain pressure",drops:5,spread:44,rise:18,noise:[420,720],tone:[523,659],wave:"triangle"},
+  dam:{label:"Dam pressure",drops:7,spread:58,rise:8,noise:[260,430],tone:[196,247],wave:"sawtooth"},
+  reservoir:{label:"Reservoir rings",drops:6,spread:70,rise:3,noise:[360,560],tone:[392,494],wave:"sine"},
+  sluice:{label:"Sluice release",drops:8,spread:82,rise:14,noise:[520,980],tone:[440,554],wave:"triangle"},
+  wheel:{label:"Waterwheel energy",drops:9,spread:74,rise:10,noise:[300,760],tone:[330,494],wave:"square"},
+  ocean:{label:"Ocean breakthrough",drops:14,spread:116,rise:22,noise:[180,620],tone:[220,330],wave:"sine"}
+});
+function getTapWaterContext(options={}){
+  const index=Number.isInteger(options.index)?options.index:Number(state?.currentStep);
+  if(options.breakthrough||index===MILL_INDEX&&options.finalTap)return "ocean";
+  return ["mountain","dam","reservoir","sluice","wheel","ocean"][Math.max(0,Math.min(5,index))]||"mountain";
+}
+function getTapWaterProfile(context){return TAP_WATER_PROFILES[context]||TAP_WATER_PROFILES.mountain}
 const tapAudioBus={index:0,lastAt:0};
 
 function playRapidTapAudio(context,intensity){
@@ -8068,9 +8090,11 @@ document.addEventListener("pointerdown",e=>{
     const required=getRequiredTaps(state.level),nextTap=state.tapCount+1;
     if(nextTap>=required)intensity=3; else if(nextTap/required>=.75)intensity=2;
   }
-  const tapContext=getTapWaterPointerContext();
-  spawnTapWaterFeedback(e.clientX,e.clientY,intensity,tapContext);
-  triggerDamItePersonality("tap",{hydraulic:tapContext});
+  try{
+    const tapContext=getTapWaterPointerContext();
+    spawnTapWaterFeedback(e.clientX,e.clientY,intensity,tapContext);
+    triggerDamItePersonality("tap",{hydraulic:tapContext});
+  }catch(err){ safeWarn("Tap water skipped: " + err); }   // V2.1.37 — presentation never breaks input
 },{capture:true,passive:true});
 
 /* =========================================================
@@ -8328,8 +8352,12 @@ function openCharacterSpotlight(id){
     const use = document.createElement("button");
     use.className = "lcBtn";
     use.type = "button";
-    use.textContent = active ? "⭐ ACTIVE CHARACTER" : "👤 USE THIS CHARACTER";
-    use.disabled = active;
+    /* V2.1.37 — inside the guide, the already-active starter must still be pickable; otherwise a new
+       player could never make the explicit selection START GAME requires. Ownership is still enforced
+       by setActiveCharacter(). */
+    const pickable = !active || (preGameOpen && guideSelection !== c.id);
+    use.textContent = pickable ? "👤 USE THIS CHARACTER" : "⭐ ACTIVE CHARACTER";
+    use.disabled = !pickable;
     use.addEventListener("click", () => {
       if(setActiveCharacter(c.id)){
         guideSelection = c.id;
@@ -8398,13 +8426,17 @@ function showGuideTab(name){
   document.querySelectorAll("[data-guide-pane]").forEach(p => p.classList.toggle("active", p.dataset.guidePane === name));
   const choose = $("preGameChooseBtn"); if(choose) choose.hidden = name === "avatar";
 }
+/* V2.1.37 — the "never show" checkbox was removed from the guide in V2.1.30. Every guide path must
+   tolerate its absence; a thrown null here left the guide stuck over the board and ate every tap. */
+function guideNeverBox(){ return document.getElementById("preGameNever"); }
+function syncGuideNeverPreference(){ const box = guideNeverBox(); if(box) setGuideNeverShow(box.checked); }
 function openGameGuide(fromMenu){
   closeNavMenu();
   preGameOpen = true;
   guideSelection = fromMenu ? state.activeCharacter : null;
   $("preGameCard").classList.add("show");
   $("preGameClose").hidden = !fromMenu;
-  $("preGameNever").checked = guideNeverShow();
+  if(guideNeverBox()) guideNeverBox().checked = guideNeverShow();
   $("preGameStart").textContent = fromMenu ? "🚀 BACK TO THE GAME" : "🚀 START GAME";
   $("preGameMsg").textContent = "";
   closeCharacterSpotlight();
@@ -8415,7 +8447,7 @@ function openGameGuide(fromMenu){
 }
 function closeGameGuide(){
   if(!preGameOpen) return;
-  setGuideNeverShow($("preGameNever").checked);
+  syncGuideNeverPreference();
   preGameOpen = false;
   $("preGameCard").classList.remove("show");
   syncTimerPause();
@@ -8428,7 +8460,7 @@ function beginFromGuide(){
     return false;
   }
   setActiveCharacter(guideSelection);
-  setGuideNeverShow($("preGameNever").checked);
+  syncGuideNeverPreference();
   preGameOpen = false;
   $("preGameCard").classList.remove("show");
   syncTimerPause();
@@ -8568,21 +8600,23 @@ function runCommandCenterSelfTest(){
       });
     });
     t("V2.1.8: spotlight profile is applied without changing character authority", () => {
+      const activeBefore = state.activeCharacter;         // V2.1.37: compare to the live active operator, not a hard-coded id
       openCharacterSpotlight("operator-moses");
       const inner = $("characterSpotlight").querySelector(".characterSpotlightInner");
       const applied = inner && inner.dataset.characterId === "operator-moses" &&
         inner.dataset.spotMotion === CHARACTER_SPOTLIGHT_PROFILES["operator-moses"].motion;
       closeCharacterSpotlight();
-      return applied && state.activeCharacter === "wilbert-dam-guide";
+      return applied && state.activeCharacter === activeBefore;
     });
     t("V2.1.9: spotlight character is directly interactive", () => {
+      const activeBefore = state.activeCharacter;
       openCharacterSpotlight("operator-moses");
       const img = $("characterSpotlightStage").querySelector(".characterSpotlightImg");
       const before = characterSpotlightTapCount;
       const reacted = !!img && img.getAttribute("role") === "button" && img.tabIndex === 0 && reactCharacterSpotlight("operator-moses");
       const after = characterSpotlightTapCount;
       closeCharacterSpotlight();
-      return reacted && after === before + 1 && state.activeCharacter === "wilbert-dam-guide";
+      return reacted && after === before + 1 && state.activeCharacter === activeBefore;
     });
     t("V2.1.9: character interaction remains presentation-only", () => {
       const beforeOz = state.totalFlOz;
@@ -8592,6 +8626,8 @@ function runCommandCenterSelfTest(){
       closeCharacterSpotlight();
       return state.totalFlOz === beforeOz && state.activeCharacter === beforeSelection;
     });
+    /* V2.1.37: the V2.1.8/9 tests above leave another operator's spotlight open — reopen Wilbert's as a player would. */
+    document.querySelector('.preGameAvatar[data-char-id="wilbert-dam-guide"]').click();
     t("guide: spotlight keeps canonical selection in one action", () => {
       const use = $("characterSpotlightActions").querySelector("button:not(:disabled)");
       if(!use) return false;
@@ -8608,11 +8644,19 @@ function runCommandCenterSelfTest(){
       closeCharacterSpotlight();
       return locked && guideSelection === "wilbert-dam-guide";
     });
-    $("preGameNever").checked = true;
+    if(guideNeverBox()) guideNeverBox().checked = true;
     t("guide: START GAME works and closes the guide", () => beginFromGuide() && !preGameOpen && !$("preGameCard").classList.contains("show"));
-    t("guide: never-show preference persists", () => storageGet(GUIDE_SEEN_KEY) === "1");
-    openGameGuide(true); $("preGameNever").checked = false; closeGameGuide();
-    t("guide: closes from the menu and the preference can be cleared", () => !preGameOpen && storageGet(GUIDE_SEEN_KEY) !== "1");
+    t("guide: never-show preference persists", () => !guideNeverBox() || storageGet(GUIDE_SEEN_KEY) === "1");
+    openGameGuide(true); if(guideNeverBox()) guideNeverBox().checked = false; closeGameGuide();
+    t("guide: closes from the menu and the preference can be cleared", () => !preGameOpen && (!guideNeverBox() || storageGet(GUIDE_SEEN_KEY) !== "1"));
+    /* V2.1.37 — regression: the guide must open, draw its avatars and close even without the never-show checkbox. */
+    t("V2.1.37: guide opens with avatars and START releases the board", () => {
+      openGameGuide(false);
+      const drawn = document.querySelectorAll("#preGameAvatarGrid .preGameAvatar").length === CHARACTERS.length;
+      guideSelection = state.activeCharacter;
+      const started = beginFromGuide();
+      return drawn && started && !preGameOpen && !$("preGameCard").classList.contains("show");
+    });
     /* menu */
     t("menu: How to Play + Characters rows in the menu", () => !!$("navHowBtn") && !!$("navCharactersBtn") && !!$("navHowBtn").closest("#navSheet") && !!$("navCharactersBtn").closest("#navSheet"));
     t("menu: DAM MACHINE menu entry removed", () => !$("dmOpenBtn") && !/DAM MACHINE/i.test($("navSheet").textContent));
