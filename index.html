@@ -10201,8 +10201,8 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     geiBirdMemoryLearn();
     geiBirdSongbookLearn(context);
     geiBirdDuetMemoryLearn(context);
-    const confidence=geiBirdRhythmConfidence();
-    geiBirdMoodLearn(context,intensity,combo,confidence);
+    const moodConfidence=geiBirdRhythmConfidence();
+    geiBirdMoodLearn(context,intensity,combo,moodConfidence);
     geiBirdMoodPulse("tap");
     const duetRemembered=geiBirdDuetMemoryMaybeRecognize(context,intensity);
     if(duetRemembered)geiBirdMoodPulse("recognize");
