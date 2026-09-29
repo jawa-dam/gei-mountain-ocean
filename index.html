@@ -1366,7 +1366,19 @@ svg{ width:100%; height:100%; display:block; position:relative; z-index:5; }
 @keyframes tapFeelWorldHit{0%{transform:scale(1)}45%{transform:scale(.996) translateY(1px)}100%{transform:scale(1)}}
 @keyframes tapFeelStationHit{0%{transform:scale(1)}50%{transform:scale(.965) translateY(2px)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.tapFeelPulse::before,.tapFeelBeat,.world.tap-feel-hit,.station.tap-feel-hit{animation-duration:.001ms!important}}
-.tapWaterLayer{position:fixed;inset:0;z-index:80;overflow:hidden;pointer-events:none}
+/* V2.1.68 — TAP EFFECT VISIBILITY & POINTER-LAYER REPAIR 💧⚡ */
+.tapWaterLayer{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:130 !important;
+  overflow:hidden !important;
+  pointer-events:none !important;
+  isolation:isolate;
+  contain:layout paint;
+  transform:translateZ(0);
+  will-change:contents;
+}
+.tapWaterLayer > *{pointer-events:none !important}
 .tapWaterRipple{position:absolute;width:18px;height:18px;border:2px solid var(--water-bright);border-radius:50%;transform:translate(-50%,-50%) scale(.35);opacity:.9;box-shadow:0 0 12px color-mix(in srgb,var(--water-bright) 55%,transparent);animation:tapWaterRipple .72s cubic-bezier(.2,.75,.2,1) forwards}
 .tapWaterDrop{position:absolute;width:8px;height:12px;border-radius:70% 70% 60% 60%;background:linear-gradient(160deg,var(--foam),var(--water-bright) 58%,var(--juicy-blue));box-shadow:0 0 9px color-mix(in srgb,var(--water-bright) 58%,transparent);transform:translate(-50%,-50%) rotate(45deg) scale(.65);animation:tapWaterDrop .72s cubic-bezier(.18,.7,.25,1) forwards}
 .tapWaterFlash{position:absolute;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,var(--foam) 0%,color-mix(in srgb,var(--water-bright) 55%,transparent) 34%,transparent 72%);transform:translate(-50%,-50%) scale(.4);opacity:.9;animation:tapWaterFlash .42s ease-out forwards}
