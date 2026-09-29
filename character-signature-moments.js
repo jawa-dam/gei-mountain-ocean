@@ -42,7 +42,9 @@
     "character-1":             {name:"THE SUMMIT PULSE",        emoji:"🏔️", cls:"mountain",line:"Mountain to ocean!"},
     "lion":                    {name:"THE LION ROAR",          emoji:"🦁", cls:"lion",    line:"HEAR THE FLOW!"},
     "nite":                    {name:"THE NIGHT GLIDE",        emoji:"🌙", cls:"night",   line:"Night flow."},
-    "lite":                    {name:"THE LIGHT BURST",        emoji:"💡", cls:"light",   line:"Light the flow!"}
+    "lite":                    {name:"THE LIGHT BURST",        emoji:"💡", cls:"light",   line:"Light the flow!"},
+    "jesus":                   {name:"THE LIVING FLOW",         emoji:"✝️", cls:"jesus",   line:"Let the living water flow."},
+    "devil":                   {name:"THE TEMPTATION SURGE",    emoji:"😈", cls:"devil",   line:"Pressure meets resistance."}
   });
 
   const state = {
@@ -175,6 +177,8 @@
       @keyframes sigMountain{35%{transform:translateY(-14px) scale(1.08)}70%{transform:translateY(2px) scale(.98)}100%{transform:none}}
       @keyframes sigLion{28%{transform:scale(.88)}48%{transform:scale(1.3)}68%{transform:scale(.94)}100%{transform:scale(1)}}
       @keyframes sigNight{35%{transform:translateY(-10px) rotate(-5deg)}65%{transform:translateY(3px) rotate(5deg)}100%{transform:none}}
+      @keyframes sigJesus{0%{transform:scale(.75) translateY(8px);opacity:.45}45%{transform:scale(1.18) translateY(-7px);opacity:1}100%{transform:scale(1)}}
+      @keyframes sigDevil{0%,100%{transform:rotate(0) scale(1)}30%{transform:rotate(-8deg) scale(1.12)}60%{transform:rotate(8deg) scale(.96)}}
       @keyframes sigLight{25%{transform:scale(.88)}45%{transform:scale(1.3)}65%{transform:scale(.96)}100%{transform:scale(1)}}
 
       .geiSignatureMoment .sigBurst{animation:sigBurst 1.2s ease-out .05s 1}
