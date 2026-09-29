@@ -2746,6 +2746,76 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 @keyframes geiLabelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes geiBrandIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes geiEnterIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* V2.1.54 — SPECIAL CHARACTER SPOTLIGHT ENGINE */
+.geiCharacterSpotlight{
+ position:absolute;z-index:18;right:10px;top:10px;width:min(156px,34vw);
+ padding:8px 9px 9px;border:1px solid rgba(157,234,255,.25);
+ border-radius:16px;background:rgba(3,7,17,.62);backdrop-filter:blur(10px);
+ box-shadow:0 10px 28px rgba(0,0,0,.28),0 0 22px rgba(47,210,255,.10);
+ color:#eafcff;pointer-events:none;opacity:0;transform:translateY(-6px) scale(.97);
+ transition:opacity .45s ease,transform .45s ease,box-shadow .35s ease;
+ overflow:hidden;contain:layout paint
+}
+.geiCharacterSpotlight.show{opacity:1;transform:translateY(0) scale(1)}
+.geiCharacterSpotlight .spotHead{display:flex;align-items:center;gap:7px}
+.geiCharacterSpotlight .spotAvatar{
+ width:40px;height:40px;flex:0 0 40px;border-radius:12px;object-fit:contain;
+ background:rgba(255,255,255,.05);filter:drop-shadow(0 4px 8px rgba(0,0,0,.3));
+ animation:geiSpotIdle 3.8s ease-in-out infinite
+}
+.geiCharacterSpotlight .spotFallback{
+ width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+ background:rgba(47,210,255,.10);font-size:19px
+}
+.geiCharacterSpotlight .spotCopy{min-width:0}
+.geiCharacterSpotlight .spotKicker{
+ display:block;font-size:7px;font-weight:1000;letter-spacing:.14em;opacity:.68;
+ text-transform:uppercase;white-space:nowrap
+}
+.geiCharacterSpotlight .spotName{
+ display:block;margin-top:2px;font-size:clamp(10px,2.5vw,12px);font-weight:1000;
+ line-height:1.08;white-space:normal;overflow:hidden;text-overflow:ellipsis
+}
+.geiCharacterSpotlight .spotFlow{
+ height:3px;margin-top:7px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.08)
+}
+.geiCharacterSpotlight .spotFlow i{
+ display:block;width:34%;height:100%;border-radius:inherit;background:var(--water-bright);
+ box-shadow:0 0 10px var(--water-bright);transform:translateX(0);
+ animation:geiSpotFlow 2.6s ease-in-out infinite
+}
+.geiCharacterSpotlight.reacting{
+ box-shadow:0 10px 28px rgba(0,0,0,.28),0 0 30px rgba(47,210,255,.32)
+}
+.geiCharacterSpotlight.reacting .spotAvatar{animation:geiSpotReact .62s ease-out 1}
+.geiCharacterSpotlight.milestone{
+ box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 42px rgba(255,215,106,.38)
+}
+.geiCharacterSpotlight.milestone .spotFlow i{background:var(--gold);box-shadow:0 0 12px var(--gold)}
+@keyframes geiSpotIdle{
+ 0%,100%{transform:translateY(0) rotate(-2deg)}
+ 50%{transform:translateY(-3px) rotate(2deg)}
+}
+@keyframes geiSpotReact{
+ 0%{transform:scale(1) translateY(0) rotate(0)}
+ 38%{transform:scale(1.13) translateY(-4px) rotate(-4deg)}
+ 72%{transform:scale(.98) translateY(1px) rotate(3deg)}
+ 100%{transform:scale(1) translateY(0) rotate(0)}
+}
+@keyframes geiSpotFlow{
+ 0%,100%{transform:translateX(0);width:34%}
+ 50%{transform:translateX(170%);width:48%}
+}
+@media(max-width:620px){
+ .geiCharacterSpotlight{right:7px;top:7px;width:min(142px,42vw);padding:7px}
+ .geiCharacterSpotlight .spotAvatar,.geiCharacterSpotlight .spotFallback{width:34px;height:34px;flex-basis:34px;border-radius:10px}
+ .geiCharacterSpotlight .spotKicker{font-size:6px}
+ .geiCharacterSpotlight .spotName{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .geiCharacterSpotlight,.geiCharacterSpotlight.show{transition:none}
+ .geiCharacterSpotlight .spotAvatar,.geiCharacterSpotlight .spotFlow i{animation:none}
+}
 @keyframes geiCharacterTagIn{from{opacity:0;transform:translate(-50%,14px) scale(.94)}to{opacity:1;transform:translate(-50%,8px) scale(1)}}
 @keyframes geiProgress{to{width:100%}}
 @media (max-width:520px){.geiSplashCharacterTag{top:52%;font-size:.58rem;padding:6px 10px}.geiSplashWorld{height:52vh}.geiSplashLabel{font-size:.62rem;letter-spacing:.1em}.geiSplashBrand{top:12%}.geiSplashMountain{bottom:23%}.geiSplashDam{bottom:22%;left:31%;width:17%;height:30%}.geiSplashMill{bottom:23%}.geiSplashWheel{bottom:24%}.geiSplashOcean{bottom:8%}.geiSplashIte{top:39%;width:min(82vw,340px);height:min(25vh,190px)}.geiSplashIteFrame{top:39%;width:min(88vw,375px);height:min(28vh,215px)}}
@@ -2934,6 +3004,12 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   if(!pool.length)pool=crew.slice();
   var pick=pool[Math.floor(Math.random()*pool.length)];
   sessionStorage.setItem(lastKey,pick.name);
+  /* V2.1.54 — hand the randomized splash identity to the session spotlight layer. */
+  try{
+    sessionStorage.setItem("geiCharacterSpotlightV2154",JSON.stringify({
+      name:pick.name,image:pick.image,seed:Date.now()
+    }));
+  }catch(e){}
   ite.alt=pick.name;
   ite.onerror=function(){
     ite.style.display="none";
@@ -11556,6 +11632,134 @@ function runBirdCompanionSelfTest(){
   return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
 }
 
+/* V2.1.54 — SPECIAL CHARACTER SPOTLIGHT ENGINE
+   The randomized splash character becomes the visual "character of this session".
+   Presentation-only: it never unlocks characters, changes FL OZ, progression,
+   activeCharacter, purchase state, or economy authority. */
+const GEI_CHARACTER_SPOTLIGHT=Object.freeze({
+  version:"V2.1.54",
+  storageKey:"geiCharacterSpotlightV2154",
+  tapCooldownMs:260,
+  idleMinMs:5200,
+  idleMaxMs:9800,
+  reactionMs:620
+});
+let geiCharacterSpotlightState={
+  character:null,lastReactionAt:0,lastMilestoneAt:0,started:false,idleTimer:null,taps:0
+};
+function geiCharacterSpotlightLoad(){
+  try{
+    const raw=sessionStorage.getItem(GEI_CHARACTER_SPOTLIGHT.storageKey);
+    if(raw){
+      const v=JSON.parse(raw);
+      if(v&&typeof v.name==="string"&&typeof v.image==="string"){
+        geiCharacterSpotlightState.character=v;
+        return v;
+      }
+    }
+  }catch(e){}
+  return null;
+}
+function geiCharacterSpotlightFallback(){
+  const c=typeof getActiveCharacter==="function"?getActiveCharacter():null;
+  return c&&c.name&&c.img?{name:c.name,image:c.img,seed:0}:null;
+}
+function geiCharacterSpotlightEnsureVisual(){
+  const worldEl=$("world");
+  if(!worldEl)return null;
+  let box=$("geiCharacterSpotlight");
+  if(box)return box;
+  box=document.createElement("div");
+  box.id="geiCharacterSpotlight";
+  box.className="geiCharacterSpotlight";
+  box.setAttribute("aria-hidden","true");
+  box.innerHTML='<div class="spotHead"><span class="spotVisual"></span><span class="spotCopy"><span class="spotKicker">SESSION SPOTLIGHT</span><span class="spotName">DAM NATION CREW</span></span></div><div class="spotFlow"><i></i></div>';
+  worldEl.appendChild(box);
+  return box;
+}
+function geiCharacterSpotlightRender(){
+  const c=geiCharacterSpotlightState.character||geiCharacterSpotlightFallback();
+  const box=geiCharacterSpotlightEnsureVisual();
+  if(!box||!c)return false;
+  const visual=box.querySelector(".spotVisual"),name=box.querySelector(".spotName");
+  if(!visual||!name)return false;
+  name.textContent=c.name||"DAM NATION CREW";
+  visual.innerHTML="";
+  const img=document.createElement("img");
+  img.className="spotAvatar";img.alt="";img.decoding="async";img.src=c.image;
+  img.onerror=function(){
+    visual.innerHTML='<span class="spotFallback">💧</span>';
+  };
+  visual.appendChild(img);
+  box.classList.add("show");
+  return true;
+}
+function geiCharacterSpotlightContext(){
+  try{
+    const d=DAM_DAYS[Math.min(state.currentStep,DAM_DAYS.length-1)];
+    return d?String(d.station||"hydraulic flow").toLowerCase():"hydraulic flow";
+  }catch(e){return "hydraulic flow";}
+}
+function geiCharacterSpotlightReact(kind="tap",strength=1){
+  const box=$("geiCharacterSpotlight");
+  if(!box)return false;
+  const now=performance.now(), major=kind==="milestone"||kind==="level";
+  const cooldown=major?900:GEI_CHARACTER_SPOTLIGHT.tapCooldownMs;
+  if(now-geiCharacterSpotlightState.lastReactionAt<cooldown)return false;
+  if(major && now-geiCharacterSpotlightState.lastMilestoneAt<2600)return false;
+  geiCharacterSpotlightState.lastReactionAt=now;
+  if(major)geiCharacterSpotlightState.lastMilestoneAt=now;
+  geiCharacterSpotlightState.taps++;
+  box.classList.remove("reacting","milestone");void box.offsetWidth;
+  box.classList.add(major?"milestone":"reacting");
+  box.dataset.context=geiCharacterSpotlightContext();
+  box.style.setProperty("--spot-strength",Math.max(.6,Math.min(1.5,Number(strength)||1)));
+  setTimeout(()=>box.classList.remove("reacting","milestone"),major?1100:GEI_CHARACTER_SPOTLIGHT.reactionMs);
+  return true;
+}
+function geiCharacterSpotlightScheduleIdle(){
+  clearTimeout(geiCharacterSpotlightState.idleTimer);
+  if(document.hidden)return;
+  const delay=GEI_CHARACTER_SPOTLIGHT.idleMinMs+
+    Math.random()*(GEI_CHARACTER_SPOTLIGHT.idleMaxMs-GEI_CHARACTER_SPOTLIGHT.idleMinMs);
+  geiCharacterSpotlightState.idleTimer=setTimeout(()=>{
+    const box=$("geiCharacterSpotlight");
+    if(box&&!document.hidden)geiCharacterSpotlightReact("idle",.8);
+    geiCharacterSpotlightScheduleIdle();
+  },delay);
+}
+function geiCharacterSpotlightStartup(){
+  if(geiCharacterSpotlightState.started)return true;
+  geiCharacterSpotlightState.started=true;
+  geiCharacterSpotlightLoad();
+  if(!geiCharacterSpotlightState.character)geiCharacterSpotlightState.character=geiCharacterSpotlightFallback();
+  const rendered=geiCharacterSpotlightRender();
+  if(!rendered)return false;
+  setTimeout(()=>{const box=$("geiCharacterSpotlight");if(box)box.classList.add("show");},120);
+  geiCharacterSpotlightScheduleIdle();
+  document.addEventListener("visibilitychange",geiCharacterSpotlightScheduleIdle);
+  return true;
+}
+/* Capture real taps without touching the game's tap/economy handler. */
+document.addEventListener("pointerdown",function(e){
+  if(!geiCharacterSpotlightState.started||document.hidden)return;
+  const target=e.target;
+  if(target&&target.closest&&target.closest("#geiCharacterSpotlight"))return;
+  geiCharacterSpotlightReact("tap",1);
+},{passive:true});
+/* Hydraulic milestones give the spotlight a stronger reaction. */
+(function(){
+  const originalReachOcean=window.reachOcean;
+  if(typeof originalReachOcean==="function"){
+    window.reachOcean=function(){
+      const out=originalReachOcean.apply(this,arguments);
+      try{geiCharacterSpotlightReact("level",1.4)}catch(e){}
+      return out;
+    };
+  }
+})();
+
+
 /* =========================================================
    HOSTINGER / IFRAME HEIGHT REPORTING
 ========================================================= */
@@ -11633,6 +11837,7 @@ preloadCharacter(getActiveCharacter());
 try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); }   // V2.1.12 — presentation only
   window.__GEI_GAME_BOOTED__=true; // V2.1.36 — gameplay init completed before optional modules
   try{geiNatureStartup("mountain")}catch(e){} // V2.1.40 — adaptive bird companion
+  try{geiCharacterSpotlightStartup()}catch(e){safeWarn("V2.1.54 spotlight skipped: "+e)}
 
 
 /* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
