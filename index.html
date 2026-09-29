@@ -3750,11 +3750,13 @@ const CHARACTERS = [
   { id:"nite", name:"Nite", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-2-FPeHSJnA5Oa68mkG.png", cost:UNLOCK_COST_FL_OZ },
   { id:"lite", name:"Lite", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-1-A1JeCEEcM7kG4AFC.png", cost:UNLOCK_COST_FL_OZ },
   { id:"jesus", name:"Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:0, special:true, specialPurchaseId:"special-jesus" },
+  { id:"dam-black-jesus", name:"DAM Black Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:0, special:true, specialPurchaseId:"special-dam-black-jesus" },
   { id:"devil", name:"Devil", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-4-0uOG99jJJKAPpaKB.png", cost:0, special:true, specialPurchaseId:"special-devil" }
 ].map(c => ({ ...c, img: c.img || CHARACTER_BASE + c.file }));
 
 const SPECIAL_CHARACTER_PRODUCTS = Object.freeze([
   { id:"special-jesus", label:"Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"jesus", specialCharacter:true, specialBadge:"✝️ SPECIAL CHARACTER" },
+  { id:"special-dam-black-jesus", label:"DAM Black Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"dam-black-jesus", specialCharacter:true, specialBadge:"✝️ DAM BLACK JESUS" },
   { id:"special-devil", label:"Devil", priceLabel:"$6", priceUsd:6, flOz:0, kind:"special-character", characterId:"devil", specialCharacter:true, specialBadge:"😈 SPECIAL CHARACTER" }
 ]);
 /* Premium skins for the future. The 7 built-in skins stay free and random, as before. */
@@ -10837,7 +10839,13 @@ const DAM_ITE_OPERATOR_VOICES = Object.freeze({
     breakthrough:["The living flow breaks through.","Water is moving."],
     machine:["Jesus says: keep the flow moving.","The system is flowing."],
     level:["Jesus clears the level.","Keep the living water flowing."]
-  },
+  }},
+  "dam-black-jesus": { name:"DAM Black Jesus", wave:"sine", notes:[392,494,659], lines:{
+    tap:["DAM Black Jesus is in the flow.","Keep the living water moving."],
+    breakthrough:["The living flow breaks through.","The water is moving forward."],
+    machine:["DAM Black Jesus says: keep the flow moving.","The system is alive."],
+    level:["DAM Black Jesus clears the level.","Keep the living water flowing."]
+  }},
   "devil": { name:"Devil", wave:"sawtooth", notes:[196,233,277], lines:{
     tap:["Devil is in the pressure zone.","Resistance is building."],
     breakthrough:["Pressure breaks through.","The surge is moving."],
