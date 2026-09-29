@@ -9,6 +9,7 @@ export const PACKS = Object.freeze({
   ten: Object.freeze({ label:"10 Songs", price:"12.00", flOz:66600 }),
   twentyfive: Object.freeze({ label:"25 Songs", price:"18.00", flOz:166500 }),
   "special-jesus": Object.freeze({ label:"Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"jesus" }),
+  "special-dam-black-jesus": Object.freeze({ label:"DAM Black Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"dam-black-jesus" }),
   "special-devil": Object.freeze({ label:"Devil — Special Character", price:"6.00", flOz:0, kind:"special-character", characterId:"devil" })
 });
 
