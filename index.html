@@ -9927,10 +9927,11 @@ function renderCharactersPanel(){
     const img = characterImage(c, "charThumbImg");
     img.loading = "lazy";
     thumb.appendChild(img);
-    const status = starter ? "⭐ STARTER · UNLOCKED" : owned ? "✅ UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`;
+    const status = c.special ? (owned ? "✨ SPECIAL · OWNED" : "✨ SPECIAL · CASH PURCHASE") : (starter ? "⭐ STARTER · UNLOCKED" : owned ? "✅ UNLOCKED" : `🔒 LOCKED · ${fmt(c.cost)} FL OZ`);
     let btn;
     if(active) btn = `<button class="storeBtn" disabled>ACTIVE</button>`;
     else if(owned) btn = `<button class="storeBtn" data-char-use="${esc(c.id)}">USE CHARACTER</button>`;
+    else if(c.special) btn = `<button class="storeBtn specialPurchaseBtn" disabled>BUY IN STORE</button>`;
     else if(state.totalFlOz < c.cost) btn = `<button class="storeBtn" disabled>${characterNeedText(c)}</button>`;
     else btn = `<button class="storeBtn" data-char-unlock="${esc(c.id)}">PURCHASE · ${fmt(c.cost)} FL OZ</button>`;
     const info = document.createElement("div");
