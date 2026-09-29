@@ -8,9 +8,9 @@ export const PACKS = Object.freeze({
   single: Object.freeze({ label:"1 Song", price:"6.00", flOz:6660 }),
   ten: Object.freeze({ label:"10 Songs", price:"12.00", flOz:66600 }),
   twentyfive: Object.freeze({ label:"25 Songs", price:"18.00", flOz:166500 }),
-  "special-jesus": Object.freeze({ label:"Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"jesus" }),
-  "special-dam-black-jesus": Object.freeze({ label:"DAM Black Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"dam-black-jesus" }),
-  "special-devil": Object.freeze({ label:"Devil — Special Character", price:"6.00", flOz:0, kind:"special-character", characterId:"devil" })
+  "special-jesus": Object.freeze({ label:"Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"jesus", cashOnly:true, machineEligible:false }),
+  "special-dam-black-jesus": Object.freeze({ label:"DAM Black Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"dam-black-jesus", cashOnly:true, machineEligible:false }),
+  "special-devil": Object.freeze({ label:"Devil — Special Character", price:"6.00", flOz:0, kind:"special-character", characterId:"devil", cashOnly:true, machineEligible:false })
 });
 
 export function getPack(packId) {
@@ -34,7 +34,12 @@ export function validateEntitlementAuthority({ packId, flOz, amount, currency = 
     amount === pack.price &&
     Number(flOz) === pack.flOz &&
     Number.isInteger(pack.flOz) &&
-    (special ? Number(flOz) === 0 && typeof pack.characterId === "string" : pack.flOz > 0);
+    (special
+      ? Number(flOz) === 0 &&
+        typeof pack.characterId === "string" &&
+        pack.cashOnly === true &&
+        pack.machineEligible === false
+      : pack.flOz > 0);
 }
 
 export function auditReceipt(record) {
@@ -46,7 +51,10 @@ export function auditReceipt(record) {
       record?.amount === pack.price &&
       Number(record?.flOz) === pack.flOz &&
       (pack.kind === "special-character"
-        ? record?.productType === "special-character" && record?.characterId === pack.characterId
+        ? record?.productType === "special-character" &&
+          record?.characterId === pack.characterId &&
+          pack.cashOnly === true &&
+          pack.machineEligible === false
         : (record?.productType === "fl-oz" || !record?.productType)),
     packId: record?.packId || null,
     flOz: pack?.flOz ?? null,
@@ -74,6 +82,8 @@ export function reconcileEntitlementAuthority(record) {
   if (pack && record?.amount !== pack.price) reasons.push("AMOUNT_DRIFT");
   if (pack && Number(record?.flOz) !== pack.flOz) reasons.push("FL_OZ_DRIFT");
   if (pack?.kind === "special-character") {
+    if (pack.cashOnly !== true) reasons.push("CASH_ONLY_POLICY_DRIFT");
+    if (pack.machineEligible !== false) reasons.push("MACHINE_ELIGIBILITY_DRIFT");
     if (record?.productType !== "special-character") reasons.push("PRODUCT_TYPE_DRIFT");
     if (record?.characterId !== pack.characterId) reasons.push("CHARACTER_ID_DRIFT");
   } else if (record?.productType && record.productType !== "fl-oz") {
