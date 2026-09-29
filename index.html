@@ -33,6 +33,26 @@
 @keyframes damNationAudioPulse{0%{opacity:0;transform:scale(.72)}22%{opacity:.72}100%{opacity:0;transform:scale(1.08)}}
 @keyframes damNationVoicePulse{0%{opacity:0;transform:scale(.72)}24%{opacity:.9}100%{opacity:0;transform:scale(1.16)}}
 @media (prefers-reduced-motion:reduce){.damNationAudioPulse.active,.damNationAudioPulse.voice{animation:none;opacity:0}}
+/* V2.1.51 — FAST TAP PERFORMANCE ENGINE: hydraulic surge presentation + bird above the scene */
+.geiBirdLayer{z-index:10;overflow:hidden}
+.geiBirdLayer .birdCompanion{left:clamp(4px,calc(var(--bird-x,76%) - 27px),calc(100% - 58px));top:clamp(4px,calc(var(--bird-y,18%) - 23px),calc(100% - 50px))}
+.geiSurgeLayer{z-index:6;overflow:hidden;border-radius:inherit;opacity:0;transition:opacity .35s ease;contain:strict}
+.geiSurgeLayer::before{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--water-bright) 75%,transparent),inset 0 0 38px color-mix(in srgb,var(--water-bright) 42%,transparent);opacity:.6}
+.geiSurgeLayer::after{content:"";position:absolute;left:-20%;right:-20%;bottom:0;height:40%;background:radial-gradient(ellipse 22% 12% at 18% 30%,color-mix(in srgb,var(--foam) 38%,transparent),transparent 70%),radial-gradient(ellipse 26% 10% at 52% 18%,color-mix(in srgb,var(--foam) 30%,transparent),transparent 70%),radial-gradient(ellipse 20% 12% at 84% 34%,color-mix(in srgb,var(--foam) 34%,transparent),transparent 70%),radial-gradient(ellipse 70% 40% at 50% 0%,color-mix(in srgb,var(--water-bright) 30%,transparent),transparent 72%),linear-gradient(0deg,color-mix(in srgb,var(--water-bright) 46%,transparent),color-mix(in srgb,var(--water-bright) 12%,transparent) 70%,transparent);border-radius:50% 50% 0 0/18% 18% 0 0;transform:translate3d(0,62%,0);will-change:transform}
+.geiSurgeKick{position:absolute;inset:-10%;border-radius:50%;background:radial-gradient(circle at 50% 58%,color-mix(in srgb,var(--foam) 42%,transparent),color-mix(in srgb,var(--water-bright) 22%,transparent) 30%,transparent 62%);opacity:0;pointer-events:none;will-change:transform,opacity}
+.geiSurgeLayer.tier-active{opacity:.28}
+.geiSurgeLayer.tier-rapid{opacity:.72}
+.geiSurgeLayer.tier-frenzy{opacity:1}
+.geiSurgeLayer.tier-active::before,.geiSurgeLayer.tier-rapid::before{animation:geiSurgeGlow .9s ease-in-out infinite alternate}
+.geiSurgeLayer.tier-active::after,.geiSurgeLayer.tier-rapid::after{animation:geiSurgeRise 1.4s ease-in-out infinite}
+.geiSurgeLayer.tier-frenzy::before{animation:geiSurgeGlow .42s ease-in-out infinite alternate}
+.geiSurgeLayer.tier-frenzy::after{height:54%;animation:geiSurgeRise .75s ease-in-out infinite}
+@keyframes geiSurgeGlow{0%{opacity:.45}100%{opacity:1}}
+@keyframes geiSurgeRise{0%,100%{transform:translate3d(-4%,62%,0)}50%{transform:translate3d(4%,36%,0)}}
+.tapWaterDrop.surge{width:11px;height:16px}
+.tapWaterRipple.surge{border-width:3px;animation-duration:.95s}
+.tapWaterFlash.surge{width:64px;height:64px}
+@media (prefers-reduced-motion:reduce){.geiSurgeLayer::before,.geiSurgeLayer::after{animation:none!important}}
 </style><style>
 
 :root{
@@ -5220,6 +5240,8 @@ world.addEventListener("click", (e)=>{
 
   state.tapCount++;
   /* V2.1.37 — presentation is fenced off: a visual/audio error must never abort a counted tap. */
+  /* V2.1.51 — the tap above is already counted; everything below is budgeted presentation. */
+  const tapLane = GEI_TAP_PERFORMANCE.enterLane("tap");
   try{
     const hydraulicContext = getTapWaterPointerContext();
     const hydraulicPower = state.tapCount >= getRequiredTaps(state.level) ? 3 : state.tapCount / getRequiredTaps(state.level) >= .75 ? 2 : 1;
@@ -5229,6 +5251,7 @@ world.addEventListener("click", (e)=>{
     try{ triggerDamIteHydraulicReaction(hydraulicContext,{index:state.currentStep,power:hydraulicPower}); }catch(err){}
     try{ triggerDamItePersonality("tap",{hydraulic:hydraulicContext,combo:damIteCombo.count}); }catch(err){}
   }catch(err){ safeWarn("Tap presentation skipped: " + err); }
+  finally{ GEI_TAP_PERFORMANCE.exitLane(tapLane); }
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
 
@@ -7790,6 +7813,417 @@ function resetSystem(){
 
 
 /* =========================================================
+   V2.1.51 — FAST TAP PERFORMANCE ENGINE 💧⚡
+   PLAYER INPUT is never throttled: every tap still runs the gameplay handler
+   synchronously. PRESENTATION is budgeted: effects are pooled, merged per frame,
+   and escalate through four hydraulic tiers —
+     CALM   → gentle stream   (every tap renders on its own, full fidelity)
+     ACTIVE → stronger flow   (same-tap duplicates merge, budgets enforced)
+     RAPID  → rising pressure (taps in one frame merge into one bigger splash)
+     FRENZY → hydraulic surge (one consolidated pulse per beat + surge water + rushing audio bed)
+   A watchdog quietly enters SAFE mode when frames get slow and leaves when load drops.
+   Presentation-only: never touches XP, FL OZ, the store, PayPal, or progression.
+========================================================= */
+const GEI_TAP_PERFORMANCE_CONFIG = Object.freeze({
+  version:"V2.1.51",
+  rateWindowMs:1000,
+  tierHoldMs:450,
+  tiers:Object.freeze([
+    Object.freeze({ id:"calm",   label:"GENTLE STREAM",   minRate:0 }),
+    Object.freeze({ id:"active", label:"STRONGER FLOW",   minRate:3 }),
+    Object.freeze({ id:"rapid",  label:"RISING PRESSURE", minRate:6 }),
+    Object.freeze({ id:"frenzy", label:"HYDRAULIC SURGE", minRate:10 })
+  ]),
+  /* Measured on the V2.1.50 build at 24 taps/s (4× CPU throttle): 2,700 live effect nodes,
+     584 simultaneous audio sources, 3,095 pending timers. These budgets bound all of that. */
+  MAX_ACTIVE_FX_NODES:120,
+  MAX_ACTIVE_WATER_DROPS:56,
+  MAX_ACTIVE_TAP_PULSES:16,
+  MAX_ACTIVE_BURSTS:44,
+  MAX_ACTIVE_ACCENTS:16,
+  MAX_AUDIO_VOICES:24,
+  MAX_EVENT_AUDIO_HEADROOM:8,     // breakthroughs / level moments may borrow a little extra
+  MAX_PENDING_EFFECTS:1,          // taps waiting for the next frame collapse into ONE aggregate
+  POOL_LIMIT:160,
+  sweepMs:110,
+  sameTapMergeMs:34,
+  splashBeatMs:Object.freeze({ rapid:50, frenzy:72 }),   // RAPID/FRENZY splashes land on a beat, carrying every tap in between
+  secondaryAudioShare:.7,         // texture layers yield to the core tap voice when the mix is full
+  reactionGapMs:Object.freeze({ calm:0, active:60, rapid:105, frenzy:140 }),
+  persistIdleMs:1400,
+  persistMaxWaitMs:8000,
+  safe:Object.freeze({ enterFrameMs:34, exitFrameMs:22, minHoldMs:1500, sampleFrames:18, idleMs:1600 })
+});
+const GEI_TAP_TIER_RANK = Object.freeze({ calm:0, active:1, rapid:2, frenzy:3 });
+
+const GEI_TAP_PERFORMANCE = (function(){
+  const C = GEI_TAP_PERFORMANCE_CONFIG;
+  const raw = (fn, ms) => setTimeout(fn, ms);
+  const now = () => performance.now();
+  const S = {
+    installs:0,
+    stamps:new Float64Array(64), head:0, lastTapAt:0, taps:0,
+    tier:"calm", tierSince:0, lowSince:0, decayTimer:0, surges:0,
+    safeMode:false, safeSince:0, safeEntries:0,
+    frames:new Float32Array(C.safe.sampleFrames), frameHead:0, frameCount:0, lastFrameAt:0, watching:false,
+    fx:{ live:[], pool:[], counts:{ drop:0, pulse:0, burst:0, accent:0 }, peakLive:0, spawned:0, recycled:0, sweepTimer:0 },
+    agg:null, aggFrame:0, peakQueue:0, merged:0, rendered:0, lastSplashAt:0,
+    reaction:{ lastAt:0, energy:0, rendered:0, merged:0 },
+    audio:{ ends:[], peak:0, refused:0, started:0, lane:"normal", out:new WeakMap(), noise:new WeakMap(), bed:null },
+    throttles:Object.create(null),
+    persist:{ pending:new Map(), timer:0, firstAt:0, writes:0, scheduled:0 },
+    rect:null, rectAt:0,
+    birdKeepUps:0
+  };
+  S.installs++;
+
+  /* ---------- tap rate → hydraulic tier ---------- */
+  function classifyRate(rate){
+    let id = "calm";
+    for(const t of C.tiers) if(rate >= t.minRate) id = t.id;
+    return id;
+  }
+  function rate(at){
+    const t = at || now(); let n = 0, newest = 0, oldest = Infinity;
+    for(let i = 0; i < S.stamps.length; i++){
+      const s = S.stamps[i];
+      if(s > 0 && t - s <= C.rateWindowMs){ n++; if(s > newest) newest = s; if(s < oldest) oldest = s; }
+    }
+    if(n < 2) return n;
+    /* Short bursts react fast: 4 taps in 250 ms already reads as ~12 taps/s. */
+    const span = Math.max(1, newest - oldest);
+    return Math.max(n, Math.min(30, (n - 1) * 1000 / span * (t - newest < 260 ? 1 : .5)));
+  }
+  function evaluateTier(at){
+    const t = at || now(), want = classifyRate(rate(t)), prev = S.tier;
+    if(GEI_TAP_TIER_RANK[want] >= GEI_TAP_TIER_RANK[prev]){ S.lowSince = 0; if(want !== prev) setTier(want, t); }
+    else{
+      if(!S.lowSince) S.lowSince = t;
+      if(t - S.lowSince >= C.tierHoldMs){ S.lowSince = 0; setTier(want, t); }
+    }
+    return S.tier;
+  }
+  function setTier(next, t){
+    const prev = S.tier; S.tier = next; S.tierSince = t;
+    if(next === "frenzy") S.surges++;
+    try{ onTierChange(prev, next); }catch(e){}
+  }
+  function scheduleDecay(){
+    clearTimeout(S.decayTimer);
+    if(S.tier === "calm") { S.decayTimer = 0; return; }
+    S.decayTimer = raw(() => { S.decayTimer = 0; evaluateTier(); scheduleDecay(); }, C.tierHoldMs + 60);
+  }
+  function noteTap(at){
+    const t = at || now();
+    S.stamps[S.head] = t; S.head = (S.head + 1) % S.stamps.length; S.lastTapAt = t; S.taps++;
+    evaluateTier(t); scheduleDecay(); watch();
+    if(S.tier === "rapid" || S.tier === "frenzy") surgeAudioPulse();
+    return S.tier;
+  }
+  /* Presentation tier: SAFE mode never drops below RAPID (merged, frame-aware rendering). */
+  function presentationTier(){
+    if(S.safeMode && GEI_TAP_TIER_RANK[S.tier] < 2) return "rapid";
+    return S.tier;
+  }
+  function busy(){ return GEI_TAP_TIER_RANK[presentationTier()] >= 2; }
+  function throttle(key, gapMs){
+    const t = now(), last = S.throttles[key] || 0;
+    if(gapMs > 0 && t - last < gapMs) return false;
+    S.throttles[key] = t; return true;
+  }
+
+  /* ---------- watchdog: frame-aware SAFE mode (no UI, no messages) ---------- */
+  function watch(){
+    if(S.watching) return;
+    S.watching = true; S.lastFrameAt = 0;
+    requestAnimationFrame(frame);
+  }
+  function frame(t){
+    if(S.lastFrameAt){
+      S.frames[S.frameHead] = t - S.lastFrameAt; S.frameHead = (S.frameHead + 1) % S.frames.length;
+      S.frameCount = Math.min(S.frames.length, S.frameCount + 1);
+    }
+    S.lastFrameAt = t;
+    const avg = avgFrame(), n = now();
+    if(!S.safeMode && S.frameCount >= 10 && avg > C.safe.enterFrameMs){ S.safeMode = true; S.safeSince = n; S.safeEntries++; }
+    else if(S.safeMode && avg < C.safe.exitFrameMs && n - S.safeSince > C.safe.minHoldMs) S.safeMode = false;
+    if(n - S.lastTapAt > C.safe.idleMs){
+      S.watching = false; S.frameCount = 0; S.safeMode = false; return;   // load dropped → full quality again
+    }
+    requestAnimationFrame(frame);
+  }
+  function avgFrame(){
+    if(!S.frameCount) return 0;
+    let s = 0; for(let i = 0; i < S.frameCount; i++) s += S.frames[i];
+    return s / S.frameCount;
+  }
+
+  /* ---------- pooled, budgeted effect nodes (one sweep timer for all of them) ---------- */
+  function budget(kind){
+    const k = S.safeMode ? .6 : 1;
+    const b = kind === "drop" ? C.MAX_ACTIVE_WATER_DROPS : kind === "pulse" ? C.MAX_ACTIVE_TAP_PULSES
+      : kind === "burst" ? C.MAX_ACTIVE_BURSTS : C.MAX_ACTIVE_ACCENTS;
+    return Math.max(4, Math.round(b * k));
+  }
+  function release(rec){
+    const el = rec.el;
+    if(el.parentNode) el.parentNode.removeChild(el);
+    S.fx.counts[rec.kind] = Math.max(0, S.fx.counts[rec.kind] - 1);
+    if(S.fx.pool.length < C.POOL_LIMIT){ el.className = ""; el.removeAttribute("style"); S.fx.pool.push(el); }
+  }
+  function retireOldest(kind){
+    const live = S.fx.live;
+    let idx = -1;
+    if(kind) for(let i = 0; i < live.length; i++) if(live[i].kind === kind){ idx = i; break; }
+    if(idx < 0) idx = 0;
+    if(!live.length) return;
+    const rec = live.splice(idx, 1)[0]; release(rec); S.fx.recycled++;
+  }
+  function spawn(layer, className, kind, styles, ttl){
+    if(!layer) return null;
+    if(!(kind in S.fx.counts)) kind = "accent";
+    /* Budget reached → replace the oldest effect instead of blocking the new one. */
+    while(S.fx.counts[kind] >= budget(kind)) retireOldest(kind);
+    const globalBudget = Math.round(C.MAX_ACTIVE_FX_NODES * (S.safeMode ? .6 : 1));
+    while(S.fx.live.length >= globalBudget) retireOldest(null);
+    const el = S.fx.pool.length ? S.fx.pool.shift() : document.createElement("div");   // FIFO: never the node just retired
+    el.className = className;
+    if(styles) for(const k in styles) el.style.setProperty(k, styles[k]);
+    layer.appendChild(el);
+    S.fx.live.push({ el, kind, exp:now() + (ttl || 900) });
+    S.fx.counts[kind]++; S.fx.spawned++;
+    if(S.fx.live.length > S.fx.peakLive) S.fx.peakLive = S.fx.live.length;
+    if(!S.fx.sweepTimer) S.fx.sweepTimer = raw(sweep, C.sweepMs);
+    return el;
+  }
+  function sweep(){
+    S.fx.sweepTimer = 0;
+    const t = now(), keep = [];
+    for(const rec of S.fx.live){ if(rec.exp <= t || !rec.el.isConnected) release(rec); else keep.push(rec); }
+    S.fx.live = keep;
+    if(keep.length) S.fx.sweepTimer = raw(sweep, C.sweepMs);
+  }
+  function clearFx(){
+    clearTimeout(S.fx.sweepTimer); S.fx.sweepTimer = 0;
+    S.fx.live.forEach(release); S.fx.live = [];
+  }
+
+  /* ---------- frame-aware tap water: several taps in one frame → one stronger splash ---------- */
+  function presentTapWater(x, y, intensity, context){
+    if(!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    if(!busy()) return spawnTapWaterFeedback(x, y, intensity, context, { tier:presentationTier(), merged:1 });
+    if(!S.agg) S.agg = { x, y, sx:0, sy:0, count:0, intensity:1, context };
+    const a = S.agg;
+    a.count++; a.sx += x; a.sy += y; a.x = x; a.y = y; a.context = context;
+    a.intensity = Math.max(a.intensity, Number(intensity) || 1);
+    S.merged++; if(a.count > S.peakQueue) S.peakQueue = a.count;
+    if(!S.aggFrame) S.aggFrame = requestAnimationFrame(flushTapWater);
+    return true;
+  }
+  function flushTapWater(){
+    S.aggFrame = 0;
+    const a = S.agg; if(!a) return false;
+    const tier = presentationTier(), beat = (C.splashBeatMs[tier] || 0) * (S.safeMode ? 1.4 : 1), t = now();
+    if(beat && t - S.lastSplashAt < beat){ S.aggFrame = requestAnimationFrame(flushTapWater); return false; }   // keep gathering pressure
+    S.agg = null; S.lastSplashAt = t;
+    S.rendered++;
+    /* Aim between the latest tap and the centroid so rapid taps "pull" the water together. */
+    const cx = a.sx / a.count, cy = a.sy / a.count;
+    const x = a.x * .65 + cx * .35, y = a.y * .65 + cy * .35;
+    const prev = S.audio.lane; S.audio.lane = "tap";
+    try{ return spawnTapWaterFeedback(x, y, a.intensity, a.context, { tier:presentationTier(), merged:a.count }); }
+    catch(e){ return false; }
+    finally{ S.audio.lane = prev; }
+  }
+  function cancelPending(){ if(S.aggFrame) cancelAnimationFrame(S.aggFrame); S.aggFrame = 0; S.agg = null; }
+
+  /* ---------- hydraulic reactions: merge duplicates, carry energy into the next beat ---------- */
+  function gateReaction(context, options){
+    const tier = presentationTier(), t = now(), R = S.reaction;
+    const power = Math.max(1, Math.min(3, Number(options && options.power) || 1));
+    const gap = tier === "calm" ? 0 : Math.max(C.sameTapMergeMs, C.reactionGapMs[tier] || 0);
+    if(gap && t - R.lastAt < gap){ R.energy += power; R.merged++; return null; }
+    const energy = R.energy; R.energy = 0; R.lastAt = t; R.rendered++;
+    const boosted = Math.min(3, Math.max(power, energy >= 4 ? 3 : energy >= 2 ? 2 : power));
+    const spreadScale = tier === "frenzy" ? 1.32 + Math.min(.3, energy * .04) : tier === "rapid" ? 1.14 + Math.min(.2, energy * .03) : 1;
+    const countScale = tier === "frenzy" ? .62 : tier === "rapid" ? .78 : 1;
+    if(tier === "rapid" || tier === "frenzy") surgeKick(tier === "frenzy" ? 1 : .6);
+    return Object.assign({}, options, { power:boosted, spreadScale, countScale, surge:tier === "frenzy", tier, energy });
+  }
+  function worldRect(){
+    const t = now();
+    if(!S.rect || t - S.rectAt > 400){ try{ S.rect = world.getBoundingClientRect(); S.rectAt = t; }catch(e){ S.rect = null; } }
+    return S.rect;
+  }
+
+  /* ---------- surge presentation: persistent, compositor-friendly, zero per-tap DOM ---------- */
+  function surgeLayer(){
+    let el = $("geiSurgeLayer");
+    if(el) return el;
+    const w = $("world"); if(!w) return null;
+    el = document.createElement("div"); el.id = "geiSurgeLayer"; el.className = "layer geiSurgeLayer"; el.setAttribute("aria-hidden", "true");
+    el.innerHTML = '<i class="geiSurgeKick"></i>';
+    w.appendChild(el); return el;
+  }
+  function surgeKick(strength){
+    const el = surgeLayer(); if(!el || !el.animate) return;
+    const k = el.firstElementChild; if(!k) return;
+    try{
+      k.animate([{ opacity:0, transform:"scale(.7)" }, { opacity:.55 * strength + .2, transform:"scale(1)" }, { opacity:0, transform:"scale(1.18)" }],
+        { duration:240, easing:"ease-out" });
+    }catch(e){}
+  }
+  function onTierChange(prev, next){
+    const el = surgeLayer();
+    if(el){ el.classList.remove("tier-calm", "tier-active", "tier-rapid", "tier-frenzy"); el.classList.add("tier-" + next); }
+    const w = $("world"); if(w) w.setAttribute("data-flow-tier", next);
+    if(next === "frenzy" && prev !== "frenzy"){
+      try{ showDamIteComboFlash("⚡ HYDRAULIC SURGE ⚡", true); }catch(e){}
+    }
+    surgeAudioLevel(next);
+  }
+
+  /* ---------- audio: voice budget, master limiter, shared noise, rushing-water surge bed ---------- */
+  function voices(){
+    const t = now(), e = S.audio.ends;
+    let w = 0; for(let i = 0; i < e.length; i++) if(e[i] > t) e[w++] = e[i];
+    e.length = w; return w;
+  }
+  function audioAllow(priority){
+    const cap = S.audio.lane === "tap"
+      ? Math.round(C.MAX_AUDIO_VOICES * (S.safeMode ? .6 : 1) * (priority === "primary" ? 1 : C.secondaryAudioShare))
+      : C.MAX_AUDIO_VOICES + C.MAX_EVENT_AUDIO_HEADROOM;
+    if(voices() >= cap){ S.audio.refused++; return false; }
+    return true;
+  }
+  function audioTrack(ctx, stopAt){
+    const ms = Math.max(30, Math.min(4000, ((Number(stopAt) || 0) - (ctx ? ctx.currentTime : 0)) * 1000 + 25));
+    S.audio.ends.push(now() + ms); S.audio.started++;
+    const v = S.audio.ends.length; if(v > S.audio.peak) S.audio.peak = v;
+  }
+  function audioOut(ctx){
+    if(!ctx) return null;
+    let out = S.audio.out.get(ctx);
+    if(out) return out;
+    try{
+      out = ctx.createDynamicsCompressor();
+      out.threshold.value = -14; out.knee.value = 12; out.ratio.value = 5; out.attack.value = .003; out.release.value = .2;
+      out.connect(ctx.destination);
+    }catch(e){ out = ctx.destination; }
+    S.audio.out.set(ctx, out); return out;
+  }
+  function sharedNoise(ctx, duration){
+    if(duration > 2.9) return null;
+    let b = S.audio.noise.get(ctx);
+    if(!b){
+      const n = Math.floor(ctx.sampleRate * 3); b = ctx.createBuffer(1, n, ctx.sampleRate);
+      const d = b.getChannelData(0); for(let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      S.audio.noise.set(ctx, b);
+    }
+    return b;
+  }
+  function noiseOffset(buffer, duration){ return Math.max(0, Math.random() * (buffer.duration - duration - .05)); }
+  function enterLane(lane){ const prev = S.audio.lane; S.audio.lane = lane; return prev; }
+  function exitLane(prev){ S.audio.lane = prev || "normal"; }
+  function surgeTarget(tier){ return tier === "frenzy" ? .03 : tier === "rapid" ? .015 : 0; }
+  function surgeAudioLevel(tier){
+    const ctx = (typeof audioCtx !== "undefined" && audioCtx && audioCtx.state === "running") ? audioCtx : null;
+    const target = surgeTarget(tier), B = S.audio.bed;
+    if(!ctx) return;
+    try{
+      const t = ctx.currentTime;
+      if(!target){
+        if(B){ B.g.gain.cancelScheduledValues(t); B.g.gain.setTargetAtTime(.0001, t, .18); B.src.stop(t + 1.1); S.audio.bed = null; }
+        return;
+      }
+      if(!B || B.ctx !== ctx){
+        const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+        src.buffer = sharedNoise(ctx, 1); src.loop = true;
+        f.type = "bandpass"; f.Q.value = .85; f.frequency.value = 460;
+        g.gain.value = .0001;
+        src.connect(f); f.connect(g); g.connect(audioOut(ctx));
+        src.start(t, Math.random() * 2);
+        S.audio.bed = { ctx, src, f, g };
+      }
+      const bed = S.audio.bed, p = getTapWaterProfile(tapFeelState.lastContext || "mountain");
+      bed.g.gain.cancelScheduledValues(t); bed.g.gain.setTargetAtTime(target, t, .14);
+      bed.f.frequency.cancelScheduledValues(t); bed.f.frequency.setTargetAtTime(tier === "frenzy" ? p.noise[1] * 1.15 : p.noise[0] * 1.2, t, .2);
+    }catch(e){}
+  }
+  /* Each tap in RAPID/FRENZY breathes into the bed instead of spawning new nodes → a rushing rhythm. */
+  function surgeAudioPulse(){
+    const B = S.audio.bed;
+    if(!B){ if(GEI_TAP_TIER_RANK[S.tier] >= 2) surgeAudioLevel(S.tier); return; }
+    try{
+      const t = B.ctx.currentTime, base = surgeTarget(S.tier) || .015, jitter = .9 + Math.random() * .25;
+      B.g.gain.cancelScheduledValues(t);
+      B.g.gain.setTargetAtTime(base * 2.1 * jitter, t, .012);
+      B.g.gain.setTargetAtTime(base, t + .045, .08);
+      const f = B.f.frequency.value || 600;
+      B.f.frequency.cancelScheduledValues(t);
+      B.f.frequency.setTargetAtTime(Math.min(2400, f * (1.08 + Math.random() * .1)), t, .02);
+      B.f.frequency.setTargetAtTime(Math.max(260, f), t + .06, .12);
+    }catch(e){}
+  }
+
+  /* ---------- batched persistence for learning systems (bird memory, mood, songbook…) ---------- */
+  function persist(key, writer){
+    if(typeof writer !== "function") return false;
+    const P = S.persist, t = now();
+    P.pending.set(key, writer); P.scheduled++;
+    if(!P.firstAt) P.firstAt = t;
+    clearTimeout(P.timer);
+    const wait = Math.max(0, Math.min(C.persistIdleMs, C.persistMaxWaitMs - (t - P.firstAt)));
+    P.timer = raw(flushPersist, wait);
+    return true;
+  }
+  function flushPersist(){
+    const P = S.persist;
+    clearTimeout(P.timer); P.timer = 0; P.firstAt = 0;
+    const jobs = Array.from(P.pending.values()); P.pending.clear();
+    jobs.forEach(fn => { try{ fn(); P.writes++; }catch(e){} });
+    return jobs.length;
+  }
+  function install(){
+    if(S.installed) return false;
+    S.installed = true;
+    document.addEventListener("visibilitychange", () => { if(document.hidden) flushPersist(); });
+    window.addEventListener("pagehide", flushPersist);
+    surgeLayer();
+    return true;
+  }
+
+  function engineTimers(){
+    return (S.fx.sweepTimer ? 1 : 0) + (S.persist.timer ? 1 : 0) + (S.decayTimer ? 1 : 0);
+  }
+  function snapshot(){
+    return {
+      version:C.version, tier:S.tier, presentationTier:presentationTier(), rate:+rate().toFixed(1), safeMode:S.safeMode, safeEntries:S.safeEntries,
+      taps:S.taps, surges:S.surges, avgFrameMs:+avgFrame().toFixed(1),
+      fxLive:S.fx.live.length, fxPeak:S.fx.peakLive, fxSpawned:S.fx.spawned, fxRecycled:S.fx.recycled, fxPool:S.fx.pool.length, fxCounts:Object.assign({}, S.fx.counts),
+      tapsMerged:S.merged, splashesRendered:S.rendered, peakQueueDepth:S.peakQueue, pendingAggregates:S.agg ? 1 : 0,
+      reactionsRendered:S.reaction.rendered, reactionsMerged:S.reaction.merged,
+      audioVoices:voices(), audioPeak:S.audio.peak, audioRefused:S.audio.refused, audioStarted:S.audio.started, surgeBed:!!S.audio.bed,
+      persistPending:S.persist.pending.size, persistWrites:S.persist.writes, persistScheduled:S.persist.scheduled,
+      engineTimers:engineTimers(), birdKeepUps:S.birdKeepUps, installs:S.installs
+    };
+  }
+  function resetStats(){
+    S.fx.peakLive = S.fx.live.length; S.fx.spawned = 0; S.fx.recycled = 0; S.merged = 0; S.rendered = 0; S.peakQueue = 0;
+    S.reaction.rendered = 0; S.reaction.merged = 0; S.audio.peak = voices(); S.audio.refused = 0; S.audio.started = 0;
+    S.persist.writes = 0; S.persist.scheduled = 0; S.birdKeepUps = 0; S.surges = 0; S.safeEntries = 0;
+  }
+
+  return {
+    config:C, state:S, classifyRate, rate, noteTap, tier:() => S.tier, presentationTier, busy, throttle,
+    spawn, sweep, clearFx, budget, presentTapWater, flushTapWater, cancelPending, gateReaction, worldRect,
+    audioAllow, audioTrack, audioOut, sharedNoise, noiseOffset, enterLane, exitLane, surgeKick,
+    persist, flushPersist, install, snapshot, resetStats, avgFrame, voices,
+    get safeMode(){ return S.safeMode; }
+  };
+})();
+
+/* =========================================================
    TOAST
 ========================================================= */
 let toastTimer;
@@ -7846,9 +8280,11 @@ function playRandomTapTone(context,intensity,combo=0){
     const detune=(Math.random()-.5)*10;
     const freq=Math.max(120,base*rise+detune);
     const type=(combo>=6||context==="wheel")?"triangle":(Math.random()<.35?"sine":"triangle");
-    damVoice({freq,to:freq*(k===3?1.16:1.06),time:combo>=6?.095:(k===3?.08:.06),
-      gain:combo>=8?.024:combo>=6?.020:(k===3?.017:.013),type,gesture:true});
-    if(Math.random()<.22 && combo<6){
+    /* V2.1.51 — in a FRENZY the tink tightens into a rhythm riding on the surge bed. */
+    const frenzy=GEI_TAP_PERFORMANCE.presentationTier()==="frenzy",busy=GEI_TAP_PERFORMANCE.busy();
+    damVoice({freq,to:freq*(k===3?1.16:1.06),time:frenzy?.05:combo>=6?.095:(k===3?.08:.06),
+      gain:(combo>=8?.024:combo>=6?.020:(k===3?.017:.013))*(frenzy?.8:1),type,gesture:true,priority:"primary"});
+    if(!busy && Math.random()<.22 && combo<6){
       damVoice({freq:freq*1.5,time:.045,gain:.006,type:"sine",delay:.035,gesture:true});
     }
     return {freq,scaleSize:scale.length};
@@ -7858,27 +8294,24 @@ function playRandomTapTone(context,intensity,combo=0){
 function triggerTapFeel(clientX,clientY,intensity,context,combo=0){
   const x=Number(clientX),y=Number(clientY);
   if(!Number.isFinite(x)||!Number.isFinite(y))return false;
+  /* V2.1.51 — pooled beat + tier-aware screen response (no per-tap reflow storms). */
+  const perf=GEI_TAP_PERFORMANCE,tier=perf.presentationTier(),rank=GEI_TAP_TIER_RANK[tier];
   const layer=$("tapFeelPulse");
   if(layer){
     layer.style.setProperty("--tap-x",x+"px");
     layer.style.setProperty("--tap-y",y+"px");
-    layer.className="tapFeelPulse";
-    void layer.offsetWidth;
-    layer.className="tapFeelPulse";
-    const beat=document.createElement("div"); beat.className="tapFeelBeat";
-    beat.style.setProperty("left",x+"px"); beat.style.setProperty("top",y+"px");
-    layer.appendChild(beat);
-    setTimeout(()=>beat.remove(),520);
+    if(rank<2||perf.throttle("tapFeelBeat",45)) perf.spawn(layer,"tapFeelBeat","pulse",{left:x+"px",top:y+"px"},520);
   }
   try{
     const worldNode=$("world");
-    if(worldNode){
+    /* Shaking the whole world repaints every glow on mobile; RAPID/FRENZY hand that job to the surge layer. */
+    if(worldNode&&rank<2&&perf.throttle("worldHit",rank?110:0)){
       worldNode.classList.remove("tap-feel-hit"); void worldNode.offsetWidth; worldNode.classList.add("tap-feel-hit");
     }
     const g=stationsGroup?.querySelector?.('.station[data-index="'+Math.max(0,Math.min(5,Number(state?.currentStep)||0))+'"]');
-    if(g){
+    if(g&&perf.throttle("stationHit",[0,60,120,170][rank]||0)){
       g.classList.remove("tap-feel-hit"); void g.offsetWidth; g.classList.add("tap-feel-hit");
-      setTimeout(()=>g.classList.remove("tap-feel-hit"),220);
+      clearTimeout(g.__geiTapFeelTimer); g.__geiTapFeelTimer=setTimeout(()=>g.classList.remove("tap-feel-hit"),220);
     }
   }catch(e){}
   tapFeelState.lastX=x;tapFeelState.lastY=y;tapFeelState.lastAt=performance.now();tapFeelState.lastContext=context||"mountain";
@@ -7937,6 +8370,9 @@ function playRapidTapAudio(context,intensity){
 
 function playContextualTapWaterSound(context,intensity){
   playRapidTapAudio(context,intensity);
+  /* V2.1.51 — RAPID alternates the texture layer; FRENZY hands it to the rushing surge bed. */
+  const tier=GEI_TAP_PERFORMANCE.presentationTier();
+  if(tier==="frenzy"||(tier==="rapid"&&!GEI_TAP_PERFORMANCE.throttle("tapTexture",150)))return;
   try{ playTapTexture(context,intensity); }catch(e){}
 }
 
@@ -7947,45 +8383,45 @@ function playTapBreakthroughAccent(){
   }catch(e){}
 }
 
-function spawnTapWaterFeedback(clientX,clientY,intensity,context){
+function spawnTapWaterFeedback(clientX,clientY,intensity,context,opts={}){
   const layer=$("tapWaterLayer");
   if(!layer||!Number.isFinite(clientX)||!Number.isFinite(clientY))return false;
-  const power=Math.max(1,Math.min(3,Number(intensity)||1));
+  /* V2.1.51 — pooled + budgeted. A merged splash (several taps in one frame) grows
+     bigger and wider instead of multiplying node count. */
+  const perf=GEI_TAP_PERFORMANCE,tier=opts.tier||perf.presentationTier(),merged=Math.max(1,Number(opts.merged)||1);
+  const power=Math.max(1,Math.min(3,(Number(intensity)||1)+(merged>=3?1:0)));
   const resolved=getTapWaterProfile(context),contextId=TAP_WATER_PROFILES[context]?context:"mountain";
-  layer.dataset.tapContext=contextId;
-  const ripple=document.createElement("div"); ripple.className="tapWaterRipple"; ripple.style.left=clientX+"px"; ripple.style.top=clientY+"px"; layer.appendChild(ripple);
-  const flash=document.createElement("div"); flash.className="tapWaterFlash"; flash.style.left=clientX+"px"; flash.style.top=clientY+"px"; layer.appendChild(flash);
-  if(contextId==="wheel"||contextId==="ocean"){
-    const ring=document.createElement("div"); ring.className="tapWaterContextRing "+contextId; ring.style.left=clientX+"px"; ring.style.top=clientY+"px"; layer.appendChild(ring); setTimeout(()=>ring.remove(),1250);
+  const surge=tier==="frenzy",pressure=tier==="rapid";
+  if(layer.dataset.tapContext!==contextId)layer.dataset.tapContext=contextId;
+  const at={left:clientX+"px",top:clientY+"px"};
+  perf.spawn(layer,"tapWaterRipple"+(surge?" surge":""),"pulse",at,1200);
+  perf.spawn(layer,"tapWaterFlash"+(surge?" surge":""),"pulse",at,1200);
+  if(contextId==="wheel"||contextId==="ocean"||surge){
+    perf.spawn(layer,"tapWaterContextRing "+(contextId==="wheel"||contextId==="ocean"?contextId:"ocean"),"pulse",at,1250);
   }
-  const count=Math.max(3,Math.round(resolved.drops*(power===3?1.45:power===2?1.15:.72)));
-  const spread=resolved.spread*(power===3?1.28:power===2?1.1:.9);
+  const density=surge?.62+Math.min(.5,merged*.08):pressure?.8+Math.min(.35,merged*.1):1;
+  const count=Math.max(3,Math.round(resolved.drops*(power===3?1.45:power===2?1.15:.72)*density));
+  const spread=resolved.spread*(power===3?1.28:power===2?1.1:.9)*(surge?1.35:pressure?1.15:1);
+  const dropClass="tapWaterDrop"+(surge?" surge":"");
   for(let i=0;i<count;i++){
-    const drop=document.createElement("div"); drop.className="tapWaterDrop";
     const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.5,distance=spread*(.62+Math.random()*.6);
-    drop.style.left=clientX+"px"; drop.style.top=clientY+"px";
-    drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-resolved.rise)+"px");
-    drop.style.animationDelay=Math.random()*.06+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),900);
+    perf.spawn(layer,dropClass,"drop",{left:clientX+"px",top:clientY+"px","--dx":Math.cos(angle)*distance+"px","--dy":(Math.sin(angle)*distance-resolved.rise*(surge?1.6:1))+"px","animation-delay":Math.random()*.06+"s"},900);
   }
-  setTimeout(()=>{ripple.remove();flash.remove()},1200);
   try{spawnTapAccent(layer,clientX,clientY,contextId,power)}catch(e){}
   tapWaterPulseCount++;
   playContextualTapWaterSound(contextId,power);
   return true;
 }
 function spawnHydraulicBreakthrough(index){
-  triggerDamIteHydraulicReaction("ocean",{index,power:3});
+  triggerDamIteHydraulicReaction("ocean",{index,power:3,important:true});
   const layer=$("tapWaterLayer"); if(!layer)return false;
-  const context=getTapWaterContext({index,breakthrough:true}),rect=world?.getBoundingClientRect?.();
+  const context=getTapWaterContext({index,breakthrough:true}),rect=GEI_TAP_PERFORMANCE.worldRect();
   const x=rect?rect.left+rect.width*.5:innerWidth*.5,y=rect?rect.top+rect.height*.68:innerHeight*.68;
-  const shown=spawnTapWaterFeedback(x,y,3,context); if(!shown)return false;
+  const shown=spawnTapWaterFeedback(x,y,3,context,{tier:"calm",merged:1}); if(!shown)return false;
   const p=getTapWaterProfile(context);
   for(let i=0;i<p.drops+8;i++){
-    const drop=document.createElement("div"); drop.className="tapWaterBreakthrough";
     const angle=(i/(p.drops+8))*Math.PI*2,distance=p.spread*(.8+Math.random()*.75);
-    drop.style.left=x+"px"; drop.style.top=y+"px";
-    drop.style.setProperty("--dx",Math.cos(angle)*distance+"px"); drop.style.setProperty("--dy",(Math.sin(angle)*distance-p.rise*2)+"px");
-    drop.style.animationDelay=Math.random()*.12+"s"; layer.appendChild(drop); setTimeout(()=>drop.remove(),1150);
+    GEI_TAP_PERFORMANCE.spawn(layer,"tapWaterBreakthrough","burst",{left:x+"px",top:y+"px","--dx":Math.cos(angle)*distance+"px","--dy":(Math.sin(angle)*distance-p.rise*2)+"px","animation-delay":Math.random()*.12+"s"},1150);
   }
   playTapBreakthroughAccent();
   try{geiNatureBreakthrough("ocean")}catch(e){}
@@ -8096,38 +8532,39 @@ const DAM_ITE_HYDRAULIC_REACTIONS=Object.freeze({
 const damIteHydraulicReaction={timers:[],count:0,lastContext:null};
 function triggerDamIteHydraulicReaction(context,options={}){
   const p=DAM_ITE_HYDRAULIC_REACTIONS[context]||DAM_ITE_HYDRAULIC_REACTIONS.mountain;
+  /* V2.1.51 — rapid calls merge into one stronger pulse; the energy carries into the next beat. */
+  if(!options.important){ const gated=GEI_TAP_PERFORMANCE.gateReaction(context,options); if(!gated)return true; options=gated; }
   const index=Number.isInteger(options.index)?options.index:Number(state?.currentStep);
   const station=stationsGroup?.querySelector?.('.station[data-index="'+Math.max(0,Math.min(5,index))+'"]');
   if(station){
     station.classList.remove("hydraulicReact"); void station.offsetWidth;
     station.dataset.reaction=context; station.classList.add("hydraulicReact");
     const ttl=context==="ocean"?1050:720;
-    const timer=setTimeout(()=>station.classList.remove("hydraulicReact"),ttl);
-    damIteHydraulicReaction.timers.push(timer);
+    clearTimeout(station.__geiReactTimer);                  // one timer per station, never an ever-growing list
+    station.__geiReactTimer=setTimeout(()=>station.classList.remove("hydraulicReact"),ttl);
   }
   const layer=$("tapWaterLayer");
   if(layer){
-    const rect=world?.getBoundingClientRect?.();
+    const rect=GEI_TAP_PERFORMANCE.worldRect();
     const baseX=Number.isFinite(options.x)?options.x:(rect?rect.left+rect.width*.5:innerWidth*.5);
     const baseY=Number.isFinite(options.y)?options.y:(rect?rect.top+rect.height*(context==="ocean"?.72:.5):innerHeight*.55);
     const power=Math.max(1,Math.min(3,Number(options.power)||1));
-    layer.dataset.hydraulicReaction=context;
-    const count=Math.max(3,Math.round(p.count*(power===3?1.35:power===2?1:.68)));
+    const spreadScale=Number(options.spreadScale)||1,countScale=Number(options.countScale)||1;
+    if(layer.dataset.hydraulicReaction!==context)layer.dataset.hydraulicReaction=context;
+    const count=Math.max(3,Math.round(p.count*(power===3?1.35:power===2?1:.68)*countScale));
+    const big=context==="ocean"||options.surge;
     for(let i=0;i<count;i++){
-      const d=document.createElement("div");
-      d.className="hydraulicReactionBurst"+(p.ring&&i===0?" ring":"")+(context==="ocean"?" surge":"");
-      const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.28, distance=p.spread*(.55+Math.random()*.75);
-      d.style.left=baseX+"px"; d.style.top=baseY+"px";
-      d.style.setProperty("--dx",Math.cos(angle)*distance+"px");
-      d.style.setProperty("--dy",(Math.sin(angle)*distance-p.rise)+"px");
-      d.style.animationDelay=(Math.random()*.08).toFixed(2)+"s";
-      layer.appendChild(d); setTimeout(()=>d.remove(),context==="ocean"?1250:900);
+      const angle=(i/count)*Math.PI*2+(Math.random()-.5)*.28, distance=p.spread*spreadScale*(.55+Math.random()*.75);
+      GEI_TAP_PERFORMANCE.spawn(layer,"hydraulicReactionBurst"+(p.ring&&i===0?" ring":"")+(big?" surge":""),"burst",{
+        left:baseX+"px",top:baseY+"px","--dx":Math.cos(angle)*distance+"px","--dy":(Math.sin(angle)*distance-p.rise*(options.surge?1.5:1))+"px",
+        "animation-delay":(Math.random()*.08).toFixed(2)+"s"},big?1250:900);
     }
   }
   damIteHydraulicReaction.count++; damIteHydraulicReaction.lastContext=context;
   try{
-    const notes=p.notes;
-    notes.forEach((freq,i)=>setTimeout(()=>playTone(freq,i===notes.length-1 ? .2 : .11,p.wave),i*48));
+    const notes=p.notes,busy=GEI_TAP_PERFORMANCE.busy();
+    /* Notes are scheduled on the audio clock — no timer per note. */
+    notes.forEach((freq,i)=>{ if(!busy||i===0||i===notes.length-1) playTone(freq,i===notes.length-1 ? .2 : .11,p.wave,i*.048); });
     playWaterNoise(context==="ocean"?.34:.11+((Number(options.power)||1)*.025),p.noise[0],p.noise[1],context==="ocean"?.12:.045);
   }catch(e){}
   return true;
@@ -8152,12 +8589,16 @@ document.addEventListener("pointerdown",e=>{
     const required=getRequiredTaps(state.level),nextTap=state.tapCount+1;
     if(nextTap>=required)intensity=3; else if(nextTap/required>=.75)intensity=2;
   }
+  const lane=GEI_TAP_PERFORMANCE.enterLane("tap");
   try{
+    GEI_TAP_PERFORMANCE.noteTap();                         // V2.1.51 — measure tap rate → hydraulic tier
     const tapContext=getTapWaterPointerContext();
-    spawnTapWaterFeedback(e.clientX,e.clientY,intensity,tapContext);
+    GEI_TAP_PERFORMANCE.presentTapWater(e.clientX,e.clientY,intensity,tapContext);   // frame-aware, pooled
     triggerDamItePersonality("tap",{hydraulic:tapContext});
   }catch(err){ safeWarn("Tap water skipped: " + err); }   // V2.1.37 — presentation never breaks input
+  finally{ GEI_TAP_PERFORMANCE.exitLane(lane); }
 },{capture:true,passive:true});
+GEI_TAP_PERFORMANCE.install();
 
 /* =========================================================
    FULLSCREEN
@@ -9384,19 +9825,27 @@ function getAudio(){
   if(audioCtx.state === "suspended") audioCtx.resume();
   return audioCtx;
 }
-function playTone(freq, time, type){
+/* V2.1.51 — every synth voice passes the shared voice budget and a gentle master limiter,
+   so a tap frenzy gets denser instead of clipping or piling up hundreds of nodes. */
+function playTone(freq, time, type, delay){
   const ctx = getAudio();
+  if(!GEI_TAP_PERFORMANCE.audioAllow()) return false;
+  const t0 = ctx.currentTime + Math.max(0, Number(delay) || 0);
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = type || "sine";
-  osc.frequency.value = freq;
-  gain.gain.value = 0.05;
-  osc.connect(gain); gain.connect(ctx.destination);
-  osc.start();
-  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + time);
-  osc.stop(ctx.currentTime + time);
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0.05, t0);
+  osc.connect(gain); gain.connect(GEI_TAP_PERFORMANCE.audioOut(ctx));
+  osc.start(t0);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + time);
+  osc.stop(t0 + time);
+  GEI_TAP_PERFORMANCE.audioTrack(ctx, t0 + time);
+  return true;
 }
 function noiseBuffer(ctx, duration){
+  const shared = GEI_TAP_PERFORMANCE.sharedNoise(ctx, duration);   // V2.1.51 — one reusable noise buffer
+  if(shared) return shared;
   const bufferSize = ctx.sampleRate * duration;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -9405,6 +9854,7 @@ function noiseBuffer(ctx, duration){
 }
 function playWaterNoise(duration, startFreq, endFreq, peakGain){
   const ctx = getAudio();
+  if(!GEI_TAP_PERFORMANCE.audioAllow()) return false;
   const src = ctx.createBufferSource();
   src.buffer = noiseBuffer(ctx, duration);
   const filter = ctx.createBiquadFilter();
@@ -9416,9 +9866,11 @@ function playWaterNoise(duration, startFreq, endFreq, peakGain){
   gain.gain.setValueAtTime(0.0001, ctx.currentTime);
   gain.gain.linearRampToValueAtTime(peakGain, ctx.currentTime + duration*0.25);
   gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
-  src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-  src.start();
+  src.connect(filter); filter.connect(gain); gain.connect(GEI_TAP_PERFORMANCE.audioOut(ctx));
+  src.start(ctx.currentTime, GEI_TAP_PERFORMANCE.noiseOffset(src.buffer, duration));
   src.stop(ctx.currentTime + duration);
+  GEI_TAP_PERFORMANCE.audioTrack(ctx, ctx.currentTime + duration);
+  return true;
 }
 
 function playWaterTap(tapCount){
@@ -9521,6 +9973,7 @@ function livingAudioCtx(allowCreate){
 }
 function damVoice(o){
   const ctx = livingAudioCtx(!!o.gesture); if(!ctx) return false;
+  if(!GEI_TAP_PERFORMANCE.audioAllow(o.priority)) return false;
   try{
     const t0 = ctx.currentTime + (o.delay || 0), dur = Math.max(.03, o.time || .1);
     const osc = ctx.createOscillator(), g = ctx.createGain();
@@ -9530,13 +9983,15 @@ function damVoice(o){
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.linearRampToValueAtTime(o.gain || .02, t0 + Math.min(.025, dur * .25));
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    osc.connect(g); g.connect(ctx.destination);
+    osc.connect(g); g.connect(GEI_TAP_PERFORMANCE.audioOut(ctx));
     osc.start(t0); osc.stop(t0 + dur + .03);
+    GEI_TAP_PERFORMANCE.audioTrack(ctx, t0 + dur + .03);
     return true;
   }catch(e){ return false; }
 }
 function damNoise(o){
   const ctx = livingAudioCtx(!!o.gesture); if(!ctx) return false;
+  if(!GEI_TAP_PERFORMANCE.audioAllow()) return false;
   try{
     const t0 = ctx.currentTime + (o.delay || 0), dur = Math.max(.05, o.dur || .2);
     const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx, dur);
@@ -9547,8 +10002,9 @@ function damNoise(o){
     g.gain.setValueAtTime(0.0001, t0);
     g.gain.linearRampToValueAtTime(o.gain || .02, t0 + dur * .25);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    src.connect(f); f.connect(g); g.connect(ctx.destination);
-    src.start(t0); src.stop(t0 + dur + .03);
+    src.connect(f); f.connect(g); g.connect(GEI_TAP_PERFORMANCE.audioOut(ctx));
+    src.start(t0, GEI_TAP_PERFORMANCE.noiseOffset(src.buffer, dur)); src.stop(t0 + dur + .03);
+    GEI_TAP_PERFORMANCE.audioTrack(ctx, t0 + dur + .03);
     return true;
   }catch(e){ return false; }
 }
@@ -9726,6 +10182,7 @@ function showLivingBadge(title, sub, ms){
   if(sub){ const s = document.createElement("small"); s.textContent = sub; b.appendChild(s); }
   try { const w = $("world").getBoundingClientRect(); if(w.height > 120) b.style.top = Math.round(w.top + 58) + "px"; } catch(e){}   // sit inside the world, never over the HUD stats
   b.classList.remove("show"); void b.offsetWidth; b.classList.add("show");
+  try { if($("geiBirdCompanion")){ geiBirdObstacleCache.at = 0; geiBirdCompanionMove(); } } catch(e){}   // V2.1.51 — the bird hops out from under the badge
   clearTimeout(livingBadgeTimer);
   livingBadgeTimer = setTimeout(() => { b.classList.remove("show"); setTimeout(() => { if(!b.classList.contains("show")) b.innerHTML = ""; }, 500); }, ms || 2600);
   return true;
@@ -9758,7 +10215,8 @@ function resumeLivingWorld(){ if(livingWorld.started || !livingWorld.moment) ret
 /* ---------- hydraulic tap polish (builds on V2.1.11; called from its presentation functions) ---------- */
 function spawnTapAccent(layer, x, y, context, power){
   if(!layer || livingReducedMotion()) return 0;
-  const add = (cls, vars, ttl) => { const v = Object.assign({ "--x":x + "px", "--y":y + "px" }, vars || {}); livingNode(layer, "tapAccent " + cls, v, ttl || 1500); };
+  /* V2.1.51 — pooled + budgeted: past the accent budget the oldest accent is retired, never the new one. */
+  const add = (cls, vars, ttl) => { const v = Object.assign({ "--x":x + "px", "--y":y + "px" }, vars || {}); if(v.animationDelay){ v["animation-delay"] = v.animationDelay; delete v.animationDelay; } GEI_TAP_PERFORMANCE.spawn(layer, "tapAccent " + cls, "accent", v, ttl || 1500); };
   const big = power >= 2, huge = power >= 3;
   let n = 0;
   if(context === "mountain"){ n = huge ? 5 : big ? 3 : 1; for(let i = 0; i < n; i++) add("rise", { "--dx":rnd(-12, 12).toFixed(0) + "px", "--h":rnd(40, 80).toFixed(0) + "px" }, 900); }
@@ -10112,11 +10570,12 @@ function runDamItePersonalitySelfTest(){
 const GEI_DAM_NATION_AUDIO=Object.freeze({version:"V2.1.50",enabled:true,master:.16,minGapMs:46,maxVoices:8,voiceCooldownMs:1450,contexts:Object.freeze({
 mountain:{body:72,tink:190,noise:180,release:620,pan:-.12},dam:{body:92,tink:220,noise:260,release:760,pan:-.04},reservoir:{body:68,tink:260,noise:420,release:900,pan:.12},sluice:{body:82,tink:310,noise:720,release:1350,pan:-.08},wheel:{body:76,tink:230,noise:520,release:1080,pan:.08},ocean:{body:58,tink:175,noise:340,release:720,pan:.16}})});
 let geiDamNationAudioState={ctx:null,noiseBuffer:null,lastTapAt:0,lastVoiceAt:0,voices:0};
-function geiDamNationAudioContext(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;if(!geiDamNationAudioState.ctx)geiDamNationAudioState.ctx=new A();if(geiDamNationAudioState.ctx.state==="suspended")geiDamNationAudioState.ctx.resume().catch(()=>{});return geiDamNationAudioState.ctx}catch(e){return null}}
+/* V2.1.51 — DAM NATION shares the game's single AudioContext (mobile browsers limit contexts). */
+function geiDamNationAudioContext(){try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;geiDamNationAudioState.ctx=getAudio();return geiDamNationAudioState.ctx}catch(e){return null}}
 function geiDamNationNoiseBuffer(c){if(geiDamNationAudioState.noiseBuffer)return geiDamNationAudioState.noiseBuffer;const n=Math.floor(c.sampleRate*.18),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n*.18);return geiDamNationAudioState.noiseBuffer=b}
-function geiDamNationTone(c,f,d,gain,when,type,pan){const o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+when;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=pan||0;o.connect(g);g.connect(p);p.connect(c.destination);o.start(t);o.stop(t+d+.02)}
-function geiDamNationWater(c,scene,when,intensity){const d=GEI_DAM_NATION_AUDIO.contexts[scene]||GEI_DAM_NATION_AUDIO.contexts.mountain,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+when;s.buffer=geiDamNationNoiseBuffer(c);f.type="bandpass";f.Q.value=.72;f.frequency.setValueAtTime(d.noise*.72,t);f.frequency.exponentialRampToValueAtTime(d.release,t+.11);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(GEI_DAM_NATION_AUDIO.master*(.32+Math.min(1.5,intensity||1)*.09),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+.12);p.pan.value=d.pan;s.connect(f);f.connect(g);g.connect(p);p.connect(c.destination);s.start(t);s.stop(t+.15)}
-function geiDamNationPulse(kind){try{const w=document.getElementById("world");if(!w)return;let e=w.querySelector(".damNationAudioPulse");if(!e){e=document.createElement("div");e.className="damNationAudioPulse";w.appendChild(e)}e.classList.remove("active","voice");void e.offsetWidth;e.classList.add(kind==="voice"?"voice":"active")}catch(e){}}
+function geiDamNationTone(c,f,d,gain,when,type,pan){if(!GEI_TAP_PERFORMANCE.audioAllow("primary"))return false;const o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+when;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,gain),t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=pan||0;o.connect(g);g.connect(p);p.connect(GEI_TAP_PERFORMANCE.audioOut(c));o.start(t);o.stop(t+d+.02);GEI_TAP_PERFORMANCE.audioTrack(c,t+d+.02);return true}
+function geiDamNationWater(c,scene,when,intensity){if(!GEI_TAP_PERFORMANCE.audioAllow("primary"))return false;const d=GEI_DAM_NATION_AUDIO.contexts[scene]||GEI_DAM_NATION_AUDIO.contexts.mountain,s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+when;s.buffer=geiDamNationNoiseBuffer(c);f.type="bandpass";f.Q.value=.72;f.frequency.setValueAtTime(d.noise*.72,t);f.frequency.exponentialRampToValueAtTime(d.release,t+.11);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(GEI_DAM_NATION_AUDIO.master*(.32+Math.min(1.5,intensity||1)*.09),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+.12);p.pan.value=d.pan;s.connect(f);f.connect(g);g.connect(p);p.connect(GEI_TAP_PERFORMANCE.audioOut(c));s.start(t,Math.random()*.02);s.stop(t+.15);GEI_TAP_PERFORMANCE.audioTrack(c,t+.15);return true}
+function geiDamNationPulse(kind){try{if(kind!=="voice"&&!GEI_TAP_PERFORMANCE.throttle("damNationPulse",[0,80,160,220][GEI_TAP_TIER_RANK[GEI_TAP_PERFORMANCE.presentationTier()]]||0))return;const w=document.getElementById("world");if(!w)return;let e=w.querySelector(".damNationAudioPulse");if(!e){e=document.createElement("div");e.className="damNationAudioPulse";w.appendChild(e)}e.classList.remove("active","voice");void e.offsetWidth;e.classList.add(kind==="voice"?"voice":"active")}catch(e){}}
 function geiDamNationTapSound(context="mountain",intensity=1,combo=0){const n=performance.now();if(n-geiDamNationAudioState.lastTapAt<GEI_DAM_NATION_AUDIO.minGapMs||geiDamNationAudioState.voices>=GEI_DAM_NATION_AUDIO.maxVoices)return false;const c=geiDamNationAudioContext();if(!c)return false;const d=GEI_DAM_NATION_AUDIO.contexts[context]||GEI_DAM_NATION_AUDIO.contexts.mountain,j=1+(Math.random()-.5)*.12,b=1+Math.min(1.2,combo*.045);geiDamNationAudioState.lastTapAt=n;geiDamNationAudioState.voices++;geiDamNationTone(c,d.tink*j,.055,GEI_DAM_NATION_AUDIO.master*.34*b,0,"triangle",d.pan);geiDamNationTone(c,d.body*j,.105,GEI_DAM_NATION_AUDIO.master*.44*b,.008,"sine",d.pan);geiDamNationWater(c,context,.018,intensity);setTimeout(()=>geiDamNationAudioState.voices=Math.max(0,geiDamNationAudioState.voices-1),180);geiDamNationPulse("tap");return true}
 function geiDamNationVoice(context="dam",intensity=1){const n=performance.now();if(n-geiDamNationAudioState.lastVoiceAt<GEI_DAM_NATION_AUDIO.voiceCooldownMs)return false;const c=geiDamNationAudioContext();if(!c)return false;const d=GEI_DAM_NATION_AUDIO.contexts[context]||GEI_DAM_NATION_AUDIO.contexts.dam;geiDamNationAudioState.lastVoiceAt=n;geiDamNationTone(c,118,.075,.067,0,"triangle",d.pan);geiDamNationTone(c,178,.24,.058,.055,"sine",d.pan);geiDamNationTone(c,356,.19,.024,.075,"sine",d.pan);geiDamNationTone(c,136,.25,.061,.23,"sine",d.pan);geiDamNationWater(c,context,.26,Math.max(1,intensity*.75));geiDamNationPulse("voice");return true}
 const GEI_NATURE_AUDIO=Object.freeze({enabled:true,minChirpGapMs:360,birdChirpGain:.012,ambienceGain:.010,tapChance:.34});
@@ -10136,7 +10595,7 @@ const GEI_BIRD_COMPANION=Object.freeze({
 const geiBirdCompanionState={lastTapAt:0,intervals:[],emaMs:420,lastAnswerAt:0,learnedTaps:0,songTier:1,seed:Math.random()};
 function geiNatureReducedMotion(){try{return !!matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}}
 function geiNatureScene(context){return GEI_NATURE_SCENES[context]||GEI_NATURE_SCENES.mountain}
-function geiBirdNote(freq,dur,when,pan,gain){try{const c=getAudio(),o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+Math.max(0,when),f=Math.max(420,Number(freq)||1200),d=Math.max(.035,Number(dur)||.12);o.type="sine";o.frequency.setValueAtTime(f*.92,t);o.frequency.exponentialRampToValueAtTime(f*1.28,t+d*.42);o.frequency.exponentialRampToValueAtTime(f*.82,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,Number(gain)||GEI_NATURE_AUDIO.birdChirpGain),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=Math.max(-1,Math.min(1,Number(pan)||0));o.connect(g);g.connect(p);p.connect(c.destination);o.start(t);o.stop(t+d+.025)}catch(e){}}
+function geiBirdNote(freq,dur,when,pan,gain){try{if(!GEI_TAP_PERFORMANCE.audioAllow("primary"))return;const c=getAudio(),o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner(),t=c.currentTime+Math.max(0,when),f=Math.max(420,Number(freq)||1200),d=Math.max(.035,Number(dur)||.12);o.type="sine";o.frequency.setValueAtTime(f*.92,t);o.frequency.exponentialRampToValueAtTime(f*1.28,t+d*.42);o.frequency.exponentialRampToValueAtTime(f*.82,t+d);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,Number(gain)||GEI_NATURE_AUDIO.birdChirpGain),t+.018);g.gain.exponentialRampToValueAtTime(.0001,t+d);p.pan.value=Math.max(-1,Math.min(1,Number(pan)||0));o.connect(g);g.connect(p);p.connect(GEI_TAP_PERFORMANCE.audioOut(c));o.start(t);o.stop(t+d+.025);GEI_TAP_PERFORMANCE.audioTrack(c,t+d+.025)}catch(e){}}
 function geiBirdPhrase(context,boost=1){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now(),scene=geiNatureScene(context);if(now-geiNatureState.lastPhraseAt<2200)return false;geiNatureState.lastPhraseAt=now;const phrase=GEI_BIRD_PHRASES[Math.floor(Math.random()*GEI_BIRD_PHRASES.length)],root=GEI_BIRD_ROOTS[Math.floor(Math.random()*GEI_BIRD_ROOTS.length)]*(scene.pitch||1),direction=Math.random()<.5?-1:1;phrase.forEach((step,i)=>{const jitter=1+(Math.random()-.5)*.08,freq=root*Math.pow(1.07,direction*step/48)*jitter,dur=.095+Math.random()*.055,delay=i*.11+Math.random()*.035,pan=Math.max(-.9,Math.min(.9,(scene.pan||0)+(Math.random()-.5)*.32));geiBirdNote(freq,dur,delay,pan,GEI_NATURE_AUDIO.birdChirpGain*(boost||1)*(i===0?.82:1))});return true}
 function geiBirdChirp(context,intensity=1,force=false){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now();if(!force&&now-geiNatureState.lastChirpAt<GEI_NATURE_AUDIO.minChirpGapMs)return false;const scene=geiNatureScene(context);geiNatureState.lastChirpAt=now;const root=(scene.root||1500)*(1+(Math.random()-.5)*.12),span=.11+Math.random()*.07;geiBirdNote(root,span,0,(scene.pan||0)+(Math.random()-.5)*.45,GEI_NATURE_AUDIO.birdChirpGain*(.8+Math.min(1.8,Number(intensity)||1)*.35));if(Math.random()<.48)setTimeout(()=>geiBirdNote(root*1.28,span*.82,.10,(scene.pan||0)*-.7,.009),0);return true}
 function geiBirdCompanionLoad(){
@@ -10176,19 +10635,60 @@ function geiBirdCompanionAnswer(context,intensity=1,combo=0){
   }
   return true;
 }
+/* V2.1.51 — the companion lives in its own layer ABOVE the world SVG. It used to sit inside
+   #livingWorldLayer (z-index 4), underneath the SVG scene (z-index 5), so it hid behind the game. */
+function geiBirdCompanionLayer(){
+  const world=$("world"); if(!world)return null;
+  let layer=$("geiBirdLayer");
+  if(!layer){layer=document.createElement("div");layer.id="geiBirdLayer";layer.className="layer geiBirdLayer";layer.setAttribute("aria-hidden","true");world.appendChild(layer)}
+  return layer;
+}
 function geiBirdCompanionEnsureVisual(){
-  const world=$("world"),layer=$("livingWorldLayer"); if(!world||!layer)return null;
-  let el=$("geiBirdCompanion"); if(el)return el;
+  const world=$("world"),layer=geiBirdCompanionLayer(); if(!world||!layer)return null;
+  let el=$("geiBirdCompanion");
+  if(el){ if(el.parentNode!==layer)layer.appendChild(el); return el; }
   el=document.createElement("div"); el.id="geiBirdCompanion"; el.className="birdCompanion"; el.setAttribute("aria-hidden","true");
   el.innerHTML='<span class="birdBody">🐦</span><span class="birdNote">♪</span>';
   layer.appendChild(el);
   return el;
 }
+/* V2.1.51 — keep the bird in open sky: never parked under the BUY-ites / Song Vault /
+   DAM MACHINE buttons or the tap-count toast. Measured only when the bird moves (≤ ~1/s). */
+const geiBirdObstacleCache={at:0,rects:[],world:null};
+function geiBirdObstacles(){
+  const n=performance.now();
+  if(n-geiBirdObstacleCache.at<(geiBirdObstacleCache.badge?400:2000)&&geiBirdObstacleCache.world)return geiBirdObstacleCache;
+  geiBirdObstacleCache.badge=!!($("livingSkinBadge")&&$("livingSkinBadge").classList.contains("show"));
+  const w=$("world");geiBirdObstacleCache.at=n;geiBirdObstacleCache.world=w?w.getBoundingClientRect():null;
+  geiBirdObstacleCache.rects=["songVaultFloatBtn","dmStoreFloatBtn","dmFloatBtn","labelToast","livingSkinBadge"].map(id=>{const e=$(id);if(!e||(id==="livingSkinBadge"&&!e.classList.contains("show")))return null;const r=e.getBoundingClientRect();return r.width&&r.height?{l:r.left-8,t:r.top-8,r:r.right+8,b:r.bottom+8}:null}).filter(Boolean);
+  return geiBirdObstacleCache;
+}
+function geiBirdSetPosition(el,x,y){
+  if(!el)return;
+  let px=Number(x),py=Number(y);
+  try{
+    const o=geiBirdObstacles(),W=o.world;
+    if(W&&W.width>60&&W.height>60){
+      const hit=(xx,yy)=>{const cx=W.left+W.width*xx/100,cy=W.top+W.height*yy/100,l=cx-27,t=cy-23,r=cx+27,b=cy+23;return o.rects.some(q=>l<q.r&&r>q.l&&t<q.b&&b>q.t)};
+      if(hit(px,py)){
+        /* nearest open-sky spot on a coarse grid (pure arithmetic, no extra layout reads) */
+        let best=null,bestD=Infinity;
+        for(let gx=12;gx<=88;gx+=8)for(let gy=6;gy<=62;gy+=4){
+          if(hit(gx,gy))continue;
+          const d=(gx-px)*(gx-px)+(gy-py)*(gy-py)*1.6;
+          if(d<bestD){bestD=d;best=[gx,gy]}
+        }
+        if(best){px=best[0];py=best[1]}
+      }
+    }
+  }catch(e){}
+  el.style.setProperty("--bird-x",px.toFixed(1)+"%");
+  el.style.setProperty("--bird-y",py.toFixed(1)+"%");
+}
 function geiBirdCompanionMove(context){
   const el=geiBirdCompanionEnsureVisual();if(!el)return;
   const p=geiBirdApplyPersonality(context||geiNatureState.scene||"mountain");
-  el.style.setProperty("--bird-x",(p.x[0]+Math.random()*(p.x[1]-p.x[0])).toFixed(1)+"%");
-  el.style.setProperty("--bird-y",(p.y[0]+Math.random()*(p.y[1]-p.y[0])).toFixed(1)+"%");
+  geiBirdSetPosition(el,p.x[0]+Math.random()*(p.x[1]-p.x[0]),p.y[0]+Math.random()*(p.y[1]-p.y[0]));
 }
 function geiBirdCompanionVisual(mode="listen"){
   const el=geiBirdCompanionEnsureVisual(); if(!el)return;
@@ -10203,9 +10703,12 @@ function geiBirdRhythmConfidence(){
 }
 function geiBirdLearnTap(context,intensity=1,combo=0){
   if(!GEI_NATURE_AUDIO.enabled)return;
+  /* V2.1.51 — the bird still LEARNS from every tap, but it performs on a budget:
+     NORMAL reacts often, RAPID reacts periodically, FRENZY gets one strong "I'm keeping up!" moment. */
+  const perfTier=GEI_TAP_PERFORMANCE.presentationTier(),birdBusy=GEI_TAP_TIER_RANK[perfTier]>=2;
   geiBirdCompanionEnsureVisual();
   geiBirdApplyPersonality(context);
-  geiBirdCompanionVisual("listen");
+  if(!birdBusy&&GEI_TAP_PERFORMANCE.throttle("birdListen",perfTier==="calm"?0:160))geiBirdCompanionVisual("listen");
   const now=performance.now(),prev=geiBirdCompanionState.lastTapAt;
   if(prev>0){
     const delta=Math.max(GEI_BIRD_COMPANION.minTapMs,Math.min(GEI_BIRD_COMPANION.maxTapMs,now-prev));
@@ -10218,12 +10721,13 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     geiBirdDuetMemoryLearn(context);
     const moodConfidence=geiBirdRhythmConfidence();
     geiBirdMoodLearn(context,intensity,combo,moodConfidence);
-    geiBirdMoodPulse("tap");
-    geiBirdMoodReaction("tap",context,intensity,combo);
+    if(!birdBusy&&GEI_TAP_PERFORMANCE.throttle("birdMoodPulse",perfTier==="calm"?0:380))geiBirdMoodPulse("tap");
+    if(perfTier==="frenzy")geiBirdKeepUp(context,intensity,combo);
+    else geiBirdMoodReaction("tap",context,intensity,combo);
     const duetRemembered=geiBirdDuetMemoryMaybeRecognize(context,intensity);
     if(duetRemembered){geiBirdMoodPulse("recognize");geiBirdMoodReaction("recognize",context,intensity,combo)}
     else if(geiBirdDuetMaybeJoin(context,intensity,combo))geiBirdMoodReaction("duet-close",context,intensity,combo);
-    if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
+    if(geiBirdCompanionState.learnedTaps%3===0)GEI_TAP_PERFORMANCE.persist("birdCompanion",geiBirdCompanionSave);
     const confidence=geiBirdRhythmConfidence();
     const intentional=confidence>=.72&&geiBirdCompanionState.intervals.length>=3;
     const personality=geiBirdPersonality(context);
@@ -10239,7 +10743,7 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
   geiBirdCompanionState.lastTapAt=now;
 }
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
-function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;try{geiDamNationTapSound(context,intensity,combo)}catch(e){}geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
+function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;try{geiDamNationTapSound(context,intensity,combo)}catch(e){}geiBirdLearnTap(context,intensity,combo);const tier=GEI_TAP_PERFORMANCE.presentationTier(),chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0)+(tier==="rapid"?.1:0));if(tier!=="frenzy"&&Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);/* V2.1.51 — RAPID alternates the water bed; FRENZY hands it to the rushing surge bed. */if(tier==="frenzy"||(tier==="rapid"&&!GEI_TAP_PERFORMANCE.throttle("natureWaterBed",170)))return;geiNatureWaterBed(context,intensity)}
 function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;try{geiDamNationVoice(context,2)}catch(e){}geiBirdPhrase(context,1.45);geiBirdMoodReaction("celebrate",context,2,8);setTimeout(()=>geiBirdChirp(context,2,true),430)}
 function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdDuetMemoryLoad();geiBirdMoodLoad();geiBirdMoodApply();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);geiBirdMoodReactionScheduleIdle(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
 
@@ -10291,10 +10795,12 @@ function geiBirdMoodApply(){
   const el=geiBirdCompanionEnsureVisual(),m=geiBirdMoodGet();
   geiBirdMoodState.mood=m.id;
   if(!el)return m;
-  GEI_BIRD_MOOD.moods.forEach(x=>el.classList.remove("mood-"+x.id));
-  el.classList.add("mood-"+m.id);
-  el.setAttribute("data-bird-mood",m.id);
-  const note=el.querySelector(".birdNote");if(note)note.textContent=m.note;
+  if(el.getAttribute("data-bird-mood")!==m.id){          // V2.1.51 — no class churn on every tap
+    GEI_BIRD_MOOD.moods.forEach(x=>el.classList.remove("mood-"+x.id));
+    el.classList.add("mood-"+m.id);
+    el.setAttribute("data-bird-mood",m.id);
+  }
+  const note=el.querySelector(".birdNote");if(note&&!(el.__geiNoteHoldUntil>performance.now())&&note.textContent!==m.note)note.textContent=m.note;
   return m;
 }
 function geiBirdMoodDecay(){
@@ -10315,7 +10821,7 @@ function geiBirdMoodLearn(context,intensity=1,combo=0,confidence=0){
   geiBirdMoodState.lastAt=performance.now();
   const m=geiBirdMoodApply();
   if(m.id!==before)geiBirdMoodState.changes++;
-  if(geiBirdMoodState.learned%GEI_BIRD_MOOD.saveEvery===0)geiBirdMoodSave();
+  if(geiBirdMoodState.learned%GEI_BIRD_MOOD.saveEvery===0)GEI_TAP_PERFORMANCE.persist("birdMood",geiBirdMoodSave);
   return m;
 }
 function geiBirdMoodForDuet(){
@@ -10327,7 +10833,7 @@ function geiBirdMoodPulse(kind="tap"){
   const cls=kind==="recognize"?"moodRecognize":kind==="duet"?"moodDuet":"moodTap";
   el.classList.remove("moodRecognize","moodDuet","moodTap");
   void el.offsetWidth;el.classList.add(cls);
-  setTimeout(()=>el.classList.remove(cls),760);
+  clearTimeout(el.__geiMoodPulseTimer);el.__geiMoodPulseTimer=setTimeout(()=>el.classList.remove(cls),760);
 }
 
 const GEI_BIRD_DUET_MEMORY=Object.freeze({
@@ -10406,7 +10912,7 @@ function geiBirdDuetMemoryLearn(context){
       .sort((a,b)=>(b.seen||0)-(a.seen||0)).slice(0,GEI_BIRD_DUET_MEMORY.maxMemories);
   }
   geiBirdDuetMemoryState.lastContext=key;
-  geiBirdDuetMemorySave();
+  GEI_TAP_PERFORMANCE.persist("birdDuetMemory",geiBirdDuetMemorySave);   // V2.1.51 — batched, not every tap
 }
 function geiBirdDuetMemoryRecognize(context){
   const motif=geiBirdDuetMemoryClean(geiBirdCompanionState.intervals);
@@ -10425,7 +10931,7 @@ function geiBirdDuetMemoryRecognize(context){
     geiBirdDuetMemoryState.familiarity*.78+bestScore*.22));
   best.seen=Math.max(0,Number(best.seen)||0)+1;
   best.lastSeen=Date.now();
-  geiBirdDuetMemorySave();
+  GEI_TAP_PERFORMANCE.persist("birdDuetMemory",geiBirdDuetMemorySave);
   return {memory:best,score:bestScore};
 }
 function geiBirdDuetMemoryRecallPhrase(context,recognition,intensity=1){
@@ -10587,7 +11093,7 @@ function geiBirdSongbookCapture(context){
     );
   }
   geiBirdSongbookState.lastChapter=key;
-  geiBirdSongbookSave();
+  GEI_TAP_PERFORMANCE.persist("birdSongbook",geiBirdSongbookSave);        // V2.1.51 — batched
   return true;
 }
 function GEI_BIRD_MEMORYSignatureSafe(){
@@ -10701,7 +11207,7 @@ function geiBirdMemoryPhrase(context,intensity=1){
 function geiBirdMemoryLearn(){
   if(!GEI_NATURE_AUDIO.enabled)return;
   if(geiBirdCompanionState.learnedTaps<GEI_BIRD_MEMORY.minLearnedTaps)return;
-  if(geiBirdMemoryBuild()&&geiBirdMemoryState.learned%GEI_BIRD_MEMORY.saveEvery===0)geiBirdMemorySave();
+  if(geiBirdMemoryBuild()&&geiBirdMemoryState.learned%GEI_BIRD_MEMORY.saveEvery===0)GEI_TAP_PERFORMANCE.persist("birdMemory",geiBirdMemorySave);
 }
 
 /* V2.1.42 — BIRD PERSONALITY & SIX HYDRAULIC CALLS
@@ -10720,9 +11226,11 @@ function geiBirdApplyPersonality(context){
   const p=geiBirdPersonality(context),el=geiBirdCompanionEnsureVisual();
   geiBirdPersonalityState.context=String(context||"mountain").toLowerCase();geiBirdPersonalityState.id=p.id;
   if(!el)return p;
-  el.classList.remove("personality-curious","personality-alert","personality-playful","personality-excited","personality-rhythmic","personality-triumphant");
-  el.classList.add("personality-"+p.id);el.setAttribute("data-bird-personality",p.id);
-  const note=el.querySelector(".birdNote");if(note)note.textContent=p.note;
+  if(el.getAttribute("data-bird-personality")!==p.id){   // V2.1.51 — no class churn on every tap
+    el.classList.remove("personality-curious","personality-alert","personality-playful","personality-excited","personality-rhythmic","personality-triumphant");
+    el.classList.add("personality-"+p.id);el.setAttribute("data-bird-personality",p.id);
+  }
+  const note=el.querySelector(".birdNote");if(note&&!(el.__geiNoteHoldUntil>performance.now())&&note.textContent!==p.note)note.textContent=p.note;
   return p;
 }
 function geiBirdPersonalityPhrase(context){
@@ -10764,8 +11272,118 @@ const GEI_BIRD_MOOD_REACTIONS=Object.freeze({version:"V2.1.48",cooldownMs:1200,m
 let geiBirdMoodReactionState={lastAt:0,lastMajorAt:0,lastKind:"",idleTimer:null};
 function geiBirdReactionClear(el){if(!el)return;GEI_BIRD_MOOD_REACTIONS.kinds.forEach(k=>el.classList.remove("reaction-"+k))}
 function geiBirdReactionPosition(context,kind){const p=geiBirdPersonality(context),loX=p.x[0],hiX=p.x[1],loY=p.y[0],hiY=p.y[1];let x=loX+Math.random()*(hiX-loX),y=loY+Math.random()*(hiY-loY);if(kind==="duet-close"||kind==="recognize"){x=loX+(hiX-loX)*(.24+Math.random()*.18);y=loY+(hiY-loY)*(.34+Math.random()*.18)}if(kind==="celebrate"){x=loX+(hiX-loX)*(.48+Math.random()*.28);y=loY+(hiY-loY)*(.18+Math.random()*.22)}return{x:Math.max(loX,Math.min(hiX,x)),y:Math.max(loY,Math.min(hiY,y))}}
-function geiBirdMoodReaction(kind="happy",context=geiNatureState.scene||"mountain",intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now(),major=/^(celebrate|recognize|duet-close)$/.test(kind);if(now-geiBirdMoodReactionState.lastAt<GEI_BIRD_MOOD_REACTIONS.cooldownMs)return false;if(major&&now-geiBirdMoodReactionState.lastMajorAt<GEI_BIRD_MOOD_REACTIONS.majorCooldownMs)return false;const el=geiBirdCompanionEnsureVisual();if(!el)return false;const p=geiBirdApplyPersonality(context),m=geiBirdMoodGet();let chosen=kind;if(kind==="tap"){chosen=m.id==="curious"?"curious":m.id==="happy"?"happy":m.id==="playful"?"playful":m.id==="excited"?"excited":"celebrate";if((combo>=4||intensity>=3)&&m.id!=="curious")chosen=m.id==="celebratory"?"celebrate":"excited"}if(GEI_BIRD_MOOD_REACTIONS.kinds.indexOf(chosen)<0)chosen="happy";const pos=geiBirdReactionPosition(context,chosen);geiBirdReactionClear(el);void el.offsetWidth;el.classList.add("reaction-"+chosen);el.style.setProperty("--bird-x",pos.x.toFixed(1)+"%");el.style.setProperty("--bird-y",pos.y.toFixed(1)+"%");el.setAttribute("data-bird-reaction",chosen);geiBirdMoodPulse(chosen==="recognize"?"recognize":chosen==="duet-close"?"duet":"tap");const note=el.querySelector(".birdNote");if(note)note.textContent=chosen==="celebrate"?"✦":chosen==="recognize"?"!":p.note;geiBirdMoodReactionState.lastAt=now;if(major)geiBirdMoodReactionState.lastMajorAt=now;geiBirdMoodReactionState.lastKind=chosen;setTimeout(()=>{if(!el.isConnected)return;geiBirdReactionClear(el);geiBirdApplyPersonality(context);geiBirdCompanionMove(context)},GEI_BIRD_MOOD_REACTIONS.moveMs);return true}
+function geiBirdMoodReaction(kind="happy",context=geiNatureState.scene||"mountain",intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now(),major=/^(celebrate|recognize|duet-close)$/.test(kind);if(now-geiBirdMoodReactionState.lastAt<GEI_BIRD_MOOD_REACTIONS.cooldownMs)return false;if(major&&now-geiBirdMoodReactionState.lastMajorAt<GEI_BIRD_MOOD_REACTIONS.majorCooldownMs)return false;const el=geiBirdCompanionEnsureVisual();if(!el)return false;const p=geiBirdApplyPersonality(context),m=geiBirdMoodGet();let chosen=kind;if(kind==="tap"){chosen=m.id==="curious"?"curious":m.id==="happy"?"happy":m.id==="playful"?"playful":m.id==="excited"?"excited":"celebrate";if((combo>=4||intensity>=3)&&m.id!=="curious")chosen=m.id==="celebratory"?"celebrate":"excited"}if(GEI_BIRD_MOOD_REACTIONS.kinds.indexOf(chosen)<0)chosen="happy";const pos=geiBirdReactionPosition(context,chosen);geiBirdReactionClear(el);void el.offsetWidth;el.classList.add("reaction-"+chosen);geiBirdSetPosition(el,pos.x,pos.y);el.setAttribute("data-bird-reaction",chosen);geiBirdMoodPulse(chosen==="recognize"?"recognize":chosen==="duet-close"?"duet":"tap");const note=el.querySelector(".birdNote");if(note)note.textContent=chosen==="celebrate"?"✦":chosen==="recognize"?"!":p.note;geiBirdMoodReactionState.lastAt=now;if(major)geiBirdMoodReactionState.lastMajorAt=now;geiBirdMoodReactionState.lastKind=chosen;setTimeout(()=>{if(!el.isConnected)return;geiBirdReactionClear(el);geiBirdApplyPersonality(context);geiBirdCompanionMove(context)},GEI_BIRD_MOOD_REACTIONS.moveMs);return true}
 function geiBirdMoodReactionScheduleIdle(context){clearTimeout(geiBirdMoodReactionState.idleTimer);const delay=GEI_BIRD_MOOD_REACTIONS.idleMinMs+Math.random()*(GEI_BIRD_MOOD_REACTIONS.idleMaxMs-GEI_BIRD_MOOD_REACTIONS.idleMinMs);geiBirdMoodReactionState.idleTimer=setTimeout(()=>{if(!document.hidden)geiBirdMoodReaction("rest",context||geiNatureState.scene||"mountain",1,0);geiBirdMoodReactionScheduleIdle(context||geiNatureState.scene||"mountain")},delay)}
+
+/* V2.1.51 — BIRD "I'M KEEPING UP!" FRENZY REACTION 🐦⚡
+   During a hydraulic surge the bird stops twitching on every tap and instead performs one
+   strong, readable reaction per beat window: a big hop, a bright note, and a quick rising run.
+   Presentation-only: no gameplay or wallet state. Uses the Web Animations API (no timers, no reflow). */
+const GEI_BIRD_KEEP_UP=Object.freeze({version:"V2.1.51",cooldownMs:2600,notes:3});
+let geiBirdKeepUpState={lastAt:0,count:0};
+function geiBirdKeepUp(context,intensity=1,combo=0){
+  if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;
+  const now=performance.now();
+  if(now-geiBirdKeepUpState.lastAt<GEI_BIRD_KEEP_UP.cooldownMs)return false;
+  const el=geiBirdCompanionEnsureVisual();if(!el)return false;
+  geiBirdKeepUpState.lastAt=now;geiBirdKeepUpState.count++;GEI_TAP_PERFORMANCE.state.birdKeepUps++;
+  try{geiBirdMoodReaction("excited",context,Math.max(3,intensity),Math.max(8,combo))}catch(e){}
+  const note=el.querySelector(".birdNote");if(note)note.textContent="⚡";el.__geiNoteHoldUntil=now+900;
+  try{if(el.animate)el.animate([{transform:"translate(0,0) scale(1)"},{transform:"translate(-4px,-16px) scale(1.24) rotate(-8deg)"},{transform:"translate(3px,-6px) scale(1.1) rotate(6deg)"},{transform:"translate(0,0) scale(1)"}],{duration:820,easing:"cubic-bezier(.2,.9,.25,1)"})}catch(e){}
+  try{
+    const scene=geiNatureScene(context),root=(scene.root||1500)*(scene.pitch||1);
+    for(let i=0;i<GEI_BIRD_KEEP_UP.notes;i++)geiBirdNote(root*(1+i*.18),.085,.02+i*.075,Math.max(-.8,Math.min(.8,(scene.pan||0)+(i%2?-.15:.15))),GEI_NATURE_AUDIO.birdChirpGain*1.05);
+  }catch(e){}
+  return true;
+}
+
+/* V2.1.51 — FAST TAP PERFORMANCE SELF-TEST: runTapPerformanceSelfTest() → { pass, fail, results:[…] }.
+   Console only. Exercises the budgets synchronously and restores everything it touches. */
+function runTapPerformanceSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  const P=GEI_TAP_PERFORMANCE,C=GEI_TAP_PERFORMANCE_CONFIG,S=P.state;
+  const economy=()=>JSON.stringify({t:state.totalFlOz,l:state.level,lf:state.levelFlOz,c:state.completedLevels,f:state.damMachineFreePlays,u:state.unlocked,tc:state.tapCount,ph:state.phase});
+  const before=economy();
+  const saved={tier:S.tier,stamps:S.stamps.slice(),head:S.head,lastTapAt:S.lastTapAt,safe:S.safeMode,lane:S.audio.lane,ends:S.audio.ends.slice(),
+    reaction:Object.assign({},S.reaction),throttles:Object.assign({},S.throttles),combo:{count:damIteCombo.count,lastAt:damIteCombo.lastAt,peak:damIteCombo.peak},
+    keepUp:Object.assign({},geiBirdKeepUpState),persistPending:new Map(S.persist.pending)};
+  const probe=document.createElement("div"); probe.style.cssText="position:fixed;left:-9999px;top:0;width:10px;height:10px;overflow:hidden;visibility:hidden";
+  document.body.appendChild(probe);
+
+  t("V2.1.51: engine configuration exists",()=>C.version==="V2.1.51"&&C.tiers.length===4&&C.tiers.map(x=>x.id).join()==="calm,active,rapid,frenzy");
+  t("V2.1.51: tier thresholds rise calm→frenzy",()=>C.tiers.every((x,i)=>!i||x.minRate>C.tiers[i-1].minRate));
+  t("V2.1.51: tap rate classifies into hydraulic tiers",()=>P.classifyRate(1)==="calm"&&P.classifyRate(4)==="active"&&P.classifyRate(8)==="rapid"&&P.classifyRate(14)==="frenzy");
+  t("V2.1.51: explicit presentation budgets exist",()=>C.MAX_ACTIVE_FX_NODES>0&&C.MAX_ACTIVE_WATER_DROPS>0&&C.MAX_ACTIVE_TAP_PULSES>0&&C.MAX_AUDIO_VOICES>0&&C.MAX_PENDING_EFFECTS===1);
+  t("V2.1.51: normal tapping stays CALM with full-fidelity rendering",()=>{S.stamps.fill(0);S.tier="calm";S.lowSince=0;const n=performance.now();P.noteTap(n-1400);P.noteTap(n-800);P.noteTap(n);return P.tier()==="calm"||P.tier()==="active"});
+  t("V2.1.51: rapid tapping escalates to FRENZY",()=>{S.stamps.fill(0);const n=performance.now();for(let i=0;i<14;i++)P.noteTap(n-(13-i)*60);return P.tier()==="frenzy"});
+  t("V2.1.51: 500 spawned effects stay inside the node budget",()=>{let peak=0;for(let i=0;i<500;i++){P.spawn(probe,"tapWaterDrop",["drop","pulse","burst","accent"][i%4],{left:i+"px"},900);peak=Math.max(peak,S.fx.live.length)}return peak<=C.MAX_ACTIVE_FX_NODES&&probe.childElementCount<=C.MAX_ACTIVE_FX_NODES});
+  t("V2.1.51: per-kind particle budgets hold",()=>S.fx.counts.drop<=P.budget("drop")&&S.fx.counts.pulse<=P.budget("pulse")&&S.fx.counts.burst<=P.budget("burst")&&S.fx.counts.accent<=P.budget("accent"));
+  t("V2.1.51: budget recycles instead of blocking",()=>{const el=P.spawn(probe,"tapWaterDrop","drop",{},900);return !!el&&el.isConnected});
+  t("V2.1.51: DOM cleanup leaves no effect nodes behind",()=>{P.clearFx();return probe.childElementCount===0&&S.fx.live.length===0&&Object.values(S.fx.counts).every(n=>n===0)});
+  t("V2.1.51: node pool stays bounded",()=>S.fx.pool.length<=C.POOL_LIMIT);
+  t("V2.1.51: 100 taps in one frame collapse into one pending aggregate",()=>{S.stamps.fill(0);const n=performance.now();for(let i=0;i<14;i++)P.noteTap(n-(13-i)*60);P.cancelPending();S.peakQueue=0;for(let i=0;i<100;i++)P.presentTapWater(50,50,1,"dam");const ok=(S.agg?1:0)<=C.MAX_PENDING_EFFECTS&&S.agg.count===100;P.cancelPending();return ok&&!S.agg});
+  t("V2.1.51: hydraulic reactions merge during FRENZY",()=>{S.reaction.lastAt=0;S.reaction.energy=0;let rendered=0;for(let i=0;i<100;i++)if(P.gateReaction("dam",{power:1}))rendered++;return rendered===1&&S.reaction.energy>=99});
+  t("V2.1.51: merged energy produces a stronger pulse",()=>{S.reaction.lastAt=0;const o=P.gateReaction("dam",{power:1});return !!o&&o.power===3&&o.spreadScale>1});
+  t("V2.1.51: CALM reactions are never merged",()=>{S.stamps.fill(0);S.tier="calm";S.safeMode=false;S.reaction.lastAt=performance.now();return !!P.gateReaction("dam",{power:1})});
+  t("V2.1.51: audio voice limit holds under 200 tap voices",()=>{S.audio.ends=[];const prev=P.enterLane("tap");let allowed=0;S.safeMode=false;for(let i=0;i<200;i++)if(P.audioAllow("primary")){allowed++;P.audioTrack(null,.5)}P.exitLane(prev);const v=P.voices();S.audio.ends=[];return allowed===C.MAX_AUDIO_VOICES&&v<=C.MAX_AUDIO_VOICES});
+  t("V2.1.51: noise buffer is shared, not reallocated per tap",()=>{if(typeof audioCtx==="undefined"||!audioCtx)return true;const a=noiseBuffer(audioCtx,.1),b=noiseBuffer(audioCtx,.2);return a===b&&a.duration>=2.9});
+  t("V2.1.51: bird reacts once per FRENZY window",()=>{geiBirdKeepUpState.lastAt=0;const first=geiBirdKeepUp("dam",3,10),second=geiBirdKeepUp("dam",3,10);return (first||geiNatureReducedMotion()||!GEI_NATURE_AUDIO.enabled)&&second===false});
+  t("V2.1.51: bird companion renders above the world scene",()=>{const el=geiBirdCompanionEnsureVisual(),layer=$("geiBirdLayer"),svg=$("worldSVG");return !!el&&el.parentNode===layer&&Number(getComputedStyle(layer).zIndex)>Number(getComputedStyle(svg).zIndex)});
+  t("V2.1.51: learning persistence is batched",()=>{const w0=S.persist.writes;let calls=0;const fn=()=>{calls++};for(let i=0;i<500;i++)P.persist("selfTestProbe",fn);const pend=S.persist.pending.size;P.flushPersist();return pend<=1+saved.persistPending.size&&calls===1&&S.persist.writes-w0<=1+saved.persistPending.size});
+  t("V2.1.51: engine timers stay bounded",()=>P.snapshot().engineTimers<=3);
+  t("V2.1.51: engine installed exactly once (no duplicate handlers)",()=>S.installs===1&&P.install()===false);
+  t("V2.1.51: performance layer is presentation-only",()=>economy()===before);
+  t("V2.1.51: engine never references economy authority",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(
+    runTapPerformanceSelfTest.toString().replace(/t\("V2\.1\.51: engine never references[^\n]*/,"")+geiBirdKeepUp.toString()+P.noteTap.toString()+P.spawn.toString()+P.presentTapWater.toString()+P.gateReaction.toString()+P.persist.toString()));
+
+  /* restore */
+  probe.remove(); P.clearFx(); P.cancelPending();
+  S.tier=saved.tier; S.stamps.set(saved.stamps); S.head=saved.head; S.lastTapAt=saved.lastTapAt; S.safeMode=saved.safe; S.audio.lane=saved.lane; S.audio.ends=saved.ends;
+  Object.assign(S.reaction,saved.reaction); S.throttles=Object.assign(Object.create(null),saved.throttles);
+  damIteCombo.count=saved.combo.count; damIteCombo.lastAt=saved.combo.lastAt; damIteCombo.peak=saved.combo.peak;
+  Object.assign(geiBirdKeepUpState,saved.keepUp);
+  try{const el=$("geiSurgeLayer");if(el){el.classList.remove("tier-active","tier-rapid","tier-frenzy");el.classList.add("tier-"+S.tier)}}catch(e){}
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
+
+/* V2.1.51 — GEI TAP STRESS TEST (in-page): await runGeiTapStressTest() → per-run metrics.
+   Drives the PRESENTATION pipeline only (the same calls a real tap makes) at a chosen rate,
+   so it can never award a day, touch the wallet, or change progression. */
+async function runGeiTapStressTest(opts={}){
+  const P=GEI_TAP_PERFORMANCE,runs=opts.runs||[[100,20],[500,24],[1000,24]],out=[];
+  const economy=()=>JSON.stringify({t:state.totalFlOz,l:state.level,lf:state.levelFlOz,c:state.completedLevels,f:state.damMachineFreePlays,tc:state.tapCount,ph:state.phase});
+  const before=economy(),combo={count:damIteCombo.count,lastAt:damIteCombo.lastAt,peak:damIteCombo.peak};
+  const w=$("world"),r=w.getBoundingClientRect();
+  for(const [taps,rate] of runs){
+    P.resetStats();
+    const frames=[];let last=performance.now(),running=true,peakDom=0,peakQueue=0;
+    const loop=ts=>{frames.push(ts-last);last=ts;const n=$("tapWaterLayer")?.childElementCount||0;if(n>peakDom)peakDom=n;if(running)requestAnimationFrame(loop)};
+    requestAnimationFrame(loop);
+    const gap=1000/rate,t0=performance.now();
+    for(let i=0;i<taps;i++){
+      const wait=t0+i*gap-performance.now(); if(wait>1)await new Promise(res=>setTimeout(res,wait));
+      const x=r.left+r.width*(.3+Math.random()*.4),y=r.top+r.height*(.3+Math.random()*.4),ctx=getTapWaterPointerContext();
+      const lane=P.enterLane("tap");
+      try{
+        P.noteTap(); P.presentTapWater(x,y,1,ctx);
+        const n=registerDamIteCombo(ctx,1); triggerTapFeel(x,y,1,ctx,n);
+        triggerDamIteHydraulicReaction(ctx,{index:state.currentStep,power:1});
+      }catch(e){} finally{P.exitLane(lane)}
+      peakQueue=Math.max(peakQueue,P.state.agg?P.state.agg.count:0);
+    }
+    await new Promise(res=>setTimeout(res,1400));
+    running=false;
+    const f=frames.slice(2).sort((a,b)=>a-b),snap=P.snapshot();
+    out.push({taps,rate,avgFrameMs:+(f.reduce((s,n)=>s+n,0)/Math.max(1,f.length)).toFixed(1),p95FrameMs:+(f[Math.floor(f.length*.95)]||0).toFixed(1),
+      peakActiveEffects:snap.fxPeak,peakEffectDom:peakDom,peakAudioVoices:snap.audioPeak,audioRefused:snap.audioRefused,peakQueueDepth:peakQueue,
+      tapsMerged:snap.tapsMerged,splashesRendered:snap.splashesRendered,reactionsRendered:snap.reactionsRendered,reactionsMerged:snap.reactionsMerged,
+      birdKeepUps:snap.birdKeepUps,engineTimers:snap.engineTimers,persistWrites:snap.persistWrites,safeEntries:snap.safeEntries,
+      memoryMB:performance.memory?+(performance.memory.usedJSHeapSize/1048576).toFixed(1):null,
+      bounded:snap.fxPeak<=GEI_TAP_PERFORMANCE_CONFIG.MAX_ACTIVE_FX_NODES&&snap.audioPeak<=GEI_TAP_PERFORMANCE_CONFIG.MAX_AUDIO_VOICES+GEI_TAP_PERFORMANCE_CONFIG.MAX_EVENT_AUDIO_HEADROOM&&peakQueue<=200});
+  }
+  damIteCombo.count=combo.count;damIteCombo.lastAt=combo.lastAt;damIteCombo.peak=combo.peak;renderDamIteCombo();
+  return {harness:"GEI TAP STRESS TEST",version:"V2.1.51",economyUnchanged:economy()===before,runs:out};
+}
 
 /* V2.1.40 — ADAPTIVE BIRD COMPANION SELF-TEST
    Rhythm memory and song generation are presentation-only. */
