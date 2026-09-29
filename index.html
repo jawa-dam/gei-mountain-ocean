@@ -10173,6 +10173,7 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     geiBirdCompanionState.emaMs=geiBirdCompanionState.emaMs*.72+delta*.28;
     geiBirdCompanionState.learnedTaps++;
     geiBirdMemoryLearn();
+    geiBirdSongbookLearn(context);
     if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
     const confidence=geiBirdRhythmConfidence();
     const intentional=confidence>=.72&&geiBirdCompanionState.intervals.length>=3;
@@ -10180,9 +10181,10 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     const chance=Math.min(.72,GEI_BIRD_COMPANION.baseAnswerChance*personality.chance+(combo>=4?.08:0)+(intensity>=3?.06:0)+(geiBirdCompanionState.learnedTaps>=9?.06:0)+(intentional?.22:0));
     if(now-geiBirdCompanionState.lastAnswerAt>GEI_BIRD_COMPANION.answerCooldownMs&&Math.random()<chance){
       geiBirdCompanionVisual("respond");
-      if(geiBirdMemorySignatureReady()&&(intentional||intensity>=3||combo>=6))geiBirdMemoryPhrase(context,intensity+(intentional?.25:0));
-      else if(intentional||intensity>=3||combo>=6)geiBirdCompanionSignature(context,intensity+(intentional?.25:0));
-      else geiBirdCompanionAnswer(context,intensity,combo);
+      const recalled=geiBirdSongbookMaybeRecall(context,intensity,combo);
+      if(!recalled&&geiBirdMemorySignatureReady()&&(intentional||intensity>=3||combo>=6))geiBirdMemoryPhrase(context,intensity+(intentional?.25:0));
+      else if(!recalled&&(intentional||intensity>=3||combo>=6))geiBirdCompanionSignature(context,intensity+(intentional?.25:0));
+      else if(!recalled)geiBirdCompanionAnswer(context,intensity,combo);
     }
   }
   geiBirdCompanionState.lastTapAt=now;
@@ -10190,7 +10192,112 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
 function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
 function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
-function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+
+/* V2.1.44 — BIRD SONGBOOK
+   The companion keeps a tiny evolving library of player-shaped motifs.
+   Presentation-only; local storage only. */
+const GEI_BIRD_SONGBOOK=Object.freeze({
+  version:"V2.1.44",
+  storageKey:"geiBirdSongbookV2144",
+  maxSongs:6,
+  motifSize:5,
+  recallChance:.14,
+  homeSongChance:.08,
+  minSongConfidence:.68
+});
+const GEI_BIRD_SONG_CHAPTERS=Object.freeze({
+  mountain:{id:"first-song",title:"First Song",icon:"🏔️"},
+  dam:{id:"alert-song",title:"Water Wall Song",icon:"🧱"},
+  reservoir:{id:"water-song",title:"Water Song",icon:"💧"},
+  sluice:{id:"release-song",title:"Release Song",icon:"🚪"},
+  wheel:{id:"wheel-song",title:"Wheel Song",icon:"⚙️"},
+  ocean:{id:"ocean-song",title:"Ocean Song",icon:"🌊"}
+});
+let geiBirdSongbookState={songs:{},home:null,lastChapter:"mountain",recalls:0};
+function geiBirdSongChapter(context){
+  return GEI_BIRD_SONG_CHAPTERS[String(context||"mountain").toLowerCase()]||GEI_BIRD_SONG_CHAPTERS.mountain;
+}
+function geiBirdSongbookSave(){
+  try{localStorage.setItem(GEI_BIRD_SONGBOOK.storageKey,JSON.stringify({
+    songs:geiBirdSongbookState.songs,home:geiBirdSongbookState.home,lastChapter:geiBirdSongbookState.lastChapter,recalls:geiBirdSongbookState.recalls
+  }))}catch(e){}
+}
+function geiBirdSongbookLoad(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(GEI_BIRD_SONGBOOK.storageKey)||"null");
+    if(!saved)return;
+    geiBirdSongbookState.songs=saved.songs&&typeof saved.songs==="object"?saved.songs:{};
+    geiBirdSongbookState.home=saved.home&&Array.isArray(saved.home.motif)?saved.home:null;
+    geiBirdSongbookState.lastChapter=String(saved.lastChapter||"mountain");
+    geiBirdSongbookState.recalls=Math.max(0,Number(saved.recalls)||0);
+  }catch(e){}
+}
+function geiBirdSongbookCleanMotif(motif){
+  return (Array.isArray(motif)?motif:[]).filter(n=>Number.isFinite(n)).slice(-GEI_BIRD_SONGBOOK.motifSize)
+    .map(n=>Math.max(90,Math.min(GEI_BIRD_MEMORY.maxMotifMs,n)));
+}
+function geiBirdSongbookCapture(context){
+  if(!GEI_BIRD_MEMORYSignatureSafe())return false;
+  const key=String(context||"mountain").toLowerCase(),chapter=geiBirdSongChapter(key);
+  const motif=geiBirdSongbookCleanMotif(geiBirdMemoryState.motif);
+  if(motif.length<3||geiBirdMemoryState.confidence<GEI_BIRD_SONGBOOK.minSongConfidence)return false;
+  const existing=geiBirdSongbookState.songs[key];
+  geiBirdSongbookState.songs[key]={
+    id:chapter.id,title:chapter.title,icon:chapter.icon,motif:motif,
+    confidence:geiBirdMemoryState.confidence,learned:geiBirdCompanionState.learnedTaps,
+    updatedAt:Date.now()
+  };
+  if(!geiBirdSongbookState.home||geiBirdMemoryState.confidence>Number(geiBirdSongbookState.home.confidence||0)){
+    geiBirdSongbookState.home={title:"Home Song",icon:"🐦",motif:motif.slice(),confidence:geiBirdMemoryState.confidence,updatedAt:Date.now()};
+  }else if(existing&&existing.motif) {
+    geiBirdSongbookState.home.motif=geiBirdSongbookCleanMotif(
+      geiBirdSongbookState.home.motif.map((n,i)=>Math.round((n+(motif[i]||n))/2))
+    );
+  }
+  geiBirdSongbookState.lastChapter=key;
+  geiBirdSongbookSave();
+  return true;
+}
+function GEI_BIRD_MEMORYSignatureSafe(){
+  return typeof geiBirdMemorySignatureReady==="function"&&geiBirdMemorySignatureReady();
+}
+function geiBirdSongbookAvailable(){
+  return Object.keys(geiBirdSongbookState.songs).length>0;
+}
+function geiBirdSongbookPlay(context,intensity=1,force=false){
+  if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion()||!geiBirdSongbookAvailable())return false;
+  const key=String(context||"mountain").toLowerCase(),song=geiBirdSongbookState.songs[key]||geiBirdSongbookState.home;
+  if(!song||!Array.isArray(song.motif)||song.motif.length<3)return false;
+  const d=geiBirdPersonalityPhrase(key),scene=geiNatureScene(key),root=(scene.root||1500)*(scene.pitch||1);
+  const avg=song.motif.reduce((s,n)=>s+n,0)/song.motif.length;
+  const now=performance.now();
+  if(!force&&now-geiBirdCompanionState.lastAnswerAt<GEI_BIRD_COMPANION.answerCooldownMs)return false;
+  geiBirdCompanionState.lastAnswerAt=now;geiBirdSongbookState.recalls++;
+  const count=Math.min(5,song.motif.length);
+  for(let i=0;i<count;i++){
+    const ratio=d.ratios[i%d.ratios.length]*Math.max(.74,Math.min(1.5,avg/song.motif[i]);
+    const freq=root*ratio;
+    const delay=i===0?.02:Math.min(.6,song.motif[i-1]/1000*.56*i);
+    const pan=Math.max(-.86,Math.min(.86,(scene.pan||0)+(i%2?-.13:.13)));
+    geiBirdNote(freq,.11+Math.min(.07,(intensity||1)*.018),delay,pan,GEI_NATURE_AUDIO.birdChirpGain*(.86+(intensity||1)*.08));
+  }
+  if(geiBirdSongbookState.recalls%4===0)geiBirdSongbookSave();
+  return true;
+}
+function geiBirdSongbookMaybeRecall(context,intensity=1,combo=0){
+  if(!geiBirdSongbookAvailable())return false;
+  const confidence=geiBirdMemoryState.confidence,ready=confidence>=GEI_BIRD_SONGBOOK.minSongConfidence;
+  if(!ready)return false;
+  const homeBias=geiBirdSongbookState.home&&Math.random()<GEI_BIRD_SONGBOOK.homeSongChance;
+  const chance=Math.min(.36,GEI_BIRD_SONGBOOK.recallChance+(combo>=6?.10:0)+(intensity>=3?.08:0)+(homeBias?.08:0));
+  if(Math.random()>=chance)return false;
+  return geiBirdSongbookPlay(context,intensity,false);
+}
+function geiBirdSongbookLearn(context){
+  if(!GEI_NATURE_AUDIO.enabled||!GEI_BIRD_MEMORYSignatureSafe())return;
+  geiBirdSongbookCapture(context);
+}
 
 /* V2.1.43 — BIRD MEMORY & SIGNATURE SONGS
    The companion remembers a compact rhythm motif. Presentation-only and local. */
@@ -10325,6 +10432,10 @@ function geiBirdCompanionSignature(context,intensity=1){
 function runBirdCompanionSelfTest(){
 
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.44: songbook configuration exists",()=>GEI_BIRD_SONGBOOK.version==="V2.1.44"&&GEI_BIRD_SONGBOOK.maxSongs===6);
+  t("V2.1.44: six song chapters exist",()=>Object.keys(GEI_BIRD_SONG_CHAPTERS).length===6);
+  t("V2.1.44: songbook motifs stay bounded",()=>Object.values(geiBirdSongbookState.songs).every(s=>Array.isArray(s.motif)&&s.motif.length<=GEI_BIRD_SONGBOOK.motifSize));
+  t("V2.1.44: songbook remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdSongbookCapture.toString()+geiBirdSongbookPlay.toString()+geiBirdSongbookSave.toString()));
   t("V2.1.43: memory configuration exists",()=>GEI_BIRD_MEMORY.version==="V2.1.43"&&GEI_BIRD_MEMORY.motifSize===5);
   t("V2.1.43: signature readiness is bounded",()=>{const n=geiBirdMemoryState.confidence;return n>=0&&n<=1&&geiBirdMemoryState.familiarity>=0&&geiBirdMemoryState.familiarity<=1});
   t("V2.1.43: memory remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMemoryLearn.toString()+geiBirdMemoryPhrase.toString()+geiBirdMemorySave.toString()));
