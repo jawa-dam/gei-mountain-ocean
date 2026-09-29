@@ -2768,9 +2768,14 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 @keyframes geiBrandIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes geiEnterIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 /* V2.1.54 — SPECIAL CHARACTER SPOTLIGHT ENGINE */
+/* V2.1.63 — SESSION SPOTLIGHT SIDE RAIL & MAP SAFE-ZONE
+   The center 400px hydraulic map is protected. The session spotlight lives only
+   in the outer rail and can never occupy the station-label canvas. */
 .geiCharacterSpotlight{
- position:absolute;z-index:18;right:10px;top:10px;width:min(156px,34vw);
- padding:8px 9px 9px;border:1px solid rgba(157,234,255,.25);
+ position:absolute;z-index:18;right:8px;top:92px;
+ width:min(112px,calc((100% - 400px)/2 - 12px));
+ min-width:96px;
+ padding:7px 7px 8px;border:1px solid rgba(157,234,255,.25);
  border-radius:16px;background:rgba(3,7,17,.62);backdrop-filter:blur(10px);
  box-shadow:0 10px 28px rgba(0,0,0,.28),0 0 22px rgba(47,210,255,.10);
  color:#eafcff;pointer-events:none;opacity:0;transform:translateY(-6px) scale(.97);
@@ -2813,6 +2818,41 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
  box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 42px rgba(255,215,106,.38)
 }
 .geiCharacterSpotlight.milestone .spotFlow i{background:var(--gold);box-shadow:0 0 12px var(--gold)}
+/* V2.1.63 — side-rail geometry: keep every spotlight pixel outside the 400px map canvas. */
+.geiCharacterSpotlight.sideRail{
+ right:8px;
+ left:auto;
+ top:92px;
+ width:min(112px,calc((100% - 400px)/2 - 12px));
+ max-width:112px;
+ min-width:96px;
+}
+.geiCharacterSpotlight.sideRail .spotHead{gap:6px}
+.geiCharacterSpotlight.sideRail .spotAvatar,
+.geiCharacterSpotlight.sideRail .spotFallback{width:34px;height:34px;flex-basis:34px;border-radius:10px}
+.geiCharacterSpotlight.sideRail .spotKicker{font-size:6px;letter-spacing:.11em}
+.geiCharacterSpotlight.sideRail .spotName{font-size:10px;line-height:1.04}
+.geiCharacterSpotlight.sideRail .spotFlow{margin-top:6px}
+@media (max-width:540px){
+ .geiCharacterSpotlight.sideRail{
+   right:6px;top:86px;width:62px;min-width:62px;max-width:62px;
+   padding:6px 5px 7px;border-radius:14px;
+ }
+ .geiCharacterSpotlight.sideRail .spotHead{display:flex;flex-direction:column;gap:3px;text-align:center}
+ .geiCharacterSpotlight.sideRail .spotAvatar,
+ .geiCharacterSpotlight.sideRail .spotFallback{width:34px;height:34px;flex-basis:34px}
+ .geiCharacterSpotlight.sideRail .spotCopy{width:100%}
+ .geiCharacterSpotlight.sideRail .spotKicker{display:none}
+ .geiCharacterSpotlight.sideRail .spotName{
+   font-size:8px;line-height:1.05;text-align:center;
+   max-height:2.15em;overflow:hidden;
+ }
+ .geiCharacterSpotlight.sideRail .spotFlow{height:2px;margin-top:5px}
+}
+@media (max-height:620px){
+ .geiCharacterSpotlight.sideRail{top:76px}
+}
+
 /* V2.1.55 — personality motion language + DAM NATION moment pulse */
 .geiCharacterSpotlight.personalityPulse{animation:geiPersonalityCardPulse .72s ease-out 1}
 .geiCharacterSpotlight[data-personality="guide"] .spotAvatar{animation:geiGuideReact .62s ease-out 1}
@@ -11870,8 +11910,9 @@ function geiCharacterSpotlightEnsureVisual(){
   if(box)return box;
   box=document.createElement("div");
   box.id="geiCharacterSpotlight";
-  box.className="geiCharacterSpotlight";
+  box.className="geiCharacterSpotlight sideRail";
   box.setAttribute("aria-hidden","true");
+  box.setAttribute("data-ui-zone","session-spotlight-rail");
   box.innerHTML='<div class="spotHead"><span class="spotVisual"></span><span class="spotCopy"><span class="spotKicker">SESSION SPOTLIGHT</span><span class="spotName">DAM NATION CREW</span></span></div><div class="spotFlow"><i></i></div>';
   worldEl.appendChild(box);
   return box;
