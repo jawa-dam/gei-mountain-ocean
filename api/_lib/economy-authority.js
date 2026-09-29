@@ -1,4 +1,4 @@
-export const ECONOMY_AUTHORITY_VERSION = "2.0.25";
+export const ECONOMY_AUTHORITY_VERSION = "2.1.59";
 export const ECONOMY_RECONCILIATION_VERSION = "2.0.26";
 export const ECONOMY_MAX_FL_OZ = 1000000000;
 
@@ -7,7 +7,9 @@ export const ECONOMY_MAX_FL_OZ = 1000000000;
 export const PACKS = Object.freeze({
   single: Object.freeze({ label:"1 Song", price:"6.00", flOz:6660 }),
   ten: Object.freeze({ label:"10 Songs", price:"12.00", flOz:66600 }),
-  twentyfive: Object.freeze({ label:"25 Songs", price:"18.00", flOz:166500 })
+  twentyfive: Object.freeze({ label:"25 Songs", price:"18.00", flOz:166500 }),
+  "special-jesus": Object.freeze({ label:"Jesus — Special Character", price:"12.00", flOz:0, kind:"special-character", characterId:"jesus" }),
+  "special-devil": Object.freeze({ label:"Devil — Special Character", price:"6.00", flOz:0, kind:"special-character", characterId:"devil" })
 });
 
 export function getPack(packId) {
@@ -25,12 +27,13 @@ export function validatePackAuthority(packId, amount, currency = "USD") {
 
 export function validateEntitlementAuthority({ packId, flOz, amount, currency = "USD" }) {
   const pack = getPack(packId);
+  const special = pack?.kind === "special-character";
   return !!pack &&
     currency === "USD" &&
     amount === pack.price &&
     Number(flOz) === pack.flOz &&
     Number.isInteger(pack.flOz) &&
-    pack.flOz > 0;
+    (special ? Number(flOz) === 0 && typeof pack.characterId === "string" : pack.flOz > 0);
 }
 
 export function auditReceipt(record) {
@@ -40,11 +43,16 @@ export function auditReceipt(record) {
     authoritative: !!pack &&
       record?.currency === "USD" &&
       record?.amount === pack.price &&
-      Number(record?.flOz) === pack.flOz,
+      Number(record?.flOz) === pack.flOz &&
+      (pack.kind === "special-character"
+        ? record?.productType === "special-character" && record?.characterId === pack.characterId
+        : (record?.productType === "fl-oz" || !record?.productType)),
     packId: record?.packId || null,
     flOz: pack?.flOz ?? null,
     amount: pack?.price ?? null,
-    currency: "USD"
+    currency: "USD",
+    productType: pack?.kind || "fl-oz",
+    characterId: pack?.characterId || null
   };
 }
 
@@ -64,6 +72,12 @@ export function reconcileEntitlementAuthority(record) {
   if (record?.currency !== "USD") reasons.push("CURRENCY_DRIFT");
   if (pack && record?.amount !== pack.price) reasons.push("AMOUNT_DRIFT");
   if (pack && Number(record?.flOz) !== pack.flOz) reasons.push("FL_OZ_DRIFT");
+  if (pack?.kind === "special-character") {
+    if (record?.productType !== "special-character") reasons.push("PRODUCT_TYPE_DRIFT");
+    if (record?.characterId !== pack.characterId) reasons.push("CHARACTER_ID_DRIFT");
+  } else if (record?.productType && record.productType !== "fl-oz") {
+    reasons.push("PRODUCT_TYPE_DRIFT");
+  }
   if (record?.auditVersion !== ECONOMY_AUTHORITY_VERSION) {
     reasons.push("AUDIT_VERSION_DRIFT");
   }
@@ -74,7 +88,8 @@ export function reconcileEntitlementAuthority(record) {
     record.audit.packId !== packId ||
     record.audit.amount !== pack?.price ||
     Number(record.audit.flOz) !== pack?.flOz ||
-    record.audit.currency !== "USD"
+    record.audit.currency !== "USD" ||
+    (pack?.kind === "special-character" && (record.audit.productType !== "special-character" || record.audit.characterId !== pack.characterId))
   )) {
     reasons.push("AUDIT_RECORD_DRIFT");
   }
