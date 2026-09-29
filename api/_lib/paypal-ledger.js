@@ -2,7 +2,8 @@ import {
   ECONOMY_AUTHORITY_VERSION,
   validateEntitlementAuthority,
   auditReceipt,
-  reconcileEntitlementAuthority
+  reconcileEntitlementAuthority,
+  getPack
 } from "./economy-authority.js";
 
 const LEDGER_TTL_SECONDS = 60 * 60 * 24 * 365;
@@ -27,6 +28,13 @@ async function redisCommand(command) {
   const data = await response.json();
   if (!response.ok || data.error) throw new Error(data.error || "Durable entitlement storage request failed.");
   return data.result;
+}
+
+function getPackKind(packId) {
+  return getPack(packId)?.kind || "fl-oz";
+}
+function getPackCharacterId(packId) {
+  return getPack(packId)?.characterId || null;
 }
 
 function reconciled(record) {
@@ -245,6 +253,8 @@ export async function recordEntitlement({
     flOz,
     amount,
     currency,
+    productType: getPackKind(packId),
+    characterId: getPackCharacterId(packId),
     claimedAt: null,
     createdAt: new Date().toISOString()
   });
