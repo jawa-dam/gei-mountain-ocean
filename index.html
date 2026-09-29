@@ -2794,6 +2794,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 @keyframes birdRespond{0%{transform:translateY(0) rotate(-4deg) scale(1)}35%{transform:translateY(-8px) rotate(7deg) scale(1.08)}70%{transform:translateY(1px) rotate(-5deg) scale(.98)}100%{transform:translateY(0) rotate(-3deg) scale(1)}}
 @keyframes birdListen{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.birdCompanion,.birdCompanion .birdBody{animation:none!important;transition:none}.birdCompanion.respond .birdNote{transition:none}}
+
+/* V2.1.48 — BIRD MOOD REACTIONS 🐦✨ */
+.birdCompanion.reaction-curious .birdBody{animation:birdReactionCurious .82s ease-in-out 1}.birdCompanion.reaction-happy .birdBody{animation:birdReactionHappy .9s ease-in-out 1}.birdCompanion.reaction-playful .birdBody{animation:birdReactionPlayful 1.05s cubic-bezier(.2,.8,.3,1) 1}.birdCompanion.reaction-excited .birdBody{animation:birdReactionExcited .78s ease-in-out 1}.birdCompanion.reaction-celebrate .birdBody{animation:birdReactionCelebrate 1.15s cubic-bezier(.2,.9,.25,1) 1}.birdCompanion.reaction-recognize .birdBody{animation:birdReactionRecognize 1.02s ease-in-out 1}.birdCompanion.reaction-duet-close .birdBody{animation:birdReactionDuetClose .92s ease-in-out 1}.birdCompanion.reaction-rest .birdBody{animation:birdReactionRest 1.5s ease-in-out 1}.birdCompanion.reaction-curious .birdNote,.birdCompanion.reaction-happy .birdNote,.birdCompanion.reaction-playful .birdNote,.birdCompanion.reaction-excited .birdNote,.birdCompanion.reaction-celebrate .birdNote,.birdCompanion.reaction-recognize .birdNote,.birdCompanion.reaction-duet-close .birdNote{opacity:1;transform:translateY(-5px) scale(1)}.birdCompanion.reaction-rest .birdNote{opacity:.45;transform:translateY(-2px) scale(.86)}
+@keyframes birdReactionCurious{0%,100%{transform:translateY(0) rotate(-3deg) scale(1)}35%{transform:translateY(-3px) rotate(9deg) scale(1.04)}65%{transform:translateY(-1px) rotate(-7deg) scale(1.02)}}@keyframes birdReactionHappy{0%,100%{transform:translateY(0) scale(1)}28%{transform:translateY(-6px) scale(1.07)}52%{transform:translateY(1px) scale(.98)}76%{transform:translateY(-3px) scale(1.04)}}@keyframes birdReactionPlayful{0%{transform:translate(0,0) rotate(-3deg) scale(1)}25%{transform:translate(7px,-7px) rotate(8deg) scale(1.08)}55%{transform:translate(-5px,-3px) rotate(-9deg) scale(1.02)}82%{transform:translate(4px,-1px) rotate(5deg) scale(1.04)}100%{transform:translate(0,0) rotate(-3deg) scale(1)}}@keyframes birdReactionExcited{0%,100%{transform:translateY(0) rotate(-3deg) scale(1)}22%{transform:translateY(-9px) rotate(7deg) scale(1.1)}44%{transform:translateY(2px) rotate(-8deg) scale(1.02)}66%{transform:translateY(-6px) rotate(6deg) scale(1.08)}}@keyframes birdReactionCelebrate{0%{transform:translate(0,0) rotate(-3deg) scale(1)}25%{transform:translate(-10px,-12px) rotate(-10deg) scale(1.14)}50%{transform:translate(10px,-18px) rotate(10deg) scale(1.18)}75%{transform:translate(4px,-7px) rotate(-6deg) scale(1.08)}100%{transform:translate(0,0) rotate(-3deg) scale(1)}}@keyframes birdReactionRecognize{0%,100%{transform:scale(1) rotate(-3deg)}25%{transform:scale(1.16) rotate(-10deg)}50%{transform:scale(1.08) rotate(9deg)}72%{transform:scale(1.13) rotate(-6deg)}}@keyframes birdReactionDuetClose{0%,100%{transform:translateY(0) scale(1)}35%{transform:translate(-5px,-7px) scale(1.1)}65%{transform:translate(-2px,-2px) scale(1.05)}}@keyframes birdReactionRest{0%,100%{transform:translateY(0) rotate(-3deg) scale(1)}35%{transform:translateY(2px) rotate(2deg) scale(.96)}70%{transform:translateY(1px) rotate(-1deg) scale(.98)}}
+@media (prefers-reduced-motion:reduce){.birdCompanion.reaction-curious .birdBody,.birdCompanion.reaction-happy .birdBody,.birdCompanion.reaction-playful .birdBody,.birdCompanion.reaction-excited .birdBody,.birdCompanion.reaction-celebrate .birdBody,.birdCompanion.reaction-recognize .birdBody,.birdCompanion.reaction-duet-close .birdBody,.birdCompanion.reaction-rest .birdBody{animation:none}}
 </style>
 </head>
 <body>
@@ -8056,6 +8061,10 @@ function registerDamIteCombo(context,power=1){
 }
 function runDamIteComboSelfTest(){
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.48: reaction configuration exists",()=>GEI_BIRD_MOOD_REACTIONS.version==="V2.1.48"&&GEI_BIRD_MOOD_REACTIONS.kinds.length===8);
+  t("V2.1.48: reaction cooldowns are bounded",()=>GEI_BIRD_MOOD_REACTIONS.cooldownMs>0&&GEI_BIRD_MOOD_REACTIONS.majorCooldownMs>=GEI_BIRD_MOOD_REACTIONS.cooldownMs);
+  t("V2.1.48: hydraulic position bounds are valid",()=>Object.keys(GEI_BIRD_PERSONALITY).every(k=>{const p=GEI_BIRD_PERSONALITY[k];return p.x[0]>=0&&p.x[1]<=100&&p.y[0]>=0&&p.y[1]<=100}));
+  t("V2.1.48: reaction layer is presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMoodReaction.toString()+geiBirdMoodReactionScheduleIdle.toString()));
   t("V2.1.47: mood configuration exists",()=>GEI_BIRD_MOOD.version==="V2.1.47"&&GEI_BIRD_MOOD.moods.length===5);
   t("V2.1.47: mood score stays bounded",()=>geiBirdMoodState.score>=0&&geiBirdMoodState.score<=GEI_BIRD_MOOD.maxScore);
   t("V2.1.47: mood state remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMoodLearn.toString()+geiBirdMoodApply.toString()+geiBirdMoodSave.toString()));
@@ -10204,9 +10213,10 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     const moodConfidence=geiBirdRhythmConfidence();
     geiBirdMoodLearn(context,intensity,combo,moodConfidence);
     geiBirdMoodPulse("tap");
+    geiBirdMoodReaction("tap",context,intensity,combo);
     const duetRemembered=geiBirdDuetMemoryMaybeRecognize(context,intensity);
-    if(duetRemembered)geiBirdMoodPulse("recognize");
-    else geiBirdDuetMaybeJoin(context,intensity,combo);
+    if(duetRemembered){geiBirdMoodPulse("recognize");geiBirdMoodReaction("recognize",context,intensity,combo)}
+    else if(geiBirdDuetMaybeJoin(context,intensity,combo))geiBirdMoodReaction("duet-close",context,intensity,combo);
     if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
     const confidence=geiBirdRhythmConfidence();
     const intentional=confidence>=.72&&geiBirdCompanionState.intervals.length>=3;
@@ -10224,8 +10234,8 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
 }
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
 function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
-function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
-function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdDuetMemoryLoad();geiBirdMoodLoad();geiBirdMoodApply();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);geiBirdMoodReaction("celebrate",context,2,8);setTimeout(()=>geiBirdChirp(context,2,true),430)}
+function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdSongbookLoad();geiBirdDuetMemoryLoad();geiBirdMoodLoad();geiBirdMoodApply();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);geiBirdMoodReactionScheduleIdle(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
 
 /* V2.1.45 — BIRD DUET MODE 🐦🎵💧
    The bird occasionally joins the player's live rhythm instead of only answering it.
@@ -10741,6 +10751,15 @@ function geiBirdCompanionSignature(context,intensity=1){
   }
   return true;
 }
+
+/* V2.1.48 — BIRD MOOD REACTIONS
+   Presentation-only: mood, rhythm, duet, milestone and idle reactions. */
+const GEI_BIRD_MOOD_REACTIONS=Object.freeze({version:"V2.1.48",cooldownMs:1200,majorCooldownMs:4200,moveMs:900,idleMinMs:5200,idleMaxMs:10500,kinds:["curious","happy","playful","excited","celebrate","recognize","duet-close","rest"]});
+let geiBirdMoodReactionState={lastAt:0,lastMajorAt:0,lastKind:"",idleTimer:null};
+function geiBirdReactionClear(el){if(!el)return;GEI_BIRD_MOOD_REACTIONS.kinds.forEach(k=>el.classList.remove("reaction-"+k))}
+function geiBirdReactionPosition(context,kind){const p=geiBirdPersonality(context),loX=p.x[0],hiX=p.x[1],loY=p.y[0],hiY=p.y[1];let x=loX+Math.random()*(hiX-loX),y=loY+Math.random()*(hiY-loY);if(kind==="duet-close"||kind==="recognize"){x=loX+(hiX-loX)*(.24+Math.random()*.18);y=loY+(hiY-loY)*(.34+Math.random()*.18)}if(kind==="celebrate"){x=loX+(hiX-loX)*(.48+Math.random()*.28);y=loY+(hiY-loY)*(.18+Math.random()*.22)}return{x:Math.max(loX,Math.min(hiX,x)),y:Math.max(loY,Math.min(hiY,y))}}
+function geiBirdMoodReaction(kind="happy",context=geiNatureState.scene||"mountain",intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return false;const now=performance.now(),major=/^(celebrate|recognize|duet-close)$/.test(kind);if(now-geiBirdMoodReactionState.lastAt<GEI_BIRD_MOOD_REACTIONS.cooldownMs)return false;if(major&&now-geiBirdMoodReactionState.lastMajorAt<GEI_BIRD_MOOD_REACTIONS.majorCooldownMs)return false;const el=geiBirdCompanionEnsureVisual();if(!el)return false;const p=geiBirdApplyPersonality(context),m=geiBirdMoodGet();let chosen=kind;if(kind==="tap"){chosen=m.id==="curious"?"curious":m.id==="happy"?"happy":m.id==="playful"?"playful":m.id==="excited"?"excited":"celebrate";if((combo>=4||intensity>=3)&&m.id!=="curious")chosen=m.id==="celebratory"?"celebrate":"excited"}if(GEI_BIRD_MOOD_REACTIONS.kinds.indexOf(chosen)<0)chosen="happy";const pos=geiBirdReactionPosition(context,chosen);geiBirdReactionClear(el);void el.offsetWidth;el.classList.add("reaction-"+chosen);el.style.setProperty("--bird-x",pos.x.toFixed(1)+"%");el.style.setProperty("--bird-y",pos.y.toFixed(1)+"%");el.setAttribute("data-bird-reaction",chosen);geiBirdMoodPulse(chosen==="recognize"?"recognize":chosen==="duet-close"?"duet":"tap");const note=el.querySelector(".birdNote");if(note)note.textContent=chosen==="celebrate"?"✦":chosen==="recognize"?"!":p.note;geiBirdMoodReactionState.lastAt=now;if(major)geiBirdMoodReactionState.lastMajorAt=now;geiBirdMoodReactionState.lastKind=chosen;setTimeout(()=>{if(!el.isConnected)return;geiBirdReactionClear(el);geiBirdApplyPersonality(context);geiBirdCompanionMove(context)},GEI_BIRD_MOOD_REACTIONS.moveMs);return true}
+function geiBirdMoodReactionScheduleIdle(context){clearTimeout(geiBirdMoodReactionState.idleTimer);const delay=GEI_BIRD_MOOD_REACTIONS.idleMinMs+Math.random()*(GEI_BIRD_MOOD_REACTIONS.idleMaxMs-GEI_BIRD_MOOD_REACTIONS.idleMinMs);geiBirdMoodReactionState.idleTimer=setTimeout(()=>{if(!document.hidden)geiBirdMoodReaction("rest",context||geiNatureState.scene||"mountain",1,0);geiBirdMoodReactionScheduleIdle(context||geiNatureState.scene||"mountain")},delay)}
 
 /* V2.1.40 — ADAPTIVE BIRD COMPANION SELF-TEST
    Rhythm memory and song generation are presentation-only. */
