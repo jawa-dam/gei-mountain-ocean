@@ -10172,6 +10172,7 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     if(geiBirdCompanionState.intervals.length>GEI_BIRD_COMPANION.memorySize)geiBirdCompanionState.intervals.shift();
     geiBirdCompanionState.emaMs=geiBirdCompanionState.emaMs*.72+delta*.28;
     geiBirdCompanionState.learnedTaps++;
+    geiBirdMemoryLearn();
     if(geiBirdCompanionState.learnedTaps%3===0)geiBirdCompanionSave();
     const confidence=geiBirdRhythmConfidence();
     const intentional=confidence>=.72&&geiBirdCompanionState.intervals.length>=3;
@@ -10179,7 +10180,8 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
     const chance=Math.min(.72,GEI_BIRD_COMPANION.baseAnswerChance*personality.chance+(combo>=4?.08:0)+(intensity>=3?.06:0)+(geiBirdCompanionState.learnedTaps>=9?.06:0)+(intentional?.22:0));
     if(now-geiBirdCompanionState.lastAnswerAt>GEI_BIRD_COMPANION.answerCooldownMs&&Math.random()<chance){
       geiBirdCompanionVisual("respond");
-      if(intentional||intensity>=3||combo>=6)geiBirdCompanionSignature(context,intensity+(intentional?.25:0));
+      if(geiBirdMemorySignatureReady()&&(intentional||intensity>=3||combo>=6))geiBirdMemoryPhrase(context,intensity+(intentional?.25:0));
+      else if(intentional||intensity>=3||combo>=6)geiBirdCompanionSignature(context,intensity+(intentional?.25:0));
       else geiBirdCompanionAnswer(context,intensity,combo);
     }
   }
@@ -10188,7 +10190,81 @@ function geiBirdLearnTap(context,intensity=1,combo=0){
 function geiNatureWaterBed(context,intensity=1){try{const scene=geiNatureScene(context),k=Math.max(1,Math.min(3,Number(intensity)||1));damNoise({dur:k===3?.16:.095,from:120,to:Math.max(520,scene.root*.55),gain:GEI_NATURE_AUDIO.ambienceGain*(k===3?1.8:1),filter:"lowpass",gesture:true})}catch(e){}}
 function geiNatureTapReaction(context,intensity=1,combo=0){if(!GEI_NATURE_AUDIO.enabled)return;geiBirdLearnTap(context,intensity,combo);const chance=Math.min(.78,GEI_NATURE_AUDIO.tapChance+(combo>=4?.18:0)+(intensity>=3?.14:0));if(Math.random()<chance)geiBirdChirp(context,intensity,combo>=6);geiNatureWaterBed(context,intensity)}
 function geiNatureBreakthrough(context="ocean"){if(!GEI_NATURE_AUDIO.enabled||geiNatureReducedMotion())return;geiBirdPhrase(context,1.45);setTimeout(()=>geiBirdChirp(context,2,true),430)}
-function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+function geiNatureStartup(context="mountain"){if(geiNatureState.started||!GEI_NATURE_AUDIO.enabled)return;geiNatureState.started=true;geiNatureState.scene=context||"mountain";geiBirdCompanionLoad();geiBirdMemoryLoad();geiBirdCompanionEnsureVisual();geiBirdApplyPersonality(geiNatureState.scene);geiBirdCompanionMove(geiNatureState.scene);setTimeout(()=>geiBirdPhrase(geiNatureState.scene,1.15),520);setTimeout(()=>geiBirdChirp(geiNatureState.scene,1.2),1180)}
+
+/* V2.1.43 — BIRD MEMORY & SIGNATURE SONGS
+   The companion remembers a compact rhythm motif. Presentation-only and local. */
+const GEI_BIRD_MEMORY=Object.freeze({
+  version:"V2.1.43",
+  storageKey:"geiBirdMemoryV2143",
+  motifSize:5,
+  minLearnedTaps:6,
+  saveEvery:4,
+  familiarityThreshold:.74,
+  maxMotifMs:1400
+});
+let geiBirdMemoryState={motif:[],confidence:0,familiarity:0,plays:0,lastSignatureAt:0,learned:0};
+function geiBirdMemoryLoad(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(GEI_BIRD_MEMORY.storageKey)||"null");
+    if(saved&&Array.isArray(saved.motif)){
+      geiBirdMemoryState.motif=saved.motif.filter(n=>Number.isFinite(n)).slice(-GEI_BIRD_MEMORY.motifSize);
+      geiBirdMemoryState.confidence=Math.max(0,Math.min(1,Number(saved.confidence)||0));
+      geiBirdMemoryState.familiarity=Math.max(0,Math.min(1,Number(saved.familiarity)||0));
+      geiBirdMemoryState.plays=Math.max(0,Number(saved.plays)||0);
+    }
+  }catch(e){}
+}
+function geiBirdMemorySave(){
+  try{localStorage.setItem(GEI_BIRD_MEMORY.storageKey,JSON.stringify({
+    motif:geiBirdMemoryState.motif.slice(-GEI_BIRD_MEMORY.motifSize),
+    confidence:geiBirdMemoryState.confidence,
+    familiarity:geiBirdMemoryState.familiarity,
+    plays:geiBirdMemoryState.plays
+  }))}catch(e){}
+}
+function geiBirdMemoryBuild(){
+  const intervals=geiBirdCompanionState.intervals.slice(-GEI_BIRD_MEMORY.motifSize);
+  if(intervals.length<3)return false;
+  const avg=intervals.reduce((s,n)=>s+n,0)/intervals.length;
+  const next=intervals.map(n=>Math.max(90,Math.min(GEI_BIRD_MEMORY.maxMotifMs,n)));
+  const consistency=Math.max(0,Math.min(1,1-(Math.sqrt(intervals.reduce((s,n)=>s+Math.pow(n-avg,2),0)/intervals.length)/Math.max(1,avg*.62))));
+  geiBirdMemoryState.motif=next.slice(-GEI_BIRD_MEMORY.motifSize);
+  geiBirdMemoryState.confidence=consistency;
+  geiBirdMemoryState.familiarity=Math.max(0,Math.min(1,geiBirdMemoryState.familiarity*.76+consistency*.24));
+  geiBirdMemoryState.learned=geiBirdCompanionState.learnedTaps;
+  return true;
+}
+function geiBirdMemoryHasSignature(){
+  return geiBirdMemoryState.motif.length>=3&&geiBirdMemoryState.learned>=GEI_BIRD_MEMORY.minLearnedTaps;
+}
+function geiBirdMemorySignatureReady(){
+  return geiBirdMemoryHasSignature()&&geiBirdMemoryState.confidence>=GEI_BIRD_MEMORY.familiarityThreshold;
+}
+function geiBirdMemoryPhrase(context,intensity=1){
+  if(!geiBirdMemorySignatureReady())return false;
+  const d=geiBirdPersonalityPhrase(context),scene=geiNatureScene(context);
+  const root=(scene.root||1500)*(scene.pitch||1),motif=geiBirdMemoryState.motif.slice(-GEI_BIRD_MEMORY.motifSize);
+  const avg=motif.reduce((s,n)=>s+n,0)/motif.length;
+  geiBirdMemoryState.plays++;
+  geiBirdMemoryState.lastSignatureAt=performance.now();
+  const count=Math.min(5,motif.length);
+  for(let i=0;i<count;i++){
+    const ms=motif[i]||avg,delay=i===0?.02:Math.min(.58,ms/1000*.56),norm=Math.max(.72,Math.min(1.55,avg/ms));
+    let ratio=d.ratios[i%d.ratios.length]*norm;
+    if(d.p.pattern==="victory")ratio*=1+i*.055;
+    const freq=root*ratio;
+    const pan=Math.max(-.86,Math.min(.86,(scene.pan||0)+(i%2?-.14:.14)));
+    geiBirdNote(freq,.11+Math.min(.07,(intensity||1)*.018),delay,pan,GEI_NATURE_AUDIO.birdChirpGain*(.88+(intensity||1)*.07));
+  }
+  if(geiBirdMemoryState.plays%GEI_BIRD_MEMORY.saveEvery===0)geiBirdMemorySave();
+  return true;
+}
+function geiBirdMemoryLearn(){
+  if(!GEI_NATURE_AUDIO.enabled)return;
+  if(geiBirdCompanionState.learnedTaps<GEI_BIRD_MEMORY.minLearnedTaps)return;
+  if(geiBirdMemoryBuild()&&geiBirdMemoryState.learned%GEI_BIRD_MEMORY.saveEvery===0)geiBirdMemorySave();
+}
 
 /* V2.1.42 — BIRD PERSONALITY & SIX HYDRAULIC CALLS
    Presentation-only personality layer. */
@@ -10249,6 +10325,10 @@ function geiBirdCompanionSignature(context,intensity=1){
 function runBirdCompanionSelfTest(){
 
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.43: memory configuration exists",()=>GEI_BIRD_MEMORY.version==="V2.1.43"&&GEI_BIRD_MEMORY.motifSize===5);
+  t("V2.1.43: signature readiness is bounded",()=>{const n=geiBirdMemoryState.confidence;return n>=0&&n<=1&&geiBirdMemoryState.familiarity>=0&&geiBirdMemoryState.familiarity<=1});
+  t("V2.1.43: memory remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMemoryLearn.toString()+geiBirdMemoryPhrase.toString()+geiBirdMemorySave.toString()));
+  t("V2.1.43: motif memory stays compact",()=>geiBirdMemoryState.motif.length<=GEI_BIRD_MEMORY.motifSize);
   t("V2.1.42: all six hydraulic personalities exist",()=>["mountain","dam","reservoir","sluice","wheel","ocean"].every(k=>GEI_BIRD_PERSONALITY[k]&&GEI_BIRD_PERSONALITY[k].id));
   t("V2.1.42: personality bounds are valid",()=>Object.keys(GEI_BIRD_PERSONALITY).every(k=>{const p=GEI_BIRD_PERSONALITY[k];return p.x[0]<p.x[1]&&p.y[0]<p.y[1]&&p.chance>0}));
   t("V2.1.42: personality layer is presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdApplyPersonality.toString()+geiBirdCompanionSignature.toString()));
