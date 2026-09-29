@@ -8061,10 +8061,7 @@ function registerDamIteCombo(context,power=1){
 }
 function runDamIteComboSelfTest(){
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
-  t("V2.1.48: reaction configuration exists",()=>GEI_BIRD_MOOD_REACTIONS.version==="V2.1.48"&&GEI_BIRD_MOOD_REACTIONS.kinds.length===8);
-  t("V2.1.48: reaction cooldowns are bounded",()=>GEI_BIRD_MOOD_REACTIONS.cooldownMs>0&&GEI_BIRD_MOOD_REACTIONS.majorCooldownMs>=GEI_BIRD_MOOD_REACTIONS.cooldownMs);
-  t("V2.1.48: hydraulic position bounds are valid",()=>Object.keys(GEI_BIRD_PERSONALITY).every(k=>{const p=GEI_BIRD_PERSONALITY[k];return p.x[0]>=0&&p.x[1]<=100&&p.y[0]>=0&&p.y[1]<=100}));
-  t("V2.1.48: reaction layer is presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMoodReaction.toString()+geiBirdMoodReactionScheduleIdle.toString()));
+
   t("V2.1.47: mood configuration exists",()=>GEI_BIRD_MOOD.version==="V2.1.47"&&GEI_BIRD_MOOD.moods.length===5);
   t("V2.1.47: mood score stays bounded",()=>geiBirdMoodState.score>=0&&geiBirdMoodState.score<=GEI_BIRD_MOOD.maxScore);
   t("V2.1.47: mood state remains presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMoodLearn.toString()+geiBirdMoodApply.toString()+geiBirdMoodSave.toString()));
@@ -10766,6 +10763,10 @@ function geiBirdMoodReactionScheduleIdle(context){clearTimeout(geiBirdMoodReacti
 function runBirdCompanionSelfTest(){
 
   const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  t("V2.1.48: reaction configuration exists",()=>GEI_BIRD_MOOD_REACTIONS.version==="V2.1.48"&&GEI_BIRD_MOOD_REACTIONS.kinds.length===8);
+  t("V2.1.48: reaction cooldowns are bounded",()=>GEI_BIRD_MOOD_REACTIONS.cooldownMs>0&&GEI_BIRD_MOOD_REACTIONS.majorCooldownMs>=GEI_BIRD_MOOD_REACTIONS.cooldownMs);
+  t("V2.1.48: hydraulic position bounds are valid",()=>Object.keys(GEI_BIRD_PERSONALITY).every(k=>{const p=GEI_BIRD_PERSONALITY[k];return p.x[0]>=0&&p.x[1]<=100&&p.y[0]>=0&&p.y[1]<=100}));
+  t("V2.1.48: reaction layer is presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(geiBirdMoodReaction.toString()+geiBirdMoodReactionScheduleIdle.toString()));
   t("V2.1.44: songbook configuration exists",()=>GEI_BIRD_SONGBOOK.version==="V2.1.44"&&GEI_BIRD_SONGBOOK.maxSongs===6);
   t("V2.1.44: six song chapters exist",()=>Object.keys(GEI_BIRD_SONG_CHAPTERS).length===6);
   t("V2.1.44: songbook motifs stay bounded",()=>Object.values(geiBirdSongbookState.songs).every(s=>Array.isArray(s.motif)&&s.motif.length<=GEI_BIRD_SONGBOOK.motifSize));
