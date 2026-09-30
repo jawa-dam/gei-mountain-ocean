@@ -110,7 +110,7 @@ async function desktopSuite(browser, base){
   check("NOW PLAYING chip appears (fades away)", nowChip);
 
   /* the player dismisses the pre-game guide → PLAY state */
-  const guideClosed = await ev(page, () => { try { if (typeof closeGameGuide === "function") closeGameGuide(); } catch (e) {} return !document.getElementById("preGameCard").classList.contains("show"); });
+  const guideClosed = await ev(page, () => { try { if (typeof closeGameGuide === "function") closeGameGuide(); } catch (e) {} try { window.__GEI_BEAVER_WELCOME__ && window.__GEI_BEAVER_WELCOME__.begin(); } catch (e) {} return !document.getElementById("preGameCard").classList.contains("show"); });
   check("pre-game guide still closes normally", guideClosed);
   await sleep(600);
   check("gameplay state detected as PLAY", await ev(page, () => DAMSoundtrack.gameState) === "play");

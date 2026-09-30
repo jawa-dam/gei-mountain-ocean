@@ -15,7 +15,7 @@
   if(window.__GEI_V2189_UTILITY_DOCK__)return;
   var VERSION="V2.1.89";
   var ORDER=["dmStoreFloatBtn","damMapLauncherBtn","songVaultFloatBtn"];
-  var DIALOGS=["preGameCard","levelCard","bonusCard","damMachineCard","timeUpCard","characterSpotlight","geiSplash"];
+  var DIALOGS=["preGameCard","levelCard","bonusCard","damMachineCard","timeUpCard","characterSpotlight","geiSplash","geiWelcome"];
   var dock=null;
 
   function $(id){return document.getElementById(id);}

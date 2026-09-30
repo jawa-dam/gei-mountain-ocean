@@ -48,7 +48,7 @@
     {id:"geiMapMilestone",    tier:"cinematic", p:4}
   ];
   /* Full-screen dialogs/pages: while one is open no moment is shown over it. */
-  var MODALS=["preGameCard","levelCard","bonusCard","damMachineCard","timeUpCard","characterSpotlight","geiDamMapPage","geiSplash"];
+  var MODALS=["preGameCard","levelCard","bonusCard","damMachineCard","timeUpCard","characterSpotlight","geiDamMapPage","geiSplash","geiWelcome"];
 
   var D={
     started:false, owner:null, ownerSince:0, lastMicroAt:-1e9, lastNoticeAt:-1e9,

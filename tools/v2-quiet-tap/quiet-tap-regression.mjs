@@ -83,7 +83,7 @@ async function openGame(browser, base, device){
   await sleep(300);
   await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });
   await sleep(3400);
-  await page.evaluate(() => { try { closeGameGuide(); } catch (e) {} });
+  await page.evaluate(() => { try { closeGameGuide(); } catch (e) {} try { window.__GEI_BEAVER_WELCOME__ && window.__GEI_BEAVER_WELCOME__.begin(); } catch (e) {} });   // V2.1.90: Begin never writes storage
   await sleep(700);
   return { ctx, page, errors, tapAt };
 }

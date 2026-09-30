@@ -3165,6 +3165,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   var ite=document.getElementById("geiSplashIte");
   var tag=document.getElementById("geiSplashCharacterTag");
   if(!splash||!ite)return;
+  /* V2.1.91 — the nine DAM-ITE SURPRISES (DAM Pool, DAM Statue, …) left the crew; they appear as cameos instead. */
   var crew=[
     {name:"Wilbert the DAM Guide",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/wilbert-the-dam-guide-Jv8ovjc6i8PutsiP.png"},
     {name:"Y'all Too Beaver",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/yall-too-beaver-rhhiVplt1GMykxV8.png"},
@@ -3176,15 +3177,6 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
     {name:"Operator Santa Claus",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/operator-santa-claus-eyMjBlQqWCVDRsc2.png"},
     {name:"Operator Woman",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/operator-woman-SBXOdIurIocbRsrx.png"},
     {name:"Operator Man",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/operator-man-iOjCPh1RTtpl4t40.png"},
-    {name:"DAM Double Burger &",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png"},
-    {name:"DAM Pool",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png"},
-    {name:"DAM Double Burger",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-6-tIItWTvyZSAcXRqM.png"},
-    {name:"DAM Light",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-5-J0CAEYtL5ydwiJmX.png"},
-    {name:"DAM Unicorn",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-4-SXcOzsVgiHtGDhDY.png"},
-    {name:"DAM Water",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-3-pFGTZcpgXIovTdjM.png"},
-    {name:"DAM Lollipop",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-2-2KiYRNiOOqMrnMox.png"},
-    {name:"DAM Sundaes",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-1-RpGbXOI17l5vcLD5.png"},
-    {name:"The Dam Lion",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-3-kSPwRK9aeNJBeCaz.png"},
     {name:"The Nite Operator",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-2-FPeHSJnA5Oa68mkG.png"},
     {name:"The Lite Operator",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-1-A1JeCEEcM7kG4AFC.png"},
     {name:"DAM NATION Crew",image:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-y-all-too-2QrVO6tdd9IKOTXW.png"},
@@ -3867,21 +3859,28 @@ const CHARACTERS = [
   { id:"operator-santa-claus",    name:"Operator Santa Claus",    file:"operator-santa-claus-eyMjBlQqWCVDRsc2.png",    cost:UNLOCK_COST_FL_OZ },
   { id:"operator-woman",          name:"Operator Woman",          file:"operator-woman-SBXOdIurIocbRsrx.png",          cost:UNLOCK_COST_FL_OZ },
   { id:"operator-man",            name:"Operator Man",            file:"operator-man-iOjCPh1RTtpl4t40.png",            cost:UNLOCK_COST_FL_OZ },
-  { id:"character-8", name:"DAM Double Burger &", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-7", name:"DAM Pool", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-6", name:"DAM Double Burger", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-6-tIItWTvyZSAcXRqM.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-5", name:"DAM Light", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-5-J0CAEYtL5ydwiJmX.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-4", name:"DAM Unicorn", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-4-SXcOzsVgiHtGDhDY.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-3", name:"DAM Water", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-3-pFGTZcpgXIovTdjM.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-2", name:"DAM Lollipop", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-2-2KiYRNiOOqMrnMox.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"character-1", name:"DAM Sundaes", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-1-RpGbXOI17l5vcLD5.png", cost:UNLOCK_COST_FL_OZ },
-  { id:"lion", name:"Lion", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-3-kSPwRK9aeNJBeCaz.png", cost:UNLOCK_COST_FL_OZ },
+  { id:"character-8", name:"DAM Double Burger", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-7", name:"DAM Pool", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-6", name:"DAM Statue", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-6-tIItWTvyZSAcXRqM.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-5", name:"DAM Light", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-5-J0CAEYtL5ydwiJmX.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-4", name:"DAM Unicorn", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-4-SXcOzsVgiHtGDhDY.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-3", name:"DAM Water", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-3-pFGTZcpgXIovTdjM.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-2", name:"DAM Lollipop", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-2-2KiYRNiOOqMrnMox.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"character-1", name:"DAM Sundaes", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-1-RpGbXOI17l5vcLD5.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
+  { id:"lion", name:"Lion", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-3-kSPwRK9aeNJBeCaz.png", cost:UNLOCK_COST_FL_OZ, cameoOnly:true },
   { id:"nite", name:"Nite", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-2-FPeHSJnA5Oa68mkG.png", cost:UNLOCK_COST_FL_OZ },
   { id:"lite", name:"Lite", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-1-A1JeCEEcM7kG4AFC.png", cost:UNLOCK_COST_FL_OZ },
   { id:"jesus", name:"Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-5-vOfNL2eWdF4DHnJk.png", cost:null, special:true, cashOnly:true, machineEligible:false, specialPurchaseId:"special-jesus" },
   { id:"dam-black-jesus", name:"DAM Black Jesus", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-black-jesus-IybOgHdCnvAFJ2x5.png", cost:null, special:true, cashOnly:true, machineEligible:false, specialPurchaseId:"special-dam-black-jesus" },
   { id:"devil", name:"Devil", img:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-4-0uOG99jJJKAPpaKB.png", cost:null, special:true, cashOnly:true, machineEligible:false, specialPurchaseId:"special-devil" }
 ].map(c => ({ ...c, img: c.img || CHARACTER_BASE + c.file }));
+/* V2.1.91 — DAM-ITE SURPRISES. The nine `cameoOnly` entries above are no longer playable operators:
+   they are hidden from every picker/store, never sold or awarded, and cannot be made active.
+   They stay in the catalog (same ids + image URLs) so existing saves keep what they own and the
+   surprise cameo engine (dam-surprise-cameos-v2191.js) can reuse their art. */
+const isPlayableCharacter = c => !!c && !c.cameoOnly;
+/* Live view: rescued -ite characters are pushed onto CHARACTERS further down. */
+function playableCharacters(){ return CHARACTERS.filter(isPlayableCharacter); }
 
 const SPECIAL_CHARACTER_PRODUCTS = Object.freeze([
   { id:"special-jesus", label:"Jesus", priceLabel:"$12", priceUsd:12, flOz:0, kind:"special-character", characterId:"jesus", specialCharacter:true, cashOnly:true, machineEligible:false, specialBadge:"✝️ SPECIAL CHARACTER" },
@@ -4330,9 +4329,9 @@ const DAM_HUMOR_TITLES = {
   "operator-santa-claus":    "Santa Dam Claus",
   "operator-woman":          "The Dam Woman",
   "operator-man":            "The Dam Man",
-  "character-8":             "DAM Double Burger & on Flow Duty",
+  "character-8":             "DAM Double Burger on Flow Duty",
   "character-7":             "DAM Pool on Flow Duty",
-  "character-6":             "DAM Double Burger on Flow Duty",
+  "character-6":             "DAM Statue on Flow Duty",
   "character-5":             "DAM Light on Flow Duty",
   "character-4":             "DAM Unicorn on Flow Duty",
   "character-3":             "DAM Water on Flow Duty",
@@ -4355,9 +4354,9 @@ const DAM_HUMOR_CHARACTER = {
   "operator-santa-claus":    ["Ho ho hold the flow!", "Santa checked the list. The dam made the nice list.", "Sleigh the pressure!", "Dam-cember came early."],
   "operator-woman":          ["The Dam Woman runs a tight reservoir.", "She built that. Dam right.", "Flow boss, reporting in."],
   "operator-man":            ["The Dam Man has entered the chat.", "Hard hat on. Water under control.", "The Dam Man can. And did."],
-  "character-8":             ["DAM Double Burger & is on the flow.", "DAM Double Burger & is looking great in the dam.", "DAM Double Burger &: pressure approved."],
+  "character-8":             ["DAM Double Burger is on the flow.", "DAM Double Burger is looking great in the dam.", "DAM Double Burger: pressure approved."],
   "character-7":             ["DAM Pool is keeping the water moving.", "DAM Pool is one step closer to the perfect flow.", "DAM Pool says: dam right."],
-  "character-6":             ["DAM Double Burger is ready for the next surge.", "Six on shift. Flow on point.", "DAM Double Burger has the pressure handled."],
+  "character-6":             ["DAM Statue is ready for the next surge.", "Six on shift. Flow on point.", "DAM Statue has the pressure handled."],
   "character-5":             ["DAM Light has entered the flow.", "Five-star hydraulic work.", "DAM Light says: keep it flowing."],
   "character-4":             ["DAM Unicorn is watching the gates.", "Four the love of water, keep tapping.", "DAM Unicorn has pressure under control."],
   "character-3":             ["DAM Water is riding the current.", "Three cheers for that flow.", "DAM Water says: let it flow."],
@@ -5238,6 +5237,9 @@ function loadGame(){
   if(!state.unlockedCharacters.includes(DEFAULT_CHARACTER_ID)) state.unlockedCharacters.unshift(DEFAULT_CHARACTER_ID);
   if(!state.unlockedCharacters.includes("yall-too-beaver")) state.unlockedCharacters.push("yall-too-beaver");
   if(!state.unlockedCharacters.includes(state.activeCharacter)) state.activeCharacter = DEFAULT_CHARACTER_ID;
+  /* V2.1.91 — a save whose active operator became a DAM-ITE SURPRISE switches to the free Beaver.
+     Only the selection moves: the retired character stays in unlockedCharacters (nothing is taken away). */
+  if(!isPlayableCharacter(CHARACTERS.find(c => c.id === state.activeCharacter))) state.activeCharacter = "yall-too-beaver";
   state.tribePortraits = sanitizeTribePortraits(d.tribePortraits);
   return true;
 }
@@ -5771,7 +5773,7 @@ function resumeDayTimer(){
   if(!timerPaused || state.phase !== "playing" || state.busy) return;
   startDayTimer(dayTimerRemainingMs);
 }
-function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || document.hidden || (typeof damMachine === "object" && damMachine.open); }
+function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || window.geiWelcomeOpen === true || document.hidden || (typeof damMachine === "object" && damMachine.open); }
 function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayTimer(); }
 
 function tickDayTimer(){
@@ -5928,7 +5930,7 @@ function reachOcean(){
 ========================================================= */
 
 function getActiveCharacter(){
-  return CHARACTERS.find(x => x.id === state.activeCharacter && isUnlocked("characters", x.id))
+  return playableCharacters().find(x => x.id === state.activeCharacter && isUnlocked("characters", x.id))
       || CHARACTERS.find(x => x.id === DEFAULT_CHARACTER_ID);
 }
 function safeWarn(msg){ try { console.warn("[Nite Lite] " + msg); } catch(e){} }
@@ -7141,7 +7143,7 @@ function renderCharacter(){
 
 /* Only an owned character can become active. */
 function setActiveCharacter(id){
-  if(!CHARACTERS.some(c => c.id === id) || !isUnlocked("characters", id)) return false;
+  if(!playableCharacters().some(c => c.id === id) || !isUnlocked("characters", id)) return false;   // V2.1.91: cameos can't be active
   state.activeCharacter = id;
   saveGame();
   renderCharactersPanel();
@@ -7317,6 +7319,7 @@ function isCashOnlyCharacter(item){
 function nextLockedItem(category){
   return (UNLOCK_CATALOG[category] || []).find(it =>
     !it.rescueOnly &&
+    !(category === "characters" && it.cameoOnly) &&          // V2.1.91 — DAM-ITE SURPRISES are never awarded
     !isUnlocked(category, it.id) &&
     !(category === "characters" && isCashOnlyCharacter(it))
   ) || null;
@@ -7351,6 +7354,7 @@ function purchaseItem(category, id, opts = {}){
   if(!item) return { ok:false, message:"That item doesn't exist." };
   if(isUnlocked(category, id)) return { ok:false, message:"Already unlocked." };
   if(item.rescueOnly) return { ok:false, message:"Rescue this -ite to add them to your crew." };
+  if(category === "characters" && item.cameoOnly) return { ok:false, message:"✨ That's a DAM-ITE SURPRISE — it only drops in for cameos." };
   if(category === "characters" && isCashOnlyCharacter(item)){
     return { ok:false, message:"🔒 CASH PURCHASE REQUIRED — this special character cannot be unlocked with FL OZ." };
   }
@@ -9157,7 +9161,7 @@ function renderPreGameCharacters(){
   const grid = $("preGameAvatarGrid"); if(!grid) return;
   const w = $("preGameWallet"); if(w) w.textContent = `💧 Wallet: ${fmt(state.totalFlOz)} FL OZ`;
   grid.innerHTML = "";
-  CHARACTERS.forEach(c => {
+  playableCharacters().forEach(c => {             // V2.1.91: DAM-ITE SURPRISES are not operators
     const owned = isUnlocked("characters", c.id), selected = guideSelection === c.id;
     const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
     const card = document.createElement("div");
@@ -9600,7 +9604,7 @@ function runCommandCenterSelfTest(){
     /* V2.1.37 — regression: the guide must open, draw its avatars and close even without the never-show checkbox. */
     t("V2.1.37: guide opens with avatars and START releases the board", () => {
       openGameGuide(false);
-      const drawn = document.querySelectorAll("#preGameAvatarGrid .preGameAvatar").length === CHARACTERS.length;
+      const drawn = document.querySelectorAll("#preGameAvatarGrid .preGameAvatar").length === playableCharacters().length;
       guideSelection = state.activeCharacter;
       const started = beginFromGuide();
       return drawn && started && !preGameOpen && !$("preGameCard").classList.contains("show");
@@ -9666,7 +9670,7 @@ function runCommandCenterSelfTest(){
     t("ui: ALL -ITES SAVED uses the supplied artwork", () => { const img = $("iteHudAvatar").querySelector("img"); return img && img.src === ALL_ITES_SAVED_ART_URL && /ALL -ITES SAVED/.test($("iteHudLine").textContent); });
     t("ui: -ites panel shows the celebration banner", () => { const b = $("itesSavedBanner"); return b && b.querySelector("img").src === ALL_ITES_SAVED_ART_URL; });
     t("ui: Store has no character / Rescued -ites section", () => !$("storeCharacters") && !/Rescued -ites/i.test($("storePanel").textContent) && !$("storePanel").querySelector(".charCard"));
-    t("ui: Characters panel lists the full roster", () => $("charactersGrid").querySelectorAll(".charCard").length === CHARACTERS.length);
+    t("ui: Characters panel lists the full roster", () => $("charactersGrid").querySelectorAll(".charCard").length === playableCharacters().length);
     t("ui: no duplicate ids", () => { const seen = new Set(); return [...document.querySelectorAll("[id]")].every(el => !seen.has(el.id) && seen.add(el.id)); });
   } finally {
     Object.keys(snap).forEach(k => { state[k] = snap[k]; });
@@ -9940,7 +9944,7 @@ function renderProfile(){
     ["Reservoir level", `${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)}`, "FL OZ this level"],
     ["Flow record", `${fmt(state.completedLevels)}`, "loops completed"],
     ["Songs", `${state.unlockedSongs.length} / ${SONGS.length}`, "unlocked"],
-    ["Operator crew", `${state.unlockedCharacters.length} / ${CHARACTERS.length}`, "characters"],
+    ["Operator crew", `${playableCharacters().filter(c => isUnlocked("characters", c.id)).length} / ${playableCharacters().length}`, "characters"],
     ["Skins", `${skinsOwned} / ${skinsTotal}`, "available"],
     ["-ites preserved", `${ites} / ${ALL_TRIBES.length}`, "discovered"],
     /* v2.6 — Dam Machine */
@@ -10041,7 +10045,7 @@ function renderStoreCharacterShelf(){
   const grid = $("storeCharactersGrid");
   if(!grid) return;
   grid.innerHTML = "";
-  CHARACTERS.forEach(c => {
+  playableCharacters().forEach(c => {             // V2.1.91: DAM-ITE SURPRISES are not operators
     const owned = isUnlocked("characters", c.id);
     const active = state.activeCharacter === c.id;
     const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
@@ -10102,7 +10106,7 @@ function renderCharactersPanel(){
   const grid = $("charactersGrid");
   if(!grid) return;
   grid.innerHTML = "";
-  CHARACTERS.forEach(c => {
+  playableCharacters().forEach(c => {             // V2.1.91: DAM-ITE SURPRISES are not operators
     const owned = isUnlocked("characters", c.id);
     const active = state.activeCharacter === c.id;
     const starter = !!c.isStarter || c.id === DEFAULT_CHARACTER_ID;
@@ -10669,7 +10673,7 @@ function revealSkinWhenReady(tries){
   if(livingWorld.badgeShown || window.__GEI_PRODUCTION_GUARD__) return;
   const splash = $("geiSplash");
   const splashUp = splash && !splash.classList.contains("isDone") && splash.style.display !== "none";
-  if(splashUp || preGameOpen || damMachine.open){ if(tries < 180) setTimeout(() => revealSkinWhenReady(tries + 1), 500); return; }
+  if(splashUp || preGameOpen || window.geiWelcomeOpen === true || damMachine.open){ if(tries < 180) setTimeout(() => revealSkinWhenReady(tries + 1), 500); return; }
   livingWorld.badgeShown = true;
   showLivingBadge(`${activeSkin.deco} ${activeSkin.name.toUpperCase()}`, livingWorld.moment.atmosphere, 2800);
   if(!livingReducedMotion() && Math.random() < .12) setTimeout(() => triggerLivingEvent(livingWorld.moment.signature), 900);   // "Whoa — never seen THAT."
@@ -10974,11 +10978,11 @@ const DAM_ITE_OPERATOR_VOICES = Object.freeze({
     machine:["The Dam Man is watching the reels.","Let's see what the machine delivers."],
     level:["The Dam Man approves the level.","Hard hat on. Next level."]
   }},
-  "character-8": { name:"DAM Double Burger &", wave:"sine", notes:[330,415,523], lines:{
-    tap:["DAM Double Burger & is on flow duty.","Pressure check: DAM Double Burger & ready."],
-    breakthrough:["DAM Double Burger & has reached breakthrough.","The flow is wide open."],
-    machine:["DAM Double Burger & says: spin it.","Let's see what the dam machine delivers."],
-    level:["DAM Double Burger & clears the level.","Flow secured. Next level."]
+  "character-8": { name:"DAM Double Burger", wave:"sine", notes:[330,415,523], lines:{
+    tap:["DAM Double Burger is on flow duty.","Pressure check: DAM Double Burger ready."],
+    breakthrough:["DAM Double Burger has reached breakthrough.","The flow is wide open."],
+    machine:["DAM Double Burger says: spin it.","Let's see what the dam machine delivers."],
+    level:["DAM Double Burger clears the level.","Flow secured. Next level."]
   }},
   "character-7": { name:"DAM Pool", wave:"triangle", notes:[349,440,554], lines:{
     tap:["DAM Pool is keeping the flow moving.","Pressure looks good."],
@@ -10986,11 +10990,11 @@ const DAM_ITE_OPERATOR_VOICES = Object.freeze({
     machine:["DAM Pool is watching the reels.","Spin the machine."],
     level:["DAM Pool clears the level.","Seven on shift. Next level."]
   }},
-  "character-6": { name:"DAM Double Burger", wave:"sine", notes:[392,494,587], lines:{
-    tap:["DAM Double Burger has pressure under control.","Steady flow, steady work."],
-    breakthrough:["DAM Double Burger hits the breakthrough.","Water is moving."],
-    machine:["DAM Double Burger says: spin it.","Let's check the reels."],
-    level:["DAM Double Burger clears the level.","Pressure handled. Next stage."]
+  "character-6": { name:"DAM Statue", wave:"sine", notes:[392,494,587], lines:{
+    tap:["DAM Statue has pressure under control.","Steady flow, steady work."],
+    breakthrough:["DAM Statue hits the breakthrough.","Water is moving."],
+    machine:["DAM Statue says: spin it.","Let's check the reels."],
+    level:["DAM Statue clears the level.","Pressure handled. Next stage."]
   }},
   "character-5": { name:"DAM Light", wave:"triangle", notes:[294,370,494], lines:{
     tap:["DAM Light is on the flow.","Good pressure. Keep tapping."],
@@ -12060,7 +12064,7 @@ const GEI_CHARACTER_PERSONALITIES=Object.freeze({
   "operator-santa-claus":{id:"santa",label:"FLOW GIVER",emoji:"🎅",style:"gift",greeting:"Ho-ho-flow!",tap:"gift",milestone:"gift"},
   "operator-woman":{id:"woman",label:"DAM NATION",emoji:"👩",style:"celebrate",greeting:"Keep it flowing!",tap:"celebrate",milestone:"celebrate"},
   "operator-man":{id:"man",label:"DAM NATION",emoji:"👨",style:"celebrate",greeting:"That's DAM good!",tap:"celebrate",milestone:"celebrate"},
-  "character-8":{id:"character8",label:"DAM DOUBLE BURGER &",emoji:"🍔",style:"wave",greeting:"Double the burger, double the flow!",tap:"wave",milestone:"wave"},
+  "character-8":{id:"character8",label:"DAM DOUBLE BURGER",emoji:"🍔",style:"wave",greeting:"Double the burger, double the flow!",tap:"wave",milestone:"wave"},
   "character-7":{id:"character7",label:"DAM POOL",emoji:"🏊",style:"energy",greeting:"Make a splash!",tap:"energy",milestone:"surge"},
   "character-6":{id:"character6",label:"FLOW CREW",emoji:"🌱",style:"nature",greeting:"Let it flow!",tap:"nature",milestone:"bloom"},
   "character-5":{id:"character5",label:"FLOW CREW",emoji:"🎵",style:"rhythm",greeting:"Catch the rhythm!",tap:"rhythm",milestone:"song"},
@@ -12227,7 +12231,11 @@ if(window.visualViewport) window.visualViewport.addEventListener("resize", ()=>s
 /* V2.1.38 — TAP/STARTUP REGRESSION CLEANUP */
 document.querySelectorAll(".costText").forEach(el => { el.textContent = `${fmt(UNLOCK_COST_FL_OZ)} FL OZ`; });
 document.querySelectorAll(".groupPrice").forEach(el => { el.innerHTML = el.innerHTML.replace("${DAY_REWARD}", `${DAY_REWARD_FL_OZ} FL OZ`); });
-loadGame();
+/* V2.1.90 — BEAVER-FIRST: a brand-new visitor (no readable save) starts with the free starter
+   Beaver active. Selection only — ownership is unchanged (Wilbert stays owned and selectable),
+   nothing is saved here, and any existing save keeps its own active character. */
+const BEAVER_FIRST_CHARACTER_ID = "yall-too-beaver";
+if(!loadGame() && isUnlocked("characters", BEAVER_FIRST_CHARACTER_ID)) state.activeCharacter = BEAVER_FIRST_CHARACTER_ID;
 /* V2.1.27 — persisted state is loaded before the canonical world is rebuilt. */
 buildWorldDynamicGraphics();
 syncIteStatuses();                                      // DAM NATION V1.0: catalog mirrors the loaded record
@@ -12260,10 +12268,9 @@ try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); } 
   try{geiCharacterSpotlightStartup()}catch(e){safeWarn("V2.1.54 spotlight skipped: "+e)}
 
 
-/* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
-if(state.level===1 && state.levelFlOz===0 && storageGet("yalltooDamGame.guideSeen")!=="1"){
-  setTimeout(()=>openGameGuide(false),120);
-}
+/* V2.1.90 — the game no longer opens on the Command Guide (How to Play / pick-a-player).
+   The Beaver host welcome (beaver-welcome-v2190.js) greets new players after the splash;
+   the guide stays one tap away via 📖 and the welcome's CHOOSE ANOTHER PLAYER. */
 
 /* Redraw days already completed in this level (after a refresh) without sounds. */
 function restoreVisualProgress(){
@@ -12393,12 +12400,15 @@ function restoreVisualProgress(){
   <script src="/tap-lites-random-scene-v2183.js" defer></script>
   <script src="/tap-lites-scene-transition-v2184.js" defer></script>
   <script src="/tap-lites-synchronized-intro-v2185.js" defer></script>
+  <script src="/beaver-welcome-v2190.js" defer></script>
   <script src="/tap-lites-moment-director-v2187.js" defer></script>
   <script src="/buyites-store-v2167.js" defer></script>
   <script src="/tap-effect-v2168.js" defer></script>
   <script src="/day-card-fx-v2169.js" defer></script>
   <script src="/dam-map-v2170.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
+  <script src="/dam-surprise-cameos-v2191.js" defer></script>
+  <script src="/tap-lites-showcase-v2192.js" defer></script>
   <script src="/character-signature-moments.js" defer></script>
   <script src="/signature-moment-audio.js" defer></script>
   <script src="/dam-friendly-soundtrack-v2188.js" defer></script>
