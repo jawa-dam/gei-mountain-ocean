@@ -281,7 +281,8 @@ async function suiteMap(browser, base, device, label){
   if (g.touch) await g.page.tap("#geiMapBack"); else await g.page.click("#geiMapBack");
   await sleep(300);
   const closed = await g.page.evaluate(() => ({ open:document.getElementById("geiDamMapPage").classList.contains("show"), mode:window.__GEI_DAM_SURPRISES__.mode, on:document.querySelectorAll(".dscCameo.on").length }));
-  check("F4. " + tag + "BACK closes the map and stops map cameos", !closed.open && closed.mode === "" && closed.on === 0, closed);
+  /* V2.1.92: the global director hands off to the next idle screen (e.g. "home"), never keeps "map". */
+  check("F4. " + tag + "BACK closes the map and stops map cameos", !closed.open && closed.mode !== "map" && closed.on === 0, closed);
   check("H2. " + tag + "no horizontal page overflow on the map", q.overflow === 0, { overflow:q.overflow });
   await g.ctx.close();
 }

@@ -1,24 +1,36 @@
-/* V2.1.91 — DAM-ITE SURPRISES (damSurpriseCameoEngine)
+/* V2.1.91 → V2.1.92 — DAM-ITE SURPRISES: GLOBAL AMBIENT CAMEO ENGINE (damSurpriseCameoEngine)
  *
  * Nine former operators (DAM Pool, DAM Double Burger, DAM Statue, DAM Lollipop, DAM Sundae,
- * DAM Water, DAM Unicorn, DAM Light, Lion) are no longer playable; this engine turns their art
- * into short, decorative, randomized cameos in two places:
+ * DAM Water, DAM Unicorn, DAM Light, Lion) are no longer playable; this ONE engine turns their art
+ * into short, decorative, randomized cameos on whichever idle/waiting screen is up. A single
+ * director reads the live UI state and picks one mode at a time:
  *
- *   IDLE  "THE DAM BROKE! … TRY DAY AGAIN" card — while it sits idle and the soundtrack is
- *         playing: wait 1.5–3.5 s, show one cameo (0.9–2.2 s), wait 2.5–6 s, next… A tap anywhere
- *         on the card ends the show at once and retries the day (the button still works as before).
- *   MAP   DAM Map — occasionally, placed near a fitting region (Pool by the Millpond, Statue by
- *         the Dam, Lion by the Factory, Water/Unicorn cross the route…).
+ *   home    board waiting for the first tap (menu/home, before the timer) — screensaver cadence:
+ *           wait 3–6 s, one cameo for 1–2 s, random 3–6 s gap, repeat; placed off the HUD, the
+ *           floating buttons and the glowing station.
+ *   pregame DAM-ITE COMMAND GUIDE (START GAME) — one small friendly cameo at a time, never over
+ *           a button, tab or the title.
+ *   wheel   Bonus Waterwheel before SPIN — subtle cameos drift around the wheel / card edges,
+ *           never over SPIN or the wheel hub; stops the moment the wheel is activated.
+ *   level   HYDRAULIC CYCLE COMPLETE — after the card settles, an occasional LARGE cameo with a
+ *           random entrance/effect; kept off the headline, rescue card, FL OZ line and buttons.
+ *   idle    "THE DAM BROKE! … TRY DAY AGAIN" — while the soundtrack plays: 1.5–3.5 s, one cameo
+ *           (0.9–2.2 s), 2.5–6 s gap… breathes on the music's beat. One tap anywhere ends the show
+ *           and retries the day.
+ *   map     DAM Map — occasional cameos by a fitting region.
+ *   ""      gameplay (timer running), input in flight, another dialog/panel/menu, splash, hidden
+ *           tab → nothing is shown.
  *
+ * Any tap/key on home/pregame/wheel/level removes the cameo at once and restarts the wait.
  * Rules: one reusable aria-hidden layer (one cameo + a small fixed particle pool), pointer-events:none
- * everywhere, never more than one cameo at a time, no text/rarity announcements, reduced motion →
- * short fade/scale only. Presentation only: never writes game state, FL OZ, XP, purchases,
- * entitlements, ownership or storage.
+ * everywhere, never more than one cameo at a time, last-4 no-repeat history, skin colors from CSS
+ * variables, reduced motion → short fade/scale only. Presentation only: never writes game state,
+ * FL OZ, XP, purchases, entitlements, ownership or storage.
  */
 (function(){
   "use strict";
   if(window.__GEI_DAM_SURPRISES__) return;
-  var VERSION = "V2.1.91";
+  var VERSION = "V2.1.92";
 
   /* ---------- cameo pool (art comes from the canonical CHARACTERS catalog by id) ---------- */
   var CAMEOS = [
@@ -37,13 +49,22 @@
   var EXITS   = ["fade","shrink","sink","floatAway","slideL","slideR","spin"];
   var TIERS   = [ { id:"normal", w:65 }, { id:"special", w:25 }, { id:"rare", w:8 }, { id:"ultra", w:2 } ];
   var TIMING  = { idleFirst:[1500,3500], idleBetween:[2500,6000], show:[900,2200],
-                  mapFirst:[3000,7000], mapBetween:[7000,14000], mapChance:.7, recheck:1500 };
+                  mapFirst:[3000,7000], mapBetween:[7000,14000], mapChance:.7, recheck:1500, poll:600 };
+  /* V2.1.92 — per-screen rhythm for the global director (ms). */
+  var MODES = {
+    home:    { first:[3000,6000], between:[3000,6000], show:[1000,2000], chance:1,  size:[70,150],  k:.2  },
+    pregame: { first:[2000,4000], between:[4000,8000], show:[1200,2000], chance:1,  size:[56,110],  k:.16, subtle:true },
+    wheel:   { first:[1500,3000], between:[3000,6000], show:[1000,1800], chance:1,  size:[56,112],  k:.17, subtle:true },
+    level:   { first:[3500,6000], between:[7000,12000], show:[1600,2400], chance:.65, size:[96,230], k:.32, big:true }
+  };
+  var BIG_FX = ["glow","splash","shimmer","float","bounce","sparkle","pop","rise","wave","pulse"];
   /* Map station anchors (SVG units of the V2.1.90 DAM Map scene, viewBox 1240×520). */
   var MAP_W = 1240, MAP_H = 520;
   var ANCHOR = [{x:186,top:150},{x:417,top:368},{x:590,top:446},{x:737,top:392},{x:905,top:380},{x:1056,top:346}];
 
   var S = { mode:"", timer:0, cameoTimer:0, anims:[], visible:false, current:null, recent:[], badArt:{},
-            idleShowActive:false, installed:false, stats:{ shown:0, maxVisible:0, byTier:{normal:0,special:0,rare:0,ultra:0}, byCameo:{}, stoppedByTap:0 } };
+            idleShowActive:false, installed:false, stats:{ shown:0, maxVisible:0, byTier:{normal:0,special:0,rare:0,ultra:0}, byCameo:{}, byMode:{}, stoppedByTap:0, stoppedByInput:0 },
+            tapEnded:false, lastInput:0, poll:0 };
   var L = { layer:null, cameo:null, move:null, beat:null, fig:null, img:null, emoji:null, parts:[] };
 
   function $(id){ return document.getElementById(id); }
@@ -64,6 +85,8 @@
       "#damSurpriseLayer{position:absolute;inset:0;overflow:hidden;pointer-events:none!important;z-index:2;contain:layout paint}"+
       "#damSurpriseLayer *{pointer-events:none!important}"+
       "#damSurpriseLayer.map{z-index:2}"+
+      /* V2.1.92: over a dialog card the layer sits on the full-width stage, above the card (still click-through) */
+      "#damSurpriseLayer.over{z-index:300}"+
 
       ".dscCameo{position:absolute;left:0;top:0;width:var(--dscSize,120px);height:var(--dscSize,120px);display:none;transform:translate(-50%,-50%) rotate(var(--dscRot,0deg)) scale(var(--dscScale,1));will-change:transform,opacity}"+
       ".dscCameo.on{display:block}"+
@@ -151,12 +174,12 @@
     return "normal";
   }
   function pickCameo(){
-    var avoid = S.recent.slice(-3);
+    var avoid = S.recent.slice(-4);                                          // last several never repeat
     var pool = CAMEOS.filter(function(c){ return avoid.indexOf(c.id) < 0; });
     if(!pool.length) pool = CAMEOS.filter(function(c){ return c.id !== S.recent[S.recent.length-1]; });
     return pick(pool);
   }
-  function remember(id){ S.recent.push(id); if(S.recent.length > 5) S.recent.shift(); }
+  function remember(id){ S.recent.push(id); if(S.recent.length > 6) S.recent.shift(); }
 
   function musicBeatSeconds(){
     try{
@@ -224,14 +247,15 @@
     build();
     hideCameo();
     var c = forced && forced.cameo ? CAMEOS.find(function(x){ return x.id === forced.cameo; }) || pickCameo() : pickCameo();
-    var tier = forced && forced.tier || pickTier();
+    forced = forced || {};
+    var tier = forced.tier || (forced.subtle ? (Math.random() < .8 ? "normal" : "special") : pickTier());
     var rm = reduced();
-    var total = rint(TIMING.show);
+    var total = rint(forced.show || TIMING.show);
     if(tier === "rare" || tier === "ultra") total = Math.max(total, 1600);
-    var effect = pick(c.fx), entry = rm ? "fade" : pick(ENTRIES), exit = rm ? "fade" : pick(EXITS);
+    var effect = forced.big ? pick(BIG_FX) : pick(c.fx), entry = rm ? "fade" : pick(ENTRIES), exit = rm ? "fade" : pick(EXITS);
     if(c.heavy && !rm) entry = pick(["rise","pop"]);
     var scale = { normal:rnd(.88,1.04), special:rnd(.98,1.12), rare:rnd(1.05,1.18), ultra:rnd(1.12,1.25) }[tier];
-    var rot = rm ? 0 : rnd(-10,10);
+    var rot = rm ? 0 : forced.subtle ? rnd(-6,6) : forced.big ? rnd(-14,14) : rnd(-10,10);
 
     var art = catalogArt(c.id);
     L.fig.classList.toggle("noArt", !art || !!S.badArt[c.id]);
@@ -253,7 +277,7 @@
     var inMs = rm ? 180 : Math.min(520, total * .3), outMs = rm ? 180 : Math.min(460, total * .28);
     animate(L.move, rm ? RM_IN : ENTRY_FRAMES[entry], { duration:inMs, easing:"cubic-bezier(.2,.8,.25,1.1)", fill:"backwards" });
     if(place.travelTo && !rm) animate(cam, [{left:place.left},{left:place.travelTo}], { duration:total, easing:"ease-in-out", fill:"forwards" });
-    if((tier === "rare" || tier === "ultra") && !rm) particles(tier === "ultra" ? 6 : 4, place.size * scale);
+    if(!rm && (tier === "rare" || tier === "ultra" || (forced.big && Math.random() < .6))) particles(tier === "ultra" || forced.big ? 6 : 4, place.size * scale);
 
     S.visible = true; S.current = { id:c.id, label:c.label, tier:tier, effect:effect, entry:entry, exit:exit, ms:total };
     S.stats.shown++; S.stats.byTier[tier]++; S.stats.byCameo[c.id] = (S.stats.byCameo[c.id] || 0) + 1;
@@ -284,6 +308,151 @@
   }
   function clearSchedule(){ clearTimeout(S.timer); S.timer = 0; }
   function schedule(ms, fn){ clearSchedule(); S.timer = setTimeout(fn, ms); }
+
+  /* ---------- V2.1.92 director: which idle screen is up right now? ---------- */
+  function shown(id){ var el = $(id); return !!(el && (el.classList.contains("show") || el.classList.contains("open"))); }
+  function splashUp(){ var el = $("geiSplash"); return !!(el && !el.classList.contains("isDone") && el.style.display !== "none"); }
+  function gameVar(fn, dflt){ try{ return fn(); }catch(e){ return dflt; } }
+  /* Anything that is NOT an idle screen we decorate: panels, the nav menu, DAM MACHINE, spotlight,
+     welcome, -ite reveal, saved -ite collection, map milestone card. */
+  function blockerUp(){
+    if(gameVar(function(){ return typeof anyPanelOpen === "function" && anyPanelOpen(); }, false)) return true;
+    if(gameVar(function(){ return navOpen === true; }, false)) return true;
+    if(window.geiWelcomeOpen === true) return true;
+    var ids = ["characterSpotlight","damMachineCard","geiWelcome","tribeCard","geiIteCollection","geiMapMilestone"];
+    for(var i = 0; i < ids.length; i++) if(shown(ids[i])) return true;
+    return false;
+  }
+  function screen(){
+    if(document.hidden || splashUp()) return "";
+    if(mapOpen()) return "map";
+    if(blockerUp()) return "";
+    if(timeUpShowing()) return S.tapEnded ? "" : "idle";
+    if(gameVar(function(){ return state.busy === true; }, false)) return "";          // input in flight
+    if(shown("bonusCard")){
+      var b = gameVar(function(){ return bonus; }, null);
+      return b && b.awaiting === "spin" && !b.spinning ? "wheel" : "";                   // stop once the wheel is activated
+    }
+    if(shown("levelCard")) return "level";
+    if(shown("preGameCard")) return "pregame";
+    var ph = gameVar(function(){ return state.phase; }, "");
+    if(ph === "ready" || ph === "redeemed") return "home";                               // waiting for the first tap
+    return "";                                                                           // gameplay: stay out of the way
+  }
+  function evaluate(){
+    var want = S.disabled ? "" : screen();
+    if(want === S.mode) return;
+    if(S.mode === "idle") stopIdle(); else if(S.mode === "map") stopMap(); else stopAmbient();
+    if(want === "idle") startIdle();
+    else if(want === "map") startMap();
+    else if(MODES[want]){ S.mode = want; schedule(rint(MODES[want].first), ambientTick); }
+  }
+  function stopAmbient(){ if(!MODES[S.mode]) return; clearSchedule(); hideCameo(); S.mode = ""; }
+
+  /* ---------- generic placement: free margin around `inner` first, then its edges / a region,
+     never over a guarded rect, never outside the viewport. Returns null when nothing fits. ---------- */
+  function rectOf(el){ if(!el) return null; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 ? r : null; }
+  function guardRects(root, sels, pad){
+    var out = [];
+    if(!root) return out;
+    [].forEach.call(root.querySelectorAll(sels), function(el){
+      if(L.layer && L.layer.contains(el)) return;
+      var r = rectOf(el); if(!r) return;
+      try{ var cs = getComputedStyle(el); if(cs.visibility === "hidden" || +cs.opacity === 0) return; }catch(e){}
+      out.push({ left:r.left - pad, right:r.right + pad, top:r.top - pad, bottom:r.bottom + pad });
+    });
+    return out;
+  }
+  function placeAround(o){
+    var hr = rectOf(o.host); if(!hr) return null;
+    var vw = window.innerWidth || hr.right, vh = window.innerHeight || hr.bottom;
+    var box = { left:Math.max(hr.left, 0), right:Math.min(hr.right, vw), top:Math.max(hr.top, 0), bottom:Math.min(hr.bottom, vh) };
+    var ir = rectOf(o.inner) || { left:box.left, right:box.left, top:box.top, bottom:box.top };
+    var rg = o.region ? rectOf(o.region) : null;
+    if(rg) rg = { left:Math.max(rg.left, box.left), right:Math.min(rg.right, box.right), top:Math.max(rg.top, box.top), bottom:Math.min(rg.bottom, box.bottom) };
+    var full = Math.max(o.size[0], Math.min(o.size[1], Math.min(box.right - box.left, box.bottom - box.top) * o.k));
+    /* full size first; a crowded screen gets a slightly smaller cameo rather than one over a control */
+    var steps = [1, .85, .72];
+    for(var si = 0; si < steps.length; si++){
+      var size = Math.max(o.size[0] * .8, full * steps[si]), half = size / 2, pad = 6;
+      var zones = [
+        { x0:box.left, x1:box.right, y0:box.top, y1:ir.top },               // free margin around the card
+        { x0:box.left, x1:box.right, y0:ir.bottom, y1:box.bottom },
+        { x0:box.left, x1:ir.left, y0:box.top, y1:box.bottom },
+        { x0:ir.right, x1:box.right, y0:box.top, y1:box.bottom }
+      ].filter(function(z){ return (z.x1 - z.x0) >= size + pad*2 && (z.y1 - z.y0) >= size + pad*2; });
+      var useRg = rg && (rg.right - rg.left) >= size * .9 && (rg.bottom - rg.top) >= size * .9;
+      for(var k = 0; k < 30; k++){
+        var x, y;
+        if(zones.length && k < 15){ var z = pick(zones); x = rnd(z.x0 + half + pad, z.x1 - half - pad); y = rnd(z.y0 + half + pad, z.y1 - half - pad); }
+        else if(useRg && (k % 2 || !zones.length)){ x = rnd(rg.left + half*.9, rg.right - half*.9); y = rnd(rg.top + half*.9, rg.bottom - half*.9); }
+        else {                                                                // splash in from the card's edge
+          var side = pick(["left","right","left","right","top","bottom"]);
+          if(side === "top" || side === "bottom"){ x = rnd(ir.left + half, ir.right - half); y = side === "top" ? ir.top + rnd(-.1, .3) * size : ir.bottom - rnd(-.1, .3) * size; }
+          else { x = side === "left" ? ir.left + rnd(.05, .4) * size : ir.right - rnd(.05, .4) * size; y = rnd(ir.top + half, ir.bottom - half); }
+        }
+        x = Math.max(box.left + half*.7, Math.min(box.right - half*.7, x)); y = Math.max(box.top + half*.7, Math.min(box.bottom - half*.7, y));
+        var b = { left:x - half*.78, right:x + half*.78, top:y - half*.78, bottom:y + half*.78 };
+        if(!hits(b, o.guards)) return { left:(x - hr.left).toFixed(0) + "px", top:(y - hr.top).toFixed(0) + "px", size:size };
+      }
+    }
+    return null;
+  }
+  function shrink(r, f){ if(!r) return null; var dx = r.width * f, dy = r.height * f; return { left:r.left + dx, right:r.right - dx, top:r.top + dy, bottom:r.bottom - dy }; }
+  var HOSTS = {
+    home:function(){
+      var stage = document.querySelector(".stage"), world = $("world");
+      if(!stage) return null;
+      var g = guardRects(stage, "button,a[href],input,select,[role=button],.hud,.timerBox,#iteHud,.damIteCombo,.navSheet,.station.active,.dmStoreFloatBtn,.songVaultFloatBtn,.dmFloatBtn", 12);
+      return { host:stage, inner:$("appRoot"), region:world, guards:g };
+    },
+    pregame:function(){
+      var card = $("preGameCard"), inner = card && card.querySelector(".preGameInner"); if(!card) return null;
+      return { host:stageOr(card), over:true, inner:inner, region:inner, guards:guardRects(card, "button,[role=tab],.preGameTitle,.preGameSub,input,a[href]", 12) };
+    },
+    wheel:function(){
+      var card = $("bonusCard"); if(!card) return null;
+      var g = guardRects(card, "button,.bwTitle,.bwEyebrow,.bwFree,.bwPrompt", 10);
+      g = g.concat(guardRects(card, "#bonusBtn", 22));                              // SPIN gets extra room
+      var hub = shrink(rectOf(card.querySelector(".bwWheelBox")), .24); if(hub) g.push(hub);   // pointer + hub stay clear
+      return { host:stageOr(card), over:true, inner:card.querySelector(".bonusInner"), region:card.querySelector(".bwWheelBox"), guards:g };
+    },
+    level:function(){
+      var card = $("levelCard"); if(!card) return null;
+      return { host:stageOr(card), over:true, inner:$("levelInner"), region:$("levelInner"),
+               guards:guardRects(card, "button,.lcEyebrow,.lcLevel,.lcRescue,.lcOz,.lcCongrats,.milestoneTitle,.lcCharName,a[href]", 10) };
+    }
+  };
+  /* The full-width stage: on desktop its side margins are free space beside the card. */
+  function stageOr(el){ return document.querySelector(".stage") || el; }
+  function ambientTick(){
+    S.timer = 0;
+    var m = S.mode, cfg = MODES[m];
+    if(!cfg) return;
+    if(screen() !== m){ evaluate(); return; }
+    if(Math.random() < cfg.chance){
+      var h = HOSTS[m]();
+      if(h){
+        var place = placeAround({ host:h.host, inner:h.inner, region:h.region, guards:h.guards, size:cfg.size, k:cfg.k });
+        if(place){
+          mount(h.host, "amb " + m + (h.over ? " over" : ""));
+          var c = showCameo(place, { show:cfg.show, subtle:cfg.subtle, big:cfg.big });
+          S.stats.byMode[m] = (S.stats.byMode[m] || 0) + 1;
+          schedule(c.ms + rint(cfg.between), ambientTick); return;
+        }
+      }
+    }
+    schedule(rint(cfg.between), ambientTick);
+  }
+  /* The player is doing something: the cameo leaves at once and the wait starts over. */
+  function onInput(e){
+    S.lastInput = Date.now();
+    if(!MODES[S.mode]) return;
+    if(S.visible) S.stats.stoppedByInput++;
+    hideCameo();
+    schedule(rint(MODES[S.mode].first), ambientTick);
+    setTimeout(evaluate, 0);                                                     // e.g. SPIN / START / CONTINUE
+  }
 
   /* ---------- IDLE: The Dam Broke / Try Day Again ---------- */
   function timeUp(){ return $("timeUpCard"); }
@@ -335,6 +504,7 @@
     if(otherModalOpen("timeUpCard") || !musicPlaying()){ schedule(TIMING.recheck, idleTick); return; }
     mount(timeUp(), "idle");
     S.idleShowActive = true;
+    S.stats.byMode.idle = (S.stats.byMode.idle || 0) + 1;
     var shown = showCameo(idlePlace());
     schedule(shown.ms + rint(TIMING.idleBetween), idleTick);
   }
@@ -352,7 +522,7 @@
     /* End the show on the first touch — immediately, before anything else sees the tap. */
     t.addEventListener("pointerdown", function(e){
       if(S.mode !== "idle") return;
-      if(S.idleShowActive){ S.stats.stoppedByTap++; t.dataset.dscEnded = "1"; stopIdle(); return; }
+      if(S.idleShowActive){ S.stats.stoppedByTap++; t.dataset.dscEnded = "1"; S.tapEnded = true; stopIdle(); return; }
       schedule(rint(TIMING.idleFirst), idleTick);                           // still settling: the player is active, wait again
     }, true);
     /* …and that same tap starts the day again (no second tap). The button keeps its own handler. */
@@ -363,8 +533,8 @@
       try{ if(typeof retryDay === "function") retryDay(); }catch(err){}
     });
     new MutationObserver(function(){
-      if(timeUpShowing()){ if(S.mode !== "idle") startIdle(); }
-      else { t.dataset.dscEnded = ""; stopIdle(); }
+      if(!timeUpShowing()){ t.dataset.dscEnded = ""; S.tapEnded = false; }
+      evaluate();
     }).observe(t, { attributes:true, attributeFilter:["class"] });
   }
 
@@ -432,35 +602,42 @@
     schedule(rint(TIMING.mapBetween), mapTick);
   }
   function startMap(){
-    stopIdle();
+    stopIdle(); stopAmbient();
     S.mode = "map";
     schedule(rint(TIMING.mapFirst), mapTick);
   }
   function stopMap(){
     if(S.mode !== "map") return;
     clearSchedule(); hideCameo(); S.mode = "";
-    if(timeUpShowing()) startIdle();
   }
   function bindMap(){
     var p = mapPage(); if(!p || p.dataset.dscBound) return; p.dataset.dscBound = "1";
-    new MutationObserver(function(){ if(mapOpen()){ if(S.mode !== "map") startMap(); } else stopMap(); })
-      .observe(p, { attributes:true, attributeFilter:["class"] });
-    if(mapOpen()) startMap();
+    new MutationObserver(evaluate).observe(p, { attributes:true, attributeFilter:["class"] });
+    evaluate();
   }
 
   /* ---------- lifecycle ---------- */
   function onVisibility(){
-    if(document.hidden){ clearSchedule(); hideCameo(); return; }
-    if(S.mode === "idle") schedule(rint(TIMING.idleFirst), idleTick);
-    else if(S.mode === "map") schedule(rint(TIMING.mapFirst), mapTick);
+    if(document.hidden){ clearSchedule(); hideCameo(); }
+    evaluate();                                                   // hidden → "", visible → the screen's mode restarts its wait
+  }
+  var WATCH = ["preGameCard","bonusCard","levelCard","damMachineCard","characterSpotlight","tribeCard","geiWelcome","geiSplash","geiIteCollection","navSheet"];
+  function watchDialogs(){
+    var mo = new MutationObserver(function(){ evaluate(); });
+    WATCH.forEach(function(id){ var el = $(id); if(el && !el.dataset.dscWatch){ el.dataset.dscWatch = "1"; mo.observe(el, { attributes:true, attributeFilter:["class","style"] }); } });
+    [].forEach.call(document.querySelectorAll(".sidePanel"), function(el){ if(!el.dataset.dscWatch){ el.dataset.dscWatch = "1"; mo.observe(el, { attributes:true, attributeFilter:["class"] }); } });
   }
   function install(){
     if(S.installed) return;
     S.installed = true;
-    build(); bindIdle(); bindMap();
-    if(timeUpShowing()) startIdle();
+    build(); bindIdle(); bindMap(); watchDialogs();
     document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("load", bindMap);
+    document.addEventListener("pointerdown", onInput, true);
+    document.addEventListener("keydown", onInput, true);
+    window.addEventListener("load", function(){ bindMap(); watchDialogs(); });
+    /* Cheap safety net for state the DOM does not announce (phase, busy, wheel spinning). */
+    S.poll = setInterval(function(){ if(!S.disabled) evaluate(); }, TIMING.poll);
+    evaluate();
   }
 
   function selfTest(){
@@ -474,6 +651,8 @@
       ariaHidden:!layer || layer.getAttribute("aria-hidden") === "true",
       artFromCatalog:CAMEOS.every(function(c){ return !!catalogArt(c.id); }),
       noneSelectable:(function(){ try{ return CAMEOS.every(function(c){ return !playableCharacters().some(function(p){ return p.id === c.id; }); }); }catch(e){ return false; } })(),
+      modes:["home","pregame","wheel","level","idle","map"],
+      screen:screen(),
       presentationOnly:true
     };
   }
@@ -484,14 +663,23 @@
     effects:EFFECTS.slice(), entries:ENTRIES.slice(), exits:EXITS.slice(), tiers:TIERS.slice(), timing:TIMING,
     get mode(){ return S.mode; }, get visible(){ return S.visible; }, get current(){ return S.current; },
     get idleShowActive(){ return S.idleShowActive; },
+    get screen(){ return screen(); },
+    modes:JSON.parse(JSON.stringify(MODES)),
     stats:function(){ return JSON.parse(JSON.stringify(S.stats)); },
     recent:function(){ return S.recent.slice(); },
     pickTier:pickTier, selfTest:selfTest,
-    stop:function(){ stopIdle(); stopMap(); clearSchedule(); hideCameo(); },
+    stop:function(){ S.disabled = true; stopIdle(); stopMap(); stopAmbient(); clearSchedule(); hideCameo(); S.mode = ""; },
+    start:function(){ S.disabled = false; evaluate(); },
+    evaluate:evaluate,
     debug:{ show:function(opts){ opts = opts || {};
       if(mapOpen()){ mount($("dmwScene"), "map"); var c = CAMEOS.find(function(x){ return x.id === opts.cameo; }) || mapCameo(); return showCameo(mapPlace(c), { cameo:c.id, tier:opts.tier }); }
       if(timeUpShowing()){ mount(timeUp(), "idle"); return showCameo(idlePlace(), opts); }
-      return null; } }
+      var m = MODES[S.mode] ? S.mode : screen(), cfg = MODES[m], h = cfg && HOSTS[m]();
+      if(!h) return null;
+      var place = placeAround({ host:h.host, inner:h.inner, region:h.region, guards:h.guards, size:cfg.size, k:cfg.k });
+      if(!place) return null;
+      mount(h.host, "amb " + m + (h.over ? " over" : ""));
+      return showCameo(place, { cameo:opts.cameo, tier:opts.tier, show:cfg.show, subtle:cfg.subtle, big:cfg.big }); } }
   };
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", install, { once:true });
