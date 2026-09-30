@@ -23,7 +23,7 @@
     ["Silk Mill","Specialized Production","🧵"],["Specialized Production Facility","Advanced Manufacturing","🏗️"]
   ].map(function(x,i){return {index:i+1,name:x[0],category:x[1],icon:x[2]};});
   function n(v,d){v=Number(v);return Number.isFinite(v)?v:(d||0);}
-  function st(){return window.state||null;}
+  function st(){/* V2.1.89: index.html declares `const state` (not window.state); read it, never write it. */try{if(typeof state!=="undefined"&&state)return state;}catch(e){}return window.state||null;}
   function completed(){return Math.max(0,n(st()&&st().completedLevels,0));}
   function days(){var s=st();var reward=n(window.DAY_REWARD_FL_OZ,111);return s?Math.max(0,Math.min(6,Math.floor(n(s.levelFlOz,0)/Math.max(1,reward)))):0;}
   function totalDays(){return completed()*6+days();}
@@ -57,13 +57,15 @@
     document.getElementById("geiMapNext").textContent="NEXT FACTORY: LEVEL "+((f+1)*6);
     document.getElementById("geiMapRegions").innerHTML=REGIONS.map(function(x,i){var u=i<=ri;return "<div class=\"geiMapRegion "+(u?"unlocked":"locked")+" "+(i===ri?"current":"")+"\"><div class=\"geiMapNode\">"+x.icon+"</div><div class=\"geiMapRegionLabel\">"+x.label+"</div><div class=\"geiMapRegionDesc\">"+x.desc+"</div></div>";}).join("");
     var tr=document.getElementById("geiMapTraveler");tr.style.left=(ri*100/5)+"%";document.getElementById("geiMapTravelerIcon").textContent=r.icon;document.getElementById("geiMapTravelerBubble").textContent="YOU ARE HERE · "+r.label;
-    document.getElementById("geiMapFactoryTrack").innerHTML=FACTORIES.map(function(x){return "<div class=\"geiMapFactory "+(x.index<=f?"operational":"future")+""><span>"+x.icon+"</span><b>"+x.name+"</b><small>"+(x.index<=f?"● OPERATIONAL":"LOCKED · LEVEL "+(x.index*6))+"</small></div>";}).join("");
+    document.getElementById("geiMapFactoryTrack").innerHTML=FACTORIES.map(function(x){return "<div class=\"geiMapFactory "+(x.index<=f?"operational":"future")+"\"><span>"+x.icon+"</span><b>"+x.name+"</b><small>"+(x.index<=f?"● OPERATIONAL":"LOCKED · LEVEL "+(x.index*6))+"</small></div>";}).join("");
   }
-  function open(){styles();page();render();var p=document.getElementById("geiDamMapPage");p.classList.add("show");p.setAttribute("aria-hidden","false");}
+  function open(){styles();page();render();var p=document.getElementById("geiDamMapPage");p.classList.add("show");p.setAttribute("aria-hidden","false");placeTraveler();}
+  /* V2.1.89 — display-only: pin the traveler over the current region node and keep its bubble on screen. */
+  function placeTraveler(){try{var vp=document.querySelector("#geiDamMapPage .geiMapViewport"),tr=document.getElementById("geiMapTraveler"),node=document.querySelector("#geiMapRegions .geiMapRegion.current .geiMapNode"),bub=document.getElementById("geiMapTravelerBubble");if(!vp||!tr||!node||!bub)return;var v=vp.getBoundingClientRect(),r=node.getBoundingClientRect();if(!v.width||!r.width)return;tr.style.left=(r.left+r.width/2-v.left)+"px";bub.style.transform="";var b=bub.getBoundingClientRect(),dx=0;if(b.left<v.left+6)dx=v.left+6-b.left;else if(b.right>v.right-6)dx=v.right-6-b.right;if(dx)bub.style.transform="translateX("+Math.round(dx)+"px)";}catch(e){}}
   function close(){var p=document.getElementById("geiDamMapPage");if(p){p.classList.remove("show");p.setAttribute("aria-hidden","true");}}
   function milestone(level){
     styles();page();render();var f=factoryAt(level/6),p=document.getElementById("geiDamMapPage"),box=document.getElementById("geiMapMilestone");
-    p.classList.add("show");p.setAttribute("aria-hidden","false");
+    p.classList.add("show");p.setAttribute("aria-hidden","false");placeTraveler();
     box.innerHTML="<div class=\"factoryHero\">"+f.icon+"</div><h2>DAM MAP MILESTONE "+String(level/6).padStart(2,"0")+"</h2><p>LEVEL "+level+" COMPLETE · NEW FACTORY UNLOCKED</p><h3>"+f.name.toUpperCase()+"</h3><p>"+f.category+" · HYDRAULIC PRODUCTION ONLINE</p><button type=\"button\" id=\"geiMapMilestoneContinue\">CONTINUE TO BONUS WATERWHEEL</button>";
     box.classList.add("show");
     var go=function(){box.classList.remove("show");setTimeout(function(){try{window.openBonusWheel();}catch(e){}},220);};
@@ -74,5 +76,5 @@
     b.addEventListener("click",function(e){var s=st(),c=Math.max(0,n(s&&s.completedLevels,0)),l=Math.max(0,n(s&&s.level,0));if(c>=6&&c%6===0&&l===c){e.preventDefault();e.stopImmediatePropagation();milestone(c);}},true);
   }
   window.__GEI_V2170_DAM_MAP__={version:VERSION,regions:REGIONS,factories:FACTORIES,open:open,close:close,render:render,showMilestone:milestone,selfTest:function(){return {version:VERSION,sixRegions:REGIONS.length===6,factoryRegistry:FACTORIES.length>=24,sixLevelMilestones:true,derivedState:true,button:!!document.getElementById("damMapTopBtn"),page:!!document.getElementById("geiDamMapPage")};}};
-  styles();button();page();hook();window.addEventListener("load",function(){button();page();hook();});
+  styles();button();page();hook();window.addEventListener("load",function(){button();page();hook();});window.addEventListener("resize",function(){var p=document.getElementById("geiDamMapPage");if(p&&p.classList.contains("show"))placeTraveler();});
 })();
