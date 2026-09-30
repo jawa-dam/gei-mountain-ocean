@@ -5771,7 +5771,7 @@ function resumeDayTimer(){
   if(!timerPaused || state.phase !== "playing" || state.busy) return;
   startDayTimer(dayTimerRemainingMs);
 }
-function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || document.hidden || (typeof damMachine === "object" && damMachine.open); }
+function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || window.geiWelcomeOpen === true || document.hidden || (typeof damMachine === "object" && damMachine.open); }
 function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayTimer(); }
 
 function tickDayTimer(){
@@ -10669,7 +10669,7 @@ function revealSkinWhenReady(tries){
   if(livingWorld.badgeShown || window.__GEI_PRODUCTION_GUARD__) return;
   const splash = $("geiSplash");
   const splashUp = splash && !splash.classList.contains("isDone") && splash.style.display !== "none";
-  if(splashUp || preGameOpen || damMachine.open){ if(tries < 180) setTimeout(() => revealSkinWhenReady(tries + 1), 500); return; }
+  if(splashUp || preGameOpen || window.geiWelcomeOpen === true || damMachine.open){ if(tries < 180) setTimeout(() => revealSkinWhenReady(tries + 1), 500); return; }
   livingWorld.badgeShown = true;
   showLivingBadge(`${activeSkin.deco} ${activeSkin.name.toUpperCase()}`, livingWorld.moment.atmosphere, 2800);
   if(!livingReducedMotion() && Math.random() < .12) setTimeout(() => triggerLivingEvent(livingWorld.moment.signature), 900);   // "Whoa — never seen THAT."
@@ -12227,7 +12227,11 @@ if(window.visualViewport) window.visualViewport.addEventListener("resize", ()=>s
 /* V2.1.38 — TAP/STARTUP REGRESSION CLEANUP */
 document.querySelectorAll(".costText").forEach(el => { el.textContent = `${fmt(UNLOCK_COST_FL_OZ)} FL OZ`; });
 document.querySelectorAll(".groupPrice").forEach(el => { el.innerHTML = el.innerHTML.replace("${DAY_REWARD}", `${DAY_REWARD_FL_OZ} FL OZ`); });
-loadGame();
+/* V2.1.90 — BEAVER-FIRST: a brand-new visitor (no readable save) starts with the free starter
+   Beaver active. Selection only — ownership is unchanged (Wilbert stays owned and selectable),
+   nothing is saved here, and any existing save keeps its own active character. */
+const BEAVER_FIRST_CHARACTER_ID = "yall-too-beaver";
+if(!loadGame() && isUnlocked("characters", BEAVER_FIRST_CHARACTER_ID)) state.activeCharacter = BEAVER_FIRST_CHARACTER_ID;
 /* V2.1.27 — persisted state is loaded before the canonical world is rebuilt. */
 buildWorldDynamicGraphics();
 syncIteStatuses();                                      // DAM NATION V1.0: catalog mirrors the loaded record
@@ -12260,10 +12264,9 @@ try { startLivingWorld(); } catch(e){ safeWarn("Living world skipped: " + e); } 
   try{geiCharacterSpotlightStartup()}catch(e){safeWarn("V2.1.54 spotlight skipped: "+e)}
 
 
-/* V2.0 — first-run guide only blocks a brand-new Level 1 before play begins. */
-if(state.level===1 && state.levelFlOz===0 && storageGet("yalltooDamGame.guideSeen")!=="1"){
-  setTimeout(()=>openGameGuide(false),120);
-}
+/* V2.1.90 — the game no longer opens on the Command Guide (How to Play / pick-a-player).
+   The Beaver host welcome (beaver-welcome-v2190.js) greets new players after the splash;
+   the guide stays one tap away via 📖 and the welcome's CHOOSE ANOTHER PLAYER. */
 
 /* Redraw days already completed in this level (after a refresh) without sounds. */
 function restoreVisualProgress(){
@@ -12393,6 +12396,7 @@ function restoreVisualProgress(){
   <script src="/tap-lites-random-scene-v2183.js" defer></script>
   <script src="/tap-lites-scene-transition-v2184.js" defer></script>
   <script src="/tap-lites-synchronized-intro-v2185.js" defer></script>
+  <script src="/beaver-welcome-v2190.js" defer></script>
   <script src="/tap-lites-moment-director-v2187.js" defer></script>
   <script src="/buyites-store-v2167.js" defer></script>
   <script src="/tap-effect-v2168.js" defer></script>

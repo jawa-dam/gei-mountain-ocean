@@ -581,6 +581,8 @@
     if(store && store.classList.contains("open")) return "store";
     var pre = document.getElementById("preGameCard");
     if(pre && pre.classList.contains("show")) return "menu";
+    var welcome = document.getElementById("geiWelcome");
+    if(welcome && welcome.classList.contains("show")) return "menu";
     try{ if(typeof anyPanelOpen === "function" && anyPanelOpen()) return "menu"; }catch(e){}
     return "play";
   }
