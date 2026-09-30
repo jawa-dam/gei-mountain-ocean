@@ -123,7 +123,7 @@ const SNAP = () => {
   const s = (typeof state !== "undefined" && state) || window.state || {};
   const pick = {}; ["totalFlOz","level","levelFlOz","completedLevels","currentStep","tapCount","phase","millStage","damMachineFreePlays","xp","totalXp","unlocked","owned","characters","activeCharacter","songs"].forEach(k => { if (k in s) pick[k] = s[k]; });
   const ls = {}; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i);
-    if (/dam(Music|Moment)|tl21|gei2189|soundtrack|atmos|skin|mood|scene|intro|splash|bird/i.test(k)) continue;   // presentation-only keys
+    if (/dam(Music|Moment|MapSound)|tl21|gei2189|soundtrack|atmos|skin|mood|scene|intro|splash|bird/i.test(k)) continue;   // presentation-only keys
     ls[k] = localStorage.getItem(k); }
   return { state:pick, storage:ls };
 };
@@ -204,15 +204,15 @@ async function desktopSuite(browser, base){
   const mapOpen = await page.evaluate(() => { const p = document.getElementById("geiDamMapPage"); return !!p && p.classList.contains("show") && document.querySelectorAll("#geiMapFactoryTrack .geiMapFactory").length >= 24; });
   const mapData = await page.evaluate(() => {
     // eslint-disable-next-line no-undef
-    const days = Math.min(6, Math.floor(state.levelFlOz / 111)), total = state.completedLevels * 6 + days;
-    const ri = total > 0 && total % 6 === 0 ? 5 : Math.min(5, total % 6), M = window.__GEI_V2170_DAM_MAP__;
-    return { levelFlOz:state.levelFlOz, expected:"YOU ARE HERE · " + M.regions[ri].label, shown:document.getElementById("geiMapTravelerBubble").textContent, level:document.getElementById("geiMapLevel").textContent, stateLevel:state.level };
+    const days = Math.min(6, Math.floor(state.levelFlOz / 111)), si = days >= 6 ? 5 : days, M = window.__GEI_V2170_DAM_MAP__;
+    const expected = si === 5 ? M.progress().levelFactory.toUpperCase() : M.regions[si].label;
+    return { levelFlOz:state.levelFlOz, expected, shown:document.getElementById("geiMapPinLabel").textContent, level:document.getElementById("geiMapLevel").textContent, stateLevel:state.level };
   });
-  check("6f. DAM MAP reflects live progress (region + level)", mapData.levelFlOz > 0 && mapData.shown === mapData.expected && mapData.level === "LEVEL " + mapData.stateLevel, mapData);
+  check("6f. DAM MAP pin + level reflect live progress", mapData.levelFlOz > 0 && mapData.shown === mapData.expected && mapData.level === "LEVEL " + mapData.stateLevel, mapData);
   await page.click("#geiMapBack");
   await sleep(250);
   const after = await page.evaluate(SNAP);
-  check("6c. DAM MAP opens the V2.1.70 map (24 factories rendered) and closes", mapOpen, {});
+  check("6c. DAM MAP opens the world map (24 factories rendered) and closes", mapOpen, {});
   check("6d. opening the map changes no gameplay state", JSON.stringify(before) === JSON.stringify(after), {});
   /* dock buttons still do their jobs */
   const jobs = {};

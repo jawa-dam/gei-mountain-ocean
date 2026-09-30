@@ -70,6 +70,7 @@
     }
   }
   function openMap(){
+    var page=$("geiDamMapPage"); if(page&&page.classList.contains("show"))return true;   // the index.html launcher already opened it
     try{ if(window.__GEI_V2170_DAM_MAP__&&typeof window.__GEI_V2170_DAM_MAP__.open==="function"){window.__GEI_V2170_DAM_MAP__.open();return true;} }catch(e){}
     return false;
   }
