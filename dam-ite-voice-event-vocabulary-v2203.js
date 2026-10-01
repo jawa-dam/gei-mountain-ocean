@@ -1,8 +1,8 @@
-/* V2.2.03 — DAM-ITE VOICE EVENT VOCABULARY ENGINE
+/* V2.2.03 → V2.2.04 — DAM-ITE VOICE EVENT VOCABULARY ENGINE
  * Presentation/audio-only event-vocal library layered over the existing voice stack.
  *
  *   Core milestone voices (V2.1.93/V2.1.94, 14 hosted MP3s) tell the player WHERE THEY ARE.
- *   Event vocabulary (38 hosted MP3s, this file) tells the player WHAT IS HAPPENING.
+ *   Event vocabulary (49 hosted MP3s, this file) tells the player WHAT IS HAPPENING.
  *
  * Rules:
  *   - The six-level milestone schedule (6 MOUNTAIN · 12 DAM · 18 MILL POND · 24 SLUICE-GATE ·
@@ -99,6 +99,17 @@
     {id:"uh-oh-calm",label:"UH-OH CALM",category:"WARNING",group:"uh-oh",tone:"calm",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-uh-oh-calm-6nN6GUXjcpOFSYpS.mp3"},
     {id:"oops",label:"OOPS",category:"WARNING",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-oops-TXclqexMAies8s7p.mp3"},
     {id:"look-out",label:"LOOK OUT",category:"WARNING",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-look-out-CnR85KcEPdk18kQi.mp3"},
+    {id:"here-we-go",label:"HERE WE GO",category:"START",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-here-we-go-jLjpnZ3MVNkIHjQR.mp3"},
+    {id:"that-was-close",label:"THAT WAS CLOSE",category:"WARNING",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-that-was-close-KAIo9nVGvsnwFkN6.mp3"},
+    {id:"oh-yeah",label:"OH YEAH",category:"SUCCESS",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-oh-yeah-ro7dFI336tfsiZyg.mp3"},
+    {id:"no-way",label:"NO WAY",category:"SUCCESS",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-no-way-ryDf90cjCKGwOJsg.mp3"},
+    {id:"wait",label:"WAIT",category:"WARNING",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-wait-Aa9VobX29CSQ82kB.mp3"},
+    {id:"hey",label:"HEY",category:"SUCCESS",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-hey-lEZtLNazjjUkflas.mp3"},
+    {id:"new-discovery",label:"NEW DISCOVERY",category:"COMPLETION",protect:true,file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-new-discovery-kQQUHMvpJILfogVe.mp3"},
+    {id:"the-flow-is-strong",label:"THE FLOW IS STRONG",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-the-flow-is-strong-h7q1oacx2jtWgvuh.mp3"},
+    {id:"the-water-is-rising",label:"THE WATER IS RISING",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-the-water-is-rising-gAo96BsjyvLJBJ1b.mp3"},
+    {id:"hydraulic-power",label:"HYDRAULIC POWER",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-hydraulic-power-6UYqLPKzOpzw01z3.mp3"},
+    {id:"challenge-complete",label:"CHALLENGE COMPLETE",category:"COMPLETION",protect:true,file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-challenge-complete-78VFoXFLw6xr6GXO.mp3"}
     /* HYDRAULIC VOCABULARY */
     {id:"water",label:"WATER",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-water-nn0m965PYbYSCmgD.mp3"},
     {id:"flow",label:"FLOW",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-flow-mAq6w2zboHJ1dfeO.mp3"},
