@@ -109,7 +109,7 @@
     {id:"the-flow-is-strong",label:"THE FLOW IS STRONG",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-the-flow-is-strong-h7q1oacx2jtWgvuh.mp3"},
     {id:"the-water-is-rising",label:"THE WATER IS RISING",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-the-water-is-rising-gAo96BsjyvLJBJ1b.mp3"},
     {id:"hydraulic-power",label:"HYDRAULIC POWER",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-hydraulic-power-6UYqLPKzOpzw01z3.mp3"},
-    {id:"challenge-complete",label:"CHALLENGE COMPLETE",category:"COMPLETION",protect:true,file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-challenge-complete-78VFoXFLw6xr6GXO.mp3"}
+    {id:"challenge-complete",label:"CHALLENGE COMPLETE",category:"COMPLETION",protect:true,file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-challenge-complete-78VFoXFLw6xr6GXO.mp3"},
     /* HYDRAULIC VOCABULARY */
     {id:"water",label:"WATER",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-water-nn0m965PYbYSCmgD.mp3"},
     {id:"flow",label:"FLOW",category:"HYDRAULIC",file:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/voice-flow-mAq6w2zboHJ1dfeO.mp3"},
