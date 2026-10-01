@@ -63,7 +63,7 @@ function png(w, h, rgba){
   const raw = Buffer.concat(Array.from({ length:h }, () => row));
   return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]), chunk("IHDR", ih), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]);
 }
-const LOGO_WET = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/taplite-dam-game-MMriASP81waYdTOV.png";
+const LOGO_WET = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-tap-lites-QEy1mPNkhhmLrEN4.png";
 const LOGO_STD = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png";
 const STUB = { [LOGO_WET]:png(600, 200, [47,210,255,255]), [LOGO_STD]:png(600, 200, [243,16,186,255]) };
 
