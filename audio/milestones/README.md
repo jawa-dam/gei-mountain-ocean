@@ -1,1 +1,0 @@
-Milestone voice packs live under audio/milestones/female and audio/milestones/male. Female is the default production pack. Male is an additional selectable pack when configured.
