@@ -35,7 +35,7 @@
       "text-align:center;opacity:0;pointer-events:none;overflow:hidden;transition:opacity .2s,transform .45s cubic-bezier(.2,.8,.2,1)}"+
       ".tl2177Milestone.show{opacity:1;transform:translate(-50%,-50%) scale(1)}"+
       ".tl2177Milestone.hot{box-shadow:0 18px 70px rgba(0,0,0,.5),0 0 68px rgba(243,16,186,.20),0 0 38px rgba(47,210,255,.22)}"+
-      ".tl2177Milestone::before{content:"";position:absolute;left:-20%;right:-20%;top:-35%;height:55%;"+
+      ".tl2177Milestone::before{content:\"\";position:absolute;left:-20%;right:-20%;top:-35%;height:55%;"+
       "background:linear-gradient(90deg,transparent,rgba(47,210,255,.18),rgba(243,16,186,.16),transparent);"+
       "transform:rotate(-4deg);animation:tl2177Sheen 1.1s linear infinite;pointer-events:none}"+
       ".tl2177Milestone .tl2177Emoji{font-size:34px;line-height:1;margin-bottom:8px}"+
@@ -47,7 +47,7 @@
       ".tl2177MilestoneBar{position:fixed;left:50%;bottom:5%;transform:translateX(-50%);width:min(76vw,380px);height:5px;"+
       "border-radius:99px;background:rgba(255,255,255,.07);z-index:9988;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .3s}"+
       ".tl2177MilestoneBar.show{opacity:1}"+
-      ".tl2177MilestoneBar::after{content:"";display:block;width:var(--tlmbar,0%);height:100%;border-radius:inherit;"+
+      ".tl2177MilestoneBar::after{content:\"\";display:block;width:var(--tlmbar,0%);height:100%;border-radius:inherit;"+
       "background:linear-gradient(90deg,#2fd2ff,#3d3dea,#f310ba);box-shadow:0 0 16px rgba(47,210,255,.55);transition:width .3s ease}"+
       ".tl2177StagePulse{animation:tl2177StagePulse .85s cubic-bezier(.2,.8,.2,1)!important}"+
       "@keyframes tl2177StagePulse{0%{filter:brightness(1)}28%{filter:brightness(1.32) drop-shadow(0 0 20px rgba(47,210,255,.36))}100%{filter:brightness(1)}}"+

@@ -20,7 +20,7 @@
     css.id="tapLites2173Style";
     css.textContent=
       ".tl2173BrandGlow{position:relative;display:inline-block;will-change:transform,filter;animation:tl2173Breath 3.8s ease-in-out infinite}"+
-      ".tl2173BrandGlow::after{content:"";position:absolute;inset:-18%;border-radius:999px;pointer-events:none;"+
+      ".tl2173BrandGlow::after{content:\"\";position:absolute;inset:-18%;border-radius:999px;pointer-events:none;"+
       "background:radial-gradient(circle,rgba(47,210,255,.24),rgba(61,61,234,.10) 42%,transparent 72%);"+
       "filter:blur(10px);opacity:.7;animation:tl2173Glow 3.2s ease-in-out infinite}"+
       ".tl2173BrandReveal{animation:tl2173Reveal .8s cubic-bezier(.2,.8,.2,1) both}"+

@@ -24,7 +24,7 @@
       ".tl2175Pressure{position:fixed;left:50%;bottom:7.5%;width:min(78vw,460px);height:6px;transform:translateX(-50%);"+
       "border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;pointer-events:none;z-index:9986;"+
       "box-shadow:inset 0 0 0 1px rgba(255,255,255,.10),0 0 18px rgba(47,210,255,.12)}"+
-      ".tl2175Pressure::after{content:"";display:block;height:100%;width:var(--tlp,0%);border-radius:inherit;"+
+      ".tl2175Pressure::after{content:\"\";display:block;height:100%;width:var(--tlp,0%);border-radius:inherit;"+
       "background:linear-gradient(90deg,#2fd2ff,#3d3dea,#f310ba);box-shadow:0 0 14px rgba(47,210,255,.55);transition:width .18s ease}"+
       ".tl2175MomentumBadge{position:fixed;right:12px;bottom:12%;z-index:9987;padding:8px 11px;border-radius:12px;"+
       "background:rgba(6,7,13,.62);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);"+
@@ -33,7 +33,7 @@
       ".tl2175MomentumBadge.show{opacity:1;transform:none}"+
       ".tl2175MomentumBadge.hot{box-shadow:0 0 24px rgba(47,210,255,.20),inset 0 0 16px rgba(243,16,186,.08)}"+
       ".tl2175SystemPulse{animation:tl2175SystemPulse .55s ease-out!important}"+
-      ".tl2175Flowing::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;"+
+      ".tl2175Flowing::after{content:\"\";position:absolute;inset:0;pointer-events:none;border-radius:inherit;"+
       "background:linear-gradient(90deg,transparent,rgba(47,210,255,.12),rgba(243,16,186,.10),transparent);"+
       "background-size:220% 100%;animation:tl2175Travel 1.25s linear infinite}"+
       "@keyframes tl2175SystemPulse{0%{filter:brightness(1)}28%{filter:brightness(1.24)}100%{filter:brightness(1)}}"+
