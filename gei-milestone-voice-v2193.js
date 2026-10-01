@@ -190,6 +190,11 @@
     opts=opts||{};
     if(STEPS.indexOf(key)<0)return false;
     if(getMode()==="off"&&!opts.force)return false;
+    /* V2.2.03: once the V2.1.94 Voice Director is installed it is the single core
+       milestone player. Standing down here stops the same milestone (same 14 assets)
+       from playing twice at once. Pass {direct:true} to use this engine on its own. */
+    var director=window.GEI_VOICE_DIRECTOR;
+    if(!opts.direct&&director&&director!==api&&typeof director.announce==="function")return false;
     var current=now();
     if(!opts.force&&last.key===key&&current-last.at<1400)return false;
 
