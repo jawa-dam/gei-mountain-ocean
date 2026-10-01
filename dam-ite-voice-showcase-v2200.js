@@ -57,6 +57,8 @@
   }
 
   function build(){
+    /* V2.2.04 — Voice Showcase UI retired. Internal API remains available. */
+    return null;
     if(document.getElementById(panelId))return;
     var wrap=document.createElement("section");
     wrap.id=panelId;
@@ -109,16 +111,16 @@
     if(title)title.textContent="🎙️ DAM-ITE VOICE SHOWCASE";
   }
 
-  function openPanel(){
-    var wrap=document.getElementById(panelId);if(!wrap)return;
-    wrap.classList.add("show");refresh();
-  }
+  function openPanel(){ return false; }
   function closePanel(){
+    removeVisibleUI();
     var wrap=document.getElementById(panelId);if(!wrap)return;
     wrap.classList.remove("show");
   }
 
   function buildLauncher(){
+    /* V2.2.04 — launcher retired from visible UI. */
+    return null;
     if(document.getElementById(buttonId))return;
     var btn=document.createElement("button");
     btn.id=buttonId;btn.type="button";
@@ -167,9 +169,14 @@
     document.head.appendChild(s);
   }
 
+  function removeVisibleUI(){
+    var panel=document.getElementById(panelId);if(panel)panel.remove();
+    var button=document.getElementById(buttonId);if(button)button.remove();
+  }
+
   function install(){
     if(!DIRECTOR)return;
-    injectStyles();build();buildLauncher();refresh();
+    removeVisibleUI();
   }
 
   var api={
