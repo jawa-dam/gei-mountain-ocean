@@ -1,4 +1,5 @@
 import { recordEntitlement } from "../_lib/paypal-ledger.js";
+import { getPack } from "../_lib/economy-authority.js";
 
 const PACKS = {
   single: { label: "1 Song", price: "1.00", flOz: 6660 },
@@ -86,6 +87,13 @@ async function validateCompletedCapture(token, event) {
 
   const unit = order.purchase_units?.[0];
   const packId = unit?.custom_id;
+
+  /* V2.2.04 — the PayPal app is shared with other GEI products (e.g. the
+     GEI Discovery Guide, custom_id "GEI-DISCOVERY-50"). Captures that are
+     not DAM NATION packs belong to another app's webhook: acknowledge them
+     instead of failing, so PayPal does not retry them against this endpoint. */
+  if (!getPack(packId)) return { ignored: true, packId: packId || null };
+
   const amount = unit?.amount;
   const pack = PACKS[packId];
   const capture = unit?.payments?.captures?.find(item => item.id === captureId) ||
@@ -139,6 +147,16 @@ export default async function handler(req, res) {
 
     if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
       const fulfillment = await validateCompletedCapture(token, event);
+      if (fulfillment.ignored) {
+        return res.status(200).json({
+          received: true,
+          verified: true,
+          eventType,
+          eventId,
+          ignored: true,
+          reason: "NOT_A_DAM_NATION_PACK"
+        });
+      }
       const ledger = await recordEntitlement({
         eventId: eventId || "capture:" + fulfillment.captureID,
         ...fulfillment
