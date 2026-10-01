@@ -92,7 +92,8 @@
   function firstDiscovery(){
     var mode=currentMode();
     if(mode==="off")return false;
-    return discover("mountain","mountain",mode,"first-entry");
+    /* V2.2.03: through the public API so the V2.2.02 Rewards wrapper sees it. */
+    return api.discover("mountain","mountain",mode,"first-entry");
   }
 
   function inspectDirector(){
@@ -100,7 +101,9 @@
     try{
       var s=DIRECTOR.state||{};
       if(s.active){
-        discover(s.active,s.variant,s.resolvedMode,"milestone");
+        /* V2.2.03: through the public API so the V2.2.02 Rewards wrapper sees it
+           (calling the private closure skipped Rewards until the next page load). */
+        api.discover(s.active,s.variant,s.resolvedMode,"milestone");
       }
     }catch(e){}
   }

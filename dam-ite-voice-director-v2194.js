@@ -58,6 +58,16 @@
     count:0,played:0,fallback:0,errors:0,preloaded:0
   };
   var token=0, lastKey="", lastAt=0, lastResolvedMode="";
+  /* V2.2.03 — one bounded reload for a clip whose media element errored (network blip). */
+  var retried=Object.create(null);
+
+  /* V2.2.03 — lifecycle signal consumed by the audio reliability layer (diagnostics only). */
+  function emit(phase,detail){
+    try{
+      detail=detail||{};detail.phase=phase;
+      window.dispatchEvent(new CustomEvent("gei:voice-audio",{detail:detail}));
+    }catch(e){}
+  }
 
   function now(){return performance.now();}
   function getMode(){
@@ -69,8 +79,11 @@
   function setMode(mode){
     mode=String(mode||"").toLowerCase();
     if(MODES.indexOf(mode)<0) mode=DEFAULT_MODE;
+    var previous=getMode();
     try{localStorage.setItem(MODE_KEY,mode);}catch(e){}
     state.voiceMode=mode;
+    /* V2.2.03: switching voice never leaves the previous voice talking. */
+    if(previous!==mode){stopActive();emit("mode",{mode:mode,previous:previous});}
     return mode;
   }
   function resolveVoiceMode(){
@@ -103,12 +116,24 @@
     try{
       var a=new Audio();
       a.preload="auto";
-      a.crossOrigin="anonymous";
-      a.src=file;
+      /* V2.2.03: no crossOrigin. Voices play straight from the element (no Web Audio graph),
+         and a CORS-mode request fails the whole load if the CDN omits CORS headers.
+         Same request mode as the song radio, which plays these hosted MP3s today. */
       cache[file]=a;
       a.addEventListener("canplaythrough",function(){state.preloaded++;},{once:true});
+      a.addEventListener("loadeddata",function(){emit("load-ok",{file:file});},{once:true});
+      a.addEventListener("error",function(){
+        var code=a.error&&a.error.code||0;
+        state.errors++;
+        /* Drop the broken element so the next replay builds a fresh one — once. */
+        if(cache[file]===a)delete cache[file];
+        if(retried[file])failed[file]=true;else retried[file]=true;
+        emit("load-error",{file:file,code:code,final:!!failed[file]});
+      },{once:true});
+      emit("load-start",{file:file});
+      a.src=file;
       return true;
-    }catch(e){state.errors++;return false;}
+    }catch(e){state.errors++;emit("load-error",{file:file,code:0,final:true});return false;}
   }
 
   function preloadAll(){
@@ -117,8 +142,18 @@
     });
   }
 
+  /* V2.2.03: warm only the pack(s) the current mode can actually play. */
+  function preloadPack(mode){
+    if(mode==="off")return;
+    Object.keys(ASSETS).forEach(function(m){
+      if(mode!=="random"&&m!==mode)return;
+      Object.keys(ASSETS[m]).forEach(function(k){preloadFile(ASSETS[m][k]);});
+    });
+  }
+
   function stopActive(){
     token++;
+    emit("stop",{active:state.active});
     Object.keys(cache).forEach(function(file){
       var a=cache[file];
       try{
@@ -129,28 +164,38 @@
     state.active=null;
   }
 
-  function playFile(file,gain,localToken,done){
+  function playFile(file,gain,localToken,done,meta){
+    meta=meta||{};
     if(!file){done&&done(false);return;}
     var a=cache[file];
-    if(!a && !preloadFile(file)) {done&&done(false);return;}
+    if(!a && !preloadFile(file)) {emit("play-fail",{file:file,key:meta.key,mode:meta.mode,variant:meta.variant,reason:"unavailable"});done&&done(false);return;}
     a=cache[file];
+    var finished=false;
+    function onEnded(){finish(true,"ended");}
+    function onError(){finish(false,"media-error");}
+    function finish(ok,reason){
+      if(finished)return;
+      finished=true;
+      /* V2.2.03: detach only our own handlers. A rapid replay of the same clip reuses this
+         element; the interrupted play() rejects later (AbortError) and used to null the NEW
+         replay's handlers, so the replay never reported "ended" and the voice looked stuck. */
+      if(a.onended===onEnded)a.onended=null;
+      if(a.onerror===onError)a.onerror=null;
+      var info={file:file,key:meta.key,mode:meta.mode,variant:meta.variant,reason:reason};
+      if(localToken!==token){emit("play-interrupted",info);return;}
+      emit(ok?"play-ok":"play-fail",info);
+      done&&done(ok);
+    }
     try{
-      a.pause();a.currentTime=0;
+      a.pause();
+      try{a.currentTime=0;}catch(e){}
       a.volume=Math.max(0,Math.min(1,0.95*gain));
-      var finished=false;
-      function finish(ok){
-        if(finished)return;
-        finished=true;
-        a.onended=null;a.onerror=null;
-        if(!ok)failed[file]=true;
-        if(localToken!==token)return;
-        done&&done(ok);
-      }
-      a.onended=function(){finish(true);};
-      a.onerror=function(){finish(false);};
+      a.onended=onEnded;
+      a.onerror=onError;
+      emit("play-start",{file:file,key:meta.key,mode:meta.mode,variant:meta.variant});
       var p=a.play();
-      if(p&&typeof p.catch==="function")p.catch(function(){finish(false);});
-    }catch(e){done&&done(false);}
+      if(p&&typeof p.catch==="function")p.catch(function(err){finish(false,(err&&err.name)||"play-rejected");});
+    }catch(e){finish(false,"exception");}
   }
 
   function fallback(text,localToken){
@@ -166,6 +211,7 @@
       u.onerror=function(){state.errors++;if(localToken===token)state.active=null;};
       window.speechSynthesis.speak(u);
       state.fallback++;
+      emit("fallback",{text:text,file:state.lastFile});
       return true;
     }catch(e){state.errors++;return false;}
   }
@@ -240,6 +286,7 @@
     state.count++;state.active=key;
     var asset=getAsset(key);
     state.resolvedMode=asset.mode;state.variant=asset.variant;state.lastFile=asset.file||"";
+    emit("announce",{key:key,mode:asset.mode,variant:asset.variant,file:asset.file||"",voiceMode:getMode(),force:!!opts.force});
     if(opts.preloadOnly)return true;
     visualReaction(key,asset.variant);
     duck();
@@ -249,15 +296,15 @@
         if(localToken!==token)return;
         if(ok){state.played++;state.active=null;return;}
         fallback(LABELS[key],localToken);
-      });
+      },{key:key,mode:asset.mode,variant:asset.variant});
     }else{
       fallback(LABELS[key],localToken);
     }
     return true;
   }
 
-  function warmUp(){
-    preloadAll();
+  function warmUp(mode){
+    if(mode)preloadPack(String(mode).toLowerCase());else preloadAll();
     return {preloaded:state.preloaded,cached:Object.keys(cache).length};
   }
 
@@ -328,9 +375,24 @@
     };
   }
 
+  /* V2.2.03 — read-only views for GEI_VOICE_AUDIO_DIAGNOSTICS. */
+  function assets(){return JSON.parse(JSON.stringify(ASSETS));}
+  function cacheState(){
+    var out={};
+    Object.keys(ASSETS).forEach(function(m){
+      Object.keys(ASSETS[m]).forEach(function(k){
+        var f=ASSETS[m][k],a=cache[f];
+        out[f]={cached:!!a,failed:!!failed[f],retried:!!retried[f],
+          readyState:a?a.readyState:0,networkState:a?a.networkState:0,errorCode:a&&a.error?a.error.code:0};
+      });
+    });
+    return out;
+  }
+
   var api={
     version:VERSION,modes:MODES.slice(),steps:STEPS.slice(),labels:JSON.parse(JSON.stringify(LABELS)),
     getMode:getMode,setMode:setMode,announce:announce,warmUp:warmUp,selfTest:selfTest,stop:stopActive,
+    assets:assets,cacheState:cacheState,
     get state(){return JSON.parse(JSON.stringify(state));},presentationOnly:true
   };
 

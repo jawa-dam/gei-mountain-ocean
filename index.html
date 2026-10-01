@@ -12446,14 +12446,19 @@ function restoreVisualProgress(){
   window.addEventListener("load",wireDamMapLauncher);
 })();
 </script>
-\n<script src="/gei-milestone-voice-v2193.js"></script>
+<script src="/gei-milestone-voice-v2193.js"></script>
   <script src="/dam-ite-voice-director-v2194.js"></script>
-  <script src="/dam-ite-voice-ui-v2195.js"></script>  <script src="/dam-ite-voice-reactions-v2196.js"></script>
+  <script src="/dam-ite-voice-ui-v2195.js"></script>
+  <script src="/dam-ite-voice-reactions-v2196.js"></script>
   <script src="/dam-ite-contextual-voice-v2197.js"></script>
   <script src="/dam-ite-adaptive-voice-v2198.js"></script>
   <script src="/dam-ite-voice-memory-v2199.js"></script>
   <script src="/dam-ite-voice-showcase-v2200.js"></script>
   <script src="/dam-ite-voice-discovery-v2201.js"></script>
   <script src="/dam-ite-voice-discovery-rewards-v2202.js"></script>
+  <!-- V2.2.03: audio reliability runs right after the voice chain it observes (Director must exist).
+       The map appearance engine is deferred so it runs after the deferred dam-map-v2170.js builds the map. -->
+  <script src="/dam-ite-audio-reliability-v2203.js"></script>
+  <script src="/dam-map-random-appearance-v2203.js" defer></script>
 </body>
 </html>

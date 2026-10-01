@@ -50,7 +50,7 @@
   };
 
   var active = null;
-  var last = {key:"",mode:"",at:0,count:0,errors:0,playedFiles:0,fallback:0};
+  var last = {key:"",mode:"",at:0,count:0,errors:0,playedFiles:0,fallback:0,deferred:0};
   var audioCache = Object.create(null);
   var failureCache = Object.create(null);
 
@@ -189,6 +189,11 @@
   function announce(key,opts){
     opts=opts||{};
     if(STEPS.indexOf(key)<0)return false;
+    /* V2.2.03 — single playback owner. The V2.1.94 Voice Director binds the same level card
+       and fanfare and plays the same hosted MP3s; playing here as well stacked two clips
+       (in Random mode a female and a male voice at once). Defer to it when it is present. */
+    var director=window.GEI_VOICE_DIRECTOR;
+    if(director&&director!==api&&typeof director.announce==="function"&&!opts.standalone){last.deferred++;return false;}
     if(getMode()==="off"&&!opts.force)return false;
     var current=now();
     if(!opts.force&&last.key===key&&current-last.at<1400)return false;
@@ -291,6 +296,7 @@
       playedFiles:last.playedFiles,
       fallbackCount:last.fallback,
       errors:last.errors,
+      deferredToDirector:last.deferred,
       active:active,
       presentationOnly:true,
       gameplayStateChanged:false
