@@ -136,6 +136,10 @@
   }
 
   function installUI(){
+    /* V2.2.04 — Favorites UI retired from the visible game screen. Keep memory API internal. */
+    var old=document.getElementById("v2199MemoryDock");if(old)old.remove();
+    var toast=document.getElementById("v2199MemoryToast");if(toast)toast.remove();
+    return null;
     if(document.getElementById("v2199MemoryDock"))return;
     var wrap=document.createElement("div");
     wrap.id="v2199MemoryDock";
