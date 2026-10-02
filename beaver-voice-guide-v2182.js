@@ -417,8 +417,8 @@
     return {version:VERSION,clips:all.length,allHaveUrlAndCategory:all.every(function(c){return /^https:\/\/assets\.zyrosite\.com\//.test(c.url)&&!!c.category&&!!c.id;}),
       categories:Object.keys(BEAVER_VOICE_LIBRARY),lessonsEmpty:Object.keys(GEI_VOICE_LESSONS).every(function(k){return GEI_VOICE_LESSONS[k].length===0;}),
       speaking:A.beaver.speaking,queue:A.beaver.queue,blocked:A.beaver.blocked,broken:A.beaver.broken,sharedAudioManager:true,mapBound:!!(($("geiDamMapPage")||{}).__beaverBound),
-      gameHooks:gameBound,
-        }
+      gameHooks:gameBound,presentationOnly:true};
+  }
 
   window.BEAVER_VOICE_LIBRARY=BEAVER_VOICE_LIBRARY;
   window.GEI_VOICE_LESSONS=GEI_VOICE_LESSONS;
