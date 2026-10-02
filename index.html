@@ -1181,6 +1181,10 @@ html.skin-heaven .world{
   padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
   flex-shrink:0;
 }
+/* V2.1.81 — UNIVERSAL MOBILE FRAME: phones / coarse pointers use the full usable width
+   (the 10px side gutter stays); only desktop-class pointers keep a controlled ceiling. */
+@media (pointer:coarse), (max-width:600px){ .app{ max-width:none; } }
+@media (min-width:601px) and (pointer:fine){ .app{ max-width:520px; } }
 
 /* ============ HUD ============ */
 .hud{
@@ -1721,7 +1725,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .celebCard{ position:absolute; inset:0; z-index:96; display:flex; align-items:center; justify-content:center; pointer-events:none; visibility:hidden; }
 .celebCard.show{ visibility:visible; }
 .celebInner{
-  position:relative; width:min(92%, 400px); height:92%; display:flex; flex-direction:column; align-items:center;
+  position:relative; box-sizing:border-box; width:min(92%, 400px); height:92%; max-height:calc(100% - 16px); min-height:0; display:flex; flex-direction:column; align-items:center;
   padding:12px 14px 14px; border-radius:26px; overflow:hidden; text-align:center;
   background:linear-gradient(165deg, color-mix(in srgb, var(--juicy-navy) 92%, transparent), color-mix(in srgb, var(--juicy-violet) 55%, var(--juicy-navy)) 60%, color-mix(in srgb, var(--water-bright) 35%, var(--juicy-navy)));
   border:1.5px solid rgba(255,255,255,.4);
@@ -1733,6 +1737,10 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 @keyframes celebIn{ from{ opacity:0; transform:scale(.7) translateY(30px); } to{ opacity:1; transform:none; } }
 @keyframes celebOut{ from{ opacity:1; transform:none; } to{ opacity:0; transform:scale(.85) translateY(-40px); } }
 .celebFx{ position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+/* V2.1.81 — card always fits the world; text rows never push the character stage out */
+.celebCard{ min-height:0; overflow:hidden; padding:8px 0; box-sizing:border-box; }
+.celebInner>.celebDay,.celebInner>.celebMeaning,.celebInner>.celebOz,.celebInner>.celebConv,.celebInner>.celebTag,.celebInner>.celebLine{ flex:0 0 auto; }
+@media (max-height:700px){ .celebInner{ padding:8px 12px 10px; } .celebStage{ max-height:56%; } }
 .celebStage{ position:relative; z-index:1; flex:1 1 auto; min-height:0; max-height:66%; width:100%; display:flex; align-items:flex-end; justify-content:center; }
 .celebChar{ height:100%; max-width:100%; display:flex; align-items:flex-end; justify-content:center; filter:drop-shadow(0 0 18px var(--water-bright)); }
 .celebCharImg{ height:100%; width:auto; max-width:100%; object-fit:contain; display:block; }
@@ -3024,6 +3032,12 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 #tapFeelPulse,.tapWaterLayer,.tapWaterLayer *,.livingWorldLayer,.livingEventLayer,.labelToast{pointer-events:none!important}
 .world{pointer-events:auto!important;touch-action:manipulation}
 .world svg{pointer-events:auto!important;touch-action:manipulation}
+/* V2.1.81 — UNIVERSAL MOBILE FRAME: floating actions are anchored to the measured world area
+   (--geiWorldTop / --geiWorldH, set by utility-dock-v2189.js), never to a % of the whole app. */
+.app.geiFrameSynced .geiUtilityDock{ top:calc(var(--geiWorldTop,0px) + var(--geiWorldH,0px) * .5)!important; transform:translateY(-50%); max-height:calc(var(--geiWorldH,100%) - 12px); right:max(5px,calc(env(safe-area-inset-right,0px) + 5px)); }
+.app.geiFrameSynced .dmFloatBtn{ top:calc(var(--geiWorldTop,0px) + var(--geiWorldH,0px) * .5)!important; transform-origin:center; margin-top:-24px; left:max(5px,calc(env(safe-area-inset-left,0px) + 5px)); }
+.app.geiFrameSynced .dmFloatBtn.ready{ margin-top:-24px; }
+
 .stationsGroup,.station{pointer-events:auto!important;touch-action:manipulation}
 .preGameCard.show,.characterSpotlight.show,.sidePanel.open,.navSheet.open,.bonusCard.show,.dmCard.show,.levelCard.show{pointer-events:auto}
 
@@ -4854,7 +4868,7 @@ const DAY_LABELS = [
   { left:"Day 4", right:"2 Lights" }
 ];
 
-const CENTERS = [120, 245, 360, 470, 580, 690];
+const CENTERS = [100, 220, 332, 440, 548, 650];   /* V2.1.81: Factory lifted ~40 units so its art + FACTORY sign sit clear of the bottom edge */
 const OCEAN_Y = 770;
 const MILL_INDEX = 5;
 
@@ -5382,7 +5396,7 @@ function layoutStationLabels(){
     if(cfg.below){
       const fs = Math.min(LABEL_MAX, size + 2);
       el.setAttribute("font-size", fs);
-      spans[0].setAttribute("x", 200); spans[0].setAttribute("y", (792 - fs * 0.3).toFixed(1));   // keeps a margin above the frame edge
+      spans[0].setAttribute("x", 200); spans[0].setAttribute("y", Math.min(OCEAN_Y - 20, cy + 68 + fs + 6).toFixed(1));   // V2.1.81: sign hangs just under the Factory ring, ocean stays visible beneath
       return;
     }
     el.setAttribute("font-size", size);

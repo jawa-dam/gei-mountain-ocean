@@ -15,7 +15,7 @@
   if(window.__GEI_V2189_UTILITY_DOCK__)return;
   var VERSION="V2.1.89";
   var ORDER=["dmStoreFloatBtn","damMapLauncherBtn","songVaultFloatBtn"];
-  var DIALOGS=["preGameCard","levelCard","bonusCard","damMachineCard","timeUpCard","characterSpotlight","geiSplash","geiWelcome"];
+  var DIALOGS=["celebCard","preGameCard","levelCard","bonusCard","damMachineCard","timeUpCard","characterSpotlight","geiSplash","geiWelcome"];
   var dock=null;
 
   function $(id){return document.getElementById(id);}
@@ -46,6 +46,10 @@
       "#damMapTopBtn{display:none!important}"+  /* V2.1.70 injects a second HUD map icon; the dock owns DAM MAP now */
       "@media (max-width:430px){.geiUtilityDock{right:5px;top:calc(53% - 112px);gap:8px}.geiUtilityDock>button{width:68px!important;height:68px!important}"+
       ".geiUtilityDock #damMapLauncherBtn .damMapLauncherIcon{font-size:1.8rem}.geiUtilityDock #damMapLauncherBtn .damMapLauncherText{font-size:.62rem}}"+
+      /* V2.1.81: only when the measured world is too short for the full rail do buttons step down */
+      ".geiUtilityDock.railTight{gap:6px}.geiUtilityDock.railTight>button{width:64px!important;height:64px!important}"+
+      ".geiUtilityDock.railTiny{gap:4px}.geiUtilityDock.railTiny>button{width:54px!important;height:54px!important;padding:3px!important}"+
+      ".geiUtilityDock.railTiny .dmStoreFloatSub,.geiUtilityDock.railTiny .songVaultFloatLabel{display:none!important}"+
       "@media (max-height:620px){.geiUtilityDock{top:calc(50% - 94px);gap:6px}.geiUtilityDock>button{width:60px!important;height:60px!important}"+
       ".geiUtilityDock .dmStoreFloatTitle,.geiUtilityDock .songVaultFloatIcon,.geiUtilityDock .damMapLauncherIcon{font-size:1.55rem!important}}"+
       "@media (prefers-reduced-motion:reduce){.geiDockWave,.geiUtilityDock #damMapLauncherBtn .damMapLauncherIcon{animation:none!important}}";
@@ -82,9 +86,10 @@
     dock=$("geiUtilityDock");
     if(!dock){
       dock=document.createElement("nav");
-      dock.id="geiUtilityDock"; dock.className="geiUtilityDock"; dock.setAttribute("aria-label","Utilities");
+      dock.id="geiUtilityDock"; dock.className="geiUtilityDock mobileActionRail"; dock.setAttribute("aria-label","Utilities");
       root.appendChild(dock);
     }
+    dock.classList.add("mobileActionRail");
     ensureMapLabel(btns[1]);
     btns.forEach(function(b){ if(b.parentNode!==dock||dock.lastElementChild!==b)dock.appendChild(b); });   // enforce order
     btns[1].setAttribute("aria-label","Open DAM Map"); btns[1].title="DAM Map";
@@ -98,8 +103,22 @@
     }
     return "";
   }
+  /* V2.1.81 — measure the real world box inside the app so the rail and the DAM MACHINE button
+     stay inside it on every Android viewport (no % of the whole app, no HUD overlap). */
+  function syncFrame(){
+    var root=$("appRoot"), world=$("world"); if(!root||!world||!dock)return;
+    var a=root.getBoundingClientRect(), w=world.getBoundingClientRect();
+    if(!w.height||!w.width)return;
+    root.style.setProperty("--geiWorldTop",Math.round(w.top-a.top)+"px");
+    root.style.setProperty("--geiWorldH",Math.round(w.height)+"px");
+    root.classList.add("geiFrameSynced");
+    dock.classList.remove("railTight","railTiny");
+    var room=w.height-12;
+    if(dock.offsetHeight>room){ dock.classList.add("railTight"); if(dock.offsetHeight>room)dock.classList.add("railTiny"); }
+  }
   function syncLayer(){
     if(!dock)return;
+    syncFrame();
     dock.classList.toggle("underDialog",!!dialogOpen());
     var panel=false; try{panel=typeof anyPanelOpen==="function"&&anyPanelOpen();}catch(e){}
     dock.classList.toggle("compact",!!panel);
@@ -137,6 +156,10 @@
     var mo=new MutationObserver(syncLayer);
     DIALOGS.forEach(function(id){var m=$(id);if(m)mo.observe(m,{attributes:true,attributeFilter:["class","style","hidden"]});});
     [].forEach.call(document.querySelectorAll(".sidePanel"),function(p){mo.observe(p,{attributes:true,attributeFilter:["class"]});});
+    window.addEventListener("resize",syncFrame);
+    window.addEventListener("orientationchange",syncFrame);
+    try{ if(window.visualViewport)window.visualViewport.addEventListener("resize",syncFrame); }catch(e){}
+    try{ if(window.ResizeObserver){ var ro=new ResizeObserver(syncFrame); ro.observe($("world")); ro.observe($("appRoot")); } }catch(e){}
     setInterval(syncLayer,700);                  // splash / late-created dialogs
   }
 
