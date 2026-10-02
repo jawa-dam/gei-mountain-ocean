@@ -19,7 +19,7 @@
   if(window.__GEI_V2182_BEAVER_VOICE__) return;
   var A=window.GEI_AUDIO;                  // V2.1.83: the master audio manager (master-audio-v2183.js) owns all playback
   if(!A){try{console.warn("[BEAVER] GEI_AUDIO missing — voice guide disabled");}catch(e){}return;}
-  var VERSION="V2.1.84";
+  var VERSION="V2.1.85";
   var STORE_KEY="geiBeaverVoice.v1";
   var BEAVER_IMG="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/yall-too-beaver-rhhiVplt1GMykxV8.png";
   var CDN="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
@@ -103,7 +103,7 @@
   (function load(){
     try{var o=JSON.parse(lsGet(STORE_KEY)||"null");
       if(o&&typeof o==="object"){mem.heard=o.heard&&typeof o.heard==="object"?o.heard:{};mem.visited=o.visited&&typeof o.visited==="object"?o.visited:{};
-        mem.mapOpens=+o.mapOpens||0;mem.lastMapStation=typeof o.lastMapStation==="number"?o.lastMapStation:-1;mem.lastPos=(o.lastPos&&typeof o.lastPos.x==="number")?o.lastPos:null;mem.lastTotal=typeof o.lastTotal==="number"?o.lastTotal:undefined;mem.muted=!!o.muted;}
+        mem.mapOpens=+o.mapOpens||0;mem.lastMapStation=typeof o.lastMapStation==="number"?o.lastMapStation:-1;mem.lastPos=(o.lastPos&&typeof o.lastPos.x==="number")?o.lastPos:null;mem.lastTotal=typeof o.lastTotal==="number"?o.lastTotal:undefined;mem.extra=(o.extra&&typeof o.extra==="object")?o.extra:{};mem.muted=!!o.muted;}
     }catch(e){}
   })();
   var saveT=0;
@@ -229,13 +229,13 @@
     return null;
   }
   /* A station became the active one (game or map). One short, purposeful line — GEI intro/lesson first, else a contextual arrival. */
-  function arrive(idx,source,delay){
+  function arrive(idx,source,delay,noIntro){
     var st=stationOf(idx),t=now();
     var first=!mem.visited[st];
     mem.visited[st]=1;save();
     if(stationCool[st]&&t-stationCool[st]<ARRIVAL_COOLDOWN_MS)return false;
-    var id=lessonFor(idx+1);                                              // future recordings take priority automatically
-    if(!id){
+    var id=noIntro?null:lessonFor(idx+1);                                 // future recordings take priority automatically
+    if(!id&&!noIntro){
       var intro=candidates(["gei"],st,{gei:true});                        // introductory GEI cue (heard once)
       if(intro.length&&(first||Math.random()<.5))id=intro[0];
     }
@@ -287,22 +287,26 @@
     mem.mapOpens++;
     var c=context(),idx=c.currentStationIndex,st=c.currentStation,t=now();
     walkBeaver(true);
+    var teach=window.GEI_DAY_TEACH,plan={stationIndex:idx,welcome:false,advanced:false};
     if(!mem.heard.welcome_to_dam_map){                                    // first meaningful visit: welcome, then ONE nav line
       var chain=t;
       if(request("welcome_to_dam_map",{pri:3,delay:900,chain:chain,ttl:10000})){
         var nav=pickFrom(POOL_MAP_OPEN);
         if(nav)request(nav,{pri:3,after:500,chain:chain,ttl:20000});
-        mem.visited[st]=1;stationCool[st]=t;
+        mem.visited[st]=1;stationCool[st]=t;plan.welcome=true;
       }
     }else{
       var total=c.playerProgress&&+c.playerProgress.totalDays;
       var advanced=typeof mem.lastTotal==="number"&&isFinite(total)&&total>mem.lastTotal;
+      plan.advanced=advanced;
       if(advanced)dayComplete(((total-1)%6+6)%6);                          // you finished a Day since the last visit: celebrate it HERE, on the map
       else if(mem.lastMapStation>=0&&idx>mem.lastMapStation)request(pickFrom(POOL_NEXT),{pri:2,delay:1200});
-      else arrive(idx,"map",900);
+      else arrive(idx,"map",900,!!teach);                                // with the Six-Day engine the arrival phrase stays short; GEI teaching follows
     }
+    if(teach&&typeof teach.onMapOpened==="function"){try{teach.onMapOpened(plan);}catch(e){dlog("teach error: "+e);}}
     var tot=c.playerProgress&&+c.playerProgress.totalDays;if(isFinite(tot))mem.lastTotal=tot;
     mem.lastMapStation=idx;save();warmContext();
+    window.dispatchEvent(new CustomEvent("gei:map-opened",{detail:plan}));
   }
   function bindMap(){
     var page=$("geiDamMapPage");
@@ -338,7 +342,7 @@
   /* ------------------------------------------------------------------ 6. visual Beaver — a LARGE guide (existing artwork)
      ~30% of the map height (clamped), standing in the foreground beside the active station, using the same pin
      coordinates the Dam Map already computes. Only the Beaver is sized — the map itself is never scaled. */
-  var bv=null,bvImg=null,bvAspect=.8,lastWalkKey="",walkT=0,ro=null;
+  var bv=null,bvImg=null,bvAspect=.8,lastWalkKey="",walkT=0,ro=null,placeRaf=0;
   function ensureBeaver(page){
     var scene=$("dmwScene");if(!scene||$("geiBeaverGuide"))return;
     if(!$("geiBeaverGuideStyle")){
@@ -367,6 +371,14 @@
     try{if(window.ResizeObserver){ro=new ResizeObserver(function(){place(false);});ro.observe(scene);}}catch(e){}
     place(false);
   }
+  /* top edge (scene px) of the station-pill row: nothing of ours may sit below it */
+  function pillsTop(sh){
+    var scene=$("dmwScene"),rows=document.querySelectorAll("#geiMapRegions .dmwPill");
+    if(!scene||!rows.length)return sh*.9;
+    var sr=scene.getBoundingClientRect(),m=1e9;
+    for(var i=0;i<rows.length;i++){var r=rows[i].getBoundingClientRect();if(r.height&&r.top-sr.top<m)m=r.top-sr.top;}
+    return m<1e9?m-4:sh*.9;
+  }
   function clampN(v,a,b){return Math.max(a,Math.min(b,v));}
   /* Where the Beaver stands for the current pin: left of the station (flipping to the right if there is no room),
      feet just below the station landmark, never lower than the pill row. Returns px inside the scene. */
@@ -377,7 +389,7 @@
     var wh=wrap?wrap.clientHeight:sh,visH=Math.min(sh,wh||sh),visTop=Math.max(0,sh-visH);   // phones crop the top of the scene: size/place by what is actually on screen
     var x=px/100*sw,y=py/100*sh;
     var h=Math.round(clampN(visH*.30,96,300)),w=Math.round(h*bvAspect);
-    var maxBottom=sh*.93,bottom=Math.min(y+sh*.09,maxBottom),top=bottom-h;
+    var maxBottom=Math.min(sh*.93,pillsTop(sh)),bottom=Math.min(y+sh*.09,maxBottom),top=bottom-h;
     if(top<visTop+4){top=visTop+4;bottom=top+h;if(bottom>maxBottom){bottom=maxBottom;top=Math.max(visTop+2,bottom-h);}}
     top=Math.max(2,top);
     var left=x-62-w;if(left<4)left=Math.min(x+62,sw-w-4);
@@ -388,6 +400,7 @@
     bv.style.width=p.w+"px";bv.style.height=p.h+"px";
     bv.style.left=p.l+"px";bv.style.top=p.t+"px";
     mem.lastPos={x:p.fx,y:p.fy};
+    if(!placeRaf)placeRaf=requestAnimationFrame(function(){placeRaf=0;try{window.dispatchEvent(new CustomEvent("gei:beaver-placed"));}catch(e){}});
   }
   /* The Beaver travels to the active station, pauses beside it, then idles. */
   function walkBeaver(fromOpen){
@@ -407,6 +420,15 @@
       if(!reduced()){bv.classList.add("walking");setTimeout(function(){if(bv)bv.classList.remove("walking");},1150);}
       place(true);
     },fromOpen?380:0);
+  }
+  /* Geometry for companions (the GEI Connection card): Beaver target box, pin box and visible window, all in scene px. */
+  function layout(){
+    var scene=$("dmwScene"),pin=$("geiMapPin"),wrap=$("dmwScroll"),p=targetPos();if(!scene||!pin||!wrap||!p)return null;
+    var sr=scene.getBoundingClientRect(),pr=pin.getBoundingClientRect(),sh=scene.clientHeight;
+    var visH=Math.min(sh,wrap.clientHeight||sh);
+    return {scene:{w:scene.clientWidth,h:sh},beaver:{l:p.l,t:p.t,w:p.w,h:p.h},
+      pin:{l:pr.left-sr.left,t:pr.top-sr.top,w:pr.width,h:pr.height},
+      view:{x0:wrap.scrollLeft,x1:wrap.scrollLeft+wrap.clientWidth,y0:Math.max(0,sh-visH),y1:Math.min(sh*.93,pillsTop(sh))}};
   }
   function setSpeaking(on){if(bv)bv.classList.toggle("speaking",!!on);}
 
@@ -443,6 +465,7 @@
     get enabled(){return enabledNow();},get speaking(){return A.beaver.speaking;},get current(){return A.beaver.current;},
     get queueLength(){return A.beaver.queue;},
     memory:function(){return JSON.parse(JSON.stringify(mem));},resetMemory:function(){mem.heard={};mem.visited={};mem.mapOpens=0;mem.lastMapStation=-1;mem.lastPos=null;save();},
+    layout:layout,remember:function(k,v){mem.extra=mem.extra||{};mem.extra[k]=v;save();},recall:function(k){return mem.extra?mem.extra[k]:undefined;},
     selfTest:selfTest,presentationOnly:true};
   window.__GEI_V2182_BEAVER_VOICE__=api;
   window.GEI_BEAVER_VOICE=api;

@@ -22,10 +22,10 @@
 (function(){
   "use strict";
   if(window.GEI_AUDIO) return;
-  var VERSION="V2.1.84";
+  var VERSION="V2.1.85";
   var KEY_MUTED="geiAudioMuted";
   var DUCK={music:.28,sfx:.6,downTau:.16,upTau:.45};     // spec: music → ~28%, SFX → ~60%, Beaver 100%
-  var LOW_GAP_MS=4500, POOL_MAX=10, QUEUE_MAX=4, DUCK_WATCHDOG_MS=45000;
+  var LOW_GAP_MS=4500, POOL_MAX=10, QUEUE_MAX=8, DUCK_WATCHDOG_MS=45000;
 
   function now(){return Date.now();}
   function lsGet(k){try{return window.localStorage.getItem(k);}catch(e){return null;}}
@@ -301,7 +301,7 @@
   function releasePool(){stopBeaver();Object.keys(pool).forEach(function(k){dispose(pool[k]);});pool={};poolOrder=[];}
 
   /* ------------------------------------------------------------------ debug (developer only) */
-  var debugOn=false,dbgEl=null,dbgLog=[];
+  var debugOn=false,dbgEl=null,dbgLog=[],debugProviders=[];
   try{debugOn=!!window.GEI_DEBUG_AUDIO;}catch(e){}
   try{Object.defineProperty(window,"GEI_DEBUG_AUDIO",{configurable:true,get:function(){return debugOn;},set:function(v){debugOn=!!v;if(!debugOn&&dbgEl){dbgEl.remove();dbgEl=null;}else dbg();}});}catch(e){}
   function dlog(m){if(!debugOn)return;dbgLog.push(m);if(dbgLog.length>4)dbgLog.shift();try{console.log("[AUDIO] "+m);}catch(e){}dbg();}
@@ -311,10 +311,11 @@
     if(!dbgEl){dbgEl=document.createElement("pre");dbgEl.id="geiAudioDebug";dbgEl.setAttribute("aria-hidden","true");
       dbgEl.style.cssText="position:fixed;right:6px;top:6px;z-index:2147483000;margin:0;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.78);color:#fd8;font:11px/1.35 monospace;pointer-events:none;max-width:60vw;white-space:pre-wrap";
       document.body.appendChild(dbgEl);}
-    var t=targets();
+    var t=targets(),extra="";
+    debugProviders.forEach(function(fn){try{var l=fn();if(l)extra+="\n"+l;}catch(e){}});
     dbgEl.textContent="MASTER AUDIO"+(audioState.muted?" (MUTED)":"")+"\nMusic: "+pct(musicVolume()*t.music)+"\nSFX: "+pct(t.sfx)+"\nBeaver: "+pct(audioState.beaverVolume)+
       "\nBeaver Speaking: "+audioState.beaverSpeaking+"\nCurrent Beaver Clip: "+(audioState.currentBeaverClip||"-")+"\nVoice Priority: "+(audioState.beaverPriority||"-")+
-      "\nZone: "+zone()+"\nMusic Ducking: "+(audioState.musicDucking?"ACTIVE":"off")+"\nQueue: "+Q.length+(blocked?"  [autoplay blocked]":"")+"\n"+dbgLog.join("\n");
+      "\nZone: "+zone()+"\nMusic Ducking: "+(audioState.musicDucking?"ACTIVE":"off")+"\nQueue: "+Q.length+(blocked?"  [autoplay blocked]":"")+"\nFemale voice: "+(femaleAllowed()?"ALLOWED":"BLOCKED")+extra+"\n"+dbgLog.join("\n");
   }
 
   /* ------------------------------------------------------------------ public API */
@@ -328,7 +329,7 @@
     playBeaver:playBeaver,stopBeaver:stopBeaver,preloadBeaver:preload,isBroken:isBroken,
     setVoiceResolver:setVoiceResolver,addVoiceGate:addVoiceGate,onBeaver:onBeaver,
     get beaver(){return {speaking:!!cur,current:cur?{id:cur.clip.id,category:cur.clip.category,priority:cur.pri}:null,queue:Q.length,blocked:blocked,pool:poolOrder.length,broken:Object.keys(broken)};},
-    releasePool:releasePool,
+    releasePool:releasePool,addDebugProvider:function(fn){if(typeof fn==="function"&&debugProviders.indexOf(fn)<0)debugProviders.push(fn);},refreshDebug:function(){dbg();},
     levels:function(){var g=graphs[0];return {master:g?+g.master.gain.value.toFixed(3):null,music:g?+g.music.gain.value.toFixed(3):null,sfx:g?+g.sfx.gain.value.toFixed(3):null,
       beaverEl:cur&&pool[cur.clip.id]?+pool[cur.clip.id].volume.toFixed(3):null,radio:els.map(function(r){return +r.el.volume.toFixed(3);})};},
     selfTest:function(){var g=graphs[0];return {version:VERSION,buses:graphs.length,oneContext:graphs.length<=1,
