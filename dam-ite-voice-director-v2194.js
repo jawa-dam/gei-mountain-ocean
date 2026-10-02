@@ -200,7 +200,7 @@
         g.gain.setValueAtTime(0.0001,t);
         g.gain.exponentialRampToValueAtTime(i===2?0.034:0.026,t+0.018);
         g.gain.exponentialRampToValueAtTime(0.0001,t+0.33);
-        o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+0.35);
+        o.connect(g);g.connect(window.GEI_AUDIO?window.GEI_AUDIO.sfxIn(ctx):ctx.destination);o.start(t);o.stop(t+0.35);
       });
     }catch(e){}
   }

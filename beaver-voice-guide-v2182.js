@@ -17,16 +17,15 @@
 (function(){
   "use strict";
   if(window.__GEI_V2182_BEAVER_VOICE__) return;
+  var A=window.GEI_AUDIO;                  // V2.1.83: the master audio manager (master-audio-v2183.js) owns all playback
+  if(!A){try{console.warn("[BEAVER] GEI_AUDIO missing — voice guide disabled");}catch(e){}return;}
   var VERSION="V2.1.82";
   var STORE_KEY="geiBeaverVoice.v1";
   var BEAVER_IMG="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/yall-too-beaver-rhhiVplt1GMykxV8.png";
   var CDN="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
   var STATIONS=["mountain","dam","millpond","sluice","waterwheel","factory"];
-  var DUCK_LEVEL=.28;            // music multiplier while the Beaver speaks
-  var LOW_GAP_MS=4500;           // low-priority reactions need this much silence after the last clip
-  var STATION_TAP_COOLDOWN_MS=30000;
+      var STATION_TAP_COOLDOWN_MS=30000;
   var ARRIVAL_COOLDOWN_MS=90000;
-  var POOL_MAX=10;               // reused <audio> elements kept warm (LRU)
 
   /* ------------------------------------------------------------------ 1. LIBRARY
      Add a future recording by adding one entry (or calling registerClip) — the engine never changes.
@@ -121,9 +120,9 @@
     if(!dbgEl){dbgEl=document.createElement("pre");dbgEl.id="geiBeaverDebug";dbgEl.setAttribute("aria-hidden","true");
       dbgEl.style.cssText="position:fixed;left:6px;top:6px;z-index:2147483000;margin:0;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,.78);color:#8ff;font:11px/1.35 monospace;pointer-events:none;max-width:70vw;white-space:pre-wrap";
       document.body.appendChild(dbgEl);}
-    var c=context();
-    dbgEl.textContent="BEAVER:\nclip: "+(cur?cur.clip.id:"-")+"\ncategory: "+(cur?cur.clip.category:"-")+"\nday: "+c.currentDay+"  station: "+c.currentStation+
-      "\npriority: "+(cur?cur.pri:"-")+"\nplaying: "+!!cur+"  queue: "+Q.length+(blocked?"  [autoplay blocked]":"")+"\n"+dbgLog.join("\n");
+    var c=context(),bs=A.beaver,cur=bs.current;
+    dbgEl.textContent="BEAVER:\nclip: "+(cur?cur.id:"-")+"\ncategory: "+(cur?cur.category:"-")+"\nday: "+c.currentDay+"  station: "+c.currentStation+
+      "\npriority: "+(cur?cur.priority:"-")+"\nplaying: "+!!cur+"  queue: "+bs.queue+(bs.blocked?"  [autoplay blocked]":"")+"\n"+dbgLog.join("\n");
   }
 
   /* ------------------------------------------------------------------ 5. CONTEXT (reads existing state only) */
@@ -141,25 +140,7 @@
   }
   function stationOf(i){return STATIONS[Math.max(0,Math.min(5,i|0))];}
 
-  /* ------------------------------------------------------------------ audio pool (reused <audio> elements) */
-  var pool={},poolOrder=[],broken={},fails={};
-  function getEl(c){
-    var el=pool[c.id];
-    if(el){poolOrder=poolOrder.filter(function(x){return x!==c.id;});poolOrder.push(c.id);return el;}
-    try{el=new Audio();el.preload="auto";el.src=c.url;}catch(e){return null;}
-    pool[c.id]=el;poolOrder.push(c.id);
-    while(poolOrder.length>POOL_MAX){
-      var old=poolOrder.shift();
-      if(cur&&cur.clip.id===old){poolOrder.push(old);break;}
-      var oe=pool[old];delete pool[old];
-      if(oe){try{oe.onended=null;oe.onerror=null;oe.onplaying=null;oe.pause();oe.removeAttribute("src");oe.load();}catch(e){}}
-    }
-    return el;
-  }
-  function warm(ids){
-    try{if(navigator.connection&&navigator.connection.saveData)return;}catch(e){}
-    ids.forEach(function(id){var c=FLAT[id];if(c&&!broken[id]&&!pool[id])getEl(c);});
-  }
+  /* ------------------------------------------------------------------ preload (the pool itself lives in GEI_AUDIO) */
   function warmContext(){
     var c=context(),ids=[];
     Object.keys(FLAT).forEach(function(id){var k=FLAT[id];
@@ -167,19 +148,13 @@
       if((k.category==="arrival"||k.category==="teaching"||k.category==="gei")&&(!k.stations||k.stations.indexOf(c.currentStation)>=0)&&!(k.gei&&mem.heard[id]))ids.push(id);
     });
     ids=ids.slice(0,4).concat(["day_complete"],POOL_CELEBRATE.slice(0,1),["you_unlocked_next_station"],POOL_NEXT.slice(0,1),POOL_STATION_TAP.slice(0,2));
-    setTimeout(function(){warm(ids);},1200);
+    setTimeout(function(){A.preloadBeaver(ids);},1200);
   }
-
-  /* ------------------------------------------------------------------ 4. ducking */
-  function duck(on){
-    try{var st=window.__GEI_DAM_FRIENDLY_SOUNDTRACK__;if(st&&typeof st.voiceDuck==="function")st.voiceDuck(!!on,DUCK_LEVEL);}catch(e){}
-  }
-  var duckRelT=0;
-  function releaseDuckSoon(){clearTimeout(duckRelT);duckRelT=setTimeout(function(){if(!cur&&!Q.length)duck(false);},650);}
 
   /* ------------------------------------------------------------------ gates: is the Beaver allowed / needed to be quiet? */
   function otherVoiceBusy(){
     try{var d=window.GEI_VOICE_DIRECTOR;if(d&&d.state&&d.state.active)return true;}catch(e){}
+    try{var ev=window.__GEI_V2203_VOICE_EVENT__;var st=ev&&typeof ev.state==="function"?ev.state():null;if(st&&st.activeVoice&&(st.activeVoice.event||st.activeVoice.core))return true;}catch(e){}
     try{if(window.speechSynthesis&&window.speechSynthesis.speaking)return true;}catch(e){}
     return false;
   }
@@ -191,111 +166,45 @@
   }
   function mapOpen(){var p=$("geiDamMapPage");return !!(p&&p.classList.contains("show"));}
   function enabledNow(){
-    if(mem.muted)return false;
     if(lsGet("geiMilestoneVoiceMode")==="off")return false;                 // the player's existing voice setting
     if(mapOpen()&&lsGet("damMapSound")==="off")return false;                // the Dam Map's own sound toggle
     return true;
   }
 
-  /* ------------------------------------------------------------------ 3. voice controller */
-  var Q=[],cur=null,lastEnd=0,pumpT=0,blocked=false,unlockBound=false,history=[],lastPlayedAt={},stationCool={};
+  /* ------------------------------------------------------------------ 3. voice requests → the master audio manager
+     Playback, queue, priority, ducking and error handling all live in GEI_AUDIO.playBeaver. This file only decides WHAT to say. */
+  var history=[],lastPlayedAt={},stationCool={};
   function resolve(x){return typeof x==="string"?FLAT[x]:x;}
   function recent(id,n){return history.slice(-n).indexOf(id)>=0;}
-
-  /* request(idOrClip,{pri:1-5,delay:ms,after:ms,ttl:ms,force:bool}) → accepted? */
+  A.setVoiceResolver(function(id){return FLAT[id]||null;});
+  A.addVoiceGate({canSpeak:enabledNow,busy:function(){return otherVoiceBusy()||overlayUp();}});
+  A.onBeaver(function(ev){
+    var c=ev.clip;if(!c)return;
+    if(ev.type==="start"){setSpeaking(true);dlog("play "+c.id+" p"+ev.priority);}
+    else if(ev.type==="end"||ev.type==="abort"){
+      lastPlayedAt[c.id]=now();setSpeaking(false);
+      if(ev.type==="end"){history.push(c.id);if(history.length>12)history.shift();if(!c.repeatable){mem.heard[c.id]=1;save();}}
+      dlog(ev.type+" "+c.id);
+    }else if(ev.type==="fail")dlog("FAIL "+c.id+": "+ev.extra);
+    else if(ev.type==="drop")dlog("drop "+c.id+" ("+ev.extra+")");
+  });
+  /* request(idOrClip,{pri:1-5,delay,after,ttl,chain,force}) → accepted? */
   function request(x,o){
     o=o||{};var c=resolve(x);
-    if(!c||broken[c.id]||!enabledNow())return false;
-    var pri=Math.max(1,Math.min(5,o.pri||2)),t=now();
+    if(!c||A.isBroken(c.id))return false;
+    var t=now();
     if(!c.repeatable&&mem.heard[c.id]&&!o.force)return false;
     if(c.cooldownMs&&lastPlayedAt[c.id]&&t-lastPlayedAt[c.id]<c.cooldownMs&&!o.force)return false;
-    if(pri<=2){                                                           // reactions never queue up: fit the silence or vanish
-      if(cur||Q.length||blocked||otherVoiceBusy()||overlayUp()||document.hidden||t-lastEnd<LOW_GAP_MS){dlog("drop "+c.id+" (busy)");return false;}
-    }else{
-      if(document.hidden&&!o.delay)return false;
-      if(Q.some(function(q){return q.clip.id===c.id;})||(cur&&cur.clip.id===c.id))return false;
-    }
-    var item={clip:c,pri:pri,at:t+(o.delay||0),after:o.after||0,exp:t+(o.ttl||(pri>=3?15000:3000))+(o.delay||0),chain:o.chain||0};
-    if(pri>=4&&cur&&cur.pri<=2)interrupt();                               // major progression outranks a casual reaction
-    var front=pri>=4&&!item.chain&&Q.every(function(q){return q.pri<pri;});
-    if(front)Q.unshift(item);else Q.push(item);
-    while(Q.length>4){var lo=0;for(var i=1;i<Q.length;i++)if(Q[i].pri<Q[lo].pri)lo=i;Q.splice(lo,1);}
-    schedule(0);dbg();return true;
+    return A.playBeaver(c,o);
   }
-  function schedule(ms){clearTimeout(pumpT);pumpT=setTimeout(pump,Math.max(0,ms));}
-  function pump(){
-    if(cur)return;
-    var t=now();
-    Q=Q.filter(function(q){return q.exp>t;});
-    if(!Q.length){releaseDuckSoon();dbg();return;}
-    var item=Q[0],wait=Math.max(item.at-t,item.after-(t-lastEnd),0);
-    if(wait>0){schedule(wait);return;}
-    if(!enabledNow()){Q=[];releaseDuckSoon();return;}
-    if(otherVoiceBusy()||overlayUp()||(document.hidden&&item.pri<5)){
-      if(item.pri<=2){Q.shift();pump();return;}
-      schedule(400);return;
-    }
-    Q.shift();play(item);
-  }
-  function interrupt(){
-    if(!cur)return;
-    var it=cur,el=pool[it.clip.id];cur=null;
-    try{if(el){el.onended=null;el.onerror=null;el.onplaying=null;el.pause();}}catch(e){}
-    clearTimeout(it.wd);dlog("interrupt "+it.clip.id);setSpeaking(false);
-  }
-  function play(item){
-    var c=item.clip,el=getEl(c);
-    if(!el){fail(c,"no audio element");schedule(0);return;}
-    cur=item;duck(true);setSpeaking(true);
-    var started=false;
-    item.wd=setTimeout(function(){ if(cur===item){ if(!started)fail(c,"start timeout");end(item,true);} },6500);
-    el.onplaying=function(){started=true;clearTimeout(item.wd);item.wd=setTimeout(function(){end(item,true);},30000);};
-    el.onended=function(){end(item,false);};
-    el.onerror=function(){fail(c,"load error");end(item,true);};
-    try{el.currentTime=0;}catch(e){}
-    try{el.volume=1;}catch(e){}
-    var p;try{p=el.play();}catch(e){p=Promise.reject(e);}
-    dlog("play "+c.id+" p"+item.pri);dbg();
-    if(p&&p.catch)p.catch(function(err){
-      if(cur!==item)return;
-      if(err&&err.name==="NotAllowedError"){onBlocked(item);}
-      else{fail(c,String(err&&err.name||err));end(item,true);}
-    });
-  }
-  function end(item,aborted){
-    if(cur!==item)return;
-    clearTimeout(item.wd);
-    var c=item.clip,el=pool[c.id];
-    if(el){el.onended=null;el.onerror=null;el.onplaying=null;try{el.pause();}catch(e){}}
-    cur=null;lastEnd=now();setSpeaking(false);
-    lastPlayedAt[c.id]=lastEnd;
-    if(!aborted){history.push(c.id);if(history.length>12)history.shift();if(!c.repeatable){mem.heard[c.id]=1;save();}}
-    dlog("end "+c.id);releaseDuckSoon();schedule(30);dbg();
-  }
-  function fail(c,why){
-    fails[c.id]=(fails[c.id]||0)+1;
-    dlog("FAIL "+c.id+": "+why);
-    if(fails[c.id]>=2){broken[c.id]=1;dlog("giving up on "+c.id);}            // never hammer a broken URL
-    var el=pool[c.id];if(el&&broken[c.id]){delete pool[c.id];poolOrder=poolOrder.filter(function(x){return x!==c.id;});try{el.removeAttribute("src");el.load();}catch(e){}}
-  }
-  /* autoplay blocked: keep important lines, retry after the next valid user gesture, drop casual ones */
-  function onBlocked(item){
-    var el=pool[item.clip.id];if(el){el.onended=null;el.onerror=null;el.onplaying=null;}
-    clearTimeout(item.wd);cur=null;setSpeaking(false);duck(false);blocked=true;dlog("autoplay blocked: "+item.clip.id);
-    if(item.pri>=3){item.exp=now()+15000;item.at=0;Q.unshift(item);}
-    if(unlockBound)return;unlockBound=true;
-    var ev=["pointerdown","touchend","keydown","click"];
-    var h=function(){ev.forEach(function(e){document.removeEventListener(e,h,true);});unlockBound=false;blocked=false;setTimeout(pump,60);};
-    ev.forEach(function(e){document.addEventListener(e,h,{capture:true,passive:true});});
-  }
-  function stop(){Q=[];interrupt();duck(false);dbg();}
+  function stop(){A.stopBeaver();}
 
   /* ------------------------------------------------------------------ contextual picking (anti-repeat) */
   function candidates(cats,station,opts){
     opts=opts||{};var out=[];
     cats.forEach(function(cat){Object.keys(BEAVER_VOICE_LIBRARY[cat]||{}).forEach(function(id){
       var k=BEAVER_VOICE_LIBRARY[cat][id];
-      if(k.special||broken[id])return;
+      if(k.special||A.isBroken(id))return;
       if(k.gei&&!opts.gei)return;
       if(!k.repeatable&&mem.heard[id])return;
       if(k.stations&&station&&k.stations.indexOf(station)<0)return;
@@ -304,7 +213,7 @@
     return out;
   }
   function pickFrom(ids){
-    ids=ids.filter(function(id){return FLAT[id]&&!broken[id]&&(FLAT[id].repeatable||!mem.heard[id]);});
+    ids=ids.filter(function(id){return FLAT[id]&&!A.isBroken(id)&&(FLAT[id].repeatable||!mem.heard[id]);});
     if(!ids.length)return null;
     var fresh=ids.filter(function(id){return !recent(id,3);});
     var from=fresh.length?fresh:ids.filter(function(id){return id!==history[history.length-1];});
@@ -315,7 +224,7 @@
   /* ------------------------------------------------------------------ event reactions */
   function lessonFor(day){
     var list=GEI_VOICE_LESSONS["day"+day]||[];
-    for(var i=0;i<list.length;i++){var c=FLAT[list[i]];if(c&&!broken[c.id]&&!mem.heard[c.id])return c.id;}
+    for(var i=0;i<list.length;i++){var c=FLAT[list[i]];if(c&&!A.isBroken(c.id)&&!mem.heard[c.id])return c.id;}
     return null;
   }
   /* A station became the active one (game or map). One short, purposeful line — GEI intro/lesson first, else a contextual arrival. */
@@ -398,8 +307,11 @@
     ensureBeaver(page);
     new MutationObserver(function(){
       var open=page.classList.contains("show");
-      if(open&&!mapWasOpen)onMapOpened();
-      mapWasOpen=open;
+      var was=mapWasOpen;mapWasOpen=open;
+      try{
+        if(open&&!was)onMapOpened();
+        if(!open&&was)A.stopBeaver();                      // leaving the Dam Map: no sentence follows the player back into the game
+      }catch(e){dlog("map hook error: "+e);}
     }).observe(page,{attributes:true,attributeFilter:["class"]});
     var pin=$("geiMapPin");
     if(pin)new MutationObserver(function(){walkBeaver(false);}).observe(pin,{attributes:true,attributeFilter:["style"]});
@@ -411,8 +323,10 @@
     return true;
   }
   /* wait (cheaply) for the lazily-built Dam Map page */
+  var watching=false,gameBound=false;
   function watchForMap(){
-    if(bindMap())return;
+    if(bindMap()||watching)return;
+    watching=true;
     var mo=new MutationObserver(function(){if(bindMap())mo.disconnect();});
     mo.observe(document.body,{childList:true});
   }
@@ -466,6 +380,7 @@
   }
   var lastTapKey="";
   function bindGame(){
+    if(gameBound)return true;
     var ok=true;
     ok=wrap("beginDay",function(index){arrive(index|0,"game",900);warmContext();})&&ok;
     ok=wrap("showDayReward",function(index){dayComplete(index|0);})&&ok;
@@ -477,6 +392,7 @@
     }
     window.addEventListener("damnation:ite-in-flow",discover);
     window.addEventListener("damnation:ite-rescued",discover);
+    gameBound=true;                                        // listeners are attached exactly once, however often boot retries
     return ok;
   }
 
@@ -500,10 +416,9 @@
     var all=Object.keys(FLAT).map(function(k){return FLAT[k];});
     return {version:VERSION,clips:all.length,allHaveUrlAndCategory:all.every(function(c){return /^https:\/\/assets\.zyrosite\.com\//.test(c.url)&&!!c.category&&!!c.id;}),
       categories:Object.keys(BEAVER_VOICE_LIBRARY),lessonsEmpty:Object.keys(GEI_VOICE_LESSONS).every(function(k){return GEI_VOICE_LESSONS[k].length===0;}),
-      speaking:!!cur,queue:Q.length,blocked:blocked,broken:Object.keys(broken),mapBound:!!(($("geiDamMapPage")||{}).__beaverBound),
-      gameHooks:!!(window.beginDay&&window.beginDay.__beaver2182)&&!!(window.showDayReward&&window.showDayReward.__beaver2182),
-      musicDuck:!!(window.__GEI_DAM_FRIENDLY_SOUNDTRACK__&&window.__GEI_DAM_FRIENDLY_SOUNDTRACK__.voiceDuck),presentationOnly:true};
-  }
+      speaking:A.beaver.speaking,queue:A.beaver.queue,blocked:A.beaver.blocked,broken:A.beaver.broken,sharedAudioManager:true,mapBound:!!(($("geiDamMapPage")||{}).__beaverBound),
+      gameHooks:gameBound,
+        }
 
   window.BEAVER_VOICE_LIBRARY=BEAVER_VOICE_LIBRARY;
   window.GEI_VOICE_LESSONS=GEI_VOICE_LESSONS;
@@ -511,9 +426,8 @@
     context:context,speak:function(id,o){return request(id,o||{pri:3});},react:function(kind){
       return kind==="discover"?discover():kind==="water"?waterMoving():kind==="tap"?stationTap(context().currentStationIndex,"game"):false;},
     arrive:arrive,dayComplete:dayComplete,stop:stop,registerClip:registerClip,registerLesson:registerLesson,playLesson:playLesson,
-    setEnabled:function(on){mem.muted=!on;save();if(!on)stop();return !mem.muted;},
-    get enabled(){return enabledNow();},get speaking(){return !!cur;},get current(){return cur?{id:cur.clip.id,category:cur.clip.category,priority:cur.pri}:null;},
-    get queueLength(){return Q.length;},
+    get enabled(){return enabledNow();},get speaking(){return A.beaver.speaking;},get current(){return A.beaver.current;},
+    get queueLength(){return A.beaver.queue;},
     memory:function(){return JSON.parse(JSON.stringify(mem));},resetMemory:function(){mem.heard={};mem.visited={};mem.mapOpens=0;mem.lastMapStation=-1;mem.lastPos=null;save();},
     selfTest:selfTest,presentationOnly:true};
   window.__GEI_V2182_BEAVER_VOICE__=api;
@@ -521,8 +435,7 @@
 
   function boot(){
     bindGame();watchForMap();warmContext();
-    window.addEventListener("load",function(){bindGame();watchForMap();});
-    document.addEventListener("visibilitychange",function(){if(document.hidden)stop();});
+    window.addEventListener("load",function(){bindGame();watchForMap();},{once:true});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();

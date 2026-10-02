@@ -8553,7 +8553,7 @@ const GEI_TAP_PERFORMANCE = (function(){
     try{
       out = ctx.createDynamicsCompressor();
       out.threshold.value = -14; out.knee.value = 12; out.ratio.value = 5; out.attack.value = .003; out.release.value = .2;
-      out.connect(ctx.destination);
+      out.connect(window.GEI_AUDIO ? window.GEI_AUDIO.sfxIn(ctx) : ctx.destination);   // V2.1.83: SFX bus → MASTER
     }catch(e){ out = ctx.destination; }
     S.audio.out.set(ctx, out); return out;
   }
@@ -10036,6 +10036,7 @@ function playSong(id){
   if(!song || !isUnlocked("songs", id)){ showToast(`🔒 Locked — unlock it in the 🛒 Store for ${fmt(UNLOCK_COST_FL_OZ)} FL OZ`); return; }
   if(!radioAudio){
     radioAudio = new Audio();
+    if(window.GEI_AUDIO) window.GEI_AUDIO.registerMusicElement(radioAudio);   // V2.1.83: Song Vault radio joins the MUSIC bus (ducks/mutes with it)
     radioAudio.preload = "none";
     ["pause","play"].forEach(ev => radioAudio.addEventListener(ev, renderRadio));
     radioAudio.addEventListener("ended", onRadioEnded);
@@ -12311,17 +12312,19 @@ function restoreVisualProgress(){
   if(!splash)return;
   var ctx=null, started=false, timers=[];
   function audio(){
+    if(!ctx){ try{ ctx=(typeof getAudio==="function")?getAudio():null; }catch(e){ ctx=null; } }   // V2.1.83: share the game's single AudioContext
     if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)();
     if(ctx.state==="suspended") ctx.resume();
     return ctx;
   }
+  function out(c){ return window.GEI_AUDIO ? window.GEI_AUDIO.sfxIn(c) : c.destination; }   // V2.1.83: SFX bus
   function tone(freq,dur,type,when,gain){
     var c=audio(),o=c.createOscillator(),g=c.createGain();
     o.type=type||"sine"; o.frequency.setValueAtTime(freq,c.currentTime+when);
     g.gain.setValueAtTime(.0001,c.currentTime+when);
     g.gain.exponentialRampToValueAtTime(gain||.045,c.currentTime+when+.025);
     g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
-    o.connect(g);g.connect(c.destination);o.start(c.currentTime+when);o.stop(c.currentTime+when+dur+.03);
+    o.connect(g);g.connect(out(c));o.start(c.currentTime+when);o.stop(c.currentTime+when+dur+.03);
   }
   function noise(dur,low,high,gain,when){
     var c=audio(),n=Math.max(1,Math.floor(c.sampleRate*dur)),b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);
@@ -12329,7 +12332,7 @@ function restoreVisualProgress(){
     var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
     s.buffer=b;f.type="bandpass";f.frequency.setValueAtTime(low,c.currentTime+when);f.frequency.exponentialRampToValueAtTime(high,c.currentTime+when+dur);f.Q.value=.8;
     g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(gain,c.currentTime+when+dur*.22);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
-    s.connect(f);f.connect(g);g.connect(c.destination);s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.02);
+    s.connect(f);f.connect(g);g.connect(out(c));s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.02);
   }
   /* GEI SPLASH V1.3 — randomized natural hydraulic soundscape */
   var natureSeed=Math.floor(Math.random()*5);
@@ -12339,13 +12342,13 @@ function restoreVisualProgress(){
     var s=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain(),p=c.createStereoPanner();
     s.buffer=b;f.type="bandpass";f.frequency.setValueAtTime(low,c.currentTime+when);f.frequency.exponentialRampToValueAtTime(high,c.currentTime+when+dur);f.Q.value=.55;
     g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(gain,c.currentTime+when+dur*.28);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
-    p.pan.value=pan||0;s.connect(f);f.connect(g);g.connect(p);p.connect(c.destination);s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.03);
+    p.pan.value=pan||0;s.connect(f);f.connect(g);g.connect(p);p.connect(out(c));s.start(c.currentTime+when);s.stop(c.currentTime+when+dur+.03);
   }
   function birdChirp(when,pan){
     var c=audio(),o=c.createOscillator(),g=c.createGain(),p=c.createStereoPanner();
     o.type="sine";o.frequency.setValueAtTime(1900,c.currentTime+when);o.frequency.exponentialRampToValueAtTime(3100,c.currentTime+when+.09);o.frequency.exponentialRampToValueAtTime(2200,c.currentTime+when+.18);
     g.gain.setValueAtTime(.0001,c.currentTime+when);g.gain.exponentialRampToValueAtTime(.018,c.currentTime+when+.025);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+.2);
-    p.pan.value=pan;o.connect(g);g.connect(p);p.connect(c.destination);o.start(c.currentTime+when);o.stop(c.currentTime+when+.23);
+    p.pan.value=pan;o.connect(g);g.connect(p);p.connect(out(c));o.start(c.currentTime+when);o.stop(c.currentTime+when+.23);
   }
   function natureSplash(){
     if(natureSeed===0){
@@ -12400,7 +12403,8 @@ function restoreVisualProgress(){
 
 </script>
 
-    <script src="/tap-lites-brand-v2172.js" defer></script>
+    <script src="/master-audio-v2183.js" defer></script>
+  <script src="/tap-lites-brand-v2172.js" defer></script>
   <script src="/tap-lites-first-impression-v2173.js" defer></script>
   <script src="/tap-lites-gameplay-polish-v2174.js" defer></script>
   <script src="/tap-lites-hydraulic-momentum-v2175.js" defer></script>

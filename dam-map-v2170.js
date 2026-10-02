@@ -399,7 +399,7 @@
       src.buffer=buf;src.loop=true;bp.type="bandpass";bp.frequency.value=700;bp.Q.value=.6;
       lfo.frequency.value=.13;lg.gain.value=260;lfo.connect(lg);lg.connect(bp.frequency);
       g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.05,c.currentTime+1.2);
-      src.connect(bp);bp.connect(g);g.connect(c.destination);src.start();lfo.start();
+      src.connect(bp);bp.connect(g);g.connect(window.GEI_AUDIO?window.GEI_AUDIO.musicIn(c):c.destination);src.start();lfo.start();
       amb={c:c,src:src,lfo:lfo,g:g};
     }catch(e){amb=null;}
   }
@@ -411,7 +411,7 @@
   function chime(freqs){
     if(!soundOn())return;var c=actx();if(!c)return;
     try{freqs.forEach(function(fq,i){var o=c.createOscillator(),g=c.createGain(),t=c.currentTime+i*.09;o.type="sine";o.frequency.value=fq;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.06,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+.5);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.55);});}catch(e){}
+      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.06,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+.5);o.connect(g);g.connect(window.GEI_AUDIO?window.GEI_AUDIO.sfxIn(c):c.destination);o.start(t);o.stop(t+.55);});}catch(e){}
   }
   document.addEventListener("visibilitychange",function(){if(document.hidden)stopAmbience();else if(isOpen())startAmbience();});
 
