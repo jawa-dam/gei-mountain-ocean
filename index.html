@@ -1243,6 +1243,24 @@ html.skin-heaven .world{
   box-shadow:0 0 40px color-mix(in srgb, var(--juicy-blue) 28%, transparent), 0 0 70px color-mix(in srgb, var(--juicy-magenta) 16%, transparent), inset 0 0 60px rgba(0,0,0,.4);
   touch-action:manipulation;
 }
+/* V2.1.86 — LIVE TAP PROGRESS: one compact row between the HUD and the world (never over the timer, station or tap target). */
+.tapProg{ flex:0 0 auto; margin:0 4px 6px; padding:0; text-align:center; }
+.tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:#fff; white-space:nowrap; }
+.tapProg .tpNum{ display:inline-block; min-width:3.6ch; font-variant-numeric:tabular-nums; color:var(--gold); text-shadow:0 0 10px color-mix(in srgb,var(--gold) 50%,transparent); transform-origin:50% 60%; }
+.tapProg .tpUnit{ color:var(--foam); }
+.tapProg .tpDone{ display:none; margin-left:.5em; color:var(--water-bright); }
+.tapProg .tpBar{ margin:3px auto 0; height:6px; max-width:100%; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+.tapProg .tpBar i{ display:block; height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,var(--juicy-blue),var(--water-bright),var(--juicy-magenta)); transition:width .11s ease-out; }
+.tapProg.tap .tpNum{ animation:tpPulse .16s ease-out; }
+.tapProg.tap .tpBar i{ animation:tpFlash .16s ease-out; }
+.tapProg.complete .tpDone{ display:inline; animation:tpPulse .3s ease-out; }
+.tapProg.complete .tpUnit{ display:none; }
+.tapProg.complete .tpBar i{ background:linear-gradient(90deg,var(--water-bright),var(--gold)); }
+@keyframes tpPulse{ 0%{ transform:scale(1.28); filter:brightness(1.5); } 100%{ transform:none; filter:none; } }
+@keyframes tpFlash{ 0%{ filter:brightness(1.7); } 100%{ filter:none; } }
+@media (max-height:620px){ .tapProg{ margin-bottom:4px; } .tapProg .tpBar{ height:5px; margin-top:2px; } }
+@media (prefers-reduced-motion:reduce){ .tapProg .tpBar i{ transition:none; } .tapProg.tap .tpNum,.tapProg.tap .tpBar i,.tapProg.complete .tpDone{ animation:none; } }
+.iteHud[hidden]{ display:none!important; }
 /* V2.1.27 — MOBILE FRAME GUARD: keep the playable SVG as a real flex child with a
    non-zero floor. Mobile browser chrome can change the visual viewport while the page stays loaded. */
 .world{ min-height:240px; flex:1 1 0; }
@@ -3361,6 +3379,12 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       </div>
     </div>
 
+    <!-- V2.1.86: LIVE TAP PROGRESS — reads state.tapCount / getRequiredTaps(state.level); owns no state of its own -->
+    <div class="tapProg" id="tapProg" role="progressbar" aria-label="Taps completed" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+      <div class="tpText"><span class="tpDrop" aria-hidden="true">💧</span><b class="tpNum" id="tapProgNum">0 / 6</b><span class="tpUnit"> TAPS</span><span class="tpDone" id="tapProgDone" aria-hidden="true">✓ FLOW COMPLETE</span></div>
+      <div class="tpBar" aria-hidden="true"><i id="tapProgFill"></i></div>
+    </div>
+
     <div class="world" id="world">
       <div class="layer" id="mistLayer"></div>
       <div class="layer livingWorldLayer" id="livingWorldLayer" aria-hidden="true"><div class="livingBreath"></div></div>
@@ -4708,7 +4732,7 @@ function renderIteRescue(){
   syncIteStatuses();
   const st = state.iteRescueStats, ite = currentIte();
   const avatar = $("iteHudAvatar"), line = $("iteHudLine"), sub = $("iteHudSub");
-  avatar.innerHTML = "";
+  avatar.innerHTML = ""; box.hidden = false;
   if(ite){
     const meta = ITE_STATUS_META[ite.status];
     const step = Math.min(state.currentStep, DAYS_PER_LEVEL - 1);
@@ -4725,14 +4749,12 @@ function renderIteRescue(){
     sub.textContent = `Water rescued: +${fmt(last.waterReward)} FL OZ`;
     box.dataset.status = "saved";
   } else if(st.savedCount >= ITES.length){
-    const art = document.createElement("img");
-    art.className = "iteHudCompleteArt"; art.alt = "Save the -ites — DAM-ITE celebration"; art.decoding = "async";
-    art.addEventListener("error", () => { avatar.innerHTML = ""; avatar.appendChild(renderIte({ name:"All" }, "saved", { size:34 })); }, { once:true });
-    art.src = ALL_ITES_SAVED_ART_URL;
-    avatar.appendChild(art);
-    line.innerHTML = `<strong>ALL -ITES SAVED!</strong><span class="iteState is-saved">✅</span>`;
-    sub.textContent = "Keep the water flowing.";
+    /* V2.1.86: the persistent "ALL -ITES SAVED!" HUD panel is gone (its space goes to the game world).
+       The saved-ites data and the Profile / level-card celebration are untouched. */
+    line.textContent = ""; sub.textContent = "";
     box.dataset.status = "complete";
+    box.hidden = true;
+    return;
   } else {
     line.textContent = "Next -ite rescue";
     sub.textContent = "Begins on Day 1";
@@ -5308,7 +5330,24 @@ STEPS.forEach(()=>{
   dot.innerHTML = "<i></i>";
   progressRow.appendChild(dot);
 });
+/* V2.1.86 — live tap progress. Pure view of the existing gameplay state; no counter of its own. */
+let tapProgShown = -1, tapProgReq = -1;
+function renderTapProgress(){
+  const root = $("tapProg"); if(!root) return;
+  const req = Math.max(1, getRequiredTaps(state.level));
+  const cur = Math.max(0, Math.min(req, state.tapCount || 0));
+  const complete = cur >= req;
+  $("tapProgNum").textContent = `${cur} / ${req}`;
+  $("tapProgFill").style.width = (cur / req * 100) + "%";
+  root.setAttribute("aria-valuemax", String(req)); root.setAttribute("aria-valuenow", String(cur));
+  root.classList.toggle("complete", complete);
+  if(cur > tapProgShown && cur > 0 && tapProgReq === req){   // a real step forward: tiny pulse, restartable on rapid taps
+    root.classList.remove("tap"); void root.offsetWidth; root.classList.add("tap");
+  }
+  tapProgShown = cur; tapProgReq = req;
+}
 function updateProgressDots(){
+  renderTapProgress();
   renderDayGuide();
   const dots = progressRow.querySelectorAll(".dot i");
   dots.forEach((fillEl, i)=>{
@@ -5644,7 +5683,7 @@ world.addEventListener("click", (e)=>{
   } else if(state.tapCount < requiredTaps){
     if(tapRatio >= .5) g.classList.add("showName");
     if(tapRatio >= .75) g.classList.add("highlight");
-    showToast(`TAPS ${state.tapCount} / ${requiredTaps}`);
+    /* V2.1.86: the live TAP PROGRESS row replaces the per-tap "TAPS n / m" toast */
   } else if(state.tapCount === requiredTaps){
     stopDayTimer();                                   // success cancels the clock first
     g.classList.remove("active","highlight");
@@ -5915,7 +5954,8 @@ function renderHud(){
   const d = DAM_DAYS[Math.min(state.currentStep, DAYS_PER_LEVEL - 1)];
   hudLevel.textContent = `Level ${fmt(state.level)}`;
   hudDay.textContent = `Day ${d.day} / ${DAYS_PER_LEVEL}`;
-  hudStation.textContent = `${d.station} · TAPS ${state.tapCount} / ${getRequiredTaps(state.level)}`;
+  hudStation.textContent = d.station;                  // V2.1.86: the live TAP PROGRESS row owns the tap count
+  renderTapProgress();
   hudOz.innerHTML = `💧 <strong>${fmt(state.levelFlOz)}</strong> / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ`;
   hudReward.innerHTML = `${d.title} reward: ${esc(d.displayAmount)} = <strong>+${DAY_REWARD_FL_OZ} FL OZ</strong>`;
   loopCountEl.textContent = fmt(state.completedLevels);
@@ -9681,7 +9721,7 @@ function runCommandCenterSelfTest(){
     /* UI */
     state.iteRescueStats = sanitizeIteRescueStats({ savedIteIds:ITES.map(i => i.id) });
     renderIteRescue(); renderTribesList();
-    t("ui: ALL -ITES SAVED uses the supplied artwork", () => { const img = $("iteHudAvatar").querySelector("img"); return img && img.src === ALL_ITES_SAVED_ART_URL && /ALL -ITES SAVED/.test($("iteHudLine").textContent); });
+    t("ui: ALL -ITES SAVED no longer takes HUD space (V2.1.86)", () => $("iteHud").hidden === true && !/ALL -ITES SAVED/.test($("iteHud").textContent));
     t("ui: -ites panel shows the celebration banner", () => { const b = $("itesSavedBanner"); return b && b.querySelector("img").src === ALL_ITES_SAVED_ART_URL; });
     t("ui: Store has no character / Rescued -ites section", () => !$("storeCharacters") && !/Rescued -ites/i.test($("storePanel").textContent) && !$("storePanel").querySelector(".charCard"));
     t("ui: Characters panel lists the full roster", () => $("charactersGrid").querySelectorAll(".charCard").length === playableCharacters().length);
