@@ -46,6 +46,7 @@
     try{
       var AC=window.AudioContext||window.webkitAudioContext;
       if(!AC)return null;
+      if(!A.ctx){ try{ if(typeof getAudio==="function") A.ctx=getAudio(); }catch(e){} }   // V2.1.83: one shared AudioContext
       if(!A.ctx)A.ctx=new AC();
       if(A.ctx.state==="suspended")A.ctx.resume();
       return A.ctx;
@@ -63,7 +64,7 @@
       g.gain.setValueAtTime(.0001,c.currentTime+when);
       g.gain.exponentialRampToValueAtTime(gain||.025,c.currentTime+when+.02);
       g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
-      o.connect(f);f.connect(g);g.connect(c.destination);
+      o.connect(f);f.connect(g);g.connect(window.GEI_AUDIO?window.GEI_AUDIO.sfxIn(c):c.destination);
       o.start(c.currentTime+when);o.stop(c.currentTime+when+dur+.02);
     }catch(e){}
   }
@@ -85,7 +86,7 @@
       g.gain.setValueAtTime(.0001,c.currentTime+when);
       g.gain.exponentialRampToValueAtTime(gain,c.currentTime+when+dur*.25);
       g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
-      src.connect(f);f.connect(g);g.connect(c.destination);
+      src.connect(f);f.connect(g);g.connect(window.GEI_AUDIO?window.GEI_AUDIO.sfxIn(c):c.destination);
       src.start(c.currentTime+when);src.stop(c.currentTime+when+dur+.02);
     }catch(e){}
   }

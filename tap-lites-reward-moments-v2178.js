@@ -69,6 +69,7 @@
     try{
       var AC=window.AudioContext||window.webkitAudioContext;
       if(!AC)return null;
+      if(!R.ctx){ try{ if(typeof getAudio==="function") R.ctx=getAudio(); }catch(e){} }   // V2.1.83: one shared AudioContext
       if(!R.ctx)R.ctx=new AC();
       if(R.ctx.state==="suspended")R.ctx.resume();
       return R.ctx;
@@ -87,7 +88,7 @@
       g.gain.setValueAtTime(.0001,c.currentTime+when);
       g.gain.exponentialRampToValueAtTime(gain||.035,c.currentTime+when+.018);
       g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+when+dur);
-      o.connect(f);f.connect(g);g.connect(c.destination);
+      o.connect(f);f.connect(g);g.connect(window.GEI_AUDIO?window.GEI_AUDIO.sfxIn(c):c.destination);
       o.start(c.currentTime+when);o.stop(c.currentTime+when+dur+.02);
     }catch(e){}
   }

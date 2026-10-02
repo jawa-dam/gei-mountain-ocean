@@ -270,7 +270,7 @@
       b.limit = ctx.createDynamicsCompressor();
       b.limit.threshold.value = -20; b.limit.knee.value = 10; b.limit.ratio.value = 4; b.limit.attack.value = .008; b.limit.release.value = .3;
       b.input.connect(b.mix); b.mix.connect(b.duck); b.duck.connect(b.user); b.user.connect(b.hp);
-      b.hp.connect(b.tone); b.tone.connect(b.shelf); b.shelf.connect(b.limit); b.limit.connect(ctx.destination);
+      b.hp.connect(b.tone); b.tone.connect(b.shelf); b.shelf.connect(b.limit); b.limit.connect(window.GEI_AUDIO ? window.GEI_AUDIO.musicIn(ctx) : ctx.destination);   // V2.1.83: MUSIC bus → MASTER
       S.bus = b;
       S.waves = {};
       Object.keys(TIMBRES).forEach(function(k){
@@ -626,32 +626,14 @@
     var tone = lerp(7200, 3200, clamp(S.activity/.8,0,1));
     if(Math.abs(tone - (S.appliedTone||0)) > 60){ try{ b.tone.frequency.setTargetAtTime(tone, t, .25); }catch(e){} S.appliedTone = tone; }
     /* duck release */
-    if(S.duckMult < 1 && !S.voiceHold && performance.now() > S.duckUntil){
+    if(S.duckMult < 1 && performance.now() > S.duckUntil){
       S.duckMult = 1; S.duckKind = "";
       try{ b.duck.gain.cancelScheduledValues(t); b.duck.gain.setValueAtTime(Math.max(.0001,b.duck.gain.value), t); b.duck.gain.setTargetAtTime(1, t, .32); }catch(e){}
     }
   }
 
-  /* V2.1.82 — Beaver voice guide: hold the music at `level` (default .28) for as long as a voice speaks,
-     then glide back. Short SFX ducks are ignored while held; the release honours any SFX duck still due. */
-  function voiceDuck(on, level){
-    if(!S.bus || !S.ctx) { S.voiceHold = false; return false; }
-    var t = S.ctx.currentTime, b = S.bus.duck.gain;
-    try{
-      b.cancelScheduledValues(t); b.setValueAtTime(Math.max(.0001, b.value), t);
-      if(on){ S.voiceHold = true; b.setTargetAtTime(clamp(+level || .28, .1, .6), t, .22); }
-      else{
-        S.voiceHold = false;
-        var back = (S.duckMult < 1 && performance.now() <= S.duckUntil) ? S.duckMult : 1;
-        if(back === 1) S.duckMult = 1;
-        b.setTargetAtTime(back, t, .55);
-      }
-    }catch(e){}
-    return true;
-  }
   function duck(kind){
     var d = DUCK[kind]; if(!d || !S.bus || !S.playing) return false;
-    if(S.voiceHold) return true;                      // the Beaver already holds the music lower than any SFX duck
     var nowMs = performance.now(), t = S.ctx.currentTime;
     var mult = clamp(Math.max(d.level, MIX.duckFloor) / Math.max(.05, S.mixLevel), .2, 1);
     S.duckUntil = Math.max(S.duckUntil, nowMs + d.hold*1000);
@@ -1073,7 +1055,7 @@
     themes:THEMES.map(function(t){ return {id:t.id, name:t.name, bpm:t.bpm}; }),
     mix:MIX, duckRules:DUCK, priorities:PRIORITIES, storageKeys:KEYS,
     start:function(){ return start(true); }, pause:pause, resume:resume, toggle:toggle,
-    setEnabled:setEnabled, setVolume:setVolume, next:next, duck:duck, notify:notify, voiceDuck:voiceDuck,
+    setEnabled:setEnabled, setVolume:setVolume, next:next, duck:duck, notify:notify,
     selfTest:selfTest, destroy:destroy,
     debug:{
       simulateIdle:function(sec){ S.activity = 0; S.debugIdleOffset = Math.max(0, +sec || 0); },
