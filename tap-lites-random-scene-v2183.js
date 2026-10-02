@@ -103,7 +103,7 @@
     l.card.querySelector(".icon").textContent=scene.icon;
     l.card.querySelector(".title").textContent=scene.label;
     l.card.querySelector(".line").textContent=scene.line+" • TAP LITES";
-    l.card.querySelector(".nature").textContent=scene.nature+" "+scene.natureLabel+" • "+scene.pace.toUpperCase();
+    var natureEl=l.card.querySelector(".nature");if(natureEl){natureEl.textContent="";natureEl.style.display="none";}   // V2.1.84: no environment-name text
 
     l.veil.style.setProperty("--tl2183Opacity",String(
       scene.mood==="overdrive"?.42:

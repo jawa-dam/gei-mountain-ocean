@@ -50,6 +50,7 @@
       "font:700 9px/1 system-ui,sans-serif;letter-spacing:.1em;color:rgba(234,252,255,.66);opacity:0;transition:opacity .35s;pointer-events:none}"+
       ".tl2180Nature.show{opacity:1}"+
       "@keyframes tl2180Surge{0%,100%{transform:scale(1);opacity:var(--tl2180Opacity,.35)}50%{transform:scale(1.018);opacity:calc(var(--tl2180Opacity,.35) + .08)}}"+
+      ".tl2180AtmosBadge,.tl2180Nature{display:none!important}"+
       "@media (prefers-reduced-motion:reduce){.tl2180Aura.surge{animation:none!important}.tl2180Aura,.tl2180AtmosBadge{transition:none}}";
     document.head.appendChild(s);
   }
@@ -121,14 +122,8 @@
     l.aura.classList.toggle("active",p>=12);
     l.aura.classList.toggle("surge",p>=50);
 
-    var n=NATURE.find(function(x){return x.id===S.nature})||NATURE[0];
-    l.badge.innerHTML=a.label+'<span class="sub">'+a.sub+'</span>';
-    l.badge.classList.add("show");
-    l.nature.textContent=n.emoji+" "+n.name;
-    l.nature.classList.add("show");
-
-    clearTimeout(l.badge.__timer);
-    l.badge.__timer=setTimeout(function(){l.badge.classList.remove("show")},1250);
+    /* V2.1.84: atmosphere / nature TITLE badges (CALM FLOW, STORM RAIN, NIGHT WATER…) are no longer rendered.
+       The aura and the ambient nature sound above keep working; only the floating text over the HUD is gone. */
 
     try{
       sessionStorage.setItem(S.storageKey,JSON.stringify({

@@ -189,6 +189,7 @@
   function announce(key,opts){
     opts=opts||{};
     if(STEPS.indexOf(key)<0)return false;
+    if(window.GEI_AUDIO&&!window.GEI_AUDIO.femaleAllowed())return false;   // V2.1.84: DAM_MAP zone — female narration blocked
     if(getMode()==="off"&&!opts.force)return false;
     /* V2.2.03: once the V2.1.94 Voice Director is installed it is the single core
        milestone player. Standing down here stops the same milestone (same 14 assets)

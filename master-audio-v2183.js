@@ -1,4 +1,7 @@
-/* V2.1.83 — MASTER AUDIO BUS & BEAVER VOICE PRIORITY 🎵🦫💧
+/* V2.1.84 — adds strict VOICE ZONES: GAMEPLAY (female narrator/game voice, Beaver blocked) and DAM_MAP (Beaver only,
+ * female narration blocked). The zone is DERIVED from the live Dam Map page state, so it can never drift out of sync.
+ *
+ * V2.1.83 — MASTER AUDIO BUS & BEAVER VOICE PRIORITY 🎵🦫💧
  *
  * ONE game audio manager, three controlled channels, one shared AudioContext (the game's getAudio()):
  *
@@ -19,7 +22,7 @@
 (function(){
   "use strict";
   if(window.GEI_AUDIO) return;
-  var VERSION="V2.1.83";
+  var VERSION="V2.1.84";
   var KEY_MUTED="geiAudioMuted";
   var DUCK={music:.28,sfx:.6,downTau:.16,upTau:.45};     // spec: music → ~28%, SFX → ~60%, Beaver 100%
   var LOW_GAP_MS=4500, POOL_MAX=10, QUEUE_MAX=4, DUCK_WATCHDOG_MS=45000;
@@ -113,6 +116,45 @@
   function setBeaverVolume(v){audioState.beaverVolume=clamp(v,0,1);syncBeaverVolume();dbg();}
   function musicVolume(){try{var s=window.__GEI_DAM_FRIENDLY_SOUNDTRACK__;if(s&&typeof s.musicVolume==="number")return s.musicVolume;}catch(e){}return 1;}
 
+  /* ------------------------------------------------------------------ VOICE ZONES
+     GAMEPLAY : female narrator + game music + SFX      · Beaver BLOCKED
+     DAM_MAP  : Beaver + map ambience + SFX             · female narration BLOCKED
+     Ownership, not volume: the other channel is stopped and refused, never merely quieted. */
+  function mapPage(){return document.getElementById("geiDamMapPage");}
+  function isDamMapOpen(){var p=mapPage();return !!(p&&p.classList.contains("show")&&p.getAttribute("aria-hidden")!=="true");}
+  function zone(){return isDamMapOpen()?"DAM_MAP":"GAMEPLAY";}
+  var lastZone="GAMEPLAY",zoneWatching=false;
+  function stopFemale(){                                 // the female narrator / DAM-ITE voices: milestone director, event vocabulary, speech fallback
+    try{var d=window.GEI_VOICE_DIRECTOR;if(d&&typeof d.stop==="function")d.stop();}catch(e){}
+    try{var v=window.__GEI_V2203_VOICE_EVENT__;if(v&&typeof v.stop==="function")v.stop();}catch(e){}
+    try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
+  }
+  function femaleAllowed(){return zone()==="GAMEPLAY";}
+  function beaverAllowed(){return zone()==="DAM_MAP";}
+  /* setZone(z): run the hand-over side effects once. Called by the Dam Map watcher below; safe to call again (idempotent). */
+  function setZone(z){
+    z=z==="DAM_MAP"?"DAM_MAP":"GAMEPLAY";
+    if(z===lastZone)return z;
+    lastZone=z;
+    if(z==="DAM_MAP"){stopFemale();}                     // map opens: cancel gameplay narration, enable Beaver
+    else{stopBeaver();}                                  // map closes: Beaver stops NOW, queue cleared, music/SFX restored, female re-enabled
+    try{window.dispatchEvent(new CustomEvent("gei:audio-zone",{detail:{zone:z}}));}catch(e){}
+    dlog("zone -> "+z);dbg();return z;
+  }
+  function syncZone(){return setZone(zone());}
+  function watchZone(){
+    if(zoneWatching)return;
+    var bind=function(){
+      var p=mapPage();if(!p)return false;
+      new MutationObserver(syncZone).observe(p,{attributes:true,attributeFilter:["class","aria-hidden"]});
+      syncZone();return true;
+    };
+    if(bind()){zoneWatching=true;return;}
+    zoneWatching=true;
+    var mo=new MutationObserver(function(){if(bind())mo.disconnect();});
+    mo.observe(document.body||document.documentElement,{childList:true});
+  }
+
   /* ------------------------------------------------------------------ BEAVER voice channel */
   var resolver=null,canSpeakGates=[],busyGates=[],listeners=[];
   var pool={},poolOrder=[],broken={},fails={};
@@ -141,8 +183,8 @@
     try{el=new Audio();el.preload="auto";el.src=c.url;}catch(e){return null;}     // the ONLY place a Beaver <audio> is created
     pool[c.id]=el;poolOrder.push(c.id);
     while(poolOrder.length>POOL_MAX){
-      var old=poolOrder.shift();
-      if(cur&&cur.clip.id===old){poolOrder.push(old);break;}
+      var oi=0;while(oi<poolOrder.length-1&&cur&&cur.clip.id===poolOrder[oi])oi++;   // never evict the clip that is speaking
+      var old=poolOrder.splice(oi,1)[0];
       dispose(pool[old]);delete pool[old];
     }
     return el;
@@ -156,6 +198,8 @@
   /* playBeaver(idOrClip,{priority:1-5,pri,delay,after,ttl,chain}) → accepted?  Priorities: 5 day · 4 unlock · 3 GEI · 2 interaction · 1 casual */
   function playBeaver(x,o){
     o=o||{};var c=toClip(x);
+    if(!isDamMapOpen()){emit("drop",{clip:c,pri:0},"outside-dam-map");return false;}   // HARD GATE: Beaver exists only on the Dam Map
+    syncZone();
     if(!c||!c.url||broken[c.id]||!canSpeak())return false;
     var pri=Math.round(clamp(o.priority||o.pri||2,1,5)),t=now(),delay=o.delay||0;
     if(pri<=2){                                           // casual reactions fit the silence or vanish — they never queue up
@@ -177,6 +221,7 @@
     var t=now();
     Q=Q.filter(function(q){return q.exp>t;});
     if(!Q.length){settle();return;}
+    if(!isDamMapOpen()){Q=[];settle();return;}            // map closed while a clip was waiting: discard, never play it later in gameplay
     var item=Q[0],wait=Math.max(item.at-t,item.after-(t-lastEnd),0);
     if(wait>0){schedule(wait);return;}
     if(!canSpeak()){Q=[];settle();return;}
@@ -193,6 +238,7 @@
     try{window.dispatchEvent(new CustomEvent("gei:beaver-speaking",{detail:{speaking:!!item,id:audioState.currentBeaverClip}}));}catch(e){}
   }
   function start(item){
+    if(!isDamMapOpen()){return;}
     var c=item.clip,el=getEl(c);
     if(!el){fail(c,"no audio element");schedule(0);return;}
     clearTimeout(settleT);
@@ -268,12 +314,13 @@
     var t=targets();
     dbgEl.textContent="MASTER AUDIO"+(audioState.muted?" (MUTED)":"")+"\nMusic: "+pct(musicVolume()*t.music)+"\nSFX: "+pct(t.sfx)+"\nBeaver: "+pct(audioState.beaverVolume)+
       "\nBeaver Speaking: "+audioState.beaverSpeaking+"\nCurrent Beaver Clip: "+(audioState.currentBeaverClip||"-")+"\nVoice Priority: "+(audioState.beaverPriority||"-")+
-      "\nMusic Ducking: "+(audioState.musicDucking?"ACTIVE":"off")+"\nQueue: "+Q.length+(blocked?"  [autoplay blocked]":"")+"\n"+dbgLog.join("\n");
+      "\nZone: "+zone()+"\nMusic Ducking: "+(audioState.musicDucking?"ACTIVE":"off")+"\nQueue: "+Q.length+(blocked?"  [autoplay blocked]":"")+"\n"+dbgLog.join("\n");
   }
 
   /* ------------------------------------------------------------------ public API */
   var A={version:VERSION,
     get state(){var s={};Object.keys(audioState).forEach(function(k){s[k]=audioState[k];});s.musicVolume=musicVolume();return s;},
+    get zone(){return zone();},setZone:setZone,isDamMapOpen:isDamMapOpen,femaleAllowed:femaleAllowed,beaverAllowed:beaverAllowed,stopFemale:stopFemale,
     musicIn:musicIn,sfxIn:sfxIn,registerMusicElement:registerMusicElement,
     setMuted:setMuted,toggleMute:function(){return setMuted(!audioState.muted);},get muted(){return audioState.muted;},
     setMasterVolume:setMasterVolume,setSfxVolume:setSfxVolume,setBeaverVolume:setBeaverVolume,
@@ -290,5 +337,6 @@
   window.GEI_AUDIO=A;
 
   window.addEventListener("pagehide",releasePool);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",watchZone,{once:true});else watchZone();
   document.addEventListener("visibilitychange",function(){if(document.hidden)stopBeaver();});
 })();

@@ -156,7 +156,7 @@
     n.badge.className="tl2185IntroBadge tl2185Scene-"+I.scene.id;
     n.badge.querySelector(".emoji").textContent=m.emoji;
     n.badge.querySelector(".title").textContent=I.scene.id.replace(/-/g," ").toUpperCase();
-    n.badge.querySelector(".sub").textContent="TAP LITES • "+m.nature;
+    n.badge.querySelector(".sub").textContent="TAP LITES";   // V2.1.84: no environment-name text
     n.badge.querySelector(".crew").textContent=m.crew+" • "+m.cue;
     n.badge.classList.remove("show");
     void n.badge.offsetWidth;
