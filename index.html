@@ -2148,6 +2148,21 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
   transform:scale(.85); transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
 .dmCard.show .dmInner{ transform:none; }
 .dmCard.jackpotWin .dmInner{ animation:bwJackpotGlow 1.2s ease-in-out infinite alternate; }
+/* V2.1.87 — DAM MACHINE stage characters. Sized/placed by layoutDamStage() from the real machine rect (no phone-specific numbers). */
+.dmStage{ position:absolute; inset:0; z-index:3; pointer-events:none; overflow:hidden; }
+.dmSide,.dmDevilSpot{ position:absolute; display:none; align-items:flex-end; justify-content:center; will-change:transform; }
+.dmStage.on .dmSide{ display:flex; }
+.dmSide img,.dmDevilSpot img{ height:100%; width:auto; max-width:none; display:block; object-fit:contain; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
+.dmSideL{ animation:damCharacterFloat 3.2s ease-in-out infinite; }
+.dmSideR{ animation:damCharacterFloat 2.8s ease-in-out -1.1s infinite; }
+@keyframes damCharacterFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(calc(var(--dmFloat,8px) * -1)); } }
+.dmDevilSpot{ z-index:2; opacity:0; transform:translateY(14px) scale(.7); transition:opacity .45s ease, transform .55s cubic-bezier(.3,1.5,.5,1); }
+.dmDevilSpot img{ filter:drop-shadow(0 0 14px rgba(255,60,40,.85)) drop-shadow(0 6px 12px rgba(0,0,0,.6)); }
+.dmStage.devil .dmDevilSpot{ display:flex; }
+.dmStage.devil.in .dmDevilSpot{ opacity:1; transform:none; animation:damDevilPulse 1.3s ease-in-out .6s infinite alternate; }
+.dmStage.devil .dmSide{ opacity:.78; }
+@keyframes damDevilPulse{ from{ filter:brightness(1); } to{ filter:brightness(1.18); } }
+@media (prefers-reduced-motion:reduce){ .dmSideL,.dmSideR,.dmStage.devil.in .dmDevilSpot{ animation:none!important; } .dmDevilSpot{ transition:opacity .2s; transform:none; } }
 .dmClose{ position:absolute; top:8px; right:8px; z-index:6; width:38px; height:38px; border-radius:12px; cursor:pointer;
   font-size:1rem; font-weight:900; color:#fff; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.35); }
 .dmClose:disabled{ opacity:.4; cursor:default; }
@@ -3732,6 +3747,13 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
         </div>
         <div class="dmBurst" id="dmBurst" aria-hidden="true"></div>
         <div class="srOnly" id="dmStatus" role="status" aria-live="polite"></div>
+      </div>
+      <!-- V2.1.87: DAM MACHINE stage — Black Jesus (left) and Jesus (right) float above the machine's shoulders; the DAM Devil
+           takes the centre only during its jackpot. Decorative: aria-hidden, pointer-events:none. -->
+      <div class="dmStage" id="dmStage" aria-hidden="true">
+        <div class="dmSide dmSideL" id="dmSideL"></div>
+        <div class="dmDevilSpot" id="dmDevilSpot"></div>
+        <div class="dmSide dmSideR" id="dmSideR"></div>
       </div>
     </div>
 
@@ -6345,15 +6367,22 @@ const DAM_MACHINE_SYMBOLS = [
   { id:"fl-6660",  label:"6,660 FL OZ",  fallback:"🚨", iconClass:null, imageUrl: DAM_IMAGE_BASE + "wilbert-bouie-jr-gei-y-all-too-WNMWb3MfHDWZOOZM.png" },
   { id:"song",     label:"FREE SONG",    fallback:"🎵", iconClass:null, imageUrl:null },
   { id:"character",label:"CHARACTER",    fallback:"👤", iconClass:null, imageUrl: DAM_IMAGE_BASE + "adam-the-yalltoo-mascot-gei-beaver-G0C3b8xauhYy7K6L.png" },
-  { id:"pun",      label:"DAM PUN",      fallback:"😂", iconClass:null, imageUrl:null }
+  { id:"pun",      label:"DAM PUN",      fallback:"😂", iconClass:null, imageUrl:null },
+  /* V2.1.87 — DAM DEVIL JACKPOT symbol. Artwork = the SAME asset the Store uses for the Devil character (no new image).
+     It is a machine-only jackpot symbol, NOT a character: winning it never unlocks or grants the paid Devil. */
+  { id:"dam-devil-jackpot", label:"DAM DEVIL", fallback:"😈", iconClass:null, imageUrl: (CHARACTERS.find(c => c.id === "devil") || {}).img || null }
 ];
+/* V2.1.87 — the DAM DEVIL jackpot reward lives here and ONLY here. It reuses the machine's existing jackpot value
+   (UNLOCK_COST_FL_OZ, the same payout as the 6,660 triple); change this one line to re-tune it later. */
+const DAM_DEVIL_JACKPOT = Object.freeze({ symbolId:"dam-devil-jackpot", characterId:"devil", rewardFlOz: UNLOCK_COST_FL_OZ });
 const DAM_SYMBOL_BY_ID = {};
 DAM_MACHINE_SYMBOLS.forEach(s => { DAM_SYMBOL_BY_ID[s.id] = s; });
 
 /* Reel odds (per reel, weights sum to 100 = %). The 6,660 jackpot is deliberately rare. */
 const DAM_REEL_WEIGHTS = {
-  "water":20, "dam":16, "millpond":12, "sluice":12, "wheel":12, "factory":8,
-  "fl-111":6, "fl-666":4, "fl-6660":1, "song":3, "character":3, "pun":3
+  "water":19, "dam":16, "millpond":12, "sluice":12, "wheel":12, "factory":8,
+  "fl-111":6, "fl-666":4, "fl-6660":1, "song":3, "character":3, "pun":3,
+  "dam-devil-jackpot":1          // V2.1.87: as rare as the 6,660 jackpot; taken from "water" (20→19) so the weights still sum to 100
 };
 
 const DAM_REEL_MS = [1800, 2400, 3000];            // staggered stops: reel 1 → 2 → 3
@@ -6443,6 +6472,7 @@ function evaluateDamCombination(ids){
       case "fl-111":   return { ...oz(1110),               title:"111 TRIPLE!",       humorKey:"machineWin", detail:"+1,110 FL OZ" };
       case "fl-666":   return { ...oz(2220),               title:"666 TRIPLE!",       humorKey:"machineWin", detail:"+2,220 FL OZ" };
       case "fl-6660":  return { ...oz(UNLOCK_COST_FL_OZ),  title:"DAM JACKPOT",       humorKey:"machineJackpot", jackpot:true, detail:`+${fmt(UNLOCK_COST_FL_OZ)} FL OZ` };
+      case "dam-devil-jackpot": return { ...oz(DAM_DEVIL_JACKPOT.rewardFlOz), title:"DAM DEVIL JACKPOT", humorKey:"machineJackpot", jackpot:true, devil:true, detail:`+${fmt(DAM_DEVIL_JACKPOT.rewardFlOz)} FL OZ` };   // existing flOz reward path; never touches character ownership
       case "song":     return { kind:"song",     title:"🎵 FREE SONG!",         humorKey:"machineSong",     detail:"The next locked song joins the radio. No FL OZ spent." };
       case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };      case "pun":      return { kind:"pun",      title:"😂 DAM PUN!",           humorKey:"machinePun",      detail:"The machine has jokes." };
       default:         return { ...oz(DAY_REWARD_FL_OZ),   title:"TRIPLE FLOW!",      humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
@@ -6691,6 +6721,7 @@ function openDamMachine(){
   $("dmMsg").textContent = getDamHumor("machineIdle");
   $("dmStatus").textContent = "Dam Machine. Free hydraulic arcade. Spins never cost FL OZ.";
   renderDamMachineHeader();
+  buildDamStage(); layoutDamStage(); requestAnimationFrame(layoutDamStage);   // V2.1.87
   syncTimerPause();                                     // the day clock pauses while the machine is open
   dmSfx(() => playWaterNoise(0.7, 250, 1400, 0.1));     // hydraulic power-up
   livingMachineHook("onOpen");                          // V2.1.12: mechanical hum (presentation only)
@@ -6702,6 +6733,7 @@ function closeDamMachine(){
   cancelDamPresentation();                              // v2.6.3: close cancels a celebration cleanly
   damMachine.open = false;
   dmCard().classList.remove("show", "jackpotWin", "hasResult", "fxGlow", "fxFlash");
+  hideDamDevilSpot(); layoutDamStage();                 // V2.1.87
   livingMachineHook("onClose");                         // V2.1.12
   syncTimerPause();
 }
@@ -6725,6 +6757,7 @@ function spinDamMachine(){
 
   const card = dmCard();
   card.classList.remove("jackpotWin","hasResult","fxGlow","fxFlash");
+  hideDamDevilSpot();                                   // V2.1.87
   cancelDamPresentation();                              // a fresh spin invalidates any lingering presentation
   damMachine.presToken++;
   document.querySelectorAll("#dmReels .dmReel").forEach(r => r.classList.remove("stopped"));   // fresh glow per spin
@@ -6809,6 +6842,13 @@ function damPresentationFor(res){
     p.title = "DAM PRESSURE MAXIMUM";
     p.jackLine = "JACKPOT";
     p.detail = `+${fmt(UNLOCK_COST_FL_OZ)} FL OZ`;
+    if(res.combo && res.combo.devil){                   // V2.1.87: DAM DEVIL jackpot — same reward path, devil-themed presentation
+      p.devil = true;
+      p.title = "DAM DEVIL JACKPOT!";
+      p.mediaLine = "😈 THE DAM DEVIL APPEARS";
+      p.subLine = "Jackpot reward only — the Devil character stays in the Store.";
+      p.detail = `+${fmt(res.amount)} FL OZ`;
+    }
   } else if(res.fallback){
     p.rarity = "rare";                                  // keep the committed fallback title/detail EXACTLY as V2.6 defines them
   } else if(res.kind === "flOz"){
@@ -6882,6 +6922,10 @@ function presentDamMachineWin(res){
   const show = ids => ids.forEach(id => $(id).classList.add("show"));
   const reduced = bonusReducedMotion();
 
+  if(p.devil){                                          // DAM DEVIL appears as the temporary centrepiece, then the machine returns to normal
+    at(reduced ? 80 : 360, () => showDamDevilSpot());
+    at(reduced ? 3000 : 6200, () => hideDamDevilSpot());
+  }
   if(reduced){
     /* accessible fast path: readable almost immediately, particles/shakes/ramps skipped */
     at(60,  () => dmSfx(damSoundFor(p)));
@@ -6924,6 +6968,49 @@ function presentDamMachineWin(res){
     at(2300, () => settleDamPresentation());
   }
 }
+
+/* ---------- V2.1.87: DAM MACHINE stage (Black Jesus left, Jesus right, Devil centre during its jackpot) ---------- */
+function damStageImg(id){
+  const c = CHARACTERS.find(x => x.id === id); if(!c || !c.img) return null;
+  const img = new Image(); img.alt = ""; img.decoding = "async"; img.draggable = false;
+  img.addEventListener("error", () => img.remove(), { once:true });     // never a broken-image icon
+  img.src = c.img;
+  return img;
+}
+let damStageBuilt = false, damStageRO = null;
+function buildDamStage(){
+  if(damStageBuilt) return;
+  const fill = (host, id) => { const img = damStageImg(id); if(img) $(host).appendChild(img); };
+  fill("dmSideL", "dam-black-jesus"); fill("dmSideR", "jesus"); fill("dmDevilSpot", DAM_DEVIL_JACKPOT.characterId);
+  damStageBuilt = true;
+  try { if(window.ResizeObserver){ damStageRO = new ResizeObserver(layoutDamStage); damStageRO.observe(document.querySelector("#damMachineCard .dmInner")); } } catch(e){}
+  for(const id of ["dmSideL","dmSideR","dmDevilSpot"]){ const im = $(id).firstElementChild; if(im) im.addEventListener("load", layoutDamStage); }
+  window.addEventListener("resize", layoutDamStage, { passive:true });
+}
+/* The characters stand on the machine's top corners, in the free space above it. Everything is measured from the
+   live machine rect; if there is not enough room (short landscape), they simply step aside. */
+function layoutDamStage(){
+  const card = dmCard(), stage = $("dmStage"), inner = card && card.querySelector(".dmInner");
+  if(!stage || !inner || !damMachine.open){ if(stage) stage.classList.remove("on"); return; }
+  /* offset* metrics ignore the open animation's scale(), so the layout is right from the first frame */
+  const il = inner.offsetLeft, it = inner.offsetTop, iw = inner.offsetWidth, ih = inner.offsetHeight;
+  const space = it;                                                    // free height above the machine
+  const h = Math.floor(Math.min(Math.max(ih * .32, 70), space - 4, 170));
+  if(h < 56){ stage.classList.remove("on"); return; }
+  stage.classList.add("on");
+  card.style.setProperty("--dmFloat", Math.max(4, Math.round(h * .07)) + "px");
+  const base = it + 4;                                                 // feet: just onto the machine's top edge
+  const place = (el, hh) => { el.style.height = hh + "px"; el.style.top = Math.round(base - hh) + "px"; el.style.width = ""; };
+  const L = $("dmSideL"), R = $("dmSideR"), D = $("dmDevilSpot");
+  place(L, h); L.style.left = (il + 6) + "px"; L.style.right = "";
+  place(R, h); R.style.right = (card.clientWidth - (il + iw) + 6) + "px"; R.style.left = "";
+  const dh = Math.min(Math.floor(h * 1.25), space - 4);
+  place(D, dh);
+  const im = D.firstElementChild, dw = im && im.naturalWidth ? dh * im.naturalWidth / im.naturalHeight : dh * .7;
+  D.style.left = Math.round(il + iw / 2 - dw / 2) + "px"; D.style.right = "";
+}
+function showDamDevilSpot(){ const s = $("dmStage"); if(!s) return; layoutDamStage(); s.classList.add("devil"); void s.offsetWidth; s.classList.add("in"); }
+function hideDamDevilSpot(){ const s = $("dmStage"); if(!s) return; s.classList.remove("in"); setTimeout(() => { if(!s.classList.contains("in")) s.classList.remove("devil"); }, 520); }
 
 function settleDamPresentation(){
   damMachine.presenting = false;                        // spin available again; card stays until Continue
@@ -7082,11 +7169,11 @@ function runDamMachineSelfTest(){
   const results = [];
   const t = (name, ok) => results.push({ name, ok:!!ok });
   const ids = DAM_MACHINE_SYMBOLS.map(s => s.id);
-  t("catalog: 12 symbols with unique ids", DAM_MACHINE_SYMBOLS.length === 12 && new Set(ids).size === 12);
+  t("catalog: 13 symbols with unique ids (12 + DAM DEVIL jackpot)", DAM_MACHINE_SYMBOLS.length === 13 && new Set(ids).size === 13);
   t("catalog: every symbol has fallback + imageUrl field", DAM_MACHINE_SYMBOLS.every(s => typeof s.fallback === "string" && s.fallback.length > 0 && "imageUrl" in s && "iconClass" in s));
-  t("catalog: custom art only on water/character/fl-6660, all from the approved CDN", (() => {
+  t("catalog: custom art only on water/character/fl-6660/dam-devil-jackpot, all from the approved CDN", (() => {
     const withArt = DAM_MACHINE_SYMBOLS.filter(s => s.imageUrl).map(s => s.id).sort();
-    return JSON.stringify(withArt) === JSON.stringify(["character","fl-6660","water"]) &&
+    return JSON.stringify(withArt) === JSON.stringify(["character","dam-devil-jackpot","fl-6660","water"]) &&
       DAM_MACHINE_SYMBOLS.every(s => !s.imageUrl || s.imageUrl.indexOf(DAM_IMAGE_BASE) === 0);
   })());
   t("weights sum to 100", Object.values(DAM_REEL_WEIGHTS).reduce((a, b) => a + b, 0) === 100);
@@ -7103,6 +7190,9 @@ function runDamMachineSelfTest(){
   t("evaluator: water triple = +333", ev(["water","water","water"]).amount === 333);
   t("evaluator: dam triple = +666", ev(["dam","dam","dam"]).amount === LEVEL_REWARD_FL_OZ);
   t("evaluator: wheel triple = +666", ev(["wheel","wheel","wheel"]).amount === LEVEL_REWARD_FL_OZ);
+  t("V2.1.87: DAM DEVIL triple is a flOz jackpot that never touches character ownership", (() => { const e = ev(["dam-devil-jackpot","dam-devil-jackpot","dam-devil-jackpot"]); return e && e.kind === "flOz" && e.jackpot && e.devil && e.amount === DAM_DEVIL_JACKPOT.rewardFlOz; })());
+  t("V2.1.87: DAM DEVIL pair is not a jackpot", !ev(["dam-devil-jackpot","dam-devil-jackpot","pun"]) || !ev(["dam-devil-jackpot","dam-devil-jackpot","pun"]).jackpot);
+  t("V2.1.87: Devil symbol uses the Store's Devil artwork", DAM_SYMBOL_BY_ID["dam-devil-jackpot"].imageUrl === CHARACTERS.find(c => c.id === "devil").img);
   t("evaluator: 6,660 jackpot", ev(["fl-6660","fl-6660","fl-6660"]).amount === UNLOCK_COST_FL_OZ && ev(["fl-6660","fl-6660","fl-6660"]).jackpot);
   t("evaluator: song/character/pun kinds", ev(["song","song","song"]).kind === "song" && ev(["character","character","character"]).kind === "character" && ev(["pun","pun","pun"]).kind === "pun");
   t("evaluator: dam-water-dam special = +111", ev(["dam","water","dam"]).amount === DAY_REWARD_FL_OZ && ev(["dam","water","dam"]).title === "THE DAM IS HOLDING!");
@@ -12464,6 +12554,7 @@ function restoreVisualProgress(){
   <script src="/tap-effect-v2168.js" defer></script>
   <script src="/day-card-fx-v2169.js" defer></script>
   <script src="/dam-map-v2170.js" defer></script>
+  <script src="/dam-map-atmosphere-v2187.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
