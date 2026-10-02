@@ -231,6 +231,7 @@
   function announce(key,opts){
     opts=opts||{};
     if(STEPS.indexOf(key)<0)return false;
+    if(!opts.preloadOnly&&window.GEI_AUDIO&&!window.GEI_AUDIO.femaleAllowed())return false;   // V2.1.84: DAM_MAP zone — female narration blocked
     if(getMode()==="off"&&!opts.force)return false;
     var t=now();
     if(!opts.force&&lastKey===key&&t-lastAt<1500)return false;

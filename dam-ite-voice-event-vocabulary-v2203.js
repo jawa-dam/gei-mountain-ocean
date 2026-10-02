@@ -333,6 +333,7 @@
   function request(word,opts){
     opts=opts||{};
     counters.requests++;
+    if(window.GEI_AUDIO&&!window.GEI_AUDIO.femaleAllowed())return suppress("dam-map-zone");   // V2.1.84: DAM_MAP zone — female/DAM-ITE voice blocked
     if(!word)return suppress("unknown-word");
     var priority=PRIORITY[word.category];
     if(voiceMode()==="off")return suppress("voice-off",word.id);

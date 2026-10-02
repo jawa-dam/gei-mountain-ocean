@@ -19,7 +19,7 @@
   if(window.__GEI_V2182_BEAVER_VOICE__) return;
   var A=window.GEI_AUDIO;                  // V2.1.83: the master audio manager (master-audio-v2183.js) owns all playback
   if(!A){try{console.warn("[BEAVER] GEI_AUDIO missing — voice guide disabled");}catch(e){}return;}
-  var VERSION="V2.1.82";
+  var VERSION="V2.1.84";
   var STORE_KEY="geiBeaverVoice.v1";
   var BEAVER_IMG="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/yall-too-beaver-rhhiVplt1GMykxV8.png";
   var CDN="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
@@ -103,7 +103,7 @@
   (function load(){
     try{var o=JSON.parse(lsGet(STORE_KEY)||"null");
       if(o&&typeof o==="object"){mem.heard=o.heard&&typeof o.heard==="object"?o.heard:{};mem.visited=o.visited&&typeof o.visited==="object"?o.visited:{};
-        mem.mapOpens=+o.mapOpens||0;mem.lastMapStation=typeof o.lastMapStation==="number"?o.lastMapStation:-1;mem.lastPos=o.lastPos||null;mem.muted=!!o.muted;}
+        mem.mapOpens=+o.mapOpens||0;mem.lastMapStation=typeof o.lastMapStation==="number"?o.lastMapStation:-1;mem.lastPos=(o.lastPos&&typeof o.lastPos.x==="number")?o.lastPos:null;mem.lastTotal=typeof o.lastTotal==="number"?o.lastTotal:undefined;mem.muted=!!o.muted;}
     }catch(e){}
   })();
   var saveT=0;
@@ -192,6 +192,7 @@
   function request(x,o){
     o=o||{};var c=resolve(x);
     if(!c||A.isBroken(c.id))return false;
+    if(!A.isDamMapOpen())return false;                    // HARD GATE: the Beaver speaks on the Dam Map only
     var t=now();
     if(!c.repeatable&&mem.heard[c.id]&&!o.force)return false;
     if(c.cooldownMs&&lastPlayedAt[c.id]&&t-lastPlayedAt[c.id]<c.cooldownMs&&!o.force)return false;
@@ -294,10 +295,13 @@
         mem.visited[st]=1;stationCool[st]=t;
       }
     }else{
-      var progressed=mem.lastMapStation>=0&&idx>mem.lastMapStation;
-      if(progressed)request(pickFrom(POOL_NEXT),{pri:2,delay:1200});      // the Beaver noticed you moved on
+      var total=c.playerProgress&&+c.playerProgress.totalDays;
+      var advanced=typeof mem.lastTotal==="number"&&isFinite(total)&&total>mem.lastTotal;
+      if(advanced)dayComplete(((total-1)%6+6)%6);                          // you finished a Day since the last visit: celebrate it HERE, on the map
+      else if(mem.lastMapStation>=0&&idx>mem.lastMapStation)request(pickFrom(POOL_NEXT),{pri:2,delay:1200});
       else arrive(idx,"map",900);
     }
+    var tot=c.playerProgress&&+c.playerProgress.totalDays;if(isFinite(tot))mem.lastTotal=tot;
     mem.lastMapStation=idx;save();warmContext();
   }
   function bindMap(){
@@ -323,7 +327,7 @@
     return true;
   }
   /* wait (cheaply) for the lazily-built Dam Map page */
-  var watching=false,gameBound=false;
+  var watching=false;
   function watchForMap(){
     if(bindMap()||watching)return;
     watching=true;
@@ -331,70 +335,80 @@
     mo.observe(document.body,{childList:true});
   }
 
-  /* ------------------------------------------------------------------ 6. visual Beaver (existing artwork) */
-  var bv=null,lastWalkKey="";
+  /* ------------------------------------------------------------------ 6. visual Beaver — a LARGE guide (existing artwork)
+     ~30% of the map height (clamped), standing in the foreground beside the active station, using the same pin
+     coordinates the Dam Map already computes. Only the Beaver is sized — the map itself is never scaled. */
+  var bv=null,bvImg=null,bvAspect=.8,lastWalkKey="",walkT=0,ro=null;
   function ensureBeaver(page){
     var scene=$("dmwScene");if(!scene||$("geiBeaverGuide"))return;
     if(!$("geiBeaverGuideStyle")){
       var s=document.createElement("style");s.id="geiBeaverGuideStyle";
       s.textContent=
-        ".geiBeaverGuide{position:absolute;z-index:4;width:46px;height:46px;margin:-56px 0 0 -92px;pointer-events:none;transition:left 1.1s cubic-bezier(.4,.1,.2,1),top 1.1s cubic-bezier(.4,.1,.2,1)}"+
-        ".geiBeaverGuide .bvFace{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;font-size:24px;background:radial-gradient(circle at 35% 30%,#ffd9a0,#b9783a);border:2.5px solid #fff;box-shadow:0 0 16px rgba(255,180,90,.55);overflow:hidden;animation:geiBvIdle 3.4s ease-in-out infinite}"+
-        ".geiBeaverGuide img{width:100%;height:100%;object-fit:cover;display:block}"+
-        ".geiBeaverGuide.walking .bvFace{animation:geiBvWalk .42s ease-in-out infinite}"+
-        ".geiBeaverGuide.speaking .bvFace{box-shadow:0 0 0 4px rgba(47,210,255,.55),0 0 22px rgba(47,210,255,.8)}"+
-        "@keyframes geiBvIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}"+
-        "@keyframes geiBvWalk{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-4px) rotate(4deg)}}"+
-        "@media(prefers-reduced-motion:reduce){.geiBeaverGuide{transition:none}.geiBeaverGuide .bvFace{animation:none!important}}";
+        ".geiBeaverGuide{position:absolute;z-index:5;left:0;top:0;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;"+
+          "transition:left 1.1s cubic-bezier(.4,.1,.2,1),top 1.1s cubic-bezier(.4,.1,.2,1);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}"+
+        ".geiBeaverGuide .bvBody{height:100%;display:flex;align-items:flex-end;transform-origin:50% 100%;animation:geiBvIdle 3.6s ease-in-out infinite}"+
+        ".geiBeaverGuide img{height:100%;width:auto;max-width:none;object-fit:contain;display:block}"+
+        ".geiBeaverGuide .bvEmoji{font-size:clamp(64px,18vw,150px);line-height:1}"+
+        ".geiBeaverGuide.walking .bvBody{animation:geiBvWalk .46s ease-in-out infinite}"+
+        ".geiBeaverGuide.speaking{filter:drop-shadow(0 0 14px rgba(47,210,255,.85)) drop-shadow(0 6px 10px rgba(0,0,0,.55))}"+
+        ".geiBeaverGuide.speaking .bvBody{animation:geiBvTalk .55s ease-in-out infinite}"+
+        "@keyframes geiBvIdle{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-2px) scale(1.012,.99)}}"+
+        "@keyframes geiBvWalk{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}"+
+        "@keyframes geiBvTalk{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.025)}}"+
+        "@media(prefers-reduced-motion:reduce){.geiBeaverGuide{transition:none}.geiBeaverGuide .bvBody{animation:none!important}}";
       document.head.appendChild(s);
     }
     bv=document.createElement("div");bv.id="geiBeaverGuide";bv.className="geiBeaverGuide";bv.setAttribute("aria-hidden","true");
-    bv.innerHTML='<div class="bvFace"><span>🦫</span></div>';
+    bv.innerHTML='<div class="bvBody"><span class="bvEmoji">🦫</span></div>';
     scene.appendChild(bv);
     var img=new Image();img.alt="";img.decoding="async";
-    img.onload=function(){var f=bv&&bv.querySelector(".bvFace");if(f){f.innerHTML="";f.appendChild(img);}};
-    img.src=BEAVER_IMG;                                                    // falls back to 🦫 if the artwork is unreachable
-    var pin=$("geiMapPin");
-    if(pin){var from=mem.lastPos;if(from&&from.l){bv.style.left=from.l;bv.style.top=from.t;}else{bv.style.left=pin.style.left;bv.style.top=pin.style.top;}}
+    img.onload=function(){bvAspect=(img.naturalWidth/img.naturalHeight)||.8;var b=bv&&bv.querySelector(".bvBody");if(b){b.innerHTML="";b.appendChild(img);bvImg=img;}place(false);};
+    img.src=BEAVER_IMG;                                                    // falls back to a big 🦫 if the artwork is unreachable
+    try{if(window.ResizeObserver){ro=new ResizeObserver(function(){place(false);});ro.observe(scene);}}catch(e){}
+    place(false);
   }
-  /* The Beaver travels to the active station, pauses beside the pin, then idles. */
+  function clampN(v,a,b){return Math.max(a,Math.min(b,v));}
+  /* Where the Beaver stands for the current pin: left of the station (flipping to the right if there is no room),
+     feet just below the station landmark, never lower than the pill row. Returns px inside the scene. */
+  function targetPos(){
+    var scene=$("dmwScene"),pin=$("geiMapPin"),wrap=$("dmwScroll");if(!scene||!pin)return null;
+    var sw=scene.clientWidth,sh=scene.clientHeight;if(!sw||!sh)return null;
+    var px=parseFloat(pin.style.left),py=parseFloat(pin.style.top);if(!isFinite(px)||!isFinite(py))return null;
+    var wh=wrap?wrap.clientHeight:sh,visH=Math.min(sh,wh||sh),visTop=Math.max(0,sh-visH);   // phones crop the top of the scene: size/place by what is actually on screen
+    var x=px/100*sw,y=py/100*sh;
+    var h=Math.round(clampN(visH*.30,96,300)),w=Math.round(h*bvAspect);
+    var maxBottom=sh*.93,bottom=Math.min(y+sh*.09,maxBottom),top=bottom-h;
+    if(top<visTop+4){top=visTop+4;bottom=top+h;if(bottom>maxBottom){bottom=maxBottom;top=Math.max(visTop+2,bottom-h);}}
+    top=Math.max(2,top);
+    var left=x-62-w;if(left<4)left=Math.min(x+62,sw-w-4);
+    return {l:Math.round(left),t:Math.round(top),w:w,h:h,fx:left/sw,fy:top/sh};
+  }
+  function place(animate){
+    if(!bv)return;var p=targetPos();if(!p)return;
+    bv.style.width=p.w+"px";bv.style.height=p.h+"px";
+    bv.style.left=p.l+"px";bv.style.top=p.t+"px";
+    mem.lastPos={x:p.fx,y:p.fy};
+  }
+  /* The Beaver travels to the active station, pauses beside it, then idles. */
   function walkBeaver(fromOpen){
     var pin=$("geiMapPin");if(!bv||!pin)return;
-    var l=pin.style.left,t=pin.style.top;if(!l||!t)return;
-    var key=l+"|"+t;if(key===lastWalkKey&&!fromOpen)return;
-    var go=function(){
-      bv.style.left=l;bv.style.top=t;lastWalkKey=key;mem.lastPos={l:l,t:t};save();
+    var p=targetPos();if(!p)return;
+    var key=p.l+"|"+p.t;if(key===lastWalkKey&&!fromOpen)return;
+    clearTimeout(walkT);
+    var scene=$("dmwScene"),from=mem.lastPos;
+    if(fromOpen&&from&&scene&&typeof from.x==="number"&&(Math.abs(from.x*scene.clientWidth-p.l)>6||Math.abs(from.y*scene.clientHeight-p.t)>6)){
+      bv.style.transition="none";bv.style.width=p.w+"px";bv.style.height=p.h+"px";
+      bv.style.left=Math.round(from.x*scene.clientWidth)+"px";bv.style.top=Math.round(from.y*scene.clientHeight)+"px";
+      void bv.offsetWidth;bv.style.transition="";
+    }
+    lastWalkKey=key;
+    walkT=setTimeout(function(){
+      if(!bv)return;
       if(!reduced()){bv.classList.add("walking");setTimeout(function(){if(bv)bv.classList.remove("walking");},1150);}
-    };
-    if(fromOpen&&mem.lastPos&&mem.lastPos.l&&(mem.lastPos.l!==l||mem.lastPos.t!==t)){bv.style.left=mem.lastPos.l;bv.style.top=mem.lastPos.t;setTimeout(go,420);}
-    else go();
+      place(true);
+    },fromOpen?380:0);
   }
   function setSpeaking(on){if(bv)bv.classList.toggle("speaking",!!on);}
-
-  /* ------------------------------------------------------------------ game hooks (wrap existing functions, never replace behaviour) */
-  function wrap(name,fn){
-    var orig=window[name];
-    if(typeof orig!=="function"||orig.__beaver2182)return false;
-    var w=function(){var out=orig.apply(this,arguments);try{fn.apply(null,arguments);}catch(e){}return out;};
-    w.__beaver2182=true;w.__orig=orig;window[name]=w;return true;
-  }
-  var lastTapKey="";
-  function bindGame(){
-    if(gameBound)return true;
-    var ok=true;
-    ok=wrap("beginDay",function(index){arrive(index|0,"game",900);warmContext();})&&ok;
-    ok=wrap("showDayReward",function(index){dayComplete(index|0);})&&ok;
-    var w=$("world");
-    if(w&&!w.__beaverTap){w.__beaverTap=1;
-      w.addEventListener("click",function(){
-        setTimeout(function(){var s=gameState();if(!s||s.tapCount!==1)return;var k=s.level+":"+s.currentStep;if(k===lastTapKey)return;lastTapKey=k;stationTap(s.currentStep|0,"game");},0);
-      },true);
-    }
-    window.addEventListener("damnation:ite-in-flow",discover);
-    window.addEventListener("damnation:ite-rescued",discover);
-    gameBound=true;                                        // listeners are attached exactly once, however often boot retries
-    return ok;
-  }
 
   /* ------------------------------------------------------------------ extension API for future recordings */
   function registerClip(def){
@@ -417,7 +431,7 @@
     return {version:VERSION,clips:all.length,allHaveUrlAndCategory:all.every(function(c){return /^https:\/\/assets\.zyrosite\.com\//.test(c.url)&&!!c.category&&!!c.id;}),
       categories:Object.keys(BEAVER_VOICE_LIBRARY),lessonsEmpty:Object.keys(GEI_VOICE_LESSONS).every(function(k){return GEI_VOICE_LESSONS[k].length===0;}),
       speaking:A.beaver.speaking,queue:A.beaver.queue,blocked:A.beaver.blocked,broken:A.beaver.broken,sharedAudioManager:true,mapBound:!!(($("geiDamMapPage")||{}).__beaverBound),
-      gameHooks:gameBound,presentationOnly:true};
+      zone:A.zone,mapOnly:true,presentationOnly:true};
   }
 
   window.BEAVER_VOICE_LIBRARY=BEAVER_VOICE_LIBRARY;
@@ -434,8 +448,8 @@
   window.GEI_BEAVER_VOICE=api;
 
   function boot(){
-    bindGame();watchForMap();warmContext();
-    window.addEventListener("load",function(){bindGame();watchForMap();},{once:true});
+    watchForMap();
+    window.addEventListener("load",watchForMap,{once:true});
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
 })();

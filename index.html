@@ -3789,7 +3789,7 @@ const PRESSURE_PHASES = [
   { key:"normal",   label:"Normal flow",          aboveMs:4000 },
   { key:"rising",   label:"Pressure rising",      aboveMs:2000 },
   { key:"critical", label:"Critical pressure",    aboveMs:1000 },
-  { key:"imminent", label:"Dam failure imminent", aboveMs:0 }
+  { key:"imminent", label:"Critical pressure",    aboveMs:0 }   /* V2.1.84: no "Dam failure imminent" caption on the timer */
 ];
 function pressurePhase(remMs){ return PRESSURE_PHASES.find(p => remMs > p.aboveMs) || PRESSURE_PHASES[PRESSURE_PHASES.length - 1]; }
 const CELEBRATION_MS     = 3000;   // Day 1–5 celebration, card + character as one unit
