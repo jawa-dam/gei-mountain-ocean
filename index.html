@@ -2877,6 +2877,16 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .geiSplashEnter{position:absolute;z-index:5;bottom:7%;padding:12px 22px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(5,10,22,.62);color:#fff;font-size:.78rem;font-weight:900;letter-spacing:.16em;opacity:0;animation:geiEnterIn .7s ease-out 8.6s forwards;box-shadow:0 0 22px rgba(47,210,255,.15);backdrop-filter:blur(10px)}
 .geiSplashProgress{position:absolute;z-index:5;left:10%;right:10%;bottom:3%;height:3px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
 .geiSplashProgress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#2fd2ff,#3d3dea,#f310ba);box-shadow:0 0 12px #2fd2ff;animation:geiProgress 10s linear forwards}
+/* V2.1.89 cinematic splash: canvas scene replaces the flat SVG world; classic splash remains the fallback (class "cine" removed on failure) */
+#geiSplash.cine .geiSplashNoise,#geiSplash.cine .geiSplashGlow,#geiSplash.cine .geiSplashWater,#geiSplash.cine .geiSplashIteFrame,#geiSplash.cine .geiSplashIte,#geiSplash.cine .geiSplashCharacterTag,#geiSplash.cine .geiSplashFlash,#geiSplash.cine .geiSplashWorld,#geiSplash.cine .geiSplashEyebrow,#geiSplash.cine .geiSplashEnter,#geiSplash.cine .geiSplashProgress,#geiSplash.cine .tl2173OpeningStamp{display:none!important}
+#geiSplash.cine{overflow:hidden;background:#030711}
+#geiSplash.cine .geiSplashBrand{top:max(3.5%,env(safe-area-inset-top));z-index:4;animation:none;opacity:0;transform:translateY(10px) scale(.96);transition:opacity 1s ease,transform 1.2s cubic-bezier(.2,.8,.2,1);pointer-events:none;filter:drop-shadow(0 4px 18px rgba(0,10,30,.55))}
+#geiSplash.cine.cineLogo .geiSplashBrand{opacity:1;transform:none}
+#geiSplash.cine .geiSplashTitle{font-size:clamp(2.2rem,10vw,4.2rem)}
+#geiSplash.cine .tl92HasLogo img{max-height:min(15vh,150px);width:auto;max-width:78vw}
+#geiSplash.cine .geiSplashSub{opacity:0;transition:opacity .9s ease;margin-top:8px;letter-spacing:.24em;text-shadow:0 2px 12px rgba(0,10,30,.8)}
+#geiSplash.cine.cineSub .geiSplashSub{opacity:1}
+#geiSplash.cine .geiSplashSkip{z-index:8}
 @keyframes geiSplashPulse{0%,100%{transform:scale(.92);opacity:.55}50%{transform:scale(1.08);opacity:1}}
 @keyframes geiWorldIn{to{opacity:1}}
 @keyframes geiMountainIn{from{transform:translateY(80px) scale(.82);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
@@ -3207,7 +3217,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 })();
 </script>
 
-<div id="geiSplash" aria-label="Genesis Engineered opening sequence">
+<div id="geiSplash" class="cine" aria-label="Genesis Engineered opening sequence">
   <div class="geiSplashNoise"></div><div class="geiSplashGlow"></div><div class="geiSplashWater"></div>
   <div class="geiSplashIteFrame" aria-hidden="true"></div>
   <img class="geiSplashIte" id="geiSplashIte" alt="" aria-hidden="true">
@@ -12597,8 +12607,24 @@ function restoreVisualProgress(){
     }
   }
 
+  function cineStart(){
+    /* V2.1.89 cinematic cues (relative to scene start): mountain→soft ambience, dam→rumble, gates→release, bottle→splash, fill→sparkle, logo→friendly intro */
+    var el=0;try{el=Math.max(0,window.__GEI_CINE__.elapsed());}catch(e){}
+    function T(f,d,ty,w,g){if(w-el>=-.05)tone(f,d,ty,Math.max(0,w-el),g);}
+    function N(d,a,b,g,w){if(w-el>=-.05)noise(d,a,b,g,Math.max(0,w-el));}
+    natureSplash();
+    T(72,2.2,"sine",0,.03);T(108,1.5,"triangle",.3,.02);
+    T(58,1.6,"sine",1.0,.04);N(1.2,80,320,.06,1.0);                     /* dam: low rumble */
+    T(68,.3,"square",2.0,.055);T(118,.22,"sawtooth",2.05,.028);N(1.6,200,1200,.12,2.0);  /* gates release */
+    N(1.4,260,1500,.09,3.0);                                            /* stream travels */
+    N(.5,500,2600,.12,4.25);T(420,.12,"sine",4.3,.03);                  /* bottle splash */
+    [523,659,784,1046,1318].forEach(function(f,i){T(f,.55,"sine",4.6+i*.22,.028);});     /* fill sparkle */
+    [392,523,659,784].forEach(function(f,i){T(f,.7,"triangle",5.4+i*.15,.034);});        /* logo: friendly intro */
+    T(1046,1.0,"sine",6.4,.04);
+  }
   function start(){
     if(started)return; started=true;
+    if(splash.classList.contains("cine")){cineStart();return;}
     natureSplash();
     /* 0–2s: mountain wakes */
     tone(72,1.8,"sine",0,.035); tone(108,1.5,"triangle",.15,.025);
@@ -12652,6 +12678,7 @@ function restoreVisualProgress(){
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
+  <script src="/splash-cinematic-v2189.js" defer></script>
   <script src="/character-signature-moments.js" defer></script>
   <script src="/signature-moment-audio.js" defer></script>
   <script src="/dam-friendly-soundtrack-v2188.js" defer></script>
