@@ -1,4 +1,8 @@
-/* V2.1.84 — adds strict VOICE ZONES: GAMEPLAY (female narrator/game voice, Beaver blocked) and DAM_MAP (Beaver only,
+/* V2.1.88 — the voice controller now serves two channels through the SAME queue, pool and ducking: "beaver" (Dam Map only)
+ * and "wow" (gameplay only: WOW collection / pressure-release voices). Each channel is gated by the zone; the other channel's
+ * queued items are discarded on every zone change. There is still exactly one speaker at a time.
+ *
+ * V2.1.84 — adds strict VOICE ZONES: GAMEPLAY (female narrator/game voice, Beaver blocked) and DAM_MAP (Beaver only,
  * female narration blocked). The zone is DERIVED from the live Dam Map page state, so it can never drift out of sync.
  *
  * V2.1.83 — MASTER AUDIO BUS & BEAVER VOICE PRIORITY 🎵🦫💧
@@ -22,7 +26,7 @@
 (function(){
   "use strict";
   if(window.GEI_AUDIO) return;
-  var VERSION="V2.1.85";
+  var VERSION="V2.1.88";
   var KEY_MUTED="geiAudioMuted";
   var DUCK={music:.28,sfx:.6,downTau:.16,upTau:.45};     // spec: music → ~28%, SFX → ~60%, Beaver 100%
   var LOW_GAP_MS=4500, POOL_MAX=10, QUEUE_MAX=8, DUCK_WATCHDOG_MS=45000;
@@ -107,7 +111,7 @@
   /* ------------------------------------------------------------------ master controls */
   function setMuted(on){
     audioState.muted=!!on;lsSet(KEY_MUTED,on?"1":"0");
-    if(on)stopBeaver();
+    if(on){stopBeaver();stopWow();}
     applyAll(false);try{window.dispatchEvent(new CustomEvent("gei:audio-mute",{detail:{muted:audioState.muted}}));}catch(e){}
     return audioState.muted;
   }
@@ -129,14 +133,14 @@
     try{var v=window.__GEI_V2203_VOICE_EVENT__;if(v&&typeof v.stop==="function")v.stop();}catch(e){}
     try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
   }
-  function femaleAllowed(){return zone()==="GAMEPLAY";}
+  function femaleAllowed(){return zone()==="GAMEPLAY"&&!(cur&&cur.ch==="wow");}   // a WOW line owns the voice while it speaks
   function beaverAllowed(){return zone()==="DAM_MAP";}
   /* setZone(z): run the hand-over side effects once. Called by the Dam Map watcher below; safe to call again (idempotent). */
   function setZone(z){
     z=z==="DAM_MAP"?"DAM_MAP":"GAMEPLAY";
     if(z===lastZone)return z;
     lastZone=z;
-    if(z==="DAM_MAP"){stopFemale();}                     // map opens: cancel gameplay narration, enable Beaver
+    if(z==="DAM_MAP"){stopFemale();stopChannel("wow");}  // map opens: cancel gameplay narration + any WOW voice, enable Beaver
     else{stopBeaver();}                                  // map closes: Beaver stops NOW, queue cleared, music/SFX restored, female re-enabled
     try{window.dispatchEvent(new CustomEvent("gei:audio-zone",{detail:{zone:z}}));}catch(e){}
     dlog("zone -> "+z);dbg();return z;
@@ -156,21 +160,23 @@
   }
 
   /* ------------------------------------------------------------------ BEAVER voice channel */
-  var resolver=null,canSpeakGates=[],busyGates=[],listeners=[];
+  var resolver=null,canSpeakGates={beaver:[],wow:[]},busyGates={beaver:[],wow:[]},listeners=[];
   var pool={},poolOrder=[],broken={},fails={};
   var Q=[],cur=null,lastEnd=0,pumpT=0,blocked=false,unlockBound=false,unlockHandler=null;
   function emit(type,item,extra){
-    var d={type:type,clip:item&&item.clip,priority:item&&item.pri,extra:extra};
+    var d={type:type,clip:item&&item.clip,priority:item&&item.pri,extra:extra,channel:(item&&item.ch)||"beaver"};
     listeners.slice().forEach(function(fn){try{fn(d);}catch(e){}});
   }
   function onBeaver(fn){if(typeof fn==="function"&&listeners.indexOf(fn)<0)listeners.push(fn);return function(){listeners=listeners.filter(function(f){return f!==fn;});};}
   function setVoiceResolver(fn){resolver=fn;}
-  function addVoiceGate(g){
-    if(g&&typeof g.canSpeak==="function"&&canSpeakGates.indexOf(g.canSpeak)<0)canSpeakGates.push(g.canSpeak);
-    if(g&&typeof g.busy==="function"&&busyGates.indexOf(g.busy)<0)busyGates.push(g.busy);
+  function addVoiceGate(g){                              // g.channel: "beaver" (default) | "wow"
+    var ch=g&&g.channel==="wow"?"wow":"beaver";
+    if(g&&typeof g.canSpeak==="function"&&canSpeakGates[ch].indexOf(g.canSpeak)<0)canSpeakGates[ch].push(g.canSpeak);
+    if(g&&typeof g.busy==="function"&&busyGates[ch].indexOf(g.busy)<0)busyGates[ch].push(g.busy);
   }
-  function canSpeak(){if(audioState.muted)return false;for(var i=0;i<canSpeakGates.length;i++){try{if(!canSpeakGates[i]())return false;}catch(e){}}return true;}
-  function externallyBusy(){for(var i=0;i<busyGates.length;i++){try{if(busyGates[i]())return true;}catch(e){}}return false;}
+  function canSpeak(ch){ch=ch||"beaver";if(audioState.muted)return false;var a=canSpeakGates[ch]||[];for(var i=0;i<a.length;i++){try{if(!a[i]())return false;}catch(e){}}return true;}
+  function externallyBusy(ch){ch=ch||"beaver";var a=busyGates[ch]||[];for(var i=0;i<a.length;i++){try{if(a[i]())return true;}catch(e){}}return false;}
+  function channelAllowed(ch){return ch==="wow"?!isDamMapOpen():isDamMapOpen();}   // the zone decides who may speak
   function isBroken(id){return !!broken[id];}
 
   function beaverElVolume(){return clamp(audioState.beaverVolume*audioState.masterVolume,0,1);}
@@ -195,20 +201,23 @@
   }
   function toClip(x){return typeof x==="string"?(resolver?resolver(x):null):x;}
 
-  /* playBeaver(idOrClip,{priority:1-5,pri,delay,after,ttl,chain}) → accepted?  Priorities: 5 day · 4 unlock · 3 GEI · 2 interaction · 1 casual */
-  function playBeaver(x,o){
+  /* playVoice(idOrClip,{channel,priority:1-5,pri,delay,after,ttl,chain}) → accepted?  Priorities: 5 day · 4 unlock · 3 GEI · 2 interaction · 1 casual
+     playBeaver / playWow are the two public doors; each is hard-gated by the zone. */
+  function playBeaver(x,o){o=o||{};return playVoice(x,o,"beaver");}
+  function playWow(x,o){o=o||{};return playVoice(x,o,"wow");}
+  function playVoice(x,o,ch){
     o=o||{};var c=toClip(x);
-    if(!isDamMapOpen()){emit("drop",{clip:c,pri:0},"outside-dam-map");return false;}   // HARD GATE: Beaver exists only on the Dam Map
+    if(!channelAllowed(ch)){emit("drop",{clip:c,pri:0,ch:ch},ch==="wow"?"inside-dam-map":"outside-dam-map");return false;}   // HARD GATE: Beaver only on the map, WOW voices only in gameplay
     syncZone();
-    if(!c||!c.url||broken[c.id]||!canSpeak())return false;
+    if(!c||!c.url||broken[c.id]||!canSpeak(ch))return false;
     var pri=Math.round(clamp(o.priority||o.pri||2,1,5)),t=now(),delay=o.delay||0;
     if(pri<=2){                                           // casual reactions fit the silence or vanish — they never queue up
-      if(cur||Q.length||blocked||externallyBusy()||document.hidden||t-lastEnd<LOW_GAP_MS){emit("drop",{clip:c,pri:pri},"busy");return false;}
+      if(cur||Q.length||blocked||externallyBusy(ch)||document.hidden||t-lastEnd<LOW_GAP_MS){emit("drop",{clip:c,pri:pri,ch:ch},"busy");return false;}
     }else{
       if(document.hidden&&!delay)return false;
-      if(Q.some(function(q){return q.clip.id===c.id;})||(cur&&cur.clip.id===c.id))return false;   // never duplicate
+      if(Q.some(function(q){return q.clip.id===c.id&&q.ch===ch;})||(cur&&cur.clip.id===c.id&&cur.ch===ch))return false;   // never duplicate
     }
-    var item={clip:c,pri:pri,at:t+delay,after:o.after||0,exp:t+(o.ttl||(pri>=3?15000:3000))+delay,chain:o.chain||0};
+    var item={clip:c,pri:pri,ch:ch,at:t+delay,after:o.after||0,exp:t+(o.ttl||(pri>=3?15000:3000))+delay,chain:o.chain||0};
     if(pri>=4&&cur&&cur.pri<=2)interrupt("outranked");
     var front=pri>=4&&!item.chain&&Q.every(function(q){return q.pri<pri;});
     if(front)Q.unshift(item);else Q.push(item);
@@ -221,11 +230,13 @@
     var t=now();
     Q=Q.filter(function(q){return q.exp>t;});
     if(!Q.length){settle();return;}
-    if(!isDamMapOpen()){Q=[];settle();return;}            // map closed while a clip was waiting: discard, never play it later in gameplay
+    var before=Q.length;Q=Q.filter(function(q){return channelAllowed(q.ch);});   // zone changed while clips waited: discard them, never play them later in the wrong zone
+    if(!Q.length){settle();return;}
     var item=Q[0],wait=Math.max(item.at-t,item.after-(t-lastEnd),0);
     if(wait>0){schedule(wait);return;}
-    if(!canSpeak()){Q=[];settle();return;}
-    if(externallyBusy()||(document.hidden&&item.pri<5)){
+    if(!canSpeak(item.ch)){Q=Q.filter(function(q){return q.ch!==item.ch;});pump();return;}
+    if(item.ch==="wow"&&cur===null){/* a WOW line takes the voice: any gameplay narration steps aside */}
+    if(externallyBusy(item.ch)||(document.hidden&&item.pri<5)){
       if(item.pri<=2){Q.shift();pump();return;}
       schedule(400);return;
     }
@@ -234,11 +245,15 @@
   var settleT=0;
   function settle(){clearTimeout(settleT);settleT=setTimeout(function(){if(!cur&&!Q.length)voiceEnd("beaver");dbg();},650);}   // glide back once the chain is truly finished
   function setSpeaking(item){
-    audioState.beaverSpeaking=!!item;audioState.currentBeaverClip=item?item.clip.id:null;audioState.beaverPriority=item?item.pri:0;
-    try{window.dispatchEvent(new CustomEvent("gei:beaver-speaking",{detail:{speaking:!!item,id:audioState.currentBeaverClip}}));}catch(e){}
+    var isB=!item||item.ch!=="wow";
+    audioState.beaverSpeaking=!!item&&isB;audioState.wowSpeaking=!!item&&!isB;
+    audioState.currentBeaverClip=item?item.clip.id:null;audioState.beaverPriority=item?item.pri:0;
+    try{window.dispatchEvent(new CustomEvent("gei:beaver-speaking",{detail:{speaking:!!item&&isB,id:audioState.currentBeaverClip}}));}catch(e){}
+    try{window.dispatchEvent(new CustomEvent("gei:wow-speaking",{detail:{speaking:!!item&&!isB,id:audioState.currentBeaverClip}}));}catch(e){}
   }
   function start(item){
-    if(!isDamMapOpen()){return;}
+    if(!channelAllowed(item.ch)){return;}
+    if(item.ch==="wow")stopFemale();                      // controlled interruption: gameplay narration yields to the WOW line
     var c=item.clip,el=getEl(c);
     if(!el){fail(c,"no audio element");schedule(0);return;}
     clearTimeout(settleT);
@@ -290,15 +305,18 @@
     unlockHandler=function(){ev.forEach(function(e){document.removeEventListener(e,unlockHandler,true);});unlockBound=false;blocked=false;setTimeout(pump,60);};
     ev.forEach(function(e){document.addEventListener(e,unlockHandler,{capture:true,passive:true});});
   }
-  /* stopBeaver(): stop the current clip, clear the queue, restore music + SFX, reset speaking state. Safe to call any time. */
-  function stopBeaver(){
-    var had=!!cur||Q.length>0;
-    Q=[];clearTimeout(pumpT);clearTimeout(settleT);
-    interrupt("stop");
-    voiceEnd("beaver");dbg();return had;
+  /* stopChannel(ch): stop that channel's current clip, drop its queued clips, restore music + SFX when nothing else speaks. Safe any time. */
+  function stopChannel(ch){
+    var had=(!!cur&&cur.ch===ch)||Q.some(function(q){return q.ch===ch;});
+    Q=Q.filter(function(q){return q.ch!==ch;});
+    if(cur&&cur.ch===ch)interrupt("stop");
+    if(!cur&&!Q.length){clearTimeout(pumpT);clearTimeout(settleT);voiceEnd("beaver");}else schedule(0);
+    dbg();return had;
   }
+  function stopBeaver(){return stopChannel("beaver");}
+  function stopWow(){return stopChannel("wow");}
   /* free every pooled element (page hide / teardown) */
-  function releasePool(){stopBeaver();Object.keys(pool).forEach(function(k){dispose(pool[k]);});pool={};poolOrder=[];}
+  function releasePool(){stopBeaver();stopWow();Object.keys(pool).forEach(function(k){dispose(pool[k]);});pool={};poolOrder=[];}
 
   /* ------------------------------------------------------------------ debug (developer only) */
   var debugOn=false,dbgEl=null,dbgLog=[],debugProviders=[];
@@ -323,12 +341,13 @@
     get state(){var s={};Object.keys(audioState).forEach(function(k){s[k]=audioState[k];});s.musicVolume=musicVolume();return s;},
     get zone(){return zone();},setZone:setZone,isDamMapOpen:isDamMapOpen,femaleAllowed:femaleAllowed,beaverAllowed:beaverAllowed,stopFemale:stopFemale,
     musicIn:musicIn,sfxIn:sfxIn,registerMusicElement:registerMusicElement,
-    setMuted:setMuted,toggleMute:function(){return setMuted(!audioState.muted);},get muted(){return audioState.muted;},
+    channelAllowed:channelAllowed,setMuted:setMuted,toggleMute:function(){return setMuted(!audioState.muted);},get muted(){return audioState.muted;},
     setMasterVolume:setMasterVolume,setSfxVolume:setSfxVolume,setBeaverVolume:setBeaverVolume,
     voiceBegin:voiceBegin,voiceEnd:voiceEnd,
-    playBeaver:playBeaver,stopBeaver:stopBeaver,preloadBeaver:preload,isBroken:isBroken,
+    playBeaver:playBeaver,stopBeaver:stopBeaver,playWow:playWow,stopWow:stopWow,preloadBeaver:preload,isBroken:isBroken,
     setVoiceResolver:setVoiceResolver,addVoiceGate:addVoiceGate,onBeaver:onBeaver,
-    get beaver(){return {speaking:!!cur,current:cur?{id:cur.clip.id,category:cur.clip.category,priority:cur.pri}:null,queue:Q.length,blocked:blocked,pool:poolOrder.length,broken:Object.keys(broken)};},
+    get beaver(){var b=cur&&cur.ch!=="wow";return {speaking:!!b,current:b?{id:cur.clip.id,category:cur.clip.category,priority:cur.pri}:null,queue:Q.filter(function(q){return q.ch!=="wow";}).length,blocked:blocked,pool:poolOrder.length,broken:Object.keys(broken)};},
+    get wow(){var w=cur&&cur.ch==="wow";return {speaking:!!w,current:w?{id:cur.clip.id,priority:cur.pri}:null,queue:Q.filter(function(q){return q.ch==="wow";}).length};},
     releasePool:releasePool,addDebugProvider:function(fn){if(typeof fn==="function"&&debugProviders.indexOf(fn)<0)debugProviders.push(fn);},refreshDebug:function(){dbg();},
     levels:function(){var g=graphs[0];return {master:g?+g.master.gain.value.toFixed(3):null,music:g?+g.music.gain.value.toFixed(3):null,sfx:g?+g.sfx.gain.value.toFixed(3):null,
       beaverEl:cur&&pool[cur.clip.id]?+pool[cur.clip.id].volume.toFixed(3):null,radio:els.map(function(r){return +r.el.volume.toFixed(3);})};},
@@ -339,5 +358,5 @@
 
   window.addEventListener("pagehide",releasePool);
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",watchZone,{once:true});else watchZone();
-  document.addEventListener("visibilitychange",function(){if(document.hidden)stopBeaver();});
+  document.addEventListener("visibilitychange",function(){if(document.hidden){stopBeaver();stopWow();}});
 })();

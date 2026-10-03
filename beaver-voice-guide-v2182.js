@@ -179,7 +179,7 @@
   A.setVoiceResolver(function(id){return FLAT[id]||null;});
   A.addVoiceGate({canSpeak:enabledNow,busy:function(){return otherVoiceBusy()||overlayUp();}});
   A.onBeaver(function(ev){
-    var c=ev.clip;if(!c)return;
+    var c=ev.clip;if(!c||ev.channel==="wow")return;
     if(ev.type==="start"){setSpeaking(true);dlog("play "+c.id+" p"+ev.priority);}
     else if(ev.type==="end"||ev.type==="abort"){
       lastPlayedAt[c.id]=now();setSpeaking(false);
