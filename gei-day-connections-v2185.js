@@ -233,7 +233,7 @@
   }
   /* Voice events drive the reveal: card fades in as the connection voice starts; heard when it finishes. */
   function onBeaverEvent(ev){
-    var c=ev&&ev.clip;if(!c||!c.id)return;
+    var c=ev&&ev.clip;if(!c||!c.id||ev.channel==="wow")return;
     var m=/^day([1-6])_(?!action)/.exec(c.id);if(!m)return;
     var day=+m[1];
     if(ev.type==="start"){revealed[seq]=1;clearTimeout(fallbackT);showCard(day,true);}

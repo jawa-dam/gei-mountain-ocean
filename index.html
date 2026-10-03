@@ -1244,7 +1244,11 @@ html.skin-heaven .world{
   touch-action:manipulation;
 }
 /* V2.1.86 — LIVE TAP PROGRESS: one compact row between the HUD and the world (never over the timer, station or tap target). */
-.tapProg{ flex:0 0 auto; margin:0 4px 6px; padding:0; text-align:center; }
+.gameBar{ flex:0 0 auto; display:flex; align-items:center; gap:8px; margin:0 4px 6px; min-height:34px; }
+.gameBar .tapProg{ flex:1 1 auto; min-width:0; margin:0; padding:0; text-align:center; }
+.operatorSlot{ flex:0 0 auto; display:flex; align-items:center; }
+.operatorSlot:empty{ display:none; }
+.tapProg{ text-align:center; }
 .tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:#fff; white-space:nowrap; }
 .tapProg .tpNum{ display:inline-block; min-width:3.6ch; font-variant-numeric:tabular-nums; color:var(--gold); text-shadow:0 0 10px color-mix(in srgb,var(--gold) 50%,transparent); transform-origin:50% 60%; }
 .tapProg .tpUnit{ color:var(--foam); }
@@ -2944,6 +2948,21 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
  box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 42px rgba(255,215,106,.38)
 }
 .geiCharacterSpotlight.milestone .spotFlow i{background:var(--gold);box-shadow:0 0 12px var(--gold)}
+/* V2.1.88 — SESSION OPERATOR chip: a normal in-flow, tappable control in the game bar. It can never sit behind the
+   action rail, the timer or the tap counter, whatever the viewport. Overrides the old absolute side-rail geometry. */
+.geiCharacterSpotlight.operatorChip,.geiCharacterSpotlight.sideRail.operatorChip{
+ position:relative;right:auto;left:auto;top:auto;z-index:2;width:auto;min-width:0;max-width:150px;min-height:34px;
+ padding:3px 8px 3px 4px;border-radius:12px;pointer-events:auto;cursor:pointer;touch-action:manipulation;
+ opacity:1;transform:none;display:flex;align-items:center;gap:6px;overflow:visible;contain:none;
+}
+.geiCharacterSpotlight.sideRail.operatorChip .spotHead{display:flex;flex-direction:row;align-items:center;gap:6px;text-align:left}
+.geiCharacterSpotlight.sideRail.operatorChip .spotAvatar,.geiCharacterSpotlight.sideRail.operatorChip .spotFallback{width:28px;height:28px;flex:0 0 28px;border-radius:9px}
+.geiCharacterSpotlight.sideRail.operatorChip .spotCopy{display:block;width:auto;min-width:0}
+.geiCharacterSpotlight.sideRail.operatorChip .spotKicker{display:none}
+.geiCharacterSpotlight.sideRail.operatorChip .spotName{max-width:50px;font-size:9px;line-height:1.05;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;text-align:left}
+.geiCharacterSpotlight.sideRail.operatorChip .spotFlow{display:none}
+.geiCharacterSpotlight.sideRail.operatorChip .spotWow{font-size:.62rem;font-weight:1000;letter-spacing:.04em;color:var(--gold);white-space:nowrap}
+.geiCharacterSpotlight.sideRail.operatorChip:focus-visible{outline:2px solid var(--water-bright);outline-offset:2px}
 /* V2.1.63 — side-rail geometry: keep every spotlight pixel outside the 400px map canvas. */
 .geiCharacterSpotlight.sideRail{
  right:8px;
@@ -3312,7 +3331,7 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
           <div class="econReward" id="hudReward">Day 1 reward: 3.28266 Liters = <strong>+111 FL OZ</strong></div>
         </div>
         <div class="timerBox idle" id="timerBox" role="timer" aria-live="off">
-          <div class="timerNum" id="timerNum">10.0</div>
+          <div class="timerNum" id="timerNum">6.0</div>
           <div class="timerUnit" id="timerUnit">Tap to start</div>
         </div>
       </div>
@@ -3395,9 +3414,13 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
     </div>
 
     <!-- V2.1.86: LIVE TAP PROGRESS — reads state.tapCount / getRequiredTaps(state.level); owns no state of its own -->
-    <div class="tapProg" id="tapProg" role="progressbar" aria-label="Taps completed" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
-      <div class="tpText"><span class="tpDrop" aria-hidden="true">💧</span><b class="tpNum" id="tapProgNum">0 / 6</b><span class="tpUnit"> TAPS</span><span class="tpDone" id="tapProgDone" aria-hidden="true">✓ FLOW COMPLETE</span></div>
-      <div class="tpBar" aria-hidden="true"><i id="tapProgFill"></i></div>
+    <div class="gameBar" id="gameBar">
+      <div class="tapProg" id="tapProg" role="progressbar" aria-label="Taps completed" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
+        <div class="tpText"><span class="tpDrop" aria-hidden="true">💧</span><b class="tpNum" id="tapProgNum">0 / 6</b><span class="tpUnit"> TAPS</span><span class="tpDone" id="tapProgDone" aria-hidden="true">✓ FLOW COMPLETE</span></div>
+        <div class="tpBar" aria-hidden="true"><i id="tapProgFill"></i></div>
+      </div>
+      <!-- V2.1.88: SESSION OPERATOR lives here (was an absolutely-positioned box in the world that the action rail could cover) -->
+      <div class="operatorSlot" id="sessionOperatorSlot"></div>
     </div>
 
     <div class="world" id="world">
@@ -3545,6 +3568,11 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       </div>
 
       <!-- v2.3: profile (read-only view of existing state) -->
+      <div class="sidePanel" id="wowPanel">
+        <button class="panelClose" data-close-panel aria-label="Close">✕</button>
+        <div class="panelTitle">💥 WOW COLLECTIONS</div>
+        <div id="wowPanelBody"></div>
+      </div>
       <div class="sidePanel" id="profilePanel">
         <button class="panelClose" data-close-panel aria-label="Close">✕</button>
         <div class="panelTitle">📊 DAM-ITE JOURNEY</div>
@@ -3825,10 +3853,10 @@ const DAYS_PER_LEVEL     = 6;
 const LEVEL_REWARD_FL_OZ = DAY_REWARD_FL_OZ * DAYS_PER_LEVEL; // 666
 const UNLOCK_COST_FL_OZ  = 6660;                              // THE unlock price: any song, paid character or skin (10 levels)
 const ECONOMY_MAX_FL_OZ  = 1000000000;                         // Hard client-side ceiling; server receipts remain the payment authority.
-const DAY_TIME_LIMIT_MS  = 6000;                              // Levels 1–60
-const ADVANCED_DAY_TIME_LIMIT_MS = 10000;                     // Level 61+ after Level 60 is mastered
+/* V2.1.88 — the old per-level day-clock limits (6s / 10s after Level 60) are gone. The ONE gameplay timer is
+   WOW_TIMER_ENGINE below: 6 seconds, +3 for every completed WOW collection (6 → 9 → 12 → 15 …). */
+const WOW_TIMER_BASE_SECONDS = 6, WOW_TIMER_STEP_SECONDS = 3;
 function getRequiredTaps(level){ return Math.ceil(Math.max(1, level) / 6) * 6; }
-function getDayTimeLimitMs(level){ return level > 60 ? ADVANCED_DAY_TIME_LIMIT_MS : DAY_TIME_LIMIT_MS; }
 function isMajorMilestone(level){ return level >= 6 && level % 6 === 0; }
 /* Pressure phases are presentation of the same clock (no second timer). */
 const PRESSURE_PHASES = [
@@ -4564,6 +4592,49 @@ function defaultIteRescueStats(){
 /* Accepts anything (legacy save, corrupt JSON, wrong types) and returns a valid record.
    savedIteIds is authoritative; savedCount and rescuedWater are re-derived from it so they can
    never disagree with the list. */
+/* =========================================================
+   V2.1.88 — WOW COLLECTIONS: saved state (additive; rides the normal saveGame / loadGame).
+   Collections themselves are configured in wow-collection-engine-v2188.js; only ids live here so the
+   save can be validated before that script runs.
+========================================================= */
+const WOW_COLLECTION_IDS = Object.freeze(["fireHydrant","plumber","fireTruck","architect","waterTower","cementMason"]);
+const WOW_REQUIRED = 6, WOW_LEVELS_PER_WINDOW = 6;
+function defaultWowState(){
+  const counts = {}; WOW_COLLECTION_IDS.forEach(id => counts[id] = 0);
+  return { v:1, activeCollection:WOW_COLLECTION_IDS[0], counts, completed:[], windows:{}, awarded:{},
+    currentWindow:0, windowTriggered:false, timerBonusSeconds:0, lastRolledLevel:0, pending:null,
+    campaignComplete:false, completionDate:null, highestLevel:0 };
+}
+function sanitizeWowState(raw){
+  const d = defaultWowState();
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return d;
+  const int = (v, lo, hi, def) => { const n = Math.floor(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : def; };
+  WOW_COLLECTION_IDS.forEach(id => { d.counts[id] = int(raw.counts && raw.counts[id], 0, WOW_REQUIRED, 0); });
+  d.completed = WOW_COLLECTION_IDS.filter(id => d.counts[id] >= WOW_REQUIRED);          // completion is derived from the counts
+  d.activeCollection = WOW_COLLECTION_IDS.find(id => d.counts[id] < WOW_REQUIRED) || WOW_COLLECTION_IDS[WOW_COLLECTION_IDS.length - 1];
+  d.campaignComplete = d.completed.length === WOW_COLLECTION_IDS.length;
+  if(raw.windows && typeof raw.windows === "object"){
+    Object.keys(raw.windows).slice(0, 400).forEach(k => {
+      const w = raw.windows[k], i = Number(k);
+      if(Number.isInteger(i) && i >= 0 && w && typeof w === "object") d.windows[i] = { t:1, l:int(w.l, 1, 1e6, 1), c:WOW_COLLECTION_IDS.includes(w.c) ? w.c : WOW_COLLECTION_IDS[0] };
+    });
+  }
+  if(raw.awarded && typeof raw.awarded === "object") Object.keys(raw.awarded).slice(0, 400).forEach(k => { if(/^w\d+:[A-Za-z]+:\d+-\d+$/.test(k)) d.awarded[k] = 1; });
+  d.currentWindow = int(raw.currentWindow, 0, 1e6, 0);
+  d.windowTriggered = !!d.windows[d.currentWindow];
+  /* the bonus can never exceed what the completed collections earned */
+  d.timerBonusSeconds = Math.min(int(raw.timerBonusSeconds, 0, 3600, 0), d.completed.length * WOW_TIMER_STEP_SECONDS);
+  d.lastRolledLevel = int(raw.lastRolledLevel, 0, 1e6, 0);
+  d.highestLevel = int(raw.highestLevel, 0, 1e6, 0);
+  d.completionDate = d.campaignComplete && typeof raw.completionDate === "string" ? raw.completionDate.slice(0, 40) : null;
+  const p = raw.pending;
+  if(p && typeof p === "object" && /^w\d+:[A-Za-z]+:\d+-\d+$/.test(String(p.eventId)) && WOW_COLLECTION_IDS.includes(p.collectionId)){
+    d.pending = { eventId:p.eventId, collectionId:p.collectionId, count:int(p.count, 1, WOW_REQUIRED, 1), completes:!!p.completes,
+      level:int(p.level, 1, 1e6, 1), fromSeconds:int(p.fromSeconds, 0, 3600, WOW_TIMER_BASE_SECONDS), toSeconds:int(p.toSeconds, 0, 3600, WOW_TIMER_BASE_SECONDS), finale:!!p.finale };
+  }
+  return d;
+}
+
 function sanitizeIteRescueStats(raw){
   const out = defaultIteRescueStats();
   if(!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
@@ -5092,6 +5163,7 @@ const state = {
   damMachineLastResult:null,
   /* DAM NATION V1.0 — -ite rescue record (see sanitizeIteRescueStats) */
   iteRescueStats: defaultIteRescueStats(),
+  wow: defaultWowState(),                                  // V2.1.88
   phase:"ready"
 };
 
@@ -5225,7 +5297,9 @@ function saveGame(){
     damMachineBestReward: state.damMachineBestReward,
     damMachineLastResult: state.damMachineLastResult,
     /* DAM NATION V1.0 — additive; legacy saves without it load safe defaults */
-    iteRescueStats: state.iteRescueStats
+    iteRescueStats: state.iteRescueStats,
+    /* V2.1.88 — WOW collections + pressure-release timer bonus (additive; legacy saves load safe defaults) */
+    wow: state.wow
   };
   storageSet(SAVE_KEY, JSON.stringify(data));
   broadcastUnlocks();
@@ -5288,6 +5362,7 @@ function loadGame(){
   state.damMachineLastResult     = sanitizeDamMachineLastResult(d.damMachineLastResult);
   /* DAM NATION V1.0 — missing/malformed rescue data becomes safe defaults; nothing else is reset. */
   state.iteRescueStats           = sanitizeIteRescueStats(d.iteRescueStats);
+  state.wow                      = sanitizeWowState(d.wow);          // V2.1.88
   /* V2.0.7 — one-time migration. Before V2.0, a rescued -ite character could ONLY come from the
      V1.7 auto-unlock, so those ids are removed once (saves without charRulesV2). After that, any
      -ite character in the save was purchased or won and is kept. Nothing else is touched. */
@@ -5339,7 +5414,7 @@ const dayRewardEl = $("dayReward"), drTitle = $("drTitle"), drAmount = $("drAmou
 const timeUpCard = $("timeUpCard"), timeUpDetail = $("timeUpDetail");
 const levelCard = $("levelCard"), levelInner = $("levelInner"), lcLevel = $("lcLevel"), lcBackdrop = $("lcBackdrop");
 const lcChar = $("lcChar"), lcCharName = $("lcCharName"), lcChain = $("lcChain"), lcSong = $("lcSong"), lcBtn = $("lcBtn"), lcNote = $("lcNote"), lcBurst = $("lcBurst");
-const PANELS = { characters: $("charactersPanel"), tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel"), profile: $("profilePanel") };
+const PANELS = { characters: $("charactersPanel"), tribes: $("tribesPanel"), radio: $("radioPanel"), store: $("storePanel"), profile: $("profilePanel"), wow: $("wowPanel") };
 const fmt = n => Number(n).toLocaleString("en-US");
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
@@ -5764,7 +5839,7 @@ function beginDay(index){
   updateProgressDots();
   renderHud();
   resetDayTimer();
-  if(isTimerBlocked()) timerPaused = true;           // a panel is open / tab hidden: hold at 10.0
+  if(isTimerBlocked()) WOW_TIMER_ENGINE.timerPaused = true;   // a panel is open / tab hidden: hold at the full budget
   else startDayTimer();
 }
 
@@ -5804,62 +5879,73 @@ function showDayReward(index){
   dayRewardTimer = setTimeout(()=> dayRewardEl.classList.remove("show"), 1500);
 }
 
-let dayTimerId = null;
-let dayTimerStartedAt = 0;
-let dayTimerBudgetMs = getDayTimeLimitMs(state.level);
-let dayTimerRemainingMs = getDayTimeLimitMs(state.level);
-let timerPaused = false;
-let lastWarnSecond = null;
-
-function currentRemainingMs(){
-  if(dayTimerId === null) return dayTimerRemainingMs;
-  return Math.max(0, dayTimerBudgetMs - (performance.now() - dayTimerStartedAt));
-}
-function startDayTimer(budgetMs = getDayTimeLimitMs(state.level)){
-  stopDayTimer();                                    // never more than one interval alive
-  timerPaused = false;
-  dayTimerBudgetMs = budgetMs;
-  dayTimerRemainingMs = budgetMs;
-  dayTimerStartedAt = performance.now();
-  dayTimerId = setInterval(tickDayTimer, 100);
-  renderTimer();
-}
-function stopDayTimer(){
-  if(dayTimerId !== null){
-    dayTimerRemainingMs = currentRemainingMs();
-    clearInterval(dayTimerId);
-    dayTimerId = null;
-  }
-}
-function resetDayTimer(){
-  stopDayTimer();
-  timerPaused = false;
-  lastWarnSecond = null;
-  dayTimerRemainingMs = getDayTimeLimitMs(state.level);
-  renderTimer();
-}
-function pauseDayTimer(){
-  if(dayTimerId === null) return;
-  stopDayTimer();
-  timerPaused = true;
-  renderTimer();
-}
-function resumeDayTimer(){
-  if(!timerPaused || state.phase !== "playing" || state.busy) return;
-  startDayTimer(dayTimerRemainingMs);
-}
-function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || window.geiWelcomeOpen === true || document.hidden || (typeof damMachine === "object" && damMachine.open); }
+/* =========================================================
+   V2.1.88 — WOW_TIMER_ENGINE: the ONE authoritative gameplay timer ("pressure release" clock).
+   baseTimerSeconds 6 + bonusTimerSeconds (3 per completed WOW collection, saved in state.wow) = currentTimerSeconds.
+   There is no second countdown anywhere: the legacy startDayTimer / stopDayTimer / … names below are thin
+   delegates so existing call sites keep working, and every one of them lands in this engine.
+========================================================= */
+const WOW_TIMER_ENGINE = (() => {
+  let id = null, startedAt = 0, budgetMs = 0, remainingMs = -1, lastWarn = null;   // -1 = idle at the full budget
+  const E = {
+    baseTimerSeconds: WOW_TIMER_BASE_SECONDS,
+    get bonusTimerSeconds(){ return Math.max(0, (state.wow && state.wow.timerBonusSeconds) | 0); },
+    get currentTimerSeconds(){ return E.baseTimerSeconds + E.bonusTimerSeconds; },
+    get timerRunning(){ return id !== null; },
+    timerPaused: false,
+    timerExpired: false,
+    get lastWarn(){ return lastWarn; }, set lastWarn(v){ lastWarn = v; },
+    fullBudgetMs(){ return E.currentTimerSeconds * 1000; },
+    remaining(){ return id === null ? (remainingMs < 0 ? E.fullBudgetMs() : remainingMs) : Math.max(0, budgetMs - (performance.now() - startedAt)); },
+    setRemaining(ms){ remainingMs = Math.max(0, ms); },
+    start(ms = E.fullBudgetMs()){
+      E.stop();                                          // never more than one interval alive
+      E.timerPaused = false; E.timerExpired = false;
+      budgetMs = ms; remainingMs = ms; startedAt = performance.now();
+      id = setInterval(tickDayTimer, 100);
+      renderTimer();
+    },
+    stop(){
+      if(id !== null){ remainingMs = E.remaining(); clearInterval(id); id = null; }   // keeps the exact time left for resume
+    },
+    reset(){
+      E.stop(); E.timerPaused = false; E.timerExpired = false; lastWarn = null;
+      remainingMs = -1;
+      renderTimer();
+    },
+    pause(){ if(id === null) return; E.stop(); E.timerPaused = true; renderTimer(); },
+    resume(){ if(!E.timerPaused || state.phase !== "playing" || state.busy) return; E.start(remainingMs); },
+    /* Pressure release: +3s per completed collection, persisted through the normal save. */
+    awardBonus(seconds = WOW_TIMER_STEP_SECONDS){
+      const add = Math.max(0, Math.floor(Number(seconds) || 0));
+      state.wow.timerBonusSeconds = Math.min(3600, (state.wow.timerBonusSeconds | 0) + add);
+      if(id === null && !E.timerExpired) remainingMs = -1;   // idle clock shows the new total right away
+      saveGame(); renderTimer();
+      return E.currentTimerSeconds;
+    },
+    snapshot(){ return { baseTimerSeconds:E.baseTimerSeconds, bonusTimerSeconds:E.bonusTimerSeconds, currentTimerSeconds:E.currentTimerSeconds,
+      timerRunning:E.timerRunning, timerPaused:E.timerPaused, timerExpired:E.timerExpired, remainingMs:Math.round(E.remaining()) }; }
+  };
+  return E;
+})();
+function currentRemainingMs(){ return WOW_TIMER_ENGINE.remaining(); }
+function startDayTimer(budgetMs){ WOW_TIMER_ENGINE.start(budgetMs); }
+function stopDayTimer(){ WOW_TIMER_ENGINE.stop(); }
+function resetDayTimer(){ WOW_TIMER_ENGINE.reset(); }
+function pauseDayTimer(){ WOW_TIMER_ENGINE.pause(); }
+function resumeDayTimer(){ WOW_TIMER_ENGINE.resume(); }
+function isTimerBlocked(){ return anyPanelOpen() || preGameOpen || window.geiWelcomeOpen === true || window.geiWowOpen === true || document.hidden || (typeof damMachine === "object" && damMachine.open); }
 function syncTimerPause(){ if(isTimerBlocked()) pauseDayTimer(); else resumeDayTimer(); }
 
 function tickDayTimer(){
   const rem = currentRemainingMs();
-  dayTimerRemainingMs = rem;
+  WOW_TIMER_ENGINE.setRemaining(rem);
   const ph = pressurePhase(rem);
   if(rem > 0 && ph.key !== "normal"){
     // Faster beats as pressure climbs: 1/s rising, 2/s critical, 4/s imminent.
     const step = ph.key === "imminent" ? 250 : ph.key === "critical" ? 500 : 1000;
     const beat = ph.key + Math.ceil(rem / step);
-    if(beat !== lastWarnSecond){ lastWarnSecond = beat; playTimerWarningSound(ph.key); }
+    if(beat !== WOW_TIMER_ENGINE.lastWarn){ WOW_TIMER_ENGINE.lastWarn = beat; playTimerWarningSound(ph.key); }
   }
   renderTimer();
   if(rem <= 0) handleDayTimeout();
@@ -5867,14 +5953,14 @@ function tickDayTimer(){
 
 function renderTimer(){
   const rem = currentRemainingMs();
-  const running = dayTimerId !== null;
+  const running = WOW_TIMER_ENGINE.timerRunning;
   const phase = state.phase;
   const ph = pressurePhase(rem);
   let unit = ph.label;
   if(phase === "ready") unit = "Tap to start";
   else if(phase === "timeout") unit = "Dam broke";
   else if(phase === "levelComplete" || phase === "redeemed") unit = "Cycle done";
-  else if(timerPaused) unit = "Paused";
+  else if(WOW_TIMER_ENGINE.timerPaused) unit = "Paused";
   timerNum.textContent = (Math.ceil(rem / 100) / 10).toFixed(1);
   timerUnit.textContent = unit;
   const live = running && phase === "playing";
@@ -5884,15 +5970,15 @@ function renderTimer(){
   PRESSURE_PHASES.forEach(p => timerBox.classList.toggle("p-" + p.key, live && p.key === ph.key));
   world.classList.toggle("pressureCritical", live && ph.key === "critical");
   world.classList.toggle("pressureImminent", live && ph.key === "imminent");
-  timerBox.classList.toggle("idle", phase === "ready" || timerPaused);
+  timerBox.classList.toggle("idle", phase === "ready" || WOW_TIMER_ENGINE.timerPaused);
   timerBox.classList.toggle("expired", phase === "timeout");
-  timerFill.style.width = (rem / getDayTimeLimitMs(state.level) * 100) + "%";
+  timerFill.style.width = (rem / WOW_TIMER_ENGINE.fullBudgetMs() * 100) + "%";
 }
 
 function handleDayTimeout(){
   if(state.phase !== "playing") return;
   stopDayTimer();
-  dayTimerRemainingMs = 0;
+  WOW_TIMER_ENGINE.setRemaining(0); WOW_TIMER_ENGINE.timerExpired = true;
   state.phase = "timeout";
   // Reset only the current day's taps. No FL OZ is awarded or removed; earlier days stay done.
   const g = stationsGroup.querySelector(`.station[data-index="${state.currentStep}"]`);
@@ -9212,6 +9298,7 @@ function togglePanel(name){
   if(willOpen){
     if(name === "radio"){ radioQuipText = getDamHumor("radio"); renderRadio(); }
     if(name === "profile"){ profileQuipText = getDamHumor("profile"); renderProfile(); }
+    if(name === "wow"){ try { window.GEI_WOW_ENGINE && window.GEI_WOW_ENGINE.renderPanel(); } catch(e){} }   // V2.1.88
     if(name === "store"){ storeQuipText = getDamHumor(walletHumorCategory(state.totalFlOz)); renderStore(); }
     PANELS[name].classList.add("open");
   }
@@ -9287,11 +9374,11 @@ function renderGuideRules(){
   const list = $("guideRulesList"); if(!list) return;
   const taps = getRequiredTaps(state.level);
   const nextTier = Math.ceil(Math.max(1, state.level) / 6) * 6 + 1;
-  const secs = Math.round(getDayTimeLimitMs(state.level) / 1000);
+  const secs = WOW_TIMER_ENGINE.currentTimerSeconds;
   const rules = [
     `🌊 <strong>Six days per level.</strong> ${DAM_DAYS.map(d => esc(d.station)).join(" → ")} → Ocean. Each day is one station.`,
     `👆 <strong>Taps per station.</strong> At your level (Level ${fmt(state.level)}) each station needs <strong>${fmt(taps)} taps</strong>. The requirement goes up as you level — next increase at Level ${fmt(nextTier)} (${fmt(getRequiredTaps(nextTier))} taps).`,
-    `⏱️ <strong>Beat the timer.</strong> Your first tap starts a ${secs}-second clock for that day${state.level > 60 ? "" : " (10 seconds per day after Level 60)"}.`,
+    `⏱️ <strong>Beat the timer.</strong> Your first tap starts a ${secs}-second clock for that day. Complete a six-item WOW collection to release pressure: +3 seconds, saved forever.`,
     `💥 <strong>Timer runs out?</strong> The dam breaks and you retry that day. FL OZ you already earned stays in your wallet.`,
     `💧 <strong>Rewards.</strong> +${fmt(DAY_REWARD_FL_OZ)} FL OZ per day · ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ per level. Finishing Day 6 saves the current -ite.`,
     `🎡 <strong>Level complete.</strong> Spin the Bonus Waterwheel, then continue to the next level.`,
@@ -10107,6 +10194,7 @@ function renderProfile(){
   $("profileStats").innerHTML = stats.map(([label, value, sub]) =>
     `<div class="pStat"><div class="pLabel">${esc(label)}</div><div class="pValue">${esc(value)}</div><div class="pSub">${esc(sub)}</div></div>`).join("");  renderDamMachineHistory();
   renderIteRescueRecord();                               // DAM NATION V1.0
+  try { window.GEI_WOW_ENGINE && window.GEI_WOW_ENGINE.renderPortfolio(); } catch(e){}   // V2.1.88 certification portfolio
 }
 
 let radioQuipText = "";
@@ -12163,13 +12251,17 @@ function geiCharacterSpotlightEnsureVisual(){
   if(!worldEl)return null;
   let box=$("geiCharacterSpotlight");
   if(box)return box;
+  const slot=$("sessionOperatorSlot");                    // V2.1.88: dedicated action-safe slot (not the world's side rail)
   box=document.createElement("div");
   box.id="geiCharacterSpotlight";
-  box.className="geiCharacterSpotlight sideRail";
-  box.setAttribute("aria-hidden","true");
+  box.className="geiCharacterSpotlight sideRail operatorChip";
+  box.setAttribute("role","button");box.setAttribute("tabindex","0");
+  box.setAttribute("aria-label","Session operator — open WOW collections and the pressure-release timer");
+  box.addEventListener("click",()=>togglePanel("wow"));
+  box.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); togglePanel("wow"); } });
   box.setAttribute("data-ui-zone","session-spotlight-rail");
-  box.innerHTML='<div class="spotHead"><span class="spotVisual"></span><span class="spotCopy"><span class="spotKicker">SESSION SPOTLIGHT</span><span class="spotName">DAM NATION CREW</span></span></div><div class="spotFlow"><i></i></div>';
-  worldEl.appendChild(box);
+  box.innerHTML='<div class="spotHead"><span class="spotVisual"></span><span class="spotCopy"><span class="spotKicker">SESSION OPERATOR</span><span class="spotName">DAM NATION CREW</span></span></div><div class="spotFlow"><i></i></div>';
+  (slot||worldEl).appendChild(box);
   return box;
 }
 function geiCharacterSpotlightRender(){
@@ -12534,6 +12626,8 @@ function restoreVisualProgress(){
 </script>
 
     <script src="/master-audio-v2183.js" defer></script>
+  <script src="/wow-collection-engine-v2188.js" defer></script>
+  <script src="/bonus-ferris-wheel-v2188.js" defer></script>
   <script src="/tap-lites-brand-v2172.js" defer></script>
   <script src="/tap-lites-first-impression-v2173.js" defer></script>
   <script src="/tap-lites-gameplay-polish-v2174.js" defer></script>
