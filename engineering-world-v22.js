@@ -112,17 +112,17 @@
       ".stmLab{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;min-height:0;background:radial-gradient(120% 80% at 50% 0,#0d2140 0,#050a18 70%);color:#eefcff;border-radius:inherit;overflow:hidden}",
       ".stmLab.show{display:flex}.stmLab *{box-sizing:border-box}",
       ".stmHead{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(47,210,255,.25);background:rgba(3,8,20,.8)}",
-      ".stmClose{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font:900 20px/1 inherit;cursor:pointer}",
+      ".stmClose{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-weight:900;font-size:20px;line-height:1;cursor:pointer}",
       ".stmHT{flex:1;min-width:0}.stmHT b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(17px,4.4vw,24px);letter-spacing:.06em;line-height:1.1}.stmHT small{display:block;margin-top:3px;font-size:13px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
       ".stmXp{flex:0 0 auto;padding:8px 12px;border-radius:14px;border:1px solid rgba(47,210,255,.5);background:rgba(47,210,255,.1);font-weight:900;letter-spacing:.04em;position:relative;font-size:16px}",
       ".stmToast{position:absolute;right:6px;top:100%;margin-top:4px;padding:6px 12px;border-radius:12px;background:linear-gradient(90deg,#2fd2ff,#f310ba);font-weight:900;font-size:15px;white-space:nowrap;animation:stmToast 2.2s ease forwards;pointer-events:none;z-index:3}",
       "@keyframes stmToast{0%{opacity:0;transform:translateY(-6px)}12%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(8px)}}",
       ".stmSteps{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.08)}",
-      ".stmStep{flex:1;min-width:0;min-height:48px;padding:4px 2px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:rgba(238,252,255,.7);font:800 11px/1.15 inherit;letter-spacing:.04em;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}",
+      ".stmStep{flex:1;min-width:0;min-height:48px;padding:4px 2px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:rgba(238,252,255,.7);font-weight:800;font-size:11px;line-height:1.15;letter-spacing:.04em;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}",
       ".stmStep i{font-style:normal;font-size:16px}.stmStep.done{border-color:rgba(141,255,176,.6);color:#bfffd2}.stmStep.now{border-color:#fff;background:rgba(47,210,255,.18);color:#fff;box-shadow:0 0 14px rgba(47,210,255,.4)}.stmStep[disabled]{opacity:.4;cursor:default}",
       ".stmBody{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:12px;-webkit-overflow-scrolling:touch;font-size:16px;line-height:1.4}",
       ".stmFoot{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.1);background:rgba(3,8,20,.9)}",
-      ".stmPrimary,.stmGo{width:100%;min-height:56px;border:0;border-radius:16px;padding:14px 16px;background:linear-gradient(90deg,#2fd2ff,#f310ba);color:#fff;font:900 17px/1.1 inherit;letter-spacing:.05em;cursor:pointer}",
+      ".stmPrimary,.stmGo{width:100%;min-height:56px;border:0;border-radius:16px;padding:14px 16px;background:linear-gradient(90deg,#2fd2ff,#f310ba);color:#fff;font-weight:900;font-size:17px;line-height:1.1;letter-spacing:.05em;cursor:pointer}",
       ".stmGo{margin-top:12px}.stmPrimary[disabled],.stmGo[disabled]{opacity:.45;cursor:default;filter:grayscale(.5)}",
       ".stmPrimary:focus-visible,.stmBtn:focus-visible,.stmClose:focus-visible,.stmStep:focus-visible,.stmCard:focus-visible,.stmCareerBtn:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}",
       ".stmSec{margin:0 0 6px;font-size:13px;font-weight:900;letter-spacing:.14em;color:#7ff0ff}",
@@ -144,7 +144,7 @@
       ".stmStat,.stmResult{margin:0 0 10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:16px;font-weight:800;min-height:46px}",
       ".stmResult em{display:block;margin-top:4px;font-style:normal;font-weight:700;color:#ffd66b;font-size:15px}",
       ".stmRow{display:grid;gap:8px;margin:0 0 10px}.stmRow.c1{grid-template-columns:1fr}.stmRow.c2{grid-template-columns:repeat(2,1fr)}.stmRow.c3{grid-template-columns:repeat(3,1fr)}.stmRow.c4{grid-template-columns:repeat(4,1fr)}.stmRow.c5{grid-template-columns:repeat(5,1fr)}.stmRow.c6{grid-template-columns:repeat(6,1fr)}",
-      ".stmBtn{min-height:56px;padding:8px 6px;border-radius:14px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font:800 22px/1.1 inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}",
+      ".stmBtn{min-height:56px;padding:8px 6px;border-radius:14px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-weight:800;font-size:22px;line-height:1.1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center}",
       ".stmBtn b{font-size:14px;letter-spacing:.04em}.stmBtn small{font-size:12px;font-weight:800;letter-spacing:.04em;opacity:.85}",
       ".stmBtn.sel{border-color:#7ff0ff;background:rgba(47,210,255,.2);box-shadow:0 0 14px rgba(47,210,255,.4)}.stmBtn.sel::after{content:\"✓\";font-size:12px}",
       ".stmBtn.good{border-color:#8dffb0;background:rgba(141,255,176,.18)}.stmBtn[disabled]{opacity:.5}",
@@ -152,7 +152,7 @@
       ".stmRow.c5 .stmBtn,.stmRow.c6 .stmBtn{font-size:12px;padding:6px 2px;font-weight:900}.stmRow.c6 .stmBtn b{font-size:22px}",
       ".stmLbl{margin:2px 0 6px;font-size:12.5px;font-weight:900;letter-spacing:.12em;color:#7ff0ff}",
       ".stmChecks{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.stmChecks span{padding:6px 10px;border-radius:999px;border:1px dashed rgba(255,255,255,.3);font-size:14px;font-weight:800;opacity:.7}.stmChecks span.on{border-style:solid;border-color:#8dffb0;opacity:1}.stmChecks span.on::before{content:\"✓ \"}",
-      ".stmCycle{display:flex;gap:4px;margin-bottom:8px}.stmCycle span{flex:1;padding:6px 0;text-align:center;border-radius:8px;border:1px solid rgba(255,255,255,.15);font:900 9.5px/1 inherit;letter-spacing:.03em;opacity:.6}.stmCycle span.past{opacity:.9;border-color:rgba(141,255,176,.5)}.stmCycle span.on{opacity:1;border-color:#fff;background:rgba(47,210,255,.2)}",
+      ".stmCycle{display:flex;gap:4px;margin-bottom:8px}.stmCycle span{flex:1;padding:6px 0;text-align:center;border-radius:8px;border:1px solid rgba(255,255,255,.15);font-weight:900;font-size:9.5px;line-height:1;letter-spacing:.03em;opacity:.6}.stmCycle span.past{opacity:.9;border-color:rgba(141,255,176,.5)}.stmCycle span.on{opacity:1;border-color:#fff;background:rgba(47,210,255,.2)}",
       ".stmWall.holds{filter:drop-shadow(0 0 8px #8dffb0)}",
       ".stmBars{display:grid;gap:8px;margin:0 0 4px;font-size:13px;font-weight:900;letter-spacing:.06em}.stmBar{height:12px;margin-top:4px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden}.stmBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2fd2ff,#7ff0ff);transition:width .25s}",
       ".stmMeter{margin:0 0 8px;font-size:18px;font-weight:900;letter-spacing:.05em}.stmMS{letter-spacing:2px}",
@@ -174,7 +174,7 @@
       ".stmLife i{grid-row:span 2;font-style:normal;font-size:28px}.stmLife b{font-size:13px;letter-spacing:.08em}.stmLife span{font-size:13px;font-weight:800}.stmLife .good{border-color:#8dffb0}.stmLife .bad{border-color:#ffb36b}.stmLife .glow{box-shadow:0 0 18px #8dffb0;animation:stmGlow 1.2s ease-in-out infinite}@keyframes stmGlow{50%{box-shadow:0 0 6px #8dffb0}}",
       /* quiz */
       ".stmQuizQ{margin:0 0 12px;font-size:clamp(20px,5vw,24px);font-weight:900;line-height:1.25}.stmQN{font-size:12px;font-weight:900;letter-spacing:.14em;color:#7ff0ff;margin-bottom:4px}",
-      ".stmOpt{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;margin:0 0 8px;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font:800 18px/1.2 inherit;text-align:left;cursor:pointer}",
+      ".stmOpt{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;margin:0 0 8px;padding:10px 14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:800;font-size:18px;line-height:1.2;text-align:left;cursor:pointer}",
       ".stmOpt i{flex:0 0 auto;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:rgba(47,210,255,.2);font-size:16px}.stmOpt.right{border-color:#8dffb0;background:rgba(141,255,176,.18)}.stmOpt.try{opacity:.55}",
       ".stmFeed{min-height:48px;margin:6px 0;font-size:16px;font-weight:800}",
       /* complete */
@@ -191,7 +191,7 @@
       ".stmCard i{font-style:normal;font-size:30px}.stmCard b{font-size:13px;letter-spacing:.05em}.stmCard small{font-size:12px;font-weight:800;color:#7ff0ff}",
       ".stmCard.done{border-color:#ffd66b;background:rgba(255,214,107,.1)}.stmCard.done small{color:#ffd66b}.stmCard.lock{opacity:.6}.stmCard.lock small{color:rgba(238,252,255,.7)}",
       ".stmMasterCard{grid-column:1/-1;border-color:#ffd66b;background:linear-gradient(90deg,rgba(255,214,107,.18),rgba(243,16,186,.14))}",
-      ".stmCareerBtn{width:100%;min-height:52px;margin:0 0 8px;border-radius:14px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);color:#fff;font:900 15px/1.1 inherit;letter-spacing:.06em;cursor:pointer}",
+      ".stmCareerBtn{width:100%;min-height:52px;margin:0 0 8px;border-radius:14px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);color:#fff;font-weight:900;font-size:15px;line-height:1.1;letter-spacing:.06em;cursor:pointer}",
       ".stmCareers{display:none;gap:8px;margin:0 0 12px}.stmCareers.show{display:grid}.stmCareers div{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}.stmCareers i{font-style:normal;font-size:28px}.stmCareers b{display:block;font-size:15px;letter-spacing:.04em}.stmCareers span{font-size:14px;opacity:.9}",
       ".stmMaster{text-align:center}.stmMaster h2{margin:4px 0 2px;font-size:clamp(22px,6vw,30px);letter-spacing:.05em;background:linear-gradient(90deg,#7ff0ff,#f39cff);-webkit-background-clip:text;background-clip:text;color:transparent}",
       ".stmTrophy{font-size:64px;line-height:1.1}.stmQuote{margin:8px 0 12px;font-size:16px;font-weight:700;line-height:1.4}",
@@ -201,14 +201,15 @@
       ".stmJNames{display:flex;justify-content:space-between;font-size:9.5px;font-weight:900;letter-spacing:.02em;margin:0 0 12px}.stmJNames span{flex:1;text-align:center}",
       ".stmLock{text-align:center;padding:24px 8px}.stmLock i{display:block;font-style:normal;font-size:56px}.stmLock p{font-size:18px;font-weight:800}",
       /* V2.2 */
+      ".stmSee{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1.5px solid #7ff0ff;background:rgba(47,210,255,.14);color:#fff;font-size:22px;cursor:pointer}.stmSee[hidden]{display:none}.stmSee:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}",
       ".stmSteps:empty{display:none}",
       ".stmCoach{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid rgba(47,210,255,.2);background:rgba(47,210,255,.06)}",
       ".stmCoach .stmAv{width:40px;height:40px;font-size:22px}.stmCoach .stmBubble{padding:5px 9px;border-radius:4px 12px 12px 12px;font-size:14px;line-height:1.25;max-height:3.9em;overflow:hidden}.stmCoach .stmBubble small{font-size:9.5px;margin:0}",
-      ".stmWhyBtn,.stmCoachBtn{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1.5px solid #ffd66b;background:rgba(255,214,107,.14);color:#fff;font:900 12px/1 inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 6px}",
+      ".stmWhyBtn,.stmCoachBtn{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1.5px solid #ffd66b;background:rgba(255,214,107,.14);color:#fff;font-weight:900;font-size:12px;line-height:1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 6px}",
       ".stmWhyBtn span{font-size:18px}.stmCoachBtn{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);font-size:22px}.stmCoach.off .stmAv{filter:grayscale(1);opacity:.6}.stmCoachBtn[aria-pressed=false]{opacity:.6}",
       ".stmWhyBtn:focus-visible,.stmCoachBtn:focus-visible,.stmSecondary:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}",
       ".stmWhy{margin:0;padding:8px 12px;border-top:1px solid rgba(255,214,107,.5);background:rgba(255,214,107,.1);font-size:14.5px;font-weight:700;line-height:1.3}.stmWhy[hidden]{display:none}.stmWhy b{display:block;font-size:10.5px;letter-spacing:.14em;color:#ffd66b}",
-      ".stmSecondary{width:100%;min-height:52px;margin:6px 0 4px;border-radius:14px;border:1.5px solid #7ff0ff;background:rgba(47,210,255,.12);color:#fff;font:900 15px/1.1 inherit;letter-spacing:.04em;cursor:pointer;padding:8px 12px}",
+      ".stmSecondary{width:100%;min-height:52px;margin:6px 0 4px;border-radius:14px;border:1.5px solid #7ff0ff;background:rgba(47,210,255,.12);color:#fff;font-weight:900;font-size:15px;line-height:1.1;letter-spacing:.04em;cursor:pointer;padding:8px 12px}",
       ".stmSlide{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:11px;font-weight:900;letter-spacing:.08em;color:#7ff0ff}",
       ".stmRange{flex:1;min-width:0;height:44px;accent-color:#2fd2ff;cursor:pointer;background:transparent}",
       ".stmRange::-webkit-slider-runnable-track{height:12px;border-radius:8px;background:rgba(255,255,255,.18)}.stmRange::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;margin-top:-11px;border-radius:50%;background:linear-gradient(145deg,#7ff0ff,#2fd2ff);border:3px solid #fff}",
@@ -269,7 +270,7 @@
     styles();
     lab=document.createElement("div");lab.className="stmLab";lab.id="stmLab";lab.setAttribute("role","dialog");lab.setAttribute("aria-modal","true");lab.setAttribute("aria-labelledby","stmTitle");lab.setAttribute("aria-hidden","true");
     lab.innerHTML='<div class="stmHead"><button type="button" class="stmClose" id="stmClose" aria-label="Back to the DAM Map">←</button>'+
-      '<div class="stmHT"><b id="stmTitle"></b><small id="stmSub"></small></div><div class="stmXp" id="stmXp" aria-live="polite"></div></div>'+
+      '<div class="stmHT"><b id="stmTitle"></b><small id="stmSub"></small></div><button type="button" class="stmSee" id="stmSeeBtn" aria-label="See inside: follow the water through the whole system" hidden><span aria-hidden="true">👁️</span></button><div class="stmXp" id="stmXp" aria-live="polite"></div></div>'+
       '<div class="stmSteps" id="stmSteps" role="tablist" aria-label="Lab steps"></div>'+
       '<div class="stmCoach" id="stmCoach"><div class="stmAv" aria-hidden="true">🦫<img alt="" src="'+GUIDE_IMG+'" onerror="this.remove()"></div>'+
       '<div class="stmBubble"><small>WILBERT · DAM GUIDE</small><span id="stmBubbleTxt" aria-live="polite"></span></div>'+
@@ -279,6 +280,10 @@
       '<div class="stmFoot"><button type="button" class="stmPrimary" id="stmPrimary"></button></div>';
     sh.appendChild(lab);
     $("stmClose").addEventListener("click",closeLab);
+    $("stmSeeBtn").addEventListener("click",function(){
+      if(V.mode!=="station")return;var id=V.id,ph=V.phase;
+      openView("system",{focus:COMP_OF[id],back:function(){openStation(id,ph);},backLabel:"← BACK TO THE LAB"});
+    });
     $("stmWhyBtn").addEventListener("click",askWhy);
     $("stmCoachBtn").addEventListener("click",function(){setCoach(!coachOn());});
     paintCoach();
@@ -347,7 +352,7 @@
     var st=G.stations[id];if(!st||!openLab())return;
     clearLab();V={mode:"station",id:id,phase:null};lastWhy="";
     $("stmTitle").textContent=st.icon+" "+st.title;$("stmSub").textContent=st.subtitle+" · "+st.topic;
-    setXpBadge();
+    setXpBadge();paintSee();
     if(!unlocked(id)&&!(phase==="free"&&master()))return renderLocked(id);
     go(phase||entryPhase(id));
     try{$("stmBody").focus({preventScroll:true});}catch(e){}
@@ -482,14 +487,33 @@
     }else primary("🗺️ BACK TO MAP",closeLab);
   }
 
+  /* ---------- views: other modules (follow-the-water-v221.js) plug whole screens into this popout ---------- */
+  G.views=G.views||{};
+  var COMP_OF={mountain:"mountain",dam:"dam",reservoir:"reservoir",sluice:"gate",wheel:"turbine",ocean:"downstream"};   // station → cutaway part
+  function paintSee(){var b=$("stmSeeBtn");if(b)b.hidden=!(V.mode==="station"&&G.views.system);}
+  function openView(name,opts){
+    opts=opts||{};var fn=G.views[name];if(typeof fn!=="function"||!openLab())return false;
+    clearLab();V={mode:"view",id:null,phase:name};lastWhy="";
+    $("stmTitle").textContent=opts.title||"🌊 FOLLOW THE WATER";$("stmSub").textContent=opts.sub||"Where is the water going?";
+    $("stmSteps").innerHTML="";$("stmWhy").hidden=true;$("stmWhy").innerHTML="";setXpBadge();paintSee();
+    var body=$("stmBody");body.scrollTop=0;body.onclick=null;body.innerHTML="";
+    var c=ctx=makeCtx(body,name);
+    fn(body,c,ENGINE,opts);
+    return true;
+  }
+  var ENGINE={say:say,wilbert:wilbert,why:showWhy,sfx:sfx,primary:primary,flag:flag,unlocked:unlocked,master:master,reduced:reduced,esc:esc,
+    close:closeLab,openStation:openStation,openAcademy:openAcademy,showMaster:showMaster,badgeCount:badgeCount,ids:ids,openView:openView};
+  G.engine=ENGINE;
+
   /* ---------- hub + master ---------- */
   function openAcademy(){
     if(!openLab())return;clearLab();V={mode:"academy",id:null,phase:"hub"};
     $("stmTitle").textContent="💧 ENGINEERING WORLD";$("stmSub").textContent="From Mountain to Ocean";setXpBadge();
-    $("stmSteps").innerHTML="";$("stmWhy").hidden=true;
+    $("stmSteps").innerHTML="";$("stmWhy").hidden=true;paintSee();
     var body=$("stmBody"),m=master(),total=core().length,got=badgeCount(),rk=rank();
     say("Tap a lab to learn, experiment and earn badges. Each lab is on your DAM Map!");
     body.innerHTML='<div class="stmHubXp"><span aria-hidden="true">'+rk.icon+'</span><div><b>'+xp()+'</b> / '+maxXp()+' STEM XP<br><small>RANK: '+esc(rk.name)+' · '+got+' of '+total+' badges</small></div></div>'+
+      (G.views.system?'<button type="button" class="stmCard stmMasterCard stmFtw" data-ftw="1"><i aria-hidden="true">🌊</i><b>FOLLOW THE WATER</b><small>SEE INSIDE THE WHOLE DAM · TAP, TRY, PREDICT</small></button>':"")+
       '<div class="stmGrid">'+(m?'<button type="button" class="stmCard stmMasterCard" data-master="1"><i aria-hidden="true">🏆</i><b>'+esc(G.master.name)+' ✓</b><small>TAP TO CELEBRATE</small></button>':"")+
       ids().map(function(id){var s=G.stations[id],e=badgeEarned(id),u=unlocked(id);
         return '<button type="button" class="stmCard'+(e?" done":"")+(u?"":" lock")+'" data-id="'+id+'"><i aria-hidden="true">'+(e?s.badge.icon:u?s.icon:"🔒")+'</i><b>'+esc(s.badge.name)+'</b><small>'+(e?"✓ EARNED":u?"STEM "+pct(id)+"%":"🔒 LOCKED")+'</small></button>';}).join("")+'</div>'+
@@ -500,8 +524,8 @@
       '<div class="stmNote real"><b>🔬 REAL-WORLD STEM</b>Water cycle, gravity, dams, reservoirs, flow, hydropower and ecosystems are real science.</div>'+
       '<div class="stmNote gei"><b>🎮 GEI GAME STORY</b>The GEI journey is the game\'s own story and imagination — not established science.</div>';
     body.onclick=function(e){
-      var c=e.target.closest&&e.target.closest("[data-id]"),m2=e.target.closest&&e.target.closest("[data-master]"),cb=e.target.closest&&e.target.closest(".stmCareerBtn"),fr=e.target.closest&&e.target.closest("[data-free]");
-      if(fr)openStation(fr.dataset.free,"free");else if(c)openStation(c.dataset.id);else if(m2)showMaster();
+      var c=e.target.closest&&e.target.closest("[data-id]"),m2=e.target.closest&&e.target.closest("[data-master]"),cb=e.target.closest&&e.target.closest(".stmCareerBtn"),fr=e.target.closest&&e.target.closest("[data-free]"),ft=e.target.closest&&e.target.closest("[data-ftw]");
+      if(ft)openView("system",{back:openAcademy,backLabel:"← BACK TO THE ACADEMY"});else if(fr)openStation(fr.dataset.free,"free");else if(c)openStation(c.dataset.id);else if(m2)showMaster();
       else if(cb){var box=$("stmCareers"),on=!box.classList.contains("show");box.classList.toggle("show",on);cb.setAttribute("aria-expanded",on);}
     };
     primary("🗺️ BACK TO MAP",closeLab);body.scrollTop=0;
@@ -509,7 +533,7 @@
   function showMaster(){
     if(!openLab())return;clearLab();V={mode:"master",id:null,phase:"master"};
     store.seen=1;save();
-    $("stmTitle").textContent="💧 ENGINEERING WORLD";$("stmSub").textContent="From Mountain to Ocean";$("stmSteps").innerHTML="";$("stmWhy").hidden=true;setXpBadge();
+    $("stmTitle").textContent="💧 ENGINEERING WORLD";$("stmSub").textContent="From Mountain to Ocean";$("stmSteps").innerHTML="";$("stmWhy").hidden=true;setXpBadge();paintSee();
     var body=$("stmBody"),ms=G.master,J=[["🏔️","MOUNTAIN"],["💧","RAIN"],["🧱","DAM"],["🌊","RESERVOIR"],["🚪","SLUICE"],["⚙️","TURBINE"],["🌎","OCEAN"]];
     say("ENGINEER MODE ACTIVATED!",true);
     body.innerHTML='<div class="stmMaster stmWow" id="stmWow"><div class="stmTrophy" aria-hidden="true">'+ms.icon+'</div><div class="stmSec">💧 '+esc(ms.world)+'</div><h2>'+esc(ms.name)+' 🏆</h2>'+
@@ -520,8 +544,9 @@
       '<p class="stmQuote" style="text-align:center;font-weight:900;letter-spacing:.04em">MOUNTAIN → DAM → RESERVOIR → SLUICE → WHEEL → OCEAN</p>'+
       '<div class="stmFinale"><b>'+esc(ms.finale[0])+'</b><b>'+esc(ms.finale[1])+'</b></div>'+
       '<div class="stmFreeChip">🚀 FREE ENGINEERING MODE UNLOCKED</div>'+
+      (G.views.system?'<button type="button" class="stmSecondary" data-finale="1">▶ WATCH THE WHOLE SYSTEM</button>':"")+
       '<div class="stmNote real"><b>💧 '+xp()+' STEM XP</b>Educational progress only — it never changes your game coins or purchases.</div>';
-    body.onclick=null;
+    body.onclick=function(e){if(e.target.closest&&e.target.closest("[data-finale]"))openView("system",{finale:true,back:openAcademy,backLabel:"🚀 OPEN FREE ENGINEERING MODE"});};
     confetti($("stmWow"),["🏆","💧","✨","🌎","⚙️"]);sfx("master");
     primary("🚀 OPEN FREE ENGINEERING MODE",openAcademy);body.scrollTop=0;
   }

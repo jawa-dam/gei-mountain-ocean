@@ -19,3 +19,19 @@ Wilbert's coach preference is `geiStemCoach.v1` (presentation only).
 node tools/v22-engineering-world/engineering-world-regression.mjs   # SHOTS=dir for screenshots
 ```
 Pre-existing `addStyle is not defined` errors come from four unparseable tap-lites modules and are ignored by the harness.
+
+## V2.2.1 — FOLLOW THE WATER (`follow-the-water-v221.js`)
+One animated cutaway of the whole system (mountain → dam → reservoir → gate → turbine → generator → downstream),
+opened by the 👁️ SEE INSIDE button in every lab, the hub's 🌊 card, or the Master screen's ▶ WATCH THE WHOLE SYSTEM.
+
+- 🌊 **Follow the water** — a guided tour: a 💧 leads, Wilbert's pointer highlights each part, the system reacts.
+- 🧩 **What does this do?** — tap any part. Names grow from plain (WATER GATE, SPINNING WHEEL) to engineering
+  (SLUICE GATE, TURBINE) once the matching lab is discovered.
+- 🧪 **Experiment** — gate + rain controls; each change plays a cause-and-effect trail and a one-line result.
+- 🎯 **Predict** — four predictions (flow, storage, energy, downstream) → ✨ understanding moments → 🧠 SYSTEMS THINKER.
+- 🔬 **Engineer view** — optional readouts (gate %, level, RPM, power, river health); the preference is remembered.
+- ▶ **Finale** — zooms out over the running system, then ENGINEERING MODE UNLOCKED.
+- The cutaway is revealed by the DAM Map's own progression (parts not reached yet are "?").
+
+Plug-in point: `GEI_STEM.views.<name>(body, ctx, env, opts)`; open with `GEI_STEM.engine.openView(name, opts)`.
+Writes only `geiWaterSystem.v1` (parts seen / understood) and `geiEngineerView.v1`. No STEM XP, game XP, FL OZ, purchases or `/api`.
