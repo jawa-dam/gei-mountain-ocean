@@ -1,16 +1,18 @@
-/* V1 — DAM STEM ACADEMY regression harness
+/* V2.2 — DAM ENGINEERING WORLD regression harness
  *
  * Loads the real index.html in headless Chromium and plays the whole STEM flow through the real DAM Map:
  *   A  map: STEM header button, per-station STEM tags, locked stations follow the map's own progression
- *   B  all six stations, start to finish: DISCOVER → EXPERIMENT → MISSION → PROVE IT (wrong answer first,
- *      never shamed) → COMPLETE → badge; XP exactly 75/station + 100 Master bonus; Master screen
+ *   B  all six stations, start to finish: DISCOVER → TEST → MISSION → WHAT WOULD YOU DO? (a wrong choice first:
+ *      an experiment, never shamed, always explained) → REWARD → badge + rank; XP exactly 75/station + 100 Master
+ *      bonus; "💡 WHY DID THAT HAPPEN?", Wilbert + 💡 WHY? + coach toggle; FREE PLAY per station; Master screen
+ *      + FREE ENGINEERING MODE
  *   C  persistence: STEM progress survives a reload; STEM XP is derived from step flags
  *   D  economy: game state (FL OZ, level, XP…) is byte-identical after the whole run; no /api request is made
  *   E  mobile + desktop: popout stays inside the map frame, no horizontal scroll, tap targets >= 44px,
  *      DAM Map pills still never overlap, BACK/Escape close the lab before the map
  *   F  no uncaught page errors
  *
- *   node tools/v1-stem-academy/stem-academy-regression.mjs
+ *   node tools/v22-engineering-world/engineering-world-regression.mjs
  *   SHOTS=/some/dir node ...    also writes screenshots
  *
  * Offline: every non-local request is blocked. Exits non-zero if any check fails.
@@ -82,7 +84,7 @@ const setProgress = (page, s) => page.evaluate(s => { state.level = s.level; sta
 const LAYOUT = () => {
   const lab = document.getElementById("stmLab"), sh = document.querySelector("#geiDamMapPage .dmwShell"), body = document.getElementById("stmBody");
   const r = lab.getBoundingClientRect(), s = sh.getBoundingClientRect();
-  const small = [...lab.querySelectorAll(".stmBtn,.stmOpt,.stmPrimary,.stmStep,.stmClose,.stmCard")].filter(b => b.offsetParent && !b.disabled)
+  const small = [...lab.querySelectorAll(".stmBtn,.stmOpt,.stmPrimary,.stmStep,.stmClose,.stmCard,.stmRange,.stmWhyBtn,.stmCoachBtn,.stmSecondary")].filter(b => b.offsetParent && !b.disabled)
     .filter(b => { const q = b.getBoundingClientRect(); return q.width < 44 || q.height < 44; }).map(b => b.className + ":" + b.textContent.trim().slice(0, 14));
   const prim = document.getElementById("stmPrimary").getBoundingClientRect();
   return {
@@ -97,6 +99,7 @@ const LAYOUT = () => {
 async function waitEnabled(page, ms = 25000){
   await page.waitForFunction(() => { const b = document.getElementById("stmPrimary"); return b && !b.disabled; }, null, { timeout: ms });
 }
+const setRange = (p, sel, v) => p.evaluate(([sel, v]) => { const i = document.querySelector(sel); i.value = v; i.dispatchEvent(new Event("input", { bubbles: true })); }, [sel, v]);
 const click = (page, sel) => page.click(sel, { timeout: 5000 });
 async function primary(page){ await waitEnabled(page); await click(page, "#stmPrimary"); await sleep(120); }
 
@@ -104,16 +107,37 @@ async function primary(page){ await waitEnabled(page); await click(page, "#stmPr
 const PLAY = {
   mountain: async p => { for (const a of ["rain", "snow", "runoff"]) { await p.waitForFunction(() => !document.querySelector('#stmLabHost [data-a]').disabled, null, {}); await click(p, `[data-a="${a}"]`); await sleep(2600); } },
   "mountain-path": async p => { await click(p, '[data-c="a"]'); await sleep(300); const t = await p.textContent(".stmStat"); check("B-mission-mountain: wrong path is encouraging, not shaming", /Try|Not that way/.test(t) && !/wrong|fail|bad/i.test(t), t); await click(p, '[data-c="c"]'); await sleep(300); },
-  dam: async p => { await click(p, '[data-m="wood"]'); await click(p, "[data-go]"); await sleep(300); const r1 = await p.textContent(".stmResult"); check("B-dam: weak design LEAKS", /LEAK/.test(r1), r1); await click(p, '[data-m="concrete"]'); await click(p, "[data-go]"); await sleep(300); const r2 = await p.textContent(".stmResult"); check("B-dam: strong design HOLDS", /DAM HOLDS/.test(r2), r2); },
-  "dam-flood": async p => { await click(p, '[data-m="rock"]'); await click(p, "[data-go]"); await sleep(300); const r1 = await p.textContent(".stmResult"); check("B-dam-mission: thin rock leaks in the flood, tells the child how to improve", /LEAK/.test(r1) && /IMPROVE/.test(r1), r1); await click(p, '[data-t="1"]'); await click(p, "[data-go]"); await sleep(300); },
-  reservoir: async p => { await click(p, '[data-r="3"]'); },
-  "reservoir-storm": async p => { await click(p, '[data-o="2"]'); await click(p, "[data-go]"); const eq = await p.waitForSelector(".stmEq b", { timeout: 4000 }).then(() => p.textContent(".stmEq")).catch(() => ""); check("B-reservoir: shows Start + In − Out = End", /START.*IN.*OUT.*END/.test(eq), eq); },
-  sluice: async p => { for (const i of [1, 2, 4]) { await click(p, `[data-g="${i}"]`); await sleep(100); } const t = await p.textContent(".stmFlowTxt"); check("B-sluice: 100% shows 🌊🌊🌊🌊🌊", t.includes("🌊🌊🌊🌊🌊"), t); },
-  "sluice-predict": async p => { await click(p, '[data-a="0"]'); await sleep(1700); await click(p, '[data-a="1"]'); await sleep(1700); },
-  wheel: async p => { await click(p, '[data-f="1"]'); const s1 = await p.textContent(".stmSpeed"); await click(p, '[data-f="4"]'); await click(p, '[data-h="2"]'); const s2 = await p.textContent(".stmSpeed"); check("B-wheel: more flow + height → faster wheel", /SLOW/.test(s1) && /SUPER FAST/.test(s2), [s1, s2]); },
+  dam: async p => {
+    await click(p, '[data-m="wood"]'); await click(p, "[data-go]"); await sleep(300); const r1 = await p.textContent(".stmResult"); check("B-dam: weak design LEAKS", /LEAK/.test(r1), r1);
+    const s0 = +(await p.textContent(".stmSN")); await click(p, '[data-x="1"]'); const s1 = +(await p.textContent(".stmSN")); check("B-dam: 🏗️ reinforcement raises wall strength", s1 > s0 && /ON/.test(await p.textContent('[data-x="1"]')), [s0, s1]);
+    await click(p, '[data-x="1"]'); await click(p, '[data-m="concrete"]'); await click(p, "[data-go]"); await sleep(300); const r2 = await p.textContent(".stmResult"); check("B-dam: strong design HOLDS (DAM HOLDING / ENGINEERING MASTER)", /HOLDING|ENGINEERING MASTER/.test(r2), r2);
+    check("B-dam: result is explained (💡 WHY)", /WHY DID THAT HAPPEN/.test(await p.textContent("#stmWhy")), {}); },
+  "dam-flood": async p => { await click(p, '[data-m="rock"]'); await click(p, "[data-go]"); await sleep(300); const r1 = await p.textContent(".stmResult"); check("B-dam-mission: thin rock is 'too much water' in the flood and tells the child how to improve", /TOO MUCH WATER|LEAK/.test(r1) && /IMPROVE/.test(r1), r1); await click(p, '[data-t="1"]'); await click(p, "[data-go]"); await sleep(300); },
+  reservoir: async p => {
+    await sleep(1400); check("B-reservoir: balanced → RESERVOIR STABLE", /STABLE/.test(await p.textContent(".stmStat")), await p.textContent(".stmStat"));
+    await setRange(p, ".stmIn", 4); await sleep(1400); check("B-reservoir: more in than out → LEVEL RISES + why", /RISES/.test(await p.textContent(".stmStat")) && /more water entered/i.test(await p.textContent("#stmWhy")), await p.textContent("#stmWhy"));
+    await setRange(p, ".stmIn", 0); await setRange(p, ".stmOut", 3); await sleep(1400); check("B-reservoir: more out than in → LEVEL FALLS", /FALLS/.test(await p.textContent(".stmStat")), await p.textContent(".stmStat")); },
+  "reservoir-storm": async p => { await setRange(p, ".stmOut", 2); await click(p, "[data-go]"); const eq = await p.waitForSelector(".stmEq b", { timeout: 4000 }).then(() => p.textContent(".stmEq")).catch(() => ""); check("B-reservoir: shows Start + In − Out = End", /START.*IN.*OUT.*END/.test(eq), eq); },
+  sluice: async p => { for (const i of [1, 2, 4]) { await click(p, `[data-g="${i}"]`); await sleep(100); } const t = await p.textContent(".stmFlowTxt"), m = await p.textContent(".stmFM"); check("B-sluice: 100% shows 🌊🌊🌊🌊🌊 and a flow meter", t.includes("🌊🌊🌊🌊🌊") && /FLOW █{8} 100%/.test(m), [t, m]); },
+  "sluice-target": async p => {
+    await click(p, '[data-g="4"]'); await sleep(200); check("B-sluice-mission: overshooting the target is explained, not punished", /Too much flow/.test(await p.textContent(".stmStat")), await p.textContent(".stmStat"));
+    await click(p, '[data-g="2"]'); await sleep(1900);                                    // target 50% (full reservoir)
+    check("B-sluice-mission: second target is 25% with a LOW reservoir (head matters)", /25%/.test(await p.textContent(".stmTT")), await p.textContent(".stmTT"));
+    await click(p, '[data-g="2"]'); await sleep(1900);                                    // 50% gate × .5 head = 25%
+    await click(p, '[data-g="4"]'); await sleep(400); },                                  // 100% gate × .5 head = 50%
+  wheel: async p => { await click(p, '[data-f="1"]'); const s1 = await p.textContent(".stmSpeed"); await click(p, '[data-f="4"]'); await click(p, '[data-h="2"]'); const s2 = await p.textContent(".stmSpeed"); check("B-wheel: more flow + height → faster turbine", /SLOW/.test(s1) && /SUPER FAST/.test(s2), [s1, s2]);
+    await sleep(1800); check("B-wheel: power meter + town lights respond", /[1-5]\/5/.test(await p.textContent(".stmTownTxt")) && +(await p.textContent(".stmEN")) > 0, await p.textContent(".stmTownTxt")); },
   "wheel-power": async p => { await click(p, '[data-f="4"]'); await click(p, '[data-h="2"]'); },
-  ocean: async p => { for (const r of [0, 3, 5]) { await click(p, `[data-r="${r}"]`); await sleep(100); } },
+  ocean: async p => { for (const r of [0, 3, 5]) { await click(p, `[data-r="${r}"]`); await sleep(100); } const l = await p.textContent(".stmLife"); check("B-ocean: fish, frogs, birds, beaver, plants and community all shown", ["FISH", "FROGS", "BIRDS", "BEAVER", "PLANTS", "COMMUNITY"].every(x => l.includes(x)), l.slice(0, 60)); },
   "ocean-balance": async p => { await click(p, '[data-r="2"]'); }
+};
+const FREE = {                                       // one quick, unscored interaction per station in FREE PLAY
+  mountain: async p => { await click(p, '[data-a="runoff"]'); await sleep(1200); },
+  dam: async p => { await setRange(p, ".stmFlood", 120); await click(p, '[data-m="soil"]'); await click(p, "[data-go]"); await sleep(300); },
+  reservoir: async p => { await setRange(p, ".stmIn", 4); await sleep(1300); },
+  sluice: async p => { await click(p, '[data-g="3"]'); },
+  wheel: async p => { await click(p, '[data-f="3"]'); },
+  ocean: async p => { await click(p, '[data-r="4"]'); }
 };
 
 async function playStation(page, id, layout, shot){
@@ -123,11 +147,19 @@ async function playStation(page, id, layout, shot){
   await sleep(150);
   const xp0 = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp);
   const lo = [];
-  const snap = async tag => { if (layout) lo.push([tag, await page.evaluate(LAYOUT)]); if (SHOTS) await page.screenshot({ path: join(SHOTS, `${layout}-${id}-${tag}.png`) }); };
+  const snap = async tag => { if (layout) lo.push([id + ":" + tag, await page.evaluate(LAYOUT)]); if (SHOTS) await page.screenshot({ path: join(SHOTS, `${layout}-${id}-${tag}.png`) }); };
   // DISCOVER
   const disc = await page.textContent("#stmBody");
   check(`B-${id}: discover shows a short lesson, REAL-WORLD and GEI layers apart`, disc.includes("REAL-WORLD STEM") && disc.includes("GEI GAME STORY") && disc.length < 900, disc.length);
   await snap("1-discover");
+  if (id === "mountain") {
+    await click(page, "#stmWhyBtn"); await sleep(100);
+    check("B-wilbert: 💡 WHY? makes Wilbert explain", /^💡/.test(await page.textContent("#stmBubbleTxt")), await page.textContent("#stmBubbleTxt"));
+    await click(page, "#stmCoachBtn"); await sleep(100);
+    const off = await page.evaluate(() => ({ p: document.getElementById("stmCoachBtn").getAttribute("aria-pressed"), t: document.getElementById("stmBubbleTxt").textContent, s: __GEI_ENGINEERING_WORLD_V22__.coach() }));
+    check("B-wilbert: the coach can be switched off (and 💡 WHY? still works)", off.p === "false" && /resting/.test(off.t) && !off.s, off);
+    await click(page, "#stmCoachBtn"); await sleep(100);
+  }
   await click(page, "#stmPrimary"); await sleep(200);
   check(`B-${id}: TRY IT awards +10 STEM XP`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === xp0 + 10, {});
   // EXPERIMENT
@@ -140,24 +172,31 @@ async function playStation(page, id, layout, shot){
   await waitEnabled(page); await sleep(200);
   check(`B-${id}: mission +25`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === xp0 + 50, {});
   await click(page, "#stmPrimary"); await sleep(200);
-  // PROVE IT — one wrong answer first
-  for (let qi = 0; qi < st.quiz.length; qi++) {
-    const q = st.quiz[qi];
-    const wrong = q.options[(q.answer + 1) % q.options.length];
-    if (qi === 0) {
-      await page.locator(".stmOpt", { hasText: wrong }).first().click(); await sleep(120);
-      const f = await page.textContent(".stmFeed");
-      check(`B-${id}: wrong answer is gentle`, /Good try/.test(f) && !/wrong|incorrect|fail/i.test(f), f);
-      await snap("4-prove");
-    }
-    await page.locator(".stmOpt", { hasText: q.options[q.answer] }).first().click(); await sleep(120);
-    await click(page, "#stmPrimary"); await sleep(200);
-  }
+  // WHAT WOULD YOU DO? — decision → result → explanation; a wrong choice first
+  const dc = await page.evaluate(id => GEI_STEM.stations[id].decide, id);
+  const scen = await page.textContent("#stmBody");
+  check(`B-${id}: decision mission shows a scenario`, scen.includes(dc.scenario) && scen.includes("WHAT WOULD YOU DO"), scen.slice(0, 60));
+  const bad = dc.options.find(o => !o.ok), good = dc.options.find(o => o.ok);
+  await page.locator(".stmOpt", { hasText: bad.text }).first().click(); await sleep(150);
+  const f = await page.textContent(".stmFeed"), w = await page.textContent("#stmWhy");
+  check(`B-${id}: wrong decision is a gentle experiment with a result and a 💡 WHY`, /Good experiment/.test(f) && !/wrong|incorrect|fail/i.test(f) && /WHY DID THAT HAPPEN/.test(w) && !(await page.$eval("#stmPrimary", b => !b.disabled)), [f, w]);
+  await snap("4-decide");
+  await page.locator(".stmOpt", { hasText: good.text }).first().click(); await sleep(150);
+  check(`B-${id}: right decision is simulated and explained`, /✅/.test(await page.textContent(".stmFeed")), await page.textContent(".stmFeed"));
+  await click(page, "#stmPrimary"); await sleep(200);
   const done = await page.textContent("#stmBody");
   const badge = await page.evaluate(id => GEI_STEM.stations[id].badge.name, id);
-  check(`B-${id}: COMPLETE shows the ${badge} badge and the wow moment`, done.includes(badge) && !!(await page.$("#stmWow .stmChainW")), done.slice(0, 80));
+  const rk = await page.evaluate(() => __GEI_ENGINEERING_WORLD_V22__.rank());
+  check(`B-${id}: REWARD shows the ${badge} badge, the wow moment, engineer rank, career card and FREE PLAY`, done.includes(badge) && !!(await page.$("#stmWow .stmChainW")) && done.includes("ENGINEER RANK") && done.includes("WHO DOES THIS JOB") && !!(await page.$("[data-free]")), [rk, done.slice(0, 60)]);
   check(`B-${id}: station worth exactly 75 STEM XP`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) - xp0 === 75 + (id === "ocean" ? 100 : 0), {});
   await snap("5-complete");
+  // FREE PLAY — no goal, no XP
+  const xpBefore = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp);
+  await click(page, "[data-free]"); await sleep(250);
+  await FREE[id](page);
+  check(`B-${id}: FREE PLAY works, awards nothing`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === xpBefore && /FREE PLAY/.test(await page.textContent("#stmBody")), {});
+  await snap("6-free");
+  await click(page, "#stmPrimary"); await sleep(200);
   return lo;
 }
 
@@ -195,11 +234,14 @@ async function suite(browser, base, name, device){
   check(`B7 [${name}]: after the sixth badge the CTA is the FINAL REWARD`, /FINAL REWARD/.test(fin), fin);
   await click(page, "#stmPrimary"); await sleep(300);
   const ms = await page.textContent("#stmBody");
-  check(`B8 [${name}]: MASTER DAM-ITE ENGINEER screen with all six badges and the water journey`, ms.includes("MASTER DAM-ITE ENGINEER") && ms.includes("traveled from mountain to ocean") && ["WATER EXPLORER", "DAM ENGINEER", "RESERVOIR MANAGER", "HYDRAULIC OPERATOR", "ENERGY ENGINEER", "WATER STEWARD"].every(b => ms.includes(b)) && ms.includes("MOUNTAIN → DAM → RESERVOIR → SLUICE → WHEEL → OCEAN"), ms.slice(0, 120));
+  check(`B8 [${name}]: MASTER DAM-ITE ENGINEER screen with all six badges and the water journey`, ms.includes("MASTER DAM-ITE ENGINEER") && ms.includes("traveled from mountain to ocean") && ["WATER EXPLORER", "DAM ENGINEER", "RESERVOIR MANAGER", "HYDRAULIC OPERATOR", "ENERGY ENGINEER", "WATER STEWARD"].every(b => ms.includes(b)) && ms.includes("MOUNTAIN → DAM → RESERVOIR → SLUICE → WHEEL → OCEAN") && ms.includes("DAM ENGINEERING WORLD") && ms.includes("YOU ENGINEERED THE WATER") && ms.includes("FREE ENGINEERING MODE UNLOCKED") && /OPEN FREE ENGINEERING MODE/.test(await page.textContent("#stmPrimary")), ms.slice(0, 120));
   if (SHOTS) await page.screenshot({ path: join(SHOTS, `${name}-master.png`) });
   const prog = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress());
   check(`B9 [${name}]: 450 lesson XP + 100 Master bonus = ${prog.maxXp}`, prog.xp === 550 && prog.xp === prog.maxXp && prog.master && prog.badges.length === 6, prog.xp);
   await click(page, "#stmPrimary"); await sleep(250);
+  const fm = await page.textContent("#stmBody");
+  check(`B9b [${name}]: FREE ENGINEERING MODE lists all six free-play labs and the MASTER rank`, (fm.match(/FREE PLAY/g) || []).length >= 6 && fm.includes("RANK: MASTER DAM-ITE ENGINEER"), fm.slice(0, 80));
+  await click(page, "#stmClose"); await sleep(250);
   const tags = await page.evaluate(() => [...document.querySelectorAll("#geiMapRegions .dmwPill .stmTag")].map(t => t.textContent));
   check(`A4 [${name}]: every pill now reads STEM ✓`, tags.length === 6 && tags.every(t => t === "💧 STEM ✓"), tags);
 
