@@ -70,7 +70,7 @@
     var s=document.createElement("style");s.id="ftwStyles";
     s.textContent=[
       ".ftwTop{margin:0 0 8px}",
-      ".ftwMission{display:flex;gap:4px;margin:0 0 6px}.ftwMission span{flex:1;min-width:0;padding:4px 0;text-align:center;border-radius:10px;border:1px dashed rgba(255,255,255,.28);font-weight:900;font-size:8px;line-height:1.15;letter-spacing:0;opacity:.65;overflow:hidden}",
+      ".ftwMission{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:0 0 6px}@container stmw (min-width:560px){.ftwMission{grid-template-columns:repeat(6,1fr)}}.ftwMission span{flex:1;min-width:0;padding:4px 0;text-align:center;border-radius:10px;border:1px dashed rgba(255,255,255,.28);font-weight:900;font-size:10.5px;line-height:1.15;letter-spacing:0;opacity:.65;overflow:hidden}",
       ".ftwMission span i{display:block;font-style:normal;font-size:15px}.ftwMission span.on{opacity:1;border:1px solid #7ff0ff;background:rgba(47,210,255,.16)}.ftwMission span.on::after{content:\" ✓\"}",
       ".ftwSvg{width:100%;height:auto;display:block;border-radius:14px;border:1px solid rgba(47,210,255,.3);background:#070d20;touch-action:manipulation}",
       ".ftwPart{cursor:pointer;outline:none}.ftwPart:focus-visible .ftwHit{stroke:#ffd66b;stroke-width:3}.ftwHit{fill:transparent;pointer-events:all;stroke:transparent}",
@@ -96,9 +96,9 @@
       ".ftwRead{display:none;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.ftwRead.on{display:grid}.ftwRead div{padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.06);text-align:center;font-weight:900;font-size:10px;line-height:1.2;letter-spacing:.04em}.ftwRead b{display:block;font-size:15px;color:#7ff0ff}",
       ".ftwAct{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}",
       ".ftwAct .stmBtn{font-size:20px}.ftwAct .stmBtn b{font-size:11.5px}",
-      ".ftwFinaleLine{margin:8px 0;text-align:center;font-size:clamp(18px,5vw,22px);font-weight:900;min-height:1.3em}",
+      ".ftwFinaleLine{margin:8px 0;text-align:center;font-size:clamp(18px,5cqw,22px);font-weight:900;min-height:1.3em}",
       ".ftwUnder{margin:4px 0;font-size:12px;font-weight:900;letter-spacing:.1em;color:#ffd66b}",
-      "@media(min-height:700px){.ftwTop{position:sticky;top:-12px;z-index:3;margin:-12px -12px 8px;padding:8px 12px 6px;background:linear-gradient(#050a18 85%,rgba(5,10,24,0))}.ftwSvg{max-height:40vh}}",
+      "#geiDamMapPage[data-dam-tall=\"1\"] .ftwTop{position:sticky;top:-12px;z-index:3;margin:-12px -12px 8px;padding:8px 12px 6px;background:linear-gradient(#050a18 85%,rgba(5,10,24,0))}#geiDamMapPage[data-dam-tall=\"1\"] .ftwSvg{max-height:calc(var(--dam-vh,100vh)*.4)}",
       "@media(prefers-reduced-motion:reduce){.ftwSvg *{animation:none!important;transition:none!important}.ftwJet{stroke-dasharray:none}}"
     ].join("");
     document.head.appendChild(s);
