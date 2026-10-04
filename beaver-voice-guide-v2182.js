@@ -284,6 +284,7 @@
   /* ------------------------------------------------------------------ Dam Map hooks */
   var mapWasOpen=false;
   function onMapOpened(){
+    try{if(window.__GEI_PERSONAL_GUIDE__)window.__GEI_PERSONAL_GUIDE__.refresh();}catch(e){}
     mem.mapOpens++;
     var c=context(),idx=c.currentStationIndex,st=c.currentStation,t=now();
     walkBeaver(true);
@@ -367,7 +368,7 @@
     scene.appendChild(bv);
     var img=new Image();img.alt="";img.decoding="async";
     img.onload=function(){bvAspect=(img.naturalWidth/img.naturalHeight)||.8;var b=bv&&bv.querySelector(".bvBody");if(b){b.innerHTML="";b.appendChild(img);bvImg=img;}place(false);};
-    img.src=BEAVER_IMG;                                                    // falls back to a big 🦫 if the artwork is unreachable
+    img.src=guideArtUrl();                                                 // V2.2.3: the player's active character (falls back to the Beaver; a big 🦫 if the artwork is unreachable)
     try{if(window.ResizeObserver){ro=new ResizeObserver(function(){place(false);});ro.observe(scene);}}catch(e){}
     place(false);
   }
@@ -389,10 +390,18 @@
     var wh=wrap?wrap.clientHeight:sh,visH=Math.min(sh,wh||sh),visTop=Math.max(0,sh-visH);   // phones crop the top of the scene: size/place by what is actually on screen
     var x=px/100*sw,y=py/100*sh;
     var h=Math.round(clampN(visH*.30,96,300)),w=Math.round(h*bvAspect);
+    /* V2.2.3: the companion clears the pin LABEL (wide station names) and stays inside the visible window; if neither side of the pin
+       has room for the full size on a narrow screen, it shrinks to fit rather than covering the label. */
+    var half=Math.max(62,Math.round((pin.offsetWidth||0)/2)+10);
+    var vx0=wrap?wrap.scrollLeft:0,vx1=vx0+(wrap?wrap.clientWidth:sw);                     // the part of the scene actually on screen
+    var room=Math.max(x-half-(vx0+4),(vx1-4)-(x+half));
+    if(room>=64&&w>room){w=Math.floor(room);h=Math.round(w/bvAspect);}
     var maxBottom=Math.min(sh*.93,pillsTop(sh)),bottom=Math.min(y+sh*.09,maxBottom),top=bottom-h;
     if(top<visTop+4){top=visTop+4;bottom=top+h;if(bottom>maxBottom){bottom=maxBottom;top=Math.max(visTop+2,bottom-h);}}
     top=Math.max(2,top);
-    var left=x-62-w;if(left<4)left=Math.min(x+62,sw-w-4);
+    var left=x-half-w;
+    if(left<vx0+4){var rl=x+half;left=(rl+w<=vx1-4)?rl:Math.max(vx0+4,Math.min(left,sw-w-4));}   // no room on the left of the pin: stand on its right, else stay inside the window
+    if(left<4)left=Math.min(x+half,sw-w-4);
     return {l:Math.round(left),t:Math.round(top),w:w,h:h,fx:left/sw,fy:top/sh};
   }
   function place(animate){
@@ -430,7 +439,26 @@
       pin:{l:pr.left-sr.left,t:pr.top-sr.top,w:pr.width,h:pr.height},
       view:{x0:wrap.scrollLeft,x1:wrap.scrollLeft+wrap.clientWidth,y0:Math.max(0,sh-visH),y1:Math.min(sh*.93,pillsTop(sh))}};
   }
-  function setSpeaking(on){if(bv)bv.classList.toggle("speaking",!!on);}
+  /* V2.2.3 — PERSONAL DAM GUIDE: the walking companion wears the player's active character (read from the game's single
+     source of truth by personal-guide-v223.js). Wilbert's VOICE stays Wilbert's: the sprite only glows when it is a beaver. */
+  var spriteIsBeaver=true;
+  function guideArtUrl(){try{var g=window.__GEI_PERSONAL_GUIDE__;return (g&&g.mapArt&&g.mapArt())||BEAVER_IMG;}catch(e){return BEAVER_IMG;}}
+  function setGuideArt(url,o){
+    o=o||{};if(!bv)return false;url=url||BEAVER_IMG;spriteIsBeaver=o.wilbert!==false;
+    if(!spriteIsBeaver)bv.classList.remove("speaking");
+    var b=bv.querySelector(".bvBody");if(!b)return false;
+    if(bv.__art===url){return true;}
+    bv.__art=url;if(!bvImg||!bvImg.parentNode){b.innerHTML='<span class="bvEmoji">'+(o.emoji||"🦫")+'</span>';}
+    var im=new Image();im.alt="";im.decoding="async";
+    im.onload=function(){if(bv.__art!==url)return;bvAspect=(im.naturalWidth/im.naturalHeight)||.8;b.innerHTML="";b.appendChild(im);bvImg=im;place(false);};
+    im.onerror=function(){if(bv.__art!==url)return;b.innerHTML='<span class="bvEmoji">'+(o.emoji||"🦫")+'</span>';bvImg=null;place(false);};
+    im.src=url;return true;
+  }
+  function setSpeaking(on){
+    if(!bv)return;
+    if(!spriteIsBeaver){try{window.dispatchEvent(new CustomEvent("gei:wilbert-speaking",{detail:!!on}));}catch(e){}return;}   // Wilbert is speaking, not the player's character
+    bv.classList.toggle("speaking",!!on);
+  }
 
   /* ------------------------------------------------------------------ extension API for future recordings */
   function registerClip(def){
@@ -465,7 +493,7 @@
     get enabled(){return enabledNow();},get speaking(){return A.beaver.speaking;},get current(){return A.beaver.current;},
     get queueLength(){return A.beaver.queue;},
     memory:function(){return JSON.parse(JSON.stringify(mem));},resetMemory:function(){mem.heard={};mem.visited={};mem.mapOpens=0;mem.lastMapStation=-1;mem.lastPos=null;save();},
-    layout:layout,remember:function(k,v){mem.extra=mem.extra||{};mem.extra[k]=v;save();},recall:function(k){return mem.extra?mem.extra[k]:undefined;},
+    layout:layout,setGuideArt:setGuideArt,remember:function(k,v){mem.extra=mem.extra||{};mem.extra[k]=v;save();},recall:function(k){return mem.extra?mem.extra[k]:undefined;},
     selfTest:selfTest,presentationOnly:true};
   window.__GEI_V2182_BEAVER_VOICE__=api;
   window.GEI_BEAVER_VOICE=api;

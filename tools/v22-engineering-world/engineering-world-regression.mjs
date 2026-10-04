@@ -252,10 +252,11 @@ async function playStation(page, id, layout, shot){
   await snap("1-discover");
   if (id === "mountain") {
     await click(page, "#stmWhyBtn"); await sleep(100);
-    check("B-wilbert: 💡 WHY? makes Wilbert explain", /^💡/.test(await page.textContent("#stmBubbleTxt")), await page.textContent("#stmBubbleTxt"));
+    const aw = await page.evaluate(() => ({ say: document.getElementById("stmBubbleTxt").textContent, why: document.getElementById("stmWhy").textContent, q: GEI_STEM.stations.mountain.ask.q }));
+    check("B-wilbert: ASK WILBERT — the guide wonders, Wilbert (the expert) explains, for the lab you are in", aw.say === aw.q && /WILBERT · EXPERT/.test(aw.why), aw);
     await click(page, "#stmCoachBtn"); await sleep(100);
     const off = await page.evaluate(() => ({ p: document.getElementById("stmCoachBtn").getAttribute("aria-pressed"), t: document.getElementById("stmBubbleTxt").textContent, s: __GEI_ENGINEERING_WORLD_V22__.coach() }));
-    check("B-wilbert: the coach can be switched off (and 💡 WHY? still works)", off.p === "false" && /resting/.test(off.t) && !off.s, off);
+    check("B-wilbert: guide reactions can be quieted (and ASK WILBERT still works)", off.p === "false" && /resting/.test(off.t) && !off.s, off);
     await click(page, "#stmCoachBtn"); await sleep(100);
   }
   await click(page, "#stmPrimary"); await sleep(200);

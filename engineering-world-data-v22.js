@@ -66,6 +66,7 @@
 
   /* ---------- the six labs ---------- */
   G.registerStation("mountain",{
+    ask:{q:"Where does all this water come from?",a:"Rain and snow fall on the mountain, and gravity pulls the water downhill into streams."},   // the Personal Guide asks, Wilbert (the expert mentor) answers
     region:0, icon:"🏔️", title:"WATER SOURCE LAB", subtitle:"Where every river begins", topic:"Water cycle · Gravity · Watersheds",
     discover:{
       guide:"Watch this! Rain hits the mountain, and gravity sends the water downhill.",
@@ -90,6 +91,7 @@
   });
 
   G.registerStation("dam",{
+    ask:{q:"How does a wall hold back all that water?",a:"That's a dam! Deeper water pushes harder, so engineers make the wall strong enough."},   // the Personal Guide asks, Wilbert (the expert mentor) answers
     region:1, icon:"🧱", title:"STRUCTURAL ENGINEERING LAB", subtitle:"Build it. Test it. Improve it.", topic:"Pressure · Materials · Design",
     discover:{
       guide:"Engineers follow a cycle: ask, imagine, plan, build, test, improve. Let's build a dam!",
@@ -114,6 +116,7 @@
   });
 
   G.registerStation("reservoir",{
+    ask:{q:"Where is all the water going?",a:"That's the reservoir! It stores water behind the dam until it's needed."},   // the Personal Guide asks, Wilbert (the expert mentor) answers
     region:2, icon:"🌊", title:"WATER STORAGE LAB", subtitle:"Keep the balance", topic:"Storage · Inflow · Outflow · Balance",
     discover:{
       guide:"The reservoir is a water bank! Water coming in and water going out must stay balanced.",
@@ -138,6 +141,7 @@
   });
 
   G.registerStation("sluice",{
+    ask:{q:"What's that gate for?",a:"That's a sluice gate! It controls how much water flows through."},   // the Personal Guide asks, Wilbert (the expert mentor) answers
     region:3, icon:"🚪", title:"FLOW CONTROL LAB", subtitle:"Open it. Watch it flow.", topic:"Flow · Gates · Cause and effect",
     discover:{
       guide:"This gate is a sluice! Slide it open and see how the water answers.",
@@ -162,6 +166,7 @@
   });
 
   G.registerStation("wheel",{
+    ask:{q:"What's that spinning thing?",a:"That's a turbine! Moving water makes it spin, and a generator turns that spin into electricity."},   // the Personal Guide asks, Wilbert (the expert mentor) answers
     region:4, icon:"⚙️", title:"ENERGY LAB", subtitle:"Turbines turn water into power", topic:"Motion · Turbines · Generators · Hydropower",
     discover:{
       guide:"Moving water pushes a turbine around. A generator turns that spin into electricity!",
@@ -186,6 +191,7 @@
   });
 
   G.registerStation("ocean",{
+    ask:{q:"Where does the water go after the dam?",a:"It keeps going downstream to rivers, wetlands and the ocean, where plants, animals and people need it."},   // the Personal Guide asks, Wilbert (the expert mentor) answers
     region:5, icon:"🌎", title:"WATER STEWARDSHIP LAB", subtitle:"Water keeps going", topic:"Downstream · Ecosystems · Stewardship",
     discover:{
       guide:"Water doesn't disappear when it leaves the dam. It keeps flowing to rivers, wetlands and the ocean!",

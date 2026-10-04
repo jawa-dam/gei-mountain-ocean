@@ -112,7 +112,7 @@
     function part(c,inner,extra){return '<g class="ftwPart" data-comp="'+c.id+'" role="button" tabindex="0" aria-label="'+c.plain+'">'+inner+'<rect class="ftwHit" x="'+(c.x-26)+'" y="'+(c.y-26)+'" width="52" height="52" rx="10"/></g>';}
     var m=comp("mountain"),d=comp("dam"),r=comp("reservoir"),g=comp("gate"),t=comp("turbine"),n=comp("generator"),o=comp("downstream");
     return '<svg class="ftwSvg" id="ftwSvg" viewBox="0 0 320 240" role="group" aria-label="Cutaway of the whole water system. Tap a part to learn what it does.">'+
-      '<defs><linearGradient id="ftwSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14224a"/><stop offset="1" stop-color="#0a1230"/></linearGradient>'+
+      '<defs><clipPath id="ftwFaceClip"><circle cx="0" cy="-34" r="13"/></clipPath><linearGradient id="ftwSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14224a"/><stop offset="1" stop-color="#0a1230"/></linearGradient>'+
       '<linearGradient id="ftwWat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fe6ff"/><stop offset="1" stop-color="#1257d8"/></linearGradient>'+
       '<linearGradient id="ftwMt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e88bb"/><stop offset="1" stop-color="#3a3460"/></linearGradient></defs>'+
       '<rect width="320" height="240" fill="url(#ftwSky)"/>'+
@@ -146,7 +146,7 @@
       /* 🔬 engineer view readouts */
       '<g class="ftwEng" id="ftwEng" aria-hidden="true"><text id="ftwEL" x="84" y="108" text-anchor="middle"></text><text id="ftwEG" x="163" y="150" text-anchor="middle"></text><text id="ftwET" x="225" y="204" text-anchor="middle"></text><text id="ftwEP" x="276" y="162" text-anchor="middle"></text><text id="ftwED" x="246" y="236" text-anchor="middle"></text><text x="196" y="156" font-size="12">➡️</text><text x="236" y="198" font-size="12">↘️</text></g>'+
       /* Wilbert's pointer + the leading drop */
-      '<g id="ftwPtr" class="ftwMove" style="transform:translate(45px,48px);opacity:0"><circle class="ftwRing" r="24"/><text y="-30" font-size="18" text-anchor="middle">🦫</text></g>'+
+      '<g id="ftwPtr" class="ftwMove" style="transform:translate(45px,48px);opacity:0"><circle class="ftwRing" r="24"/><g id="ftwPtrFace"><text y="-30" font-size="18" text-anchor="middle">🦫</text></g></g>'+
       '<text id="ftwLead" class="ftwMove" style="transform:translate(45px,60px);opacity:0" font-size="20" text-anchor="middle">💧</text>'+
     '</svg>';
   }
@@ -177,6 +177,10 @@
       '<div class="ftwAct"><button type="button" class="stmBtn" data-act="tour">🌊<b>FOLLOW THE WATER</b></button><button type="button" class="stmBtn" data-act="predict">🎯<b>PREDICT</b></button><button type="button" class="stmBtn" id="ftwEngBtn" data-act="eng" aria-pressed="false">🔬<b>ENGINEER VIEW</b></button></div>'+
       '<div class="ftwUnder" id="ftwUnder" aria-live="polite"></div>';
     var svgEl=$("ftwSvg"),card=$("ftwCard");
+    /* the pointer that leads the water is the player's own guide */
+    (function(){var g=env.guide&&env.guide(),d=g&&g.current(),f=$("ftwPtrFace");if(!d||!f)return;f.querySelector("text").textContent=d.emoji;
+      if(d.image){var im=document.createElementNS(NS,"image");im.setAttribute("href",d.image);im.setAttribute("x",-13);im.setAttribute("y",-47);im.setAttribute("width",26);im.setAttribute("height",26);im.setAttribute("preserveAspectRatio","xMidYMid slice");im.setAttribute("clip-path","url(#ftwFaceClip)");
+        im.addEventListener("error",function(){if(im.parentNode)im.parentNode.removeChild(im);});f.appendChild(im);}})();
 
     /* ---- painting ---- */
     function setT(id,txt){var e=$(id);if(e)e.textContent=txt;}
@@ -226,7 +230,7 @@
     function identify(id){
       var c=comp(id);if(!c)return;select(id);ctx.sfx("tap");
       if(!revealed(c)){card.innerHTML='<h4>❓ NOT DISCOVERED YET</h4><p>Keep travelling the DAM Map to find out what this part does!</p>';point(c);env.say("Something is hiding there… keep exploring and we'll find it together!");return;}
-      point(c);markSeen(c);
+      point(c);markSeen(c);if(env.setAsk)env.setAsk(c.station);
       var nw=techOn(c)&&c.unlock&&!ws.words[c.id];if(nw){ws.words[c.id]=1;saveWS(ws);}
       card.innerHTML='<h4>'+c.icon+' '+env.esc(name(c))+'</h4><p>'+env.esc(c.desc)+'</p>'+(nw?'<span class="ftwNew">✨ NEW WORD: '+env.esc(c.tech)+'</span>':techOn(c)&&c.plain!==c.tech?'<small>ALSO CALLED: '+env.esc(c.plain)+'</small>':"");
       env.say("Look over there! That's the "+name(c).toLowerCase()+".");
@@ -257,8 +261,8 @@
     }
     function userChange(prev){
       if(!ws.moved){ws.moved=1;saveWS(ws);}markSeen(comp("gate"));paint();
-      if(S.gate>=75&&prev.gate<75)env.wilbert("WHOA! You changed the whole system!");
-      else if(S.gate===0&&prev.gate>0)env.wilbert("Gate closed. Watch where the water goes!");
+      if(S.gate>=75&&prev.gate<75)env.react("system.changed","WHOA! You changed the whole system!");
+      else if(S.gate===0&&prev.gate>0)env.react("system.closed","Gate closed. Watch where the water goes!");
       clearTimeout(noticeT);
       noticeT=setTimeout(function(){if(!ctx.alive()||tour||pred)return;lastNotice=Date.now();trail(prev);},650);
       ctx.timers.push(noticeT);
@@ -289,9 +293,9 @@
         var res=sentence(prev),wy=G.why[p.why]||"";
         var html='<h4>'+(o[2]?"✨ YOU UNDERSTOOD THE SYSTEM!":"💙 NOW YOU'VE SEEN IT!")+'</h4><p>'+env.esc(res)+'</p><small>💡 WHY?</small><p>'+env.esc(wy)+'</p>';
         if(o[2]){var first=!ws.insights[p.key];ws.insights[p.key]=1;saveWS(ws);ctx.sfx("wow");html='<div class="ftwWin">'+p.title+'<br>YOU UNDERSTOOD THE SYSTEM!</div>'+html.replace(/^<h4>.*?<\/h4>/,"");
-          env.wilbert(first?"Now THAT is real understanding!":"You got it again!");
+          env.react(first?"system.predictRight":"system.predictRight",first?"Now THAT is real understanding!":"You got it again!");
           if(PRED.every(function(q){return ws.insights[q.key];}))html+='<div class="ftwWin">🧠 SYSTEMS THINKER</div>';}
-        else env.wilbert("Every guess teaches us something. Try another!");
+        else env.react("system.predictWrong","Every guess teaches us something. Try another!");
         html+='<button type="button" class="stmSecondary" data-act="predict">🎯 NEXT PREDICTION</button>';
         card.innerHTML=html;pred=null;point(null);paint();
       },env.reduced()?300:2400);
@@ -314,7 +318,7 @@
       tourStop();pred=null;var steps=tourSteps().filter(function(s){return revealed(comp(s.c));}),all2=tourSteps().length===steps.length;
       var t=tour={i:-1,steps:steps,stop:false,auto:auto,timer:0};
       function done(){
-        point(null);ws.tour=1;saveWS(ws);tour=null;
+        point(null);ws.tour=1;saveWS(ws);tour=null;env.react("system.tourEnd","That's the whole journey!");
         card.innerHTML='<h4>🌊 THAT\'S THE WHOLE JOURNEY!</h4><p>'+(all2?"The water travelled from the mountain, through the machine, and on downstream.":"More of the machine is waiting on the DAM Map. Keep going to discover it!")+'</p><button type="button" class="stmSecondary" data-act="tour">↻ REPLAY</button><button type="button" class="stmSecondary" data-act="predict">🎯 NOW PREDICT</button>';
         if(opts.onTourEnd)opts.onTourEnd();
       }
@@ -322,13 +326,13 @@
         if(t.stop)return;t.i++;if(t.i>=t.steps.length)return done();
         var s=t.steps[t.i],c=comp(s.c);
         if(s.set.gate!=null)S.gate=s.set.gate;if(s.set.rain!=null)S.rain=s.set.rain;if(s.lv!=null)S.level=s.lv;derive();paint();
-        select(s.c);markSeen(c);point(c);ctx.sfx(s.c==="gate"?"gate":s.c==="turbine"?"spin":s.c==="generator"?"zap":"water");
+        select(s.c);markSeen(c);point(c);if(env.setAsk)env.setAsk(c.station);ctx.sfx(s.c==="gate"?"gate":s.c==="turbine"?"spin":s.c==="generator"?"zap":"water");
         card.innerHTML='<h4>'+c.icon+' '+env.esc(name(c))+'</h4><p>'+env.esc(s.txt)+'</p><small>STEP '+(t.i+1)+' OF '+t.steps.length+'</small><button type="button" class="stmSecondary" data-act="tournext">'+(t.i===t.steps.length-1?"✅ FINISH":"NEXT ▸")+'</button>';
         env.say(s.say);
         clearTimeout(t.timer);
         if(t.auto&&!env.reduced()){t.timer=setTimeout(function(){if(ctx.alive())next();},opts.finale?3300:5200);ctx.timers.push(t.timer);}
       }
-      t.next=next;next();
+      t.next=next;env.react("system.tourStart","Follow the water!");next();
     }
 
     /* ---- ▶ finale: zoom out over the running system ---- */
