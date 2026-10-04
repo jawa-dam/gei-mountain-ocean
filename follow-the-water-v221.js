@@ -96,7 +96,7 @@
       ".ftwRead{display:none;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.ftwRead.on{display:grid}.ftwRead div{padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.06);text-align:center;font-weight:900;font-size:10px;line-height:1.2;letter-spacing:.04em}.ftwRead b{display:block;font-size:15px;color:#7ff0ff}",
       ".ftwAct{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}",
       ".ftwAct .stmBtn{font-size:20px}.ftwAct .stmBtn b{font-size:11.5px}",
-      ".ftwFinaleLine{margin:8px 0;text-align:center;font-size:clamp(18px,5vw,22px);font-weight:900;min-height:1.3em}",
+      ".ftwFinaleLine{margin:8px 0;text-align:center;font-size:clamp(18px,5cqw,22px);font-weight:900;min-height:1.3em}",
       ".ftwUnder{margin:4px 0;font-size:12px;font-weight:900;letter-spacing:.1em;color:#ffd66b}",
       "#geiDamMapPage[data-dam-tall=\"1\"] .ftwTop{position:sticky;top:-12px;z-index:3;margin:-12px -12px 8px;padding:8px 12px 6px;background:linear-gradient(#050a18 85%,rgba(5,10,24,0))}#geiDamMapPage[data-dam-tall=\"1\"] .ftwSvg{max-height:calc(var(--dam-vh,100vh)*.4)}",
       "@media(prefers-reduced-motion:reduce){.ftwSvg *{animation:none!important;transition:none!important}.ftwJet{stroke-dasharray:none}}"

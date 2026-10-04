@@ -40,15 +40,15 @@
       "#"+PID+"[data-dam-fit=mobile-land] .dmwShell{border-radius:16px}",
       /* header: one line, big targets; the title may shrink but never wraps into the HUD */
       "#"+PID+" .dmwTop{gap:6px;padding:10px 10px 8px}",
-      "#"+PID+" .dmwTitle b{white-space:nowrap;font-size:clamp(15px,4.4vw,30px);letter-spacing:.03em}",
+      "#"+PID+" .dmwTitle b{white-space:nowrap;font-size:clamp(15px,calc(var(--dam-vw,100vw)*4.4/100),30px);letter-spacing:.03em}",
       "#"+PID+" .dvEmoji{font-size:.9em}",
-      "#"+PID+" .dmwBtn{min-width:44px;min-height:44px;padding:8px 10px;font-size:clamp(13px,3.4vw,15px)}",
+      "#"+PID+" .dmwBtn{min-width:44px;min-height:44px;padding:8px 10px;font-size:clamp(13px,calc(var(--dam-vw,100vw)*3.4/100),15px)}",
       "#dvFsBtn{font-size:20px;line-height:1;padding:8px 10px}#dvFsBtn[hidden]{display:none}#dvFsBtn[aria-pressed=true]{border-color:#7ff0ff;background:rgba(47,210,255,.18)}",
       /* type floors for the map chrome */
-      "#"+PID+" .dmwStat small{font-size:clamp(11px,2.9vw,13px)}#"+PID+" .dmwStat b{font-size:clamp(16px,4.2vw,22px)}",
-      "#"+PID+" .dmwPill b{font-size:clamp(13px,3.6vw,17px)}#"+PID+" .dmwPill small,#"+PID+" .stmTag{font-size:clamp(10.5px,2.8vw,12.5px)}",
-      "#"+PID+" .dmwRailTitle{font-size:clamp(12px,3.2vw,15px)}#"+PID+" .geiMapFactory b{font-size:clamp(13px,3.4vw,16px)}#"+PID+" .geiMapFactory small{font-size:clamp(10.5px,2.8vw,12px)}",
-      "#"+PID+" .dmwPinLabel{font-size:clamp(12px,3.2vw,15px)}",
+      "#"+PID+" .dmwStat small{font-size:clamp(11px,calc(var(--dam-vw,100vw)*2.9/100),13px)}#"+PID+" .dmwStat b{font-size:clamp(16px,calc(var(--dam-vw,100vw)*4.2/100),22px)}",
+      "#"+PID+" .dmwPill b{font-size:clamp(13px,calc(var(--dam-vw,100vw)*3.6/100),17px)}#"+PID+" .dmwPill small,#"+PID+" .stmTag{font-size:clamp(10.5px,calc(var(--dam-vw,100vw)*2.8/100),12.5px)}",
+      "#"+PID+" .dmwRailTitle{font-size:clamp(12px,calc(var(--dam-vw,100vw)*3.2/100),15px)}#"+PID+" .geiMapFactory b{font-size:clamp(13px,calc(var(--dam-vw,100vw)*3.4/100),16px)}#"+PID+" .geiMapFactory small{font-size:clamp(10.5px,calc(var(--dam-vw,100vw)*2.8/100),12px)}",
+      "#"+PID+" .dmwPinLabel{font-size:clamp(12px,calc(var(--dam-vw,100vw)*3.2/100),15px)}",
       /* station pills hang from the bottom edge of the scene: they can grow (STEM tag, bigger type) without being clipped */
       "#"+PID+" .dmwPills{top:auto!important;bottom:10px}#"+PID+" .dmwPills .dmwPill{top:auto!important;bottom:0;transform:translate(-50%,0)}",
       /* compact STEM header button on narrow stages */
@@ -60,6 +60,10 @@
       "#"+PID+" .geiConn .gcDay{font-size:max(.7rem,11px)}#"+PID+" .geiConn .gcLabel{font-size:max(.66rem,10.5px)}#"+PID+" .geiConn .gcAgain{font-size:max(.7rem,11px)}#"+PID+" .geiConn .gcNote{font-size:max(.65rem,10.5px)}",
       "#"+PID+" .geiConn.micro .gcDay,#"+PID+" .geiConn.nano .gcDay{font-size:max(.65rem,10.5px)}#"+PID+" .geiConn.micro .gcAgain{font-size:max(.66rem,10.5px)}",
       "#"+PID+" .geiConn.micro .gcKey::before,#"+PID+" .geiConn.nano .gcKey::before{font-size:max(.62rem,10px)}",
+      /* roomier layouts: station pills stack icon over name so six names always fit (never an ellipsis); subtitle may wrap */
+      "#"+PID+"[data-dam-fit=tablet] .dmwPill b>span,#"+PID+"[data-dam-fit=desktop] .dmwPill b>span,#"+PID+"[data-dam-fit=mobile-land] .dmwPill b>span{display:block;text-align:center}",
+      "#"+PID+"[data-dam-fit=tablet] .dmwPill b,#"+PID+"[data-dam-fit=desktop] .dmwPill b,#"+PID+"[data-dam-fit=mobile-land] .dmwPill b{font-size:13px}",
+      "#"+PID+" .dmwPill{min-height:44px}#"+PID+" .dmwTitle span{white-space:normal;overflow:visible;text-overflow:clip}",
       /* landscape phone: the map gets the room, secondary chrome steps aside */
       "#"+PID+"[data-dam-fit=mobile-land] .dmwRail,#"+PID+"[data-dam-fit=mobile-land] .dmwAhead{display:none}",
       "#"+PID+"[data-dam-fit=mobile-land] .dmwTop{padding:4px 8px;gap:6px}#"+PID+"[data-dam-fit=mobile-land] .dmwTitle b{font-size:18px}",
