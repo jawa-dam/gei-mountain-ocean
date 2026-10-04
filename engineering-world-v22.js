@@ -109,11 +109,11 @@
     s.textContent=[
       ".stmTopBtn{display:flex;align-items:center;gap:6px;white-space:nowrap}.stmTopBtn b{color:#7ff0ff}",
       ".stmTag{display:block;margin-top:2px;color:#7ff0ff;font-weight:900;letter-spacing:.08em;white-space:nowrap}.stmTag.done{color:#8dffb0}.stmTag.lock{color:rgba(238,252,255,.5)}",
-      ".stmLab{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;min-height:0;background:radial-gradient(120% 80% at 50% 0,#0d2140 0,#050a18 70%);color:#eefcff;border-radius:inherit;overflow:hidden}",
+      ".stmLab{container:stmw/inline-size;position:absolute;inset:0;z-index:9;display:none;flex-direction:column;min-height:0;background:radial-gradient(120% 80% at 50% 0,#0d2140 0,#050a18 70%);color:#eefcff;border-radius:inherit;overflow:hidden}",
       ".stmLab.show{display:flex}.stmLab *{box-sizing:border-box}",
       ".stmHead{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(47,210,255,.25);background:rgba(3,8,20,.8)}",
       ".stmClose{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-weight:900;font-size:20px;line-height:1;cursor:pointer}",
-      ".stmHT{flex:1;min-width:0}.stmHT b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(17px,4.4vw,24px);letter-spacing:.06em;line-height:1.1}.stmHT small{display:block;margin-top:3px;font-size:13px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      ".stmHT{flex:1;min-width:0}.stmHT b{display:block;overflow-wrap:anywhere;font-size:clamp(17px,4.4vw,24px);letter-spacing:.06em;line-height:1.1}.stmHT small{display:block;margin-top:3px;font-size:13px;opacity:.75}",
       ".stmXp{flex:0 0 auto;padding:8px 12px;border-radius:14px;border:1px solid rgba(47,210,255,.5);background:rgba(47,210,255,.1);font-weight:900;letter-spacing:.04em;position:relative;font-size:16px}",
       ".stmToast{position:absolute;right:6px;top:100%;margin-top:4px;padding:6px 12px;border-radius:12px;background:linear-gradient(90deg,#2fd2ff,#f310ba);font-weight:900;font-size:15px;white-space:nowrap;animation:stmToast 2.2s ease forwards;pointer-events:none;z-index:3}",
       "@keyframes stmToast{0%{opacity:0;transform:translateY(-6px)}12%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0;transform:translateY(8px)}}",
@@ -204,7 +204,7 @@
       ".stmSee{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1.5px solid #7ff0ff;background:rgba(47,210,255,.14);color:#fff;font-size:22px;cursor:pointer}.stmSee[hidden]{display:none}.stmSee:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}",
       ".stmSteps:empty{display:none}",
       ".stmCoach{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid rgba(47,210,255,.2);background:rgba(47,210,255,.06)}",
-      ".stmCoach .stmAv{width:40px;height:40px;font-size:22px}.stmCoach .stmBubble{padding:5px 9px;border-radius:4px 12px 12px 12px;font-size:14px;line-height:1.25;max-height:3.9em;overflow:hidden}.stmCoach .stmBubble small{font-size:9.5px;margin:0}",
+      ".stmCoach .stmAv{width:40px;height:40px;font-size:22px}.stmCoach .stmBubble{padding:5px 9px;border-radius:4px 12px 12px 12px;font-size:14px;line-height:1.25}.stmCoach .stmBubble small{font-size:10.5px;margin:0}",
       ".stmWhyBtn,.stmCoachBtn{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1.5px solid #ffd66b;background:rgba(255,214,107,.14);color:#fff;font-weight:900;font-size:12px;line-height:1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0 6px}",
       ".stmWhyBtn span{font-size:18px}.stmCoachBtn{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);font-size:22px}.stmCoach.off .stmAv{filter:grayscale(1);opacity:.6}.stmCoachBtn[aria-pressed=false]{opacity:.6}",
       ".stmWhyBtn:focus-visible,.stmCoachBtn:focus-visible,.stmSecondary:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}",
@@ -230,12 +230,12 @@
       ".stmTravel{position:absolute;left:3%;top:50%;margin-top:-13px;z-index:2;text-decoration:none;font-size:24px;animation:stmTravel 4.5s ease-in-out infinite}@keyframes stmTravel{0%{left:3%}100%{left:90%}}",
       ".stmFinale{margin:10px 0;text-align:center}.stmFinale b{display:block;font-size:clamp(16px,4.6vw,21px);letter-spacing:.05em;background:linear-gradient(90deg,#7ff0ff,#f39cff);-webkit-background-clip:text;background-clip:text;color:transparent}",
       ".stmFreeChip{margin:8px 0;padding:12px;text-align:center;border-radius:14px;border:2px solid #8dffb0;background:rgba(141,255,176,.12);font-weight:900;letter-spacing:.06em}",
-      "@media(max-width:480px){.stmNode{overflow:hidden;padding:6px 0}.stmNode small{font-size:7.5px;letter-spacing:0}.stmFlowRow em{font-size:11px}.stmSteps{gap:3px;padding:6px 6px}.stmCoach .stmBubble small{display:none}.stmChain5{font-size:11.5px}}",
-      "@media(max-height:620px){.stmCoach .stmAv{display:none}.stmWhy{font-size:13px;padding:6px 10px}}",
-      "@media(max-width:700px){.stmHT small{display:none}.stmXp{padding:6px 9px;font-size:14px}.stmHead{padding:8px 10px}.stmClose{min-width:48px}}",
-      "@media(max-width:480px){.stmXl{display:none}.stmStep{font-size:8.5px;letter-spacing:0;padding:4px 0;overflow:hidden}.stmRow.c5{grid-template-columns:repeat(3,1fr)}.stmRow.c6{grid-template-columns:repeat(3,1fr)}.stmStep{font-size:10px}.stmCycle span{font-size:8.5px}}",
-      "@media(min-width:760px){.stmBody{padding:16px 22px}.stmBody>*{max-width:720px;margin-left:auto;margin-right:auto}.stmFoot>*{max-width:720px;display:block;margin:0 auto}}",
-      "@media(max-height:560px){.stmViz{max-height:26vh}.stmHT small{display:none}}",
+      "@container stmw (max-width:480px){.stmStep:not(.now) .lbl{display:none}.stmStep.now{flex:2.6}.stmStep{font-size:10px!important}.stmNode{overflow:hidden;padding:6px 0}.stmNode small{font-size:7.5px;letter-spacing:0}.stmFlowRow em{font-size:11px}.stmSteps{gap:3px;padding:6px 6px}.stmCoach .stmBubble small{display:none}.stmChain5{font-size:11.5px}}",
+      "#geiDamMapPage[data-dam-h620=\"1\"] .stmCoach .stmAv{display:none}#geiDamMapPage[data-dam-h620=\"1\"] .stmWhy{font-size:13px;padding:6px 10px}",
+      "@container stmw (max-width:700px){.stmHT small{display:none}.stmXp{padding:6px 9px;font-size:14px}.stmHead{padding:8px 10px}.stmClose{min-width:48px}}",
+      "@container stmw (max-width:480px){.stmXl{display:none}.stmStep{font-size:8.5px;letter-spacing:0;padding:4px 0;overflow:hidden}.stmRow.c5{grid-template-columns:repeat(3,1fr)}.stmRow.c6{grid-template-columns:repeat(3,1fr)}.stmStep{font-size:10px}.stmCycle span{font-size:8.5px}}",
+      "@container stmw (min-width:760px){.stmBody{padding:16px 22px}.stmBody>*{max-width:720px;margin-left:auto;margin-right:auto}.stmFoot>*{max-width:720px;display:block;margin:0 auto}}",
+      "#geiDamMapPage[data-dam-h560=\"1\"] .stmViz{max-height:calc(var(--dam-vh,100vh)*.26)}#geiDamMapPage[data-dam-h560=\"1\"] .stmHT small{display:none}",
       "@media(prefers-reduced-motion:reduce){.stmLab *,.stmTopBtn *{animation:none!important;transition:none!important}.stmTravel{left:48%}.stmChainW span{opacity:1!important}.stmToast{opacity:1}}"
     ].join("");
     document.head.appendChild(s);
@@ -333,8 +333,8 @@
     var reach=[true,flag(id,"discover"),flag(id,"experiment"),flag(id,"challenge"),flag(id,"quiz"),flag(id,"challenge")];
     PHASES.forEach(function(p,i){
       var done=i<4?flag(id,FLAG[p[0]]):i===4?badgeEarned(id):false,on=p[0]===cur;
-      h+='<button type="button" role="tab" class="stmStep'+(done?" done":"")+(on?" now":"")+'" data-p="'+p[0]+'" aria-selected="'+on+'"'+(reach[i]?"":" disabled")+'>'+
-        '<i aria-hidden="true">'+(done?"✓":p[2])+'</i>'+p[1]+'</button>';
+      h+='<button type="button" role="tab" class="stmStep'+(done?" done":"")+(on?" now":"")+'" data-p="'+p[0]+'" aria-label="'+p[1]+(done?" (done)":"")+'" aria-selected="'+on+'"'+(reach[i]?"":" disabled")+'>'+
+        '<i aria-hidden="true">'+(done?"✓":p[2])+'</i><span class="lbl">'+p[1]+'</span></button>';
     });
     $("stmSteps").innerHTML=h;
   }
