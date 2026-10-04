@@ -148,6 +148,7 @@ async function suiteDesktop(browser, base){
   await page.click(".dmwPill[data-i='1']"); await sleep(250);
   const cap = await page.evaluate(() => { const c = document.getElementById("dmwCaption"); return { show:c.classList.contains("show"), text:c.textContent }; });
   check("D2. tapping a region pill explains it", cap.show && /DAM · Dividing wall/.test(cap.text), cap);
+  await page.keyboard.press("Escape"); await sleep(200);   // V1 STEM: a pill tap also opens the STEM popout; Escape closes it before the map
 
   /* E — sound toggle */
   const snd0 = await page.evaluate(() => document.getElementById("geiMapSound").getAttribute("aria-pressed"));
