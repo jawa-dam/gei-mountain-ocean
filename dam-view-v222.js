@@ -62,7 +62,7 @@
       "#"+PID+" .geiConn.micro .gcKey::before,#"+PID+" .geiConn.nano .gcKey::before{font-size:max(.62rem,10px)}",
       /* roomier layouts: station pills stack icon over name so six names always fit (never an ellipsis); subtitle may wrap */
       "#"+PID+"[data-dam-fit=tablet] .dmwPill b>span,#"+PID+"[data-dam-fit=desktop] .dmwPill b>span,#"+PID+"[data-dam-fit=mobile-land] .dmwPill b>span{display:block;text-align:center}",
-      "#"+PID+"[data-dam-fit=tablet] .dmwPill b,#"+PID+"[data-dam-fit=desktop] .dmwPill b,#"+PID+"[data-dam-fit=mobile-land] .dmwPill b{font-size:13px}",
+      "#"+PID+"[data-dam-fit=tablet] .dmwPill b,#"+PID+"[data-dam-fit=desktop] .dmwPill b,#"+PID+"[data-dam-fit=mobile-land] .dmwPill b{font-size:13px;letter-spacing:0}#"+PID+"[data-dam-fit=tablet] .dmwPill,#"+PID+"[data-dam-fit=desktop] .dmwPill{padding-left:6px;padding-right:6px}",
       "#"+PID+" .dmwPill{min-height:44px}#"+PID+" .dmwTitle span{white-space:normal;overflow:visible;text-overflow:clip}",
       /* landscape phone: the map gets the room, secondary chrome steps aside */
       "#"+PID+"[data-dam-fit=mobile-land] .dmwRail,#"+PID+"[data-dam-fit=mobile-land] .dmwAhead{display:none}",
