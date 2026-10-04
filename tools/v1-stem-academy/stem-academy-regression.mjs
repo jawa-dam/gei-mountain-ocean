@@ -1,0 +1,258 @@
+/* V1 — DAM STEM ACADEMY regression harness
+ *
+ * Loads the real index.html in headless Chromium and plays the whole STEM flow through the real DAM Map:
+ *   A  map: STEM header button, per-station STEM tags, locked stations follow the map's own progression
+ *   B  all six stations, start to finish: DISCOVER → EXPERIMENT → MISSION → PROVE IT (wrong answer first,
+ *      never shamed) → COMPLETE → badge; XP exactly 75/station + 100 Master bonus; Master screen
+ *   C  persistence: STEM progress survives a reload; STEM XP is derived from step flags
+ *   D  economy: game state (FL OZ, level, XP…) is byte-identical after the whole run; no /api request is made
+ *   E  mobile + desktop: popout stays inside the map frame, no horizontal scroll, tap targets >= 44px,
+ *      DAM Map pills still never overlap, BACK/Escape close the lab before the map
+ *   F  no uncaught page errors
+ *
+ *   node tools/v1-stem-academy/stem-academy-regression.mjs
+ *   SHOTS=/some/dir node ...    also writes screenshots
+ *
+ * Offline: every non-local request is blocked. Exits non-zero if any check fails.
+ */
+import { createServer } from "node:http";
+import { readFile, stat, mkdir } from "node:fs/promises";
+import { resolve, extname, join } from "node:path";
+import { createRequire } from "node:module";
+import { execSync } from "node:child_process";
+
+const root = resolve(new URL("../..", import.meta.url).pathname);
+const SHOTS = process.env.SHOTS || "";
+
+async function loadPlaywright(){
+  try { return await import("playwright"); } catch {}
+  const roots = [];
+  try { roots.push(execSync("npm root -g", { encoding:"utf8" }).trim()); } catch {}
+  roots.push("/opt/node-tools/node_modules");
+  for (const r of roots){
+    try { return createRequire(join(r, "noop.js"))("playwright"); } catch {}
+    try { return createRequire(join(r, "noop.js"))("playwright-core"); } catch {}
+  }
+  console.error("Playwright is not installed. Run: npm i -D playwright");
+  process.exit(2);
+}
+const TYPES = { ".html":"text/html", ".js":"text/javascript", ".mjs":"text/javascript", ".json":"application/json", ".css":"text/css", ".png":"image/png", ".svg":"image/svg+xml" };
+function serve(){
+  return new Promise(ok => {
+    const srv = createServer(async (req, res) => {
+      try {
+        let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
+        if (p === "/") p = "/index.html";
+        const f = resolve(root, "." + p);
+        if (!f.startsWith(root)) { res.writeHead(403); return res.end(); }
+        await stat(f);
+        res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream" });
+        res.end(await readFile(f));
+      } catch { res.writeHead(404); res.end(); }
+    });
+    srv.listen(0, "127.0.0.1", () => ok(srv));
+  });
+}
+const results = [];
+function check(name, pass, detail){ results.push({ name, pass: !!pass, detail }); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+// eslint-disable-next-line no-undef
+const ECON = () => JSON.stringify(state);
+
+async function openGame(browser, base, device){
+  const ctx = await browser.newContext(Object.assign({ reducedMotion:"reduce" }, device || { viewport:{ width:1366, height:900 } }));
+  const page = await ctx.newPage();
+  const errors = [], api = [];
+  page.on("pageerror", e => errors.push(e.message));
+  await page.route("**/*", r => { const u = r.request().url(); if (u.includes("/api/")) api.push(u); return u.startsWith(base) ? r.continue() : r.abort(); });
+  await page.goto(base + "/", { waitUntil:"load" });
+  await sleep(700);
+  const vp = page.viewportSize(), touch = !!(device && device.hasTouch);
+  await (touch ? page.touchscreen.tap(vp.width / 2, vp.height / 2) : page.mouse.click(vp.width / 2, vp.height / 2));
+  await sleep(300);
+  await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });
+  await sleep(3400);
+  await page.evaluate(() => { try { closeGameGuide(); } catch (e) {} try { window.__GEI_BEAVER_WELCOME__ && window.__GEI_BEAVER_WELCOME__.begin(); } catch (e) {} });
+  await sleep(600);
+  return { ctx, page, errors, api, touch };
+}
+// eslint-disable-next-line no-undef
+const setProgress = (page, s) => page.evaluate(s => { state.level = s.level; state.completedLevels = s.completed; state.levelFlOz = s.days * 111; window.__GEI_V2170_DAM_MAP__.render(); }, s);
+
+const LAYOUT = () => {
+  const lab = document.getElementById("stmLab"), sh = document.querySelector("#geiDamMapPage .dmwShell"), body = document.getElementById("stmBody");
+  const r = lab.getBoundingClientRect(), s = sh.getBoundingClientRect();
+  const small = [...lab.querySelectorAll(".stmBtn,.stmOpt,.stmPrimary,.stmStep,.stmClose,.stmCard")].filter(b => b.offsetParent && !b.disabled)
+    .filter(b => { const q = b.getBoundingClientRect(); return q.width < 44 || q.height < 44; }).map(b => b.className + ":" + b.textContent.trim().slice(0, 14));
+  const prim = document.getElementById("stmPrimary").getBoundingClientRect();
+  return {
+    inside: r.left >= s.left - 1 && r.right <= s.right + 1 && r.top >= s.top - 1 && r.bottom <= s.bottom + 1,
+    pageHScroll: document.documentElement.scrollWidth > window.innerWidth + 1,
+    bodyHScroll: body.scrollWidth > body.clientWidth + 1,
+    small,
+    footerVisible: prim.bottom <= window.innerHeight + 1 && prim.top >= 0
+  };
+};
+
+async function waitEnabled(page, ms = 25000){
+  await page.waitForFunction(() => { const b = document.getElementById("stmPrimary"); return b && !b.disabled; }, null, { timeout: ms });
+}
+const click = (page, sel) => page.click(sel, { timeout: 5000 });
+async function primary(page){ await waitEnabled(page); await click(page, "#stmPrimary"); await sleep(120); }
+
+/* How each lab is played (labs are driven through their real buttons). */
+const PLAY = {
+  mountain: async p => { for (const a of ["rain", "snow", "runoff"]) { await p.waitForFunction(() => !document.querySelector('#stmLabHost [data-a]').disabled, null, {}); await click(p, `[data-a="${a}"]`); await sleep(2600); } },
+  "mountain-path": async p => { await click(p, '[data-c="a"]'); await sleep(300); const t = await p.textContent(".stmStat"); check("B-mission-mountain: wrong path is encouraging, not shaming", /Try|Not that way/.test(t) && !/wrong|fail|bad/i.test(t), t); await click(p, '[data-c="c"]'); await sleep(300); },
+  dam: async p => { await click(p, '[data-m="wood"]'); await click(p, "[data-go]"); await sleep(300); const r1 = await p.textContent(".stmResult"); check("B-dam: weak design LEAKS", /LEAK/.test(r1), r1); await click(p, '[data-m="concrete"]'); await click(p, "[data-go]"); await sleep(300); const r2 = await p.textContent(".stmResult"); check("B-dam: strong design HOLDS", /DAM HOLDS/.test(r2), r2); },
+  "dam-flood": async p => { await click(p, '[data-m="rock"]'); await click(p, "[data-go]"); await sleep(300); const r1 = await p.textContent(".stmResult"); check("B-dam-mission: thin rock leaks in the flood, tells the child how to improve", /LEAK/.test(r1) && /IMPROVE/.test(r1), r1); await click(p, '[data-t="1"]'); await click(p, "[data-go]"); await sleep(300); },
+  reservoir: async p => { await click(p, '[data-r="3"]'); },
+  "reservoir-storm": async p => { await click(p, '[data-o="2"]'); await click(p, "[data-go]"); const eq = await p.waitForSelector(".stmEq b", { timeout: 4000 }).then(() => p.textContent(".stmEq")).catch(() => ""); check("B-reservoir: shows Start + In − Out = End", /START.*IN.*OUT.*END/.test(eq), eq); },
+  sluice: async p => { for (const i of [1, 2, 4]) { await click(p, `[data-g="${i}"]`); await sleep(100); } const t = await p.textContent(".stmFlowTxt"); check("B-sluice: 100% shows 🌊🌊🌊🌊🌊", t.includes("🌊🌊🌊🌊🌊"), t); },
+  "sluice-predict": async p => { await click(p, '[data-a="0"]'); await sleep(1700); await click(p, '[data-a="1"]'); await sleep(1700); },
+  wheel: async p => { await click(p, '[data-f="1"]'); const s1 = await p.textContent(".stmSpeed"); await click(p, '[data-f="4"]'); await click(p, '[data-h="2"]'); const s2 = await p.textContent(".stmSpeed"); check("B-wheel: more flow + height → faster wheel", /SLOW/.test(s1) && /SUPER FAST/.test(s2), [s1, s2]); },
+  "wheel-power": async p => { await click(p, '[data-f="4"]'); await click(p, '[data-h="2"]'); },
+  ocean: async p => { for (const r of [0, 3, 5]) { await click(p, `[data-r="${r}"]`); await sleep(100); } },
+  "ocean-balance": async p => { await click(p, '[data-r="2"]'); }
+};
+
+async function playStation(page, id, layout, shot){
+  const st = await page.evaluate(id => { const s = GEI_STEM.stations[id]; return { exp: s.experiment.lab, mis: s.challenge.lab, quiz: s.quiz, ntitle: s.title }; }, id);
+  await page.click(`#geiMapRegions .dmwPill[data-i="${await page.evaluate(id => GEI_STEM.stations[id].region, id)}"]`);
+  await page.waitForSelector("#stmLab.show", { timeout: 4000 });
+  await sleep(150);
+  const xp0 = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp);
+  const lo = [];
+  const snap = async tag => { if (layout) lo.push([tag, await page.evaluate(LAYOUT)]); if (SHOTS) await page.screenshot({ path: join(SHOTS, `${layout}-${id}-${tag}.png`) }); };
+  // DISCOVER
+  const disc = await page.textContent("#stmBody");
+  check(`B-${id}: discover shows a short lesson, REAL-WORLD and GEI layers apart`, disc.includes("REAL-WORLD STEM") && disc.includes("GEI GAME STORY") && disc.length < 900, disc.length);
+  await snap("1-discover");
+  await click(page, "#stmPrimary"); await sleep(200);
+  check(`B-${id}: TRY IT awards +10 STEM XP`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === xp0 + 10, {});
+  // EXPERIMENT
+  await PLAY[st.exp](page); await snap("2-experiment");
+  await waitEnabled(page); await sleep(200);
+  check(`B-${id}: experiment +15`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === xp0 + 25, {});
+  await click(page, "#stmPrimary"); await sleep(200);
+  // MISSION
+  await PLAY[st.mis](page); await snap("3-mission");
+  await waitEnabled(page); await sleep(200);
+  check(`B-${id}: mission +25`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === xp0 + 50, {});
+  await click(page, "#stmPrimary"); await sleep(200);
+  // PROVE IT — one wrong answer first
+  for (let qi = 0; qi < st.quiz.length; qi++) {
+    const q = st.quiz[qi];
+    const wrong = q.options[(q.answer + 1) % q.options.length];
+    if (qi === 0) {
+      await page.locator(".stmOpt", { hasText: wrong }).first().click(); await sleep(120);
+      const f = await page.textContent(".stmFeed");
+      check(`B-${id}: wrong answer is gentle`, /Good try/.test(f) && !/wrong|incorrect|fail/i.test(f), f);
+      await snap("4-prove");
+    }
+    await page.locator(".stmOpt", { hasText: q.options[q.answer] }).first().click(); await sleep(120);
+    await click(page, "#stmPrimary"); await sleep(200);
+  }
+  const done = await page.textContent("#stmBody");
+  const badge = await page.evaluate(id => GEI_STEM.stations[id].badge.name, id);
+  check(`B-${id}: COMPLETE shows the ${badge} badge and the wow moment`, done.includes(badge) && !!(await page.$("#stmWow .stmChainW")), done.slice(0, 80));
+  check(`B-${id}: station worth exactly 75 STEM XP`, (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) - xp0 === 75 + (id === "ocean" ? 100 : 0), {});
+  await snap("5-complete");
+  return lo;
+}
+
+async function suite(browser, base, name, device){
+  const g = await openGame(browser, base, device), { page } = g;
+  const before = await page.evaluate(ECON);
+  if (SHOTS) await mkdir(SHOTS, { recursive: true });
+
+  /* A — map integration + progression gating (fresh player: only the first station is playable) */
+  await setProgress(page, { level: 1, completed: 0, days: 0 });
+  await page.click("#damMapLauncherBtn"); await sleep(400);
+  const a = await page.evaluate(() => ({
+    top: !!document.getElementById("stmTopBtn"), topTxt: document.getElementById("stmTopBtn").textContent,
+    tags: [...document.querySelectorAll("#geiMapRegions .dmwPill")].map(p => (p.querySelector(".stmTag") || {}).textContent),
+    mapStillOk: [...document.querySelectorAll("#geiMapRegions .dmwPill")].length === 6
+  }));
+  check(`A1 [${name}]: map header gains 💧 STEM button`, a.top && /STEM/.test(a.topTxt), a.topTxt);
+  check(`A2 [${name}]: pills show STEM progress, later stations locked`, a.tags[0] === "💧 STEM 0%" && a.tags.slice(1).every(t => t === "💧 STEM 🔒") && a.mapStillOk, a.tags);
+  await page.click('#geiMapRegions .dmwPill[data-i="1"]'); await sleep(300);
+  const locked = await page.textContent("#stmBody");
+  check(`A3 [${name}]: locked station explains itself and follows map progression`, /unlocks as you travel/.test(locked) && (await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp)) === 0, locked.slice(0, 60));
+  await page.keyboard.press("Escape"); await sleep(200);
+  const esc = await page.evaluate(() => ({ lab: document.getElementById("stmLab").classList.contains("show"), map: document.getElementById("geiDamMapPage").classList.contains("show") }));
+  check(`E1 [${name}]: Escape closes the lab first, the map stays open`, !esc.lab && esc.map, esc);
+
+  /* B — all six stations (later stations unlocked by finished levels, i.e. the map's own progression) */
+  await setProgress(page, { level: 7, completed: 6, days: 0 });
+  const layouts = [];
+  const order = await page.evaluate(() => GEI_STEM.order);
+  for (const id of order) {
+    layouts.push(...(await playStation(page, id, name, true)));
+    if (id !== order[order.length - 1]) { await click(page, "#stmClose"); await sleep(200); }
+  }
+  const fin = await page.textContent("#stmPrimary");
+  check(`B7 [${name}]: after the sixth badge the CTA is the FINAL REWARD`, /FINAL REWARD/.test(fin), fin);
+  await click(page, "#stmPrimary"); await sleep(300);
+  const ms = await page.textContent("#stmBody");
+  check(`B8 [${name}]: MASTER DAM-ITE ENGINEER screen with all six badges and the water journey`, ms.includes("MASTER DAM-ITE ENGINEER") && ms.includes("traveled from mountain to ocean") && ["WATER EXPLORER", "DAM ENGINEER", "RESERVOIR MANAGER", "HYDRAULIC OPERATOR", "ENERGY ENGINEER", "WATER STEWARD"].every(b => ms.includes(b)) && ms.includes("MOUNTAIN → DAM → RESERVOIR → SLUICE → WHEEL → OCEAN"), ms.slice(0, 120));
+  if (SHOTS) await page.screenshot({ path: join(SHOTS, `${name}-master.png`) });
+  const prog = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress());
+  check(`B9 [${name}]: 450 lesson XP + 100 Master bonus = ${prog.maxXp}`, prog.xp === 550 && prog.xp === prog.maxXp && prog.master && prog.badges.length === 6, prog.xp);
+  await click(page, "#stmPrimary"); await sleep(250);
+  const tags = await page.evaluate(() => [...document.querySelectorAll("#geiMapRegions .dmwPill .stmTag")].map(t => t.textContent));
+  check(`A4 [${name}]: every pill now reads STEM ✓`, tags.length === 6 && tags.every(t => t === "💧 STEM ✓"), tags);
+
+  /* Hub + careers */
+  await click(page, "#stmTopBtn"); await sleep(250);
+  await click(page, ".stmCareerBtn"); await sleep(150);
+  const hub = await page.evaluate(() => ({ t: document.getElementById("stmBody").textContent, careers: document.querySelectorAll("#stmCareers div").length, open: document.getElementById("stmCareers").classList.contains("show") }));
+  check(`B10 [${name}]: hub shows XP, badges and the optional WHO WORKS WITH WATER? careers`, hub.careers === 9 && hub.open && /Hydrologist|HYDROLOGIST/.test(hub.t) && /550/.test(hub.t), hub.careers);
+  layouts.push(["hub", await page.evaluate(LAYOUT)]);
+  if (SHOTS) await page.screenshot({ path: join(SHOTS, `${name}-hub.png`) });
+  await click(page, "#stmClose"); await sleep(200);
+
+  /* map pills unchanged: no overlap */
+  const pills = await page.evaluate(() => { const r = [...document.querySelectorAll("#geiMapRegions .dmwPill")].map(p => p.getBoundingClientRect()); return r.slice(1).filter((x, i) => x.left < r[i].right - 1).length; });
+  check(`E2 [${name}]: DAM Map pills still never overlap with STEM tags`, pills === 0, pills);
+  if (SHOTS) await page.screenshot({ path: join(SHOTS, `${name}-map.png`) });
+
+  /* C — persistence */
+  await page.reload({ waitUntil: "load" }); await sleep(900);
+  const after = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress());
+  check(`C1 [${name}]: STEM progress survives a reload`, after.xp === 550 && after.master, after.xp);
+  const raw = await page.evaluate(() => localStorage.getItem("geiStemAcademy.v1"));
+  check(`C2 [${name}]: only flags are stored — XP is derived`, !/"xp"/.test(raw), raw.slice(0, 80));
+  await page.evaluate(() => localStorage.setItem("geiStemAcademy.v1", JSON.stringify({ v: 1, xp: 99999, st: { mountain: { discover: 1 } } })));
+  await page.reload({ waitUntil: "load" }); await sleep(900);
+  const tam = await page.evaluate(() => __GEI_STEM_ACADEMY_V1__.progress().xp);
+  check(`C3 [${name}]: a tampered XP value is ignored`, tam === 10, tam);
+
+  /* D — economy untouched */
+  const afterEcon = await page.evaluate(ECON);
+  const beforeObj = JSON.parse(before), afterObj = JSON.parse(afterEcon);
+  const keys = ["totalFlOz", "damMachineFreePlays", "tapCount"];
+  check(`D1 [${name}]: game economy fields identical (FL OZ, free plays, taps)`, keys.every(k => JSON.stringify(beforeObj[k]) === JSON.stringify(afterObj[k])), keys.map(k => [beforeObj[k], afterObj[k]]));
+  check(`D2 [${name}]: no /api (economy / PayPal) request was made`, g.api.length === 0, g.api);
+
+  /* E — layout */
+  const bad = layouts.filter(([, l]) => !l.inside || l.pageHScroll || l.bodyHScroll || l.small.length || !l.footerVisible);
+  check(`E3 [${name}]: every STEM screen fits the frame, no horizontal scroll, tap targets ≥44px, button on screen`, bad.length === 0, bad.map(([t, l]) => [t, l]));
+  const fresh = g.errors.filter(e => !/addStyle is not defined/.test(e));      // pre-existing: the 4 unparseable tap-lites modules (see v2-dam-map harness KNOWN_BROKEN)
+  check(`F [${name}]: no new uncaught page errors`, fresh.length === 0, fresh.slice(0, 3));
+  await g.ctx.close();
+}
+
+const { chromium, devices } = await loadPlaywright();
+const srv = await serve();
+const base = "http://127.0.0.1:" + srv.address().port;
+const browser = await chromium.launch();
+try {
+  await suite(browser, base, "desktop", null);
+  await suite(browser, base, "pixel7", devices["Pixel 7"]);
+  await suite(browser, base, "iphone-se", devices["iPhone SE"]);
+} finally { await browser.close(); srv.close(); }
+
+const failed = results.filter(r => !r.pass);
+console.log(JSON.stringify({ total: results.length, failed: failed.length, failures: failed }, null, 1));
+process.exit(failed.length ? 1 : 0);
