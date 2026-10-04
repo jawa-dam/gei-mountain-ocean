@@ -4,7 +4,7 @@
  * ctx (provided by engineering-world-v22.js):
  *   host        element to draw into              mode      "experiment" | "mission" | "free"
  *   reduced     prefers-reduced-motion            done()    this step is complete (ignored in free play)
- *   why(key)    show "💡 WHY DID THAT HAPPEN?"    wilbert(msg)  coach reaction (throttled, can be switched off)
+ *   why(key)    show "💡 WHY DID THAT HAPPEN?"    react(key,msg)  the player's guide reacts in their own voice (throttled, can be quieted)
  *   say(msg)    guide speech                      sfx(kind) tap|good|oops|wow|water|build|gate|spin|zap
  *   every(fn,ms) / after(fn,ms)  timers cleared automatically    alive()  false once the lab is closed
  *
@@ -75,7 +75,7 @@
       '<div class="stmChecks" aria-label="Tried so far"><span data-c="rain">☁️ Rain</span><span data-c="snow">❄️ Snow</span><span data-c="runoff">💧 Runoff</span></div>';
     var layer=el(h,".drops"),path=el(h,".stmStream"),stat=el(h,".stmStat"),snow=el(h,".stmSnow"),cloud=el(h,".stmCloud"),used={},busy=false;
     function mark(a){used[a]=1;el(h,'[data-c="'+a+'"]').classList.add("on");
-      if(used.rain&&used.snow&&used.runoff){stat.textContent="✅ Every drop went downhill! Gravity did that.";ctx.wilbert("See that? Rain, snow, runoff — it all ends up flowing downhill.");finish(ctx);}}
+      if(used.rain&&used.snow&&used.runoff){stat.textContent="✅ Every drop went downhill! Gravity did that.";ctx.react("mountain.completed","See that? Rain, snow, runoff — it all ends up flowing downhill.");finish(ctx);}}
     h.addEventListener("click",function(e){
       var b=e.target.closest&&e.target.closest("[data-a]");if(!b||busy)return;
       var a=b.dataset.a;busy=true;ctx.sfx("tap");
@@ -114,7 +114,7 @@
       pick(h,".stmPath",path);path.classList.add("pick");
       run(ctx,1500,function(p){var q=ok?p:(p<.5?p*2*.55:(1-p)*2*.55),pt=path.getPointAtLength(len*q);dropC.setAttribute("cx",pt.x);dropC.setAttribute("cy",pt.y);},function(){
         busy=false;
-        if(ok){won=true;b.classList.add("good");stat.textContent="✅ "+G.stations.mountain.challenge.success;ctx.sfx("good");ctx.why("mountain.path.right");ctx.wilbert("Yes! Downhill. Gravity does the work.");finish(ctx);}
+        if(ok){won=true;b.classList.add("good");stat.textContent="✅ "+G.stations.mountain.challenge.success;ctx.sfx("good");ctx.why("mountain.path.right");ctx.react("mountain.pathRight","Yes! Downhill. Gravity does the work.");finish(ctx);}
         else{if(dropC.parentNode)dropC.parentNode.removeChild(dropC);stat.textContent="🤔 Not that way — try a path that goes lower!";ctx.sfx("oops");ctx.why("mountain.path.wrong");}
       });
     });
@@ -176,7 +176,7 @@
           if(ratio>=1){
             var top=ratio>=1.5;
             res.innerHTML=(top?'🚀 <b>ENGINEERING MASTER!</b> ✅':'🧱 <b>DAM HOLDING!</b> ✅')+' Strength '+S+' vs push '+demand+'.';wall.classList.add("holds");ctx.sfx("good");
-            ctx.why(top?"dam.master":"dam.hold");ctx.wilbert(top?"ENGINEER MODE ACTIVATED!":"Look at that! The dam is holding.");
+            ctx.why(top?"dam.master":"dam.hold");ctx.react(top?"dam.master":"dam.stable",top?"ENGINEER MODE ACTIVATED!":"Look at that! The dam is holding.");
             if(mission){won=true;stage(5);finish(ctx);}
             else if(tests>=2)finish(ctx);
             ctx.after(function(){wall.classList.remove("holds");},1600);
@@ -184,7 +184,7 @@
             var poor=ratio>=.7;
             crack.setAttribute("opacity",1);
             res.innerHTML=(poor?'🌊 <b>TOO MUCH WATER!</b> ⚠️':'💦 <b>LEAK!</b> ⚠️')+' Strength '+S+' is less than push '+demand+'. <em>IMPROVE it: try a stronger material, a thicker wall or reinforcement.</em>';
-            stage(5);ctx.sfx("oops");ctx.why(poor?"dam.poor":"dam.leak");ctx.wilbert("Oops! Engineers don't give up — improve it and test again!");
+            stage(5);ctx.sfx("oops");ctx.why(poor?"dam.poor":"dam.leak");ctx.react(poor?"dam.poor":"dam.leak","Oops! Engineers don't give up — improve it and test again!");
             for(var i=0;i<6;i++)(function(i){ctx.after(function(){fall(ctx,layer,170+(i%3)*10,110,150,700);},i*160);})(i);
             if(!mission&&tests>=2)finish(ctx);
           }
@@ -232,9 +232,9 @@
         else if(rain<out){kind="fall";stat.textContent="💧 WATER LEVEL FALLS";}
         else{kind="stable";stat.textContent="✅ RESERVOIR STABLE";}}
       level=e;resDraw(h,level,rain,out,s);
-      if(kind!==last){last=kind;ctx.why("reservoir."+kind);if(kind==="stable")ctx.wilbert("Balanced! Water in equals water out.");}
+      if(kind!==last){last=kind;ctx.why("reservoir."+kind);ctx.react({rise:"reservoir.rising",fall:"reservoir.falling",stable:"reservoir.stable",overflow:"reservoir.overflow"}[kind],"");}
       if(kind!=="overflow")seen[kind]=1;
-      if(!fp&&seen.rise&&seen.fall&&seen.stable){seen.done=1;ctx.wilbert("You made it rise, fall and hold steady. Nice engineering!");finish(ctx);}
+      if(!fp&&seen.rise&&seen.fall&&seen.stable){seen.done=1;ctx.react("reservoir.safe","You made it rise, fall and hold steady. Nice engineering!");finish(ctx);}
     },1100);
   });
   var STORM=[2,3,3,2,3,3,2,3,2,2];
@@ -252,10 +252,10 @@
       if(!running)return;
       var rain=STORM[tick],s=level,avail=s+rain,out=Math.min(rel,avail),e=avail-out;tick++;el(h,".stmTN").textContent=tick;
       level=Math.min(e,11);resDraw(h,Math.min(level,10),rain,out,s);
-      if(e>10){running=false;stat.innerHTML="💦 <b>OVERFLOW!</b> Too much came in. Release more water — try again!";ctx.sfx("oops");ctx.why("reservoir.overflow");ctx.wilbert("WHOA! The water is too high. Open up the release!");go.disabled=false;go.textContent="↻ TRY AGAIN";return;}
+      if(e>10){running=false;stat.innerHTML="💦 <b>OVERFLOW!</b> Too much came in. Release more water — try again!";ctx.sfx("oops");ctx.why("reservoir.overflow");ctx.react("reservoir.overflow","WHOA! The water is too high. Open up the release!");go.disabled=false;go.textContent="↻ TRY AGAIN";return;}
       if(e<1){running=false;stat.innerHTML="🏜️ <b>TOO DRY!</b> You released too much. Keep some for later — try again!";ctx.sfx("oops");ctx.why("reservoir.dry");go.disabled=false;go.textContent="↻ TRY AGAIN";return;}
       stat.textContent=e>=8?"⚠️ HIGH! Release more water.":e<=2?"⚠️ LOW! Release less.":"✅ RESERVOIR STABLE. Keep watching!";
-      if(tick>=STORM.length){running=false;stat.textContent="✅ "+G.stations.reservoir.challenge.success;ctx.why("reservoir.stable");ctx.wilbert("The storm passed and the reservoir stayed safe!");finish(ctx);go.textContent="✅ RESERVOIR SAFE";}
+      if(tick>=STORM.length){running=false;stat.textContent="✅ "+G.stations.reservoir.challenge.success;ctx.why("reservoir.stable");ctx.react("reservoir.safe","The storm passed and the reservoir stayed safe!");finish(ctx);go.textContent="✅ RESERVOIR SAFE";}
     },1100);
   });
 
@@ -298,9 +298,9 @@
       var i=+b.dataset.g;pick(h,"[data-g]",b);sluiceSet(h,i);ctx.sfx(i>prev?"gate":"gate");
       el(h,".stmStat").textContent=i===0?"🔒 Closed — almost nothing gets through.":i===4?"💦 Wide open — a big surge of water!":"🚪 The wider the gate, the more water flows.";
       ctx.why(i===0?"sluice.closed":i>prev?"sluice.more":"sluice.less");
-      if(i===4&&prev<4)ctx.wilbert("WHOA! That's a LOT of water!");
+      if(i===4&&prev<4)ctx.react("sluice.highFlow","WHOA! That's a LOT of water!");else if(i>prev&&i>0)ctx.react("sluice.opening","Here it comes!");
       prev=i;if(!tried[i]){tried[i]=1;n++;}
-      if(!fp&&n>=3){ctx.wilbert("MORE OPEN = MORE WATER FLOW. That's cause and effect!");finish(ctx);}
+      if(!fp&&n>=3){ctx.react("sluice.controlled","MORE OPEN = MORE WATER FLOW. That's cause and effect!");finish(ctx);}
     });
   });
   var TARGETS=[{head:1,t:50,note:"The reservoir is full."},{head:.5,t:25,note:"The reservoir is LOW, so water pushes out less."},{head:.5,t:50,note:"The reservoir is still LOW."}];
@@ -318,10 +318,10 @@
     h.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-g]");if(!b||locked)return;
       var i=+b.dataset.g,t=TARGETS[ti],flow;pick(h,"[data-g]",b);flow=sluiceSet(h,i,t.head);ctx.sfx("gate");
       if(flow===t.t){
-        locked=true;ctx.sfx("good");stat.textContent="✅ TARGET HIT! Flow is "+flow+"%.";ctx.why(t.head<1?"sluice.lowhead":"sluice.more");ctx.wilbert("Now THAT looks like controlled flow!");
+        locked=true;ctx.sfx("good");stat.textContent="✅ TARGET HIT! Flow is "+flow+"%.";ctx.why(t.head<1?"sluice.lowhead":"sluice.more");ctx.react("sluice.controlled","Now THAT looks like controlled flow!");
         if(ti>=TARGETS.length-1){stat.textContent="✅ "+G.stations.sluice.challenge.success;finish(ctx);}
         else ctx.after(function(){ti++;show();},1600);
-      }else if(flow>t.t+25){ctx.sfx("oops");stat.textContent="🌊 Too much flow ("+flow+"%). Close the gate a bit.";ctx.wilbert("WHOA! That's a LOT of water!");ctx.why("sluice.more");}
+      }else if(flow>t.t+25){ctx.sfx("oops");stat.textContent="🌊 Too much flow ("+flow+"%). Close the gate a bit.";ctx.react("sluice.highFlow","WHOA! That's a LOT of water!");ctx.why("sluice.more");}
       else{stat.textContent=flow>t.t?"⬇️ A bit too much ("+flow+"%). Try a smaller opening.":"⬆️ Not enough yet ("+flow+"%). Open the gate more.";ctx.why(flow>t.t?"sluice.less":"sluice.more");}
     });
   });
@@ -362,7 +362,7 @@
         [].forEach.call(h.querySelectorAll(".stmHome"),function(s,k){var on=k<homes;s.classList.toggle("lit",on);s.querySelector("b").textContent=on?"💡":"🌑";});
         el(h,".stmTownTxt").textContent="TOWN LIGHTS "+homes+"/"+HOMES;
         el(h,".stmGenFlash").setAttribute("opacity",out>40?1:0);
-        if(homes>lastHomes){ctx.sfx("zap");}lastHomes=homes;
+        if(homes>lastHomes){ctx.sfx("zap");if(lastHomes===0)ctx.react("wheel.power","We made power!");}lastHomes=homes;
       }
       paint();
       h.addEventListener("click",function(e){
@@ -370,9 +370,9 @@
         if(f){var nf=+f.dataset.f;pick(h,"[data-f]",f);ctx.sfx("spin");
           stat.textContent=nf===0?"🔒 No flow — the turbine stops.":nf>=3?"🌊 Strong flow — the turbine spins fast!":"💧 A little flow — the turbine turns slowly.";
           ctx.why(nf===0?"wheel.stopped":nf>flow?"wheel.faster":"wheel.slower");
-          if(nf>=3&&flow<3)ctx.wilbert("The turbine is accelerating — the generator is waking up!");
+          if(nf>=3&&flow<3)ctx.react("wheel.fast","The turbine is accelerating — the generator is waking up!");
           flow=nf;
-          if(flow>0&&!tried[flow]){tried[flow]=1;nt++;if(!mission&&!fp&&nt>=2){ctx.wilbert("More flow, faster turbine. Moving water has energy!");finish(ctx);}}paint();}
+          if(flow>0&&!tried[flow]){tried[flow]=1;nt++;if(!mission&&!fp&&nt>=2){ctx.react("wheel.spinning","More flow, faster turbine. Moving water has energy!");finish(ctx);}}paint();}
         if(t){ht=+t.dataset.h;pick(h,"[data-h]",t);ctx.sfx("spin");ctx.why("wheel.height");paint();}
       });
       ctx.every(function(){
@@ -380,7 +380,7 @@
         var target=flow*ht*(100/8);out=out+(target-out)*.5;if(Math.abs(target-out)<1)out=target;paint();
         if(mission){
           if(homesFor(flow*ht)>=HOMES&&homesFor(out/12.5)>=HOMES){hold++;stat.textContent="🏘️ All homes lit! Hold it… "+hold+"/3";}else hold=0;
-          if(hold>=3){won=true;stat.textContent="✅ "+G.stations.wheel.challenge.success;ctx.sfx("wow");ctx.why("wheel.lights");ctx.wilbert("The whole town is glowing! POWER THE CITY complete!");finish(ctx);}
+          if(hold>=3){won=true;stat.textContent="✅ "+G.stations.wheel.challenge.success;ctx.sfx("wow");ctx.why("wheel.lights");ctx.react("wheel.townLit","The whole town is glowing! POWER THE CITY complete!");finish(ctx);}
         }
       },500);
     };
@@ -421,8 +421,8 @@
     var h=ctx.host,tried={},n=0,fp=free(ctx);oceanBase(h);var stat=el(h,".stmStat");stat.textContent="Pick how much water to release. Try a few!";oceanPaint(h,0);
     h.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-r]");if(!b)return;var r=+b.dataset.r;ctx.sfx("water");oceanPaint(h,r);
       stat.textContent=r<2?"🏜️ Too little: fish struggle and the wetland dries out.":r>4?"🌊 Too much: the river rises fast.":r>3?"🏘️ Nature is fine, but the town is running low.":"🌎 The water reaches the ocean and life lights up!";
-      ctx.why(oceanWhy(r));if(r<2)ctx.wilbert("Uh-oh, the fish are struggling!");
-      if(!tried[r]){tried[r]=1;n++;if(!fp&&n>=3){ctx.wilbert("Water doesn't disappear — it keeps going downstream!");finish(ctx);}}});
+      ctx.why(oceanWhy(r));if(r<2)ctx.react("ocean.low","Uh-oh, the fish are struggling!");else if(r>4)ctx.react("ocean.flood","Too much, too fast!");else if(r>=2&&r<=3)ctx.react("ocean.arrival","The water reaches the ocean!");
+      if(!tried[r]){tried[r]=1;n++;if(!fp&&n>=3){ctx.react("ocean.arrival","Water doesn't disappear — it keeps going downstream!");finish(ctx);}}});
   });
   G.registerLab("ocean-balance",function(ctx){
     var h=ctx.host,r=0,hold=0,won=false;oceanBase(h);var stat=el(h,".stmStat");
@@ -434,7 +434,7 @@
     ctx.every(function(){
       if(won)return;var s=oceanState(r);
       if(s.ok){hold++;el(h,".stmHN").textContent=new Array(hold+1).join("●")+new Array(Math.max(0,3-hold)+1).join("○");
-        if(hold>=3){won=true;[].forEach.call(h.querySelectorAll(".stmLife div"),function(d){d.classList.add("glow");});stat.textContent="✅ "+G.stations.ocean.challenge.success;ctx.sfx("wow");ctx.why("ocean.healthy");ctx.wilbert("Look — the whole ecosystem lights up!");finish(ctx);}}
+        if(hold>=3){won=true;[].forEach.call(h.querySelectorAll(".stmLife div"),function(d){d.classList.add("glow");});stat.textContent="✅ "+G.stations.ocean.challenge.success;ctx.sfx("wow");ctx.why("ocean.healthy");ctx.react("ocean.healthy","Look — the whole ecosystem lights up!");finish(ctx);}}
     },1000);
   });
 })();

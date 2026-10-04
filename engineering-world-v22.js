@@ -200,7 +200,10 @@
       ".stmJourney span{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:#0b1a3a;border:2px solid #7ff0ff;box-shadow:0 0 12px rgba(47,210,255,.5)}",
       ".stmJNames{display:flex;justify-content:space-between;font-size:9.5px;font-weight:900;letter-spacing:.02em;margin:0 0 12px}.stmJNames span{flex:1;text-align:center}",
       ".stmLock{text-align:center;padding:24px 8px}.stmLock i{display:block;font-style:normal;font-size:56px}.stmLock p{font-size:18px;font-weight:800}",
-      /* V2.2 */
+      /* V2.2.3 personal guide */
+      ".stmWhyBtn .stmWil{position:relative;width:26px;height:26px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:16px;background:#10264a;border:1.5px solid #ffd66b}.stmWhyBtn .stmWil img,.stmGAv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}",
+      ".stmGuideCard{margin:8px 0;padding:12px;border-radius:16px;border:2px solid #7ff0ff;background:rgba(47,210,255,.1);text-align:center}.stmGRow{display:flex;align-items:center;justify-content:center;gap:10px;text-align:left}",
+      ".stmGAv{position:relative;width:56px;height:56px;border-radius:50%;overflow:hidden;display:grid;place-items:center;font-size:32px;background:#10264a;border:2px solid #7ff0ff}.stmGRow small{display:block;font-size:11px;letter-spacing:.14em;color:#7ff0ff}.stmGRow b{font-size:17px;letter-spacing:.04em}.stmGuideCard p{margin:8px 0 0;font-weight:900;letter-spacing:.04em}",
       ".stmSee{flex:0 0 auto;min-width:48px;min-height:48px;border-radius:14px;border:1.5px solid #7ff0ff;background:rgba(47,210,255,.14);color:#fff;font-size:22px;cursor:pointer}.stmSee[hidden]{display:none}.stmSee:focus-visible{outline:3px solid #ffd66b;outline-offset:2px}",
       ".stmSteps:empty{display:none}",
       ".stmCoach{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid rgba(47,210,255,.2);background:rgba(47,210,255,.06)}",
@@ -224,7 +227,7 @@
       ".stmScn{margin:0 0 6px;font-size:clamp(20px,5.4cqw,25px);font-weight:900;line-height:1.2}",
       ".stmSimMeter{margin:0 0 10px}.stmSimLbl{font-size:13px;font-weight:900;letter-spacing:.06em}.stmSimLbl b{color:#ffd66b;margin-left:6px}.stmSimBar{height:16px}.stmSimBar i{transition:width .9s ease;background:linear-gradient(90deg,#2fd2ff,#ffd66b 70%,#ff7b7b)}",
       ".stmRank{margin:6px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(127,240,255,.45);background:rgba(47,210,255,.08);font-size:14px;font-weight:800;letter-spacing:.04em}.stmRank b{color:#7ff0ff}",
-      ".stmCareerCard{display:flex;gap:10px;align-items:center;margin:6px 0;padding:10px 12px;border-radius:14px;border:1px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.04);font-size:14px}.stmCareerCard i{font-style:normal;font-size:30px}.stmCareerCard small{display:block;font-size:9.5px;letter-spacing:.14em;color:#7ff0ff}.stmCareerCard b{display:block;font-size:14px}",
+      ".stmCareerCard{display:flex;gap:10px;align-items:center;margin:6px 0;padding:10px 12px;border-radius:14px;border:1px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.04);font-size:14px}.stmCareerCard i{font-style:normal;font-size:30px}.stmCareerCard small{display:block;font-size:10.5px;letter-spacing:.14em;color:#7ff0ff}.stmCareerCard b{display:block;font-size:14px}",
       ".stmJourney7{display:flex;align-items:center;justify-content:space-between;margin:10px 0 4px;position:relative}.stmJourney7::before{content:\"\";position:absolute;left:5%;right:5%;top:50%;height:6px;margin-top:-3px;border-radius:4px;background:repeating-linear-gradient(90deg,#2fd2ff 0 14px,#7ff0ff 14px 22px);background-size:44px 100%;animation:stmRiv 1s linear infinite}",
       ".stmJourney7 span{position:relative;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:#0b1a3a;border:2px solid #7ff0ff;box-shadow:0 0 12px rgba(47,210,255,.5)}",
       ".stmTravel{position:absolute;left:3%;top:50%;margin-top:-13px;z-index:2;text-decoration:none;font-size:24px;animation:stmTravel 4.5s ease-in-out infinite}@keyframes stmTravel{0%{left:3%}100%{left:90%}}",
@@ -248,20 +251,39 @@
   /* Wilbert, the DAM Guide: an optional coach. Reactions are throttled and can be switched off; 💡 WHY? always works. */
   function coachOn(){try{return localStorage.getItem("geiStemCoach.v1")!=="off";}catch(e){return true;}}
   function setCoach(on){try{localStorage.setItem("geiStemCoach.v1",on?"on":"off");}catch(e){}paintCoach();}
+  function PG(){return window.__GEI_PERSONAL_GUIDE__||null;}
+  function faceHtml(who){return esc(who.emoji||"🦫")+(who.image?'<img alt="" src="'+esc(who.image)+'" onerror="this.remove()">':"");}
+  /* YOUR GUIDE = the player's active character (read from the game's single source of truth); WILBERT = the expert, one tap away */
+  function paintGuide(){
+    var g=PG(),d=g&&g.current(),av=$("stmGuideAv");if(!av)return;
+    if(d){av.innerHTML=faceHtml(d);av.setAttribute("data-guide",d.id);$("stmGuideName").textContent="YOUR GUIDE · "+String(d.name).toUpperCase();}
+    var w=g&&g.wilbert(),wf=$("stmWilFace");if(wf&&w)wf.innerHTML=faceHtml(w);
+  }
   function paintCoach(){
     var c=$("stmCoach");if(!c)return;var on=coachOn(),b=$("stmCoachBtn");
-    c.classList.toggle("off",!on);b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Wilbert coach is on. Tap to rest him.":"Wilbert coach is resting. Tap to wake him.");
-    if(!on)$("stmBubbleTxt").textContent="Wilbert is resting. Tap 💡 WHY? any time.";
+    c.classList.toggle("off",!on);b.setAttribute("aria-pressed",on);b.setAttribute("aria-label",on?"Guide reactions are on. Tap to quiet them.":"Guide reactions are quiet. Tap to wake them.");
+    if(!on)$("stmBubbleTxt").textContent="Reactions are resting. Tap 💬 to wake them. ASK WILBERT still works.";
   }
   function say(msg,force){if(!force&&!coachOn())return;var t=$("stmBubbleTxt");if(t)t.textContent=msg;}
-  function wilbert(msg){var n=Date.now();if(n-lastSay<3500)return;lastSay=n;say(msg);}
+  function guideSay(key,fallback){var g=PG();say(g?g.line(key,fallback):(fallback||""));}                     // phase intros: the guide's own short voice
+  function wilbert(msg){var n=Date.now();if(n-lastSay<3500)return;lastSay=n;say(msg);}                         // throttled reaction
+  function react(key,fallback){                                                                                // personalised reaction (+ one-time journey moments)
+    var g=PG(),k=key,line;
+    if(g){var m=g.moment("lab:"+key);if(m)k=m;line=g.line(k,fallback);}else line=fallback;
+    wilbert(line||fallback||"");
+  }
   function showWhy(key){
     var text=key?G.why[key]:"";if(key&&!text)return;
     if(text){lastWhy=text;var w=$("stmWhy");if(w){w.hidden=false;w.innerHTML='<b>💡 WHY DID THAT HAPPEN?</b><span>'+esc(text)+'</span>';}}
   }
-  function askWhy(){
-    var st=V.id&&G.stations[V.id],msg=lastWhy||(st?st.realWorld:"Tap things in the lab and I'll explain what happened!");
-    say("💡 "+msg,true);if(lastWhy)showWhy();
+  /* ASK WILBERT: the optional expert. The guide wonders, Wilbert explains — it never replaces the STEM "why" card. */
+  var askStep=0,askStation=null;
+  function askWilbert(){
+    var id=(V.mode==="station"&&V.id)||askStation||(G.order[0]),st=G.stations[id]||G.stations[G.order[0]],x=st.ask||{q:"What am I looking at?",a:st.discover.text};
+    var parts=[x.a,st.realWorld,lastWhy||st.discover.text];
+    say(x.q,true);
+    var w=$("stmWhy");if(w){w.hidden=false;w.innerHTML='<b>🦫 WILBERT · EXPERT</b><span>'+esc(parts[askStep%parts.length])+'</span>';}
+    askStep++;sfx("tap");
   }
 
   function mount(){
@@ -272,10 +294,10 @@
     lab.innerHTML='<div class="stmHead"><button type="button" class="stmClose" id="stmClose" aria-label="Back to the DAM Map">←</button>'+
       '<div class="stmHT"><b id="stmTitle"></b><small id="stmSub"></small></div><button type="button" class="stmSee" id="stmSeeBtn" aria-label="See inside: follow the water through the whole system" hidden><span aria-hidden="true">👁️</span></button><div class="stmXp" id="stmXp" aria-live="polite"></div></div>'+
       '<div class="stmSteps" id="stmSteps" role="tablist" aria-label="Lab steps"></div>'+
-      '<div class="stmCoach" id="stmCoach"><div class="stmAv" aria-hidden="true">🦫<img alt="" src="'+GUIDE_IMG+'" onerror="this.remove()"></div>'+
-      '<div class="stmBubble"><small>WILBERT · DAM GUIDE</small><span id="stmBubbleTxt" aria-live="polite"></span></div>'+
-      '<button type="button" class="stmWhyBtn" id="stmWhyBtn" aria-label="Why? Wilbert explains"><span aria-hidden="true">💡</span><b>WHY?</b></button>'+
-      '<button type="button" class="stmCoachBtn" id="stmCoachBtn" aria-pressed="true"><span aria-hidden="true">🦫</span></button></div>'+
+      '<div class="stmCoach" id="stmCoach"><div class="stmAv" id="stmGuideAv" aria-hidden="true">🦫</div>'+
+      '<div class="stmBubble"><small id="stmGuideName">WILBERT · DAM GUIDE</small><span id="stmBubbleTxt" aria-live="polite"></span></div>'+
+      '<button type="button" class="stmWhyBtn" id="stmWhyBtn" aria-label="Ask Wilbert, the expert dam guide"><span class="stmWil" id="stmWilFace" aria-hidden="true">🦫</span><b>ASK</b></button>'+
+      '<button type="button" class="stmCoachBtn" id="stmCoachBtn" aria-pressed="true" aria-label="Guide reactions on"><span aria-hidden="true">💬</span></button></div>'+
       '<div class="stmBody" id="stmBody" tabindex="-1"></div><div class="stmWhy" id="stmWhy" role="status" aria-live="polite" hidden></div>'+
       '<div class="stmFoot"><button type="button" class="stmPrimary" id="stmPrimary"></button></div>';
     sh.appendChild(lab);
@@ -284,7 +306,7 @@
       if(V.mode!=="station")return;var id=V.id,ph=V.phase;
       openView("system",{focus:COMP_OF[id],back:function(){openStation(id,ph);},backLabel:"← BACK TO THE LAB"});
     });
-    $("stmWhyBtn").addEventListener("click",askWhy);
+    $("stmWhyBtn").addEventListener("click",askWilbert);
     $("stmCoachBtn").addEventListener("click",function(){setCoach(!coachOn());});
     paintCoach();
     lab.addEventListener("keydown",function(e){if(e.key==="Escape"){e.preventDefault();e.stopPropagation();closeLab();}});
@@ -296,7 +318,7 @@
     c.alive=function(){return !c.dead&&host.isConnected;};
     c.every=function(fn,ms){var t=setInterval(function(){if(c.alive())fn();},ms);c.timers.push(t);return t;};
     c.after=function(fn,ms){var t=setTimeout(function(){if(c.alive())fn();},ms);c.timers.push(t);return t;};
-    c.sfx=sfx;c.say=say;c.wilbert=wilbert;c.why=showWhy;
+    c.sfx=sfx;c.say=say;c.wilbert=wilbert;c.react=react;c.why=showWhy;
     c.done=function(){if(c._done)return;c._done=true;if(c.onDone)c.onDone();};
     return c;
   }
@@ -319,7 +341,7 @@
     var l=mount();if(!l)return false;
     var was=l.classList.contains("show");
     if(!was)returnFocus=document.activeElement;
-    l.classList.add("show");l.setAttribute("aria-hidden","false");return true;
+    l.classList.add("show");l.setAttribute("aria-hidden","false");paintGuide();return true;
   }
   function closeLab(){
     clearLab();V.mode=null;
@@ -350,11 +372,12 @@
 
   function openStation(id,phase){
     var st=G.stations[id];if(!st||!openLab())return;
-    clearLab();V={mode:"station",id:id,phase:null};lastWhy="";
+    clearLab();V={mode:"station",id:id,phase:null};lastWhy="";askStation=null;askStep=0;
     $("stmTitle").textContent=st.icon+" "+st.title;$("stmSub").textContent=st.subtitle+" · "+st.topic;
     setXpBadge();paintSee();
     if(!unlocked(id)&&!(phase==="free"&&master()))return renderLocked(id);
     go(phase||entryPhase(id));
+    try{var g=PG(),mk=g&&g.moment("station:"+id);if(mk){say(g.line(mk));}}catch(e){}                 // first visit: the guide discovers the place
     try{$("stmBody").focus({preventScroll:true});}catch(e){}
   }
   function renderLocked(id){
@@ -379,7 +402,7 @@
   }
 
   function viewDiscover(st,body){
-    say(st.discover.guide);
+    guideSay(st.id+".observe",st.discover.guide);
     body.innerHTML='<div class="stmSec">💡 DISCOVER</div><p class="stmLearn">'+esc(st.discover.text)+'</p>'+
       '<ul class="stmFacts">'+st.discover.facts.map(function(f){return '<li>'+esc(f)+'</li>';}).join("")+'</ul>'+
       '<div class="stmNote real"><b>🔬 REAL-WORLD STEM</b>'+esc(st.realWorld)+'</div>'+
@@ -389,7 +412,7 @@
 
   function viewLab(st,body,mode){
     var isExp=mode==="experiment",def=isExp?st.experiment:st.challenge,k=isExp?"experiment":"challenge";
-    say(isExp?"Your turn! Change something and watch what happens.":"Mission time! You can do this.");
+    guideSay(isExp?(st.id==="sluice"?"tryGate":"curious"):"letsGo",isExp?"Your turn! Change something and watch what happens.":"Mission time! You can do this.");
     body.innerHTML='<div class="stmSec">'+(isExp?"🧪 EXPERIMENT":"🎯 MISSION")+'</div><p class="stmPrompt">'+esc(isExp?def.prompt:def.title)+'</p><div id="stmLabHost"></div>';
     var host=$("stmLabHost"),fn=G.labs[def.lab],c=ctx=makeCtx(host,mode);
     var nextLabel=isExp?"🎯 START MISSION ▸":"🧭 WHAT WOULD YOU DO? ▸",nextPhase=isExp?"mission":"prove";
@@ -433,7 +456,7 @@
       showWhy(o.why);sfx(o.ok?"good":"oops");
       if(o.ok){
         b.classList.add("right");[].forEach.call(body.querySelectorAll(".stmOpt"),function(x){x.disabled=true;});
-        feed.textContent="✅ "+o.outcome;wilbert("Great decision, engineer!");
+        feed.textContent="✅ "+o.outcome;react("celebrate","Great decision, engineer!");
         reward(st.id,"quiz");stepsBar(st.id,"prove");primary("🏆 FINISH",function(){go("complete");});
       }else{
         b.disabled=true;b.classList.add("try");feed.textContent="💙 "+o.outcome+" Good experiment! Try another choice.";
@@ -464,13 +487,13 @@
 
   function confetti(box,list){
     if(reduced())return;
-    for(var i=0;i<14;i++){var s=document.createElement("span");s.className="stmConf";s.textContent=list[i%list.length];s.style.left=(Math.random()*92)+"%";s.style.animationDelay=(Math.random()*1.2)+"s";box.appendChild(s);}
+    for(var i=0;i<14;i++){var s=document.createElement("span");s.className="stmConf";s.setAttribute("data-dv-ok","1");s.textContent=list[i%list.length];s.style.left=(Math.random()*92)+"%";s.style.animationDelay=(Math.random()*1.2)+"s";box.appendChild(s);}
   }
   function viewComplete(st,body){
     var b=st.badge,earned=badgeEarned(st.id),m=master(),newMaster=m&&!store.seen,nxt=nextStation(st.id);
     var rd=st.reward,total=STEPS.reduce(function(a,k){return a+(flag(st.id,k)?rd[k]:0);},0),rk=rank();
     var car=earned&&st.career&&G.careers.filter(function(c){return c.name===st.career;})[0];
-    say(earned?"ENGINEER MODE ACTIVATED! Look what you earned.":"Finish every step to earn your badge.");
+    guideSay(earned?st.id+".completed":"encourage",earned?"ENGINEER MODE ACTIVATED! Look what you earned.":"Finish every step to earn your badge.");
     body.innerHTML='<div class="stmSec">🏆 REWARD</div>'+
       '<div class="stmWow" id="stmWow"><div class="stmChainW" aria-hidden="true">'+st.wow.chain.map(function(c,i){return '<span style="animation-delay:'+(i*.45)+'s">'+c+'</span>';}).join("")+'</div><p>'+esc(st.wow.line)+'</p></div>'+
       '<div class="stmSum">'+STEPS.map(function(k){return '<div>'+({discover:"💡",experiment:"🧪",challenge:"🎯",quiz:"🧭"}[k])+'<b>'+(flag(st.id,k)?"+"+rd[k]:"—")+'</b>'+({discover:"DISCOVER",experiment:"TEST",challenge:"MISSION",quiz:"DECIDE"}[k])+'</div>';}).join("")+'</div>'+
@@ -493,7 +516,7 @@
   function paintSee(){var b=$("stmSeeBtn");if(b)b.hidden=!(V.mode==="station"&&G.views.system);}
   function openView(name,opts){
     opts=opts||{};var fn=G.views[name];if(typeof fn!=="function"||!openLab())return false;
-    clearLab();V={mode:"view",id:null,phase:name};lastWhy="";
+    clearLab();V={mode:"view",id:null,phase:name};lastWhy="";askStation=null;askStep=0;
     $("stmTitle").textContent=opts.title||"🌊 FOLLOW THE WATER";$("stmSub").textContent=opts.sub||"Where is the water going?";
     $("stmSteps").innerHTML="";$("stmWhy").hidden=true;$("stmWhy").innerHTML="";setXpBadge();paintSee();
     var body=$("stmBody");body.scrollTop=0;body.onclick=null;body.innerHTML="";
@@ -501,7 +524,7 @@
     fn(body,c,ENGINE,opts);
     return true;
   }
-  var ENGINE={say:say,wilbert:wilbert,why:showWhy,sfx:sfx,primary:primary,flag:flag,unlocked:unlocked,master:master,reduced:reduced,esc:esc,
+  var ENGINE={say:say,wilbert:wilbert,react:react,guideSay:guideSay,setAsk:function(id){askStation=id;askStep=0;},guide:PG,why:showWhy,sfx:sfx,primary:primary,flag:flag,unlocked:unlocked,master:master,reduced:reduced,esc:esc,
     close:closeLab,openStation:openStation,openAcademy:openAcademy,showMaster:showMaster,badgeCount:badgeCount,ids:ids,openView:openView};
   G.engine=ENGINE;
 
@@ -511,8 +534,8 @@
     $("stmTitle").textContent="💧 ENGINEERING WORLD";$("stmSub").textContent="From Mountain to Ocean";setXpBadge();
     $("stmSteps").innerHTML="";$("stmWhy").hidden=true;paintSee();
     var body=$("stmBody"),m=master(),total=core().length,got=badgeCount(),rk=rank();
-    say("Tap a lab to learn, experiment and earn badges. Each lab is on your DAM Map!");
-    body.innerHTML='<div class="stmHubXp"><span aria-hidden="true">'+rk.icon+'</span><div><b>'+xp()+'</b> / '+maxXp()+' STEM XP<br><small>RANK: '+esc(rk.name)+' · '+got+' of '+total+' badges</small></div></div>'+
+    guideSay("hub","Tap a lab to learn, experiment and earn badges.");
+    body.innerHTML='<div class="stmHubXp"><span aria-hidden="true">'+rk.icon+'</span><div><b>'+xp()+'</b> / '+maxXp()+' STEM XP<br><small>RANK: '+esc(rk.name)+' · '+got+' of '+total+' badges'+(PG()?' · GUIDE: '+esc(String(PG().current().name).toUpperCase()):'')+'</small></div></div>'+
       (G.views.system?'<button type="button" class="stmCard stmMasterCard stmFtw" data-ftw="1"><i aria-hidden="true">🌊</i><b>FOLLOW THE WATER</b><small>SEE INSIDE THE WHOLE DAM · TAP, TRY, PREDICT</small></button>':"")+
       '<div class="stmGrid">'+(m?'<button type="button" class="stmCard stmMasterCard" data-master="1"><i aria-hidden="true">🏆</i><b>'+esc(G.master.name)+' ✓</b><small>TAP TO CELEBRATE</small></button>':"")+
       ids().map(function(id){var s=G.stations[id],e=badgeEarned(id),u=unlocked(id);
@@ -530,14 +553,18 @@
     };
     primary("🗺️ BACK TO MAP",closeLab);body.scrollTop=0;
   }
+  function guideCard(){
+    var g=PG(),d=g&&g.current();if(!d)return "";
+    return '<div class="stmGuideCard" id="stmGuideCard"><div class="stmGRow"><span class="stmGAv" aria-hidden="true">'+faceHtml(d)+'</span><div><small>👤 YOUR GUIDE</small><b>'+esc(String(d.name).toUpperCase())+'</b></div></div><p>YOU FOLLOWED THE WATER ALL THE WAY DOWNSTREAM!</p></div>';
+  }
   function showMaster(){
     if(!openLab())return;clearLab();V={mode:"master",id:null,phase:"master"};
     store.seen=1;save();
     $("stmTitle").textContent="💧 ENGINEERING WORLD";$("stmSub").textContent="From Mountain to Ocean";$("stmSteps").innerHTML="";$("stmWhy").hidden=true;setXpBadge();paintSee();
     var body=$("stmBody"),ms=G.master,J=[["🏔️","MOUNTAIN"],["💧","RAIN"],["🧱","DAM"],["🌊","RESERVOIR"],["🚪","SLUICE"],["⚙️","TURBINE"],["🌎","OCEAN"]];
-    say("ENGINEER MODE ACTIVATED!",true);
-    body.innerHTML='<div class="stmMaster stmWow" id="stmWow"><div class="stmTrophy" aria-hidden="true">'+ms.icon+'</div><div class="stmSec">💧 '+esc(ms.world)+'</div><h2>'+esc(ms.name)+' 🏆</h2>'+
-      '<p class="stmQuote">“'+esc(ms.line)+'”</p></div>'+
+    guideSay("master","ENGINEER MODE ACTIVATED!");
+    body.innerHTML='<div class="stmMaster stmWow" id="stmWow"><div class="stmTrophy" aria-hidden="true">'+ms.icon+'</div><div class="stmSec">💧 DAM JOURNEY COMPLETE</div><div class="stmSec" style="opacity:.75">'+esc(ms.world)+'</div><h2>'+esc(ms.name)+' 🏆</h2>'+
+      '<p class="stmQuote">“'+esc(ms.line)+'”</p></div>'+guideCard()+
       '<ul class="stmBadgeList">'+core().map(function(id){var b=G.stations[id].badge;return '<li>'+b.icon+' '+esc(b.name)+' '+(badgeEarned(id)?"✓":"")+'</li>';}).join("")+'</ul>'+
       '<div class="stmJourney7" aria-hidden="true"><u class="stmTravel">💧</u>'+J.map(function(j){return '<span>'+j[0]+'</span>';}).join("")+'</div>'+
       '<div class="stmJNames">'+J.map(function(j){return '<span>'+j[1]+'</span>';}).join("")+'</div>'+
