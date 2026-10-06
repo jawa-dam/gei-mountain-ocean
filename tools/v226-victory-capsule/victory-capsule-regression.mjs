@@ -9,6 +9,7 @@
  *   E flow        CONTINUE → water flows → original handler → Bonus Waterwheel; second tap skips; FL OZ / progression untouched
  *   F reduced     prefers-reduced-motion: no motion, glowing path, hand-off ≤ 0.6 s
  *   G audio       muted → no synth calls; unmuted CONTINUE uses the game's voices
+ *   M milestone   6-level milestone model (any level), dam fill + countdown per level, tiers, phrase pool, Dam Map hand-off
  *
  *   node tools/v226-victory-capsule/victory-capsule-regression.mjs            (SHOTS=1 writes PNGs to $SHOT_DIR or ./shots)
  *
@@ -135,8 +136,8 @@ async function suiteStructure(browser, base){
   await complete(page, { level:3, rescue:true });
   const m = await page.evaluate(() => ({
     api: typeof window.__GEI_VICTORY_CAPSULE__ === "object" && __GEI_VICTORY_CAPSULE__.version,
-    groups: ["hvcHead","hvcHero","hvcBar","hvcRewards","hvcNext","hvcDock","hvcPanel","hvcMedal","hvcSay"].every(c => !!document.querySelector("#levelInner ." + c)),
-    nodes: document.querySelectorAll("#hvcBar .hvcNode.d").length, nextNode: !!document.getElementById("hvcNextNode"),
+    groups: ["hvcHead","hvcHero","hvcMile","hvcBar","hvcMsg","hvcRewards","hvcNext","hvcDock","hvcPanel","hvcMedal","hvcSay"].every(c => !!document.querySelector("#levelInner ." + c)),
+    nodes: document.querySelectorAll("#hvcBar .hvcSeg").length, nextNode: !!document.getElementById("hvcNextNode"),
     originals: ["lcEyebrow","lcCharName","lcCharTitle","lcCongrats","lcQuip","lcChain","lcSong","lcNote","lcStage","lcBackdrop","lcChar","lcRescue","lcBtn","lcLevel","milestoneCelebration"].every(id => !!document.getElementById(id) || !!document.querySelector("#levelInner ." + id)),
     hiddenOriginals: ["lcChain","lcSong","lcQuip","lcNote"].every(id => getComputedStyle(document.getElementById(id)).display === "none"),
     title: document.getElementById("lcLevel").textContent, btn: document.getElementById("lcBtn").textContent, aria: document.getElementById("lcBtn").getAttribute("aria-label"),
@@ -144,7 +145,7 @@ async function suiteStructure(browser, base){
     rescue: !document.getElementById("lcRescue").hidden, dialog: document.getElementById("levelCard").getAttribute("aria-labelledby"),
     stem: !!document.getElementById("hvcStem").textContent, charChip: document.querySelector("#hvcSay span").textContent
   }));
-  check("A1. capsule groups mount around the existing card (hero, strip, rewards, next, dock, medal, character chip, details)", m.api === "V2.2.6" && m.groups && m.nodes === 6 && m.nextNode, m);
+  check("A1. capsule groups mount around the existing card (hero, milestone dam, countdown, rewards, next, dock, medal, character chip, details)", m.api === "V2.2.6" && m.groups && m.nodes === 6 && m.nextNode, m);
   check("A2. every original element is still in the DOM; the report-style pieces are folded away", m.originals && m.hiddenOriginals, m);
   check("A3. hierarchy: 🏆 LEVEL N COMPLETE! · 💧 +666 FL OZ · NEXT → · CONTINUE →", /LEVEL 3 COMPLETE/.test(m.title) && /666/.test(m.oz) && /NEXT → .*BONUS WATERWHEEL.*Level 4/.test(m.next) && /CONTINUE →/.test(m.btn), m);
   check("A4. CONTINUE has a screen-reader label naming the destination; the dialog label is intact", /Bonus Waterwheel/.test(m.aria) && m.dialog === "lcLevel", m);
@@ -228,11 +229,11 @@ async function suiteFlow(browser, base){
   const mid = await page.evaluate(() => ({ flowing: document.getElementById("levelInner").classList.contains("hvcFlowing"), bonus: document.getElementById("bonusCard").classList.contains("show"), card: document.getElementById("levelCard").classList.contains("show") }));
   await sleep(190);
   await shot(page, "flow-mid");
-  const late = await page.evaluate(() => ({ lit: document.getElementById("hvcNextNode").classList.contains("lit"), dissolve: document.getElementById("levelCard").classList.contains("hvcDissolve") }));
+  const late = await page.evaluate(() => ({ lit: document.getElementById("hvcNextNode").classList.contains("lit"), dissolve: document.getElementById("levelCard").classList.contains("hvcDissolve"), surge: document.getElementById("levelInner").classList.contains("hvcFlowing") }));
   let bonusAt = -1;
   while (Date.now() - t0 < 2600){ if (await page.evaluate(() => document.getElementById("bonusCard").classList.contains("show"))){ bonusAt = Date.now() - t0; break; } await sleep(40); }
   check("E1. CONTINUE starts the flow immediately (water runs through the stations); the card is still up", mid.flowing && mid.card && !mid.bonus, mid);
-  check("E2. the NEXT stop lights up and the capsule dissolves into water", late.lit && late.dissolve, late);
+  check("E2. the water surges through the dam and the capsule dissolves into water (goal not lit mid-milestone)", !late.lit && late.dissolve && late.surge, late);
   check("E3. the original handler then runs: Bonus Waterwheel opens within ~0.8 s of the tap (flow ≈ 0.46 s)", bonusAt > 0 && bonusAt < 800, bonusAt);
   const after = await page.evaluate(() => ({ phase: state.phase, levelCardShown: document.getElementById("levelCard").classList.contains("show") }));
   check("E4. level card closed, Bonus Waterwheel phase intact", !after.levelCardShown, after);
@@ -267,14 +268,14 @@ async function suiteReduced(browser, base){
   const page = await boot(ctx, base);
   await complete(page, { level:2, rescue:true });
   const r = await page.evaluate(() => ({
-    anim: Array.from(document.querySelectorAll("#levelInner .lcLevel,#levelInner .hvcHero,#levelInner .lcBtn,#levelInner .hvcNode,#levelInner .hvcRewards .lcOz,#levelInner .hvcRewards .lcRescue,#levelInner::before,#levelInner .hvcHero::after")).filter(e => { const s = getComputedStyle(e); return s.animationName !== "none" && s.animationPlayState !== "paused"; }).length,
+    anim: Array.from(document.querySelectorAll("#levelInner .lcLevel,#levelInner .hvcHero,#levelInner .lcBtn,#levelInner .hvcSeg,#levelInner .hvcWater,#levelInner .hvcDam,#levelInner .hvcDrop,#levelInner .hvcRewards .lcOz,#levelInner .hvcRewards .lcRescue,#levelInner::before,#levelInner .hvcHero::after")).filter(e => { const s = getComputedStyle(e); return s.animationName !== "none" && s.animationPlayState !== "paused"; }).length,
     a: (() => { const x = document.getElementById("levelInner"), b = document.getElementById("lcBtn").getBoundingClientRect(); return { noScroll: x.scrollHeight <= x.clientHeight + 1, btn: b.bottom <= innerHeight }; })()
   }));
   check("F1. reduced motion: the capsule's own animations are off; layout unchanged (no scroll, CONTINUE visible)", r.anim === 0 && r.a.noScroll && r.a.btn, r);
   const t0 = Date.now(); await page.click("#lcBtn"); await sleep(120);
-  const path = await page.evaluate(() => ({ path: document.getElementById("levelInner").classList.contains("hvcPath"), lit: document.getElementById("hvcNextNode").classList.contains("lit"), flowing: document.getElementById("levelInner").classList.contains("hvcFlowing"), dissolve: document.getElementById("levelCard").classList.contains("hvcDissolve") }));
+  const path = await page.evaluate(() => ({ path: document.getElementById("levelInner").classList.contains("hvcPath"), lit: true, flowing: document.getElementById("levelInner").classList.contains("hvcFlowing"), dissolve: document.getElementById("levelCard").classList.contains("hvcDissolve") }));
   let at = -1; while (Date.now() - t0 < 1500){ if (await page.evaluate(() => document.getElementById("bonusCard").classList.contains("show"))){ at = Date.now() - t0; break; } await sleep(30); }
-  check("F2. reduced motion: station → glowing path → next stop (no flood, no dissolve), hand-off ≤ 0.65 s", path.path && path.lit && !path.flowing && !path.dissolve && at > 0 && at < 650, { path, at });
+  check("F2. reduced motion: dam stays filled, static glow (no flood, no dissolve), hand-off ≤ 0.65 s", path.path && path.lit && !path.flowing && !path.dissolve && at > 0 && at < 650, { path, at });
   await ctx.close();
 }
 
@@ -303,6 +304,91 @@ async function suiteAudio(browser, base){
   await c2.close();
 }
 
+
+/* ===== MILESTONE FLOW ENGINE (6-level milestones, miniature dam) ===== */
+const MSG_RE = { 1:/5 MORE TO GO!/, 2:/4 MORE TO GO!/, 3:/3 MORE TO GO!/, 4:/2 MORE TO GO!/, 5:/ONE MORE!/, 6:/MILESTONE COMPLETE!/ };
+async function suiteMilestone(browser, base){
+  const ctx = await newCtx(browser, base, { viewport:{ width:390, height:844 }, isMobile:true, hasTouch:true });
+  const page = await boot(ctx, base);
+
+  /* M1 pure model: dynamic for any level, nothing hard-coded */
+  const model = await page.evaluate(() => {
+    const f = __GEI_VICTORY_CAPSULE__.milestoneFor, bad = [];
+    for (let L = 1; L <= 600; L++){
+      const m = f(L), idx = Math.floor((L - 1) / 6), start = idx * 6 + 1, end = start + 5;
+      if (m.number !== idx + 1 || m.start !== start || m.end !== end || m.within !== L - start + 1 || m.remaining !== end - L || m.complete !== (L % 6 === 0) || m.nextStart !== end + 1) bad.push(L);
+    }
+    return { bad, l1: f(1), l6: f(6), l7: f(7), l61: f(61), l0: f(0), nan: f("x").level, size: __GEI_VICTORY_CAPSULE__.milestoneSize };
+  });
+  check("M1. milestone model is derived for every level 1–600 (1–6, 7–12 … 595–600 …) — no hard-coded milestones", model.bad.length === 0 && model.size === 6 &&
+    model.l1.number === 1 && model.l1.remaining === 5 && model.l6.complete && model.l7.number === 2 && model.l7.within === 1 && model.l7.remaining === 5 && model.l61.number === 11 && model.l61.start === 61 && model.l0.level === 1 && model.nan === 1, model);
+
+  /* M2 per level 1–6: label, fill count, exact countdown, no repeats of stale counts */
+  for (let L = 1; L <= 7; L++){
+    await complete(page, { level:L, rescue:false });
+    await sleep(1200);
+    const r = await page.evaluate(() => ({
+      lbl: document.getElementById("hvcMileLbl").textContent, filled: document.querySelectorAll("#hvcBar .hvcSeg.f").length,
+      main: document.querySelector("#hvcMsg .hvcMsgMain").textContent, sub: document.querySelector("#hvcMsg .hvcMsgSub").textContent,
+      tier: [1,2,3,4,5,6].find(k => document.getElementById("levelCard").classList.contains("hvcT" + k)), aria: document.getElementById("hvcBar").getAttribute("aria-label"),
+      goal: document.getElementById("hvcNextNode").textContent, say: document.querySelector("#hvcSay span").textContent
+    }));
+    const within = ((L - 1) % 6) + 1, mnum = Math.floor((L - 1) / 6) + 1;
+    check("M2." + L + " Level " + L + ": 'MILESTONE " + mnum + " · LEVEL " + within + "/6', " + within + " tank(s) filled, exact countdown, tier " + within,
+      r.lbl === "MILESTONE " + mnum + " · LEVEL " + within + "/6" && r.filled === within && MSG_RE[within].test(r.main) && r.tier === within && r.sub.length > 4 && new RegExp("level " + within + " of 6").test(r.aria) &&
+      (within === 6 ? r.goal === "🔓" : r.goal === "🏆"), r);
+    if (within === 6) check("M2." + L + "b milestone complete: 'NEXT CHALLENGE UNLOCKED' wording, guide says WE DID IT!", /UNLOCKED|filled the dam|Levels 7–12/i.test(r.sub) && /WE DID IT/.test(r.say), r);
+    await shot(page, "milestone-L" + L);
+    await hide(page);
+  }
+
+  /* M3 the supporting phrase varies, the count never does */
+  const seen = new Set(), mains = new Set();
+  for (let k = 0; k < 14; k++){
+    await page.evaluate(() => { document.getElementById("levelCard").classList.remove("show"); });
+    await sleep(60);
+    await page.evaluate(() => { state.level = 1; state.wow && (state.wow.pending = null); showLevelComplete({ quiet:true }); });
+    await sleep(60);
+    const t = await page.evaluate(() => [document.querySelector("#hvcMsg .hvcMsgMain").textContent, document.querySelector("#hvcMsg .hvcMsgSub").textContent]);
+    mains.add(t[0]); seen.add(t[1]);
+  }
+  check("M3. supporting phrase is randomised from a pool (≥2 variants over 14 completions) while the count never changes", seen.size >= 2 && mains.size === 1 && [...mains][0] === "💧 5 MORE TO GO!", { seen:[...seen], mains:[...mains] });
+
+  /* M4 water enters AFTER the completion state: empty → filled */
+  await page.evaluate(() => { document.getElementById("levelCard").classList.remove("show"); }); await sleep(80);
+  await page.evaluate(() => { state.level = 3; showLevelComplete({ quiet:true }); });
+  await sleep(120);
+  const early = await page.evaluate(() => document.querySelectorAll("#hvcBar .hvcSeg.f").length);
+  await sleep(1300);
+  const late = await page.evaluate(() => document.querySelectorAll("#hvcBar .hvcSeg.f").length);
+  check("M4. the newest tank fills after the completion state (2 tanks → 3 tanks)", early === 2 && late === 3, { early, late });
+  /* tapping CONTINUE before the fill finishes never leaves a stale count */
+  await page.evaluate(() => { document.getElementById("levelCard").classList.remove("show"); }); await sleep(80);
+  await page.evaluate(() => { state.level = 4; showLevelComplete({ quiet:true }); });
+  await sleep(100); await page.click("#lcBtn"); await sleep(60);
+  const tapped = await page.evaluate(() => document.querySelectorAll("#hvcBar .hvcSeg.f").length);
+  check("M4b. CONTINUE tapped immediately still shows the correct fill (4 tanks)", tapped === 4, tapped);
+  await sleep(1500);
+  await ctx.close();
+
+  /* M5 milestone completion → Dam Map hand-off */
+  const c2 = await newCtx(browser, base, { viewport:{ width:390, height:844 }, isMobile:true, hasTouch:true });
+  const p2 = await boot(c2, base);
+  await p2.evaluate(() => { try { __GEI_BEAVER_WELCOME__.begin(); } catch {} state.level = 6; state.completedLevels = 6; showLevelComplete({ quiet:true }); state.wow && (state.wow.pending = null); });
+  await sleep(2400);
+  const full = await p2.evaluate(() => { const b = document.getElementById("hvcBar"); return { filled: b.querySelectorAll(".hvcSeg.f").length, done: b.classList.contains("hvcDone"), charged: b.classList.contains("hvcCharged"), goal: document.getElementById("hvcNextNode").className, main: document.querySelector("#hvcMsg .hvcMsgMain").textContent }; });
+  await shot(p2, "milestone-complete");
+  check("M5. Level 6: dam fully charged, released (done), goal 🔓 lit, 'MILESTONE COMPLETE!'", full.filled === 6 && full.done && full.charged && /lit/.test(full.goal) && /MILESTONE COMPLETE/.test(full.main), full);
+  await p2.click("#lcBtn"); await sleep(1700);
+  const map = await p2.evaluate(() => { const pg = document.getElementById("geiDamMapPage"), box = document.getElementById("geiMapMilestone"); return { shown: pg.classList.contains("show"), flow: pg.classList.contains("hvcMapFlow"), next: (box.querySelector(".hvcMapNext") || {}).textContent, dam: box.querySelectorAll(".hvcMapDam i").length, litPaths: Array.from(pg.querySelectorAll(".dmwFlow.lit")).filter(e => getComputedStyle(e).opacity === "1").length }; });
+  await shot(p2, "milestone-map");
+  check("M6. completing a milestone hands off to the Dam Map: paths glow, 'Water flows on to Level 7 · Milestone 2 unlocked'", map.shown && map.flow && /Level 7 · Milestone 2/.test(map.next) && map.dam === 6 && map.litPaths > 0, map);
+  await sleep(4800);
+  const after = await p2.evaluate(() => ({ flow: document.getElementById("geiDamMapPage").classList.contains("hvcMapFlow"), bonus: document.getElementById("bonusCard").classList.contains("show") }));
+  check("M7. then the original chain continues (Bonus Waterwheel) and the map decoration is removed", after.bonus && !after.flow, after);
+  await c2.close();
+}
+
 const { chromium } = await loadPlaywright();
 const srv = await serve();
 const base = "http://127.0.0.1:" + srv.address().port;
@@ -315,6 +401,7 @@ try {
   await suiteFlow(browser, base);
   await suiteReduced(browser, base);
   await suiteAudio(browser, base);
+  await suiteMilestone(browser, base);
 } finally { await browser.close(); srv.close(); }
 
 const failed = results.filter(r => !r.pass);
