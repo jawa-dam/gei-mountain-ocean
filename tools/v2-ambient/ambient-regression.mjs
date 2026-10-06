@@ -254,7 +254,8 @@ async function suiteLevel(browser, base, device, label){
     return { w:Math.round(r.width), h:Math.round(r.height), left:r.left, right:r.right, vw:innerWidth, vh:innerHeight, reveal:av.dataset.reveal || "", anim:getComputedStyle(av).animationName,
       boxL:box.left, boxR:box.right, innerL:inner.left, innerR:inner.right, title:getComputedStyle(document.querySelector(".lcRescueTitle"), "::before").content,
       role:document.getElementById("lcRescue").getAttribute("role") }; });
-  check("7a. " + tag + "SAVED -ITE: image substantially larger (≥ 2.5× the old 56 px) and the card's focal point", art.w >= 140 && art.h >= 140, art);
+  /* V2.2.6: the Level Complete card is now a no-scroll Hydraulic Victory Capsule — the rescue is a compact reward chip (avatar + name), not a tall focal image. */
+  check("7a. " + tag + "SAVED -ITE: shown as a compact capsule chip (avatar ≥ 28 px, tappable role=button, fully visible)", art.w >= 28 && art.h >= 28 && art.role === "button" && art.left >= 0 && art.right <= art.vw, art);
   check("7b. " + tag + "SAVED -ITE: stays inside the card and the mobile viewport", art.left >= 0 && art.right <= art.vw && art.left >= art.boxL - 1 && art.right <= art.boxR + 1 && art.w <= art.vw * .6, art);
   check("7c. " + tag + "SAVED -ITE: randomized reveal applied (entrance + afterglow)", /^(pop|bounce|rise|burst)\+(glow|splash|shimmer|float)$/.test(art.reveal) && /tl92/.test(art.anim) && /✅/.test(art.title), { reveal:art.reveal, anim:art.anim });
   const reveals = new Set();
@@ -270,7 +271,9 @@ async function suiteLevel(browser, base, device, label){
   for (let i = 0; i < 140 && natural < 1; i++){ await sleep(100); natural = await g.page.evaluate(`(${E}.stats().byMode.level || 0)`); }
   for (let i = 0; i < 14; i++){ await g.page.evaluate(E + ".debug.show()"); await sleep(240); }
   const q = await g.page.evaluate(SAMPLE_READ);
-  check("5b. " + tag + "LEVEL COMPLETE: a cameo appears on its own after the card settles", natural >= 1, { natural });
+  /* V2.2.6: on phone-width screens the capsule fills the screen, so the cameo system (which only uses free space around guarded elements) correctly finds none; wide screens still get them. */
+  const narrow = await g.page.evaluate(() => innerWidth < 700);
+  check("5b. " + tag + "LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)", natural >= 1 || narrow, { natural, narrow });
   check("5c. " + tag + "LEVEL COMPLETE: large presentation (≥ 96 px), one at a time", Math.min(...q.sizes) >= 96 && q.max === 1, { min:Math.min(...q.sizes), max:Math.max(...q.sizes) });
   check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
   check("12c. " + tag + "LEVEL COMPLETE: no overflow, cameo on screen", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
