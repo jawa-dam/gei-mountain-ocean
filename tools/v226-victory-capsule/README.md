@@ -8,7 +8,7 @@ report-style pieces (eyebrow, congrats, wallet box, quip, chain, note) — their
 | Tier | Content |
 |------|---------|
 | Primary | 🏆 LEVEL N COMPLETE! · hero (dam + mill + the active character) · 💧 +666 FL OZ · rescue chip · NEXT → 🎡 BONUS WATERWHEEL · CONTINUE → |
-| Secondary | six-station strip (stamped), level medal, one-line STEM (only when the container is ≥ 660px tall), short character chip |
+| Secondary | **milestone dam** (below), six-tank progress, level medal, one-line STEM (only when the container is ≥ 660px tall), short character chip |
 | Optional | ⓘ overlay: wallet, store hint, rescue water, humor line, milestone stats, STEM — overlays the hero, never moves CONTINUE |
 
 Layout is container-based (`#levelCard { container: hvc / size }`): the hero flexes to the remaining height, wide containers
@@ -22,3 +22,16 @@ node tools/v226-victory-capsule/victory-capsule-regression.mjs        # SHOTS=1 
 ```
 
 Offline; exits non-zero on failure. Pre-existing `addStyle is not defined` / `Unexpected string` page errors are ignored.
+
+## Milestone Flow Engine (6-level milestones)
+
+The old six-station strip is now a **miniature dam**. Every `MILESTONE_SIZE` (6) levels form a milestone, derived from the game's own
+`state.level` by `__GEI_VICTORY_CAPSULE__.milestoneFor(level)` (`number`, `start`, `end`, `within`, `remaining`, `complete`, …) — nothing is
+hard-coded per milestone (1–6, 7–12, … 595–600 and beyond), and no second progression system or storage exists.
+
+* `MILESTONE 1 · LEVEL 1/6` + six water tanks (waves, bubbles, a drip). The newest tank fills *after* the completion state shows; tapping CONTINUE early still shows the correct count.
+* Countdown headline is always exact — `💧 5 MORE TO GO!` → `🌊 4` → `⚡ 3` → `🚀 2` → `🔥 ONE MORE!` → `🏆 MILESTONE COMPLETE!`. Only the supporting line is picked from a per-count pool (never the same twice in a row); the Personal DAM Guide chip reacts to the same count.
+* Excitement ramps with the tier (`hvcT1`…`hvcT6`): faster waves, larger glow, anticipation pulse at 2 and 1 to go, gold at the end.
+* Last level of a milestone: tanks charge → water rises → dam releases (droplet burst) → `NEXT CHALLENGE UNLOCKED`, goal 🏆 becomes 🔓. CONTINUE then flows through the dam and hands off to the existing Dam Map milestone screen, whose water paths light up and which announces `Water flows on to Level 7 · Milestone 2 unlocked`.
+* Milestone identity: `registerMilestone(id, {title, badge, nextChallenge})` (defaults: 1 FOUNDATION, 6 DAM-ITE, 11 MASTER CONTROL, matching the existing chapter names).
+* The capsule's CONTINUE capture now sits on the card, so FLOW FORWARD also plays before the Dam Map / WOW hooks on milestone levels. Secondary count text is hidden on very short containers; CONTINUE is never moved.
