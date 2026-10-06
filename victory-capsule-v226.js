@@ -90,6 +90,11 @@
       /* the old stacked report pieces: kept in the DOM for the systems that read them, folded into the capsule or the details overlay */
       I+" > .lcEyebrow,"+I+" .lcCharName,"+I+" .lcCharTitle,"+I+" .lcCongrats,"+I+" .lcQuip,"+I+" .lcChain,"+I+" .lcSong,"+I+" .lcNote{display:none!important}",
 
+      /* while the card is hidden its contents are visibility:hidden (after the fade-out). Otherwise other systems that build "keep clear" rects from visible buttons
+         (the surprise-cameo placer ignores an element's own opacity only) would count the hidden capsule's full-width CONTINUE and ⓘ and crowd out the menu. */
+      C+":not(.show) #levelInner{visibility:hidden;transition:transform .6s cubic-bezier(.34,1.56,.64,1),visibility 0s linear .5s}",
+      C+".show #levelInner{visibility:visible;transition:transform .6s cubic-bezier(.34,1.56,.64,1),visibility 0s}",
+
       /* the DAM-ITE voice caption is anchored to the bottom of the screen — exactly where the capsule's reward / next stop / CONTINUE live; while the capsule is up it moves to the top edge (it is pointer-events:none either way) */
       "html.hvcOpen .v2197ContextToast{bottom:auto!important;top:calc(env(safe-area-inset-top) + 8px)}",
 

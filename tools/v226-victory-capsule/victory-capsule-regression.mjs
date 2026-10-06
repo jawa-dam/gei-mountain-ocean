@@ -149,6 +149,10 @@ async function suiteStructure(browser, base){
   check("A3. hierarchy: 🏆 LEVEL N COMPLETE! · 💧 +666 FL OZ · NEXT → · CONTINUE →", /LEVEL 3 COMPLETE/.test(m.title) && /666/.test(m.oz) && /NEXT → .*BONUS WATERWHEEL.*Level 4/.test(m.next) && /CONTINUE →/.test(m.btn), m);
   check("A4. CONTINUE has a screen-reader label naming the destination; the dialog label is intact", /Bonus Waterwheel/.test(m.aria) && m.dialog === "lcLevel", m);
   check("A5. rescue shows as one compact chip; micro STEM lesson is one sentence; the character has a short chip", m.rescue && /^STEM: .{5,60}\.$/.test(await page.evaluate(() => document.getElementById("hvcStem").textContent)) && m.charChip.length > 0 && m.charChip.length < 22, m);
+  await hide(page); await sleep(900);
+  const hiddenVis = await page.evaluate(() => ["lcBtn","hvcInfo"].map(id => getComputedStyle(document.getElementById(id)).visibility));
+  check("A7. while the card is hidden its buttons are visibility:hidden (no phantom 'keep clear' rects for the cameo placer, no stray focus)", hiddenVis.every(v => v === "hidden"), hiddenVis);
+  await page.evaluate(() => showLevelComplete()); await sleep(700);
   const noScrollRule = await page.evaluate(() => { const o = getComputedStyle(document.getElementById("levelInner")).overflowY; return o; });
   check("A6. the capsule is NOT a scroller (overflow-y is not auto/scroll)", noScrollRule === "hidden", noScrollRule);
   await shot(page, "capsule-iphone");
@@ -220,16 +224,16 @@ async function suiteFlow(browser, base){
   const econ0 = await page.evaluate(ECON);
   const t0 = Date.now();
   await page.click("#lcBtn");
-  await sleep(140);
+  await sleep(110);
   const mid = await page.evaluate(() => ({ flowing: document.getElementById("levelInner").classList.contains("hvcFlowing"), bonus: document.getElementById("bonusCard").classList.contains("show"), card: document.getElementById("levelCard").classList.contains("show") }));
-  await sleep(330);
+  await sleep(190);
   await shot(page, "flow-mid");
   const late = await page.evaluate(() => ({ lit: document.getElementById("hvcNextNode").classList.contains("lit"), dissolve: document.getElementById("levelCard").classList.contains("hvcDissolve") }));
   let bonusAt = -1;
   while (Date.now() - t0 < 2600){ if (await page.evaluate(() => document.getElementById("bonusCard").classList.contains("show"))){ bonusAt = Date.now() - t0; break; } await sleep(40); }
   check("E1. CONTINUE starts the flow immediately (water runs through the stations); the card is still up", mid.flowing && mid.card && !mid.bonus, mid);
   check("E2. the NEXT stop lights up and the capsule dissolves into water", late.lit && late.dissolve, late);
-  check("E3. the original handler then runs: Bonus Waterwheel opens within ~1.3 s of the tap", bonusAt > 0 && bonusAt < 1300, bonusAt);
+  check("E3. the original handler then runs: Bonus Waterwheel opens within ~0.8 s of the tap (flow ≈ 0.46 s)", bonusAt > 0 && bonusAt < 800, bonusAt);
   const after = await page.evaluate(() => ({ phase: state.phase, levelCardShown: document.getElementById("levelCard").classList.contains("show") }));
   check("E4. level card closed, Bonus Waterwheel phase intact", !after.levelCardShown, after);
   const econ1 = await page.evaluate(ECON);
