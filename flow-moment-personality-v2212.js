@@ -124,7 +124,7 @@
   function milestoneRecent(t){ try{ var ms = window.MilestoneProgressEngine && window.MilestoneProgressEngine.state(); return !!(ms && t - ms.lastVoiceAt < config.milestoneQuietMs); }catch(e){ return false; } }
   function blocked(ctx, t){
     var fs = FM.state();
-    if(fs.cinematic || fs.levelComplete || fs.cardShown) return "cinematic";
+    if(fs.cinematic || fs.levelComplete || fs.cardShown || fs.transition) return "cinematic";
     var st = gameState(); if(config.requirePlaying && st.phase && st.phase !== "playing" && !ctx.afterDay) return "phase";
     if(!ctx.afterDay){ if(fs.flowLevel >= 4) return "final-push"; if(ctx.remMs != null && ctx.remMs < config.minRemMs) return "clock"; if(fs.pressure && fs.pressure.on && fs.pressure.stage >= 2) return "pressure"; }
     return "";

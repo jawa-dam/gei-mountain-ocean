@@ -40,7 +40,7 @@
     again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3"
   };
   /* spoken-voice priority (smaller number wins): failure cinematic · level complete · ONE MORE · timer warnings · milestone progress · achievement / combo · character reaction (music = ducked, not a voice) */
-  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, achievement:5, personality:6, reaction:7 };
+  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, nextChallenge:4.5, achievement:5, personality:6, reaction:7 };
 
   var config = {
     comedyChance: .15,                 // WHO TURNED THAT WATER ON?! — 10–20 % of failures
@@ -1053,11 +1053,11 @@
 
   /* ------------------------------------------------------------------ public API */
   function state(){ return { version: VERSION, enabled: enabled, cinematic: cine.active, plan: cine.plan, cardShown: cine.cardShown, skippable: cine.skippable, pressure: { on: pr.on, stage: pr.stage, fired: Object.keys(pr.fired) },
-    streak: co.streak, flowLevel: fl.level, levelComplete: vc.active, voice: lane.cur ? { id: lane.cur.id, pri: lane.cur.pri } : null, voiceLog: lane.log.slice(), particles: liveP, timers: fxT.count() + cineT.count() }; }
+    streak: co.streak, transition: !!window.__GEI_TRANSITION__, flowLevel: fl.level, levelComplete: vc.active, voice: lane.cur ? { id: lane.cur.id, pri: lane.cur.pri } : null, voiceLog: lane.log.slice(), particles: liveP, timers: fxT.count() + cineT.count() }; }
   function selfTest(){
     var r = []; function t(n, f){ var ok = false; try{ ok = !!f(); }catch(e){} r.push({ name: n, ok: ok }); }
     t("dom mounts inside the world", function(){ return ensure() && root.parentNode === world; });
-    t("one voice lane / priorities ordered", function(){ return PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
+    t("one voice lane / priorities ordered", function(){ return PRI.milestone < PRI.nextChallenge && PRI.nextChallenge < PRI.achievement && PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
     t("all twelve clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 12 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
     t("too-much-flow uses the corrected URL", function(){ return urlOf("toomuch") === "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/too-much-flow-8Yz9tQO0XI2GCwby.mp3"; });
     t("combo ladder", function(){ return COMBO[2].text === "FLOW COMBO" && COMBO[3].text === "HYDRAULIC SURGE" && COMBO[5].text === "MAXIMUM FLOW" && COMBO[7].text === "PRESSURE BOOST" && COMBO[10].text === "DAM-ITE OVERDRIVE"; });
