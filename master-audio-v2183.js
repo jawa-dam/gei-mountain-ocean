@@ -133,7 +133,13 @@
     try{var v=window.__GEI_V2203_VOICE_EVENT__;if(v&&typeof v.stop==="function")v.stop();}catch(e){}
     try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
   }
-  function femaleAllowed(){return zone()==="GAMEPLAY"&&!(cur&&cur.ch==="wow");}   // a WOW line owns the voice while it speaks
+  var femaleGates=[];                                    // V2.2.10: Flow Moment Engine (and future owners) can hold the narrator back while THEIR voice speaks
+  function addFemaleGate(fn){if(typeof fn==="function"&&femaleGates.indexOf(fn)<0)femaleGates.push(fn);}
+  function femaleAllowed(){
+    if(!(zone()==="GAMEPLAY"&&!(cur&&cur.ch==="wow")))return false;   // a WOW line owns the voice while it speaks
+    for(var i=0;i<femaleGates.length;i++){try{if(!femaleGates[i]())return false;}catch(e){}}
+    return true;
+  }
   function beaverAllowed(){return zone()==="DAM_MAP";}
   /* setZone(z): run the hand-over side effects once. Called by the Dam Map watcher below; safe to call again (idempotent). */
   function setZone(z){
@@ -339,7 +345,7 @@
   /* ------------------------------------------------------------------ public API */
   var A={version:VERSION,
     get state(){var s={};Object.keys(audioState).forEach(function(k){s[k]=audioState[k];});s.musicVolume=musicVolume();return s;},
-    get zone(){return zone();},setZone:setZone,isDamMapOpen:isDamMapOpen,femaleAllowed:femaleAllowed,beaverAllowed:beaverAllowed,stopFemale:stopFemale,
+    get zone(){return zone();},setZone:setZone,isDamMapOpen:isDamMapOpen,femaleAllowed:femaleAllowed,addFemaleGate:addFemaleGate,beaverAllowed:beaverAllowed,stopFemale:stopFemale,
     musicIn:musicIn,sfxIn:sfxIn,registerMusicElement:registerMusicElement,
     channelAllowed:channelAllowed,setMuted:setMuted,toggleMute:function(){return setMuted(!audioState.muted);},get muted(){return audioState.muted;},
     setMasterVolume:setMasterVolume,setSfxVolume:setSfxVolume,setBeaverVolume:setBeaverVolume,

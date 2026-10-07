@@ -96,6 +96,9 @@ const SAMPLER = () => {
     let o = 1, n = el; while (n && n !== document.body){ o *= parseFloat(getComputedStyle(n).opacity || "1"); n = n.parentElement; } if (o < .2) return false;
     const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
   const Q = window.__qt = { maxSim:0, sims:[], chatterSeen:{}, textSeen:{}, runs:{}, mapBlocked:0, mapSamples:0, taps:[], fx:[] };
+  /* V2.2.10: the old small combo flash is hidden; the Flow Moment Engine's big combo words (.fmeCo, one at a time, throttled) are now the micro moment. */
+  Q.flow = { count:0, maxMs:0 };
+  new MutationObserver(l => l.forEach(m => m.addedNodes.forEach(n => { if (n.classList && n.classList.contains("fmeCo")){ Q.flow.count++; Q.flow.maxMs = Math.max(Q.flow.maxMs, parseFloat(n.style.getPropertyValue("--d")) || 0); } }))).observe(document.body, { childList:true, subtree:true });
   const layer = document.getElementById("tapWaterLayer");
   new MutationObserver(l => { const t = performance.now(); l.forEach(m => { if (m.addedNodes.length) Q.fx.push(t); }); }).observe(layer, { childList:true, subtree:true });
   document.addEventListener("pointerdown", e => { if (e.target.closest && e.target.closest("#world")) Q.taps.push(performance.now()); }, true);
@@ -115,7 +118,7 @@ const SAMPLER = () => {
 };
 const SAMPLE_READ = () => { const Q = window.__qt; clearInterval(Q.iv);
   const tapsWithFx = Q.taps.filter(t => Q.fx.some(f => f >= t - 5 && f <= t + 260)).length;
-  return { levelSamples:Q.levelSamples || 0, levelOverlap:Q.levelOverlap || 0, levelOverlapWith:Q.levelOverlapWith || null, maxSim:Q.maxSim, sims:Q.sims.slice(-3), chatterSeen:Q.chatterSeen, textSeen:Q.textSeen, runs:Q.runs, mapBlocked:Q.mapBlocked, mapSamples:Q.mapSamples, taps:Q.taps.length, tapsWithFx }; };
+  return { flow:Q.flow, levelSamples:Q.levelSamples || 0, levelOverlap:Q.levelOverlap || 0, levelOverlapWith:Q.levelOverlapWith || null, maxSim:Q.maxSim, sims:Q.sims.slice(-3), chatterSeen:Q.chatterSeen, textSeen:Q.textSeen, runs:Q.runs, mapBlocked:Q.mapBlocked, mapSamples:Q.mapSamples, taps:Q.taps.length, tapsWithFx }; };
 
 const SNAP = () => {
   /* `state` is a top-level let in index.html: reachable by name, not as window.state. */
@@ -164,9 +167,9 @@ async function desktopSuite(browser, base){
   await sleep(1300);
   const s4 = await page.evaluate(SAMPLE_READ);
   const micro = ["damIteComboFlash","geiSignatureMoment"].map(id => s4.runs[id]).filter(Boolean);
-  const microCount = micro.reduce((a, r) => a + r.count, 0), microMax = Math.max(0, ...micro.map(r => r.max));
+  const microCount = micro.reduce((a, r) => a + r.count, 0) + (s4.flow ? s4.flow.count : 0), microMax = Math.max(0, ...micro.map(r => r.max));
   check("4. rapid tapping creates an occasional micro moment", microCount >= 1 && microCount <= 8, { microCount, runs:s4.runs });
-  check("4b. micro moments stay short (≤ ~900 ms)", microMax <= 1000, { microMaxMs:microMax });
+  check("4b. micro moments stay short (≤ ~900 ms; Flow Moment words ≤ 1.8 s)", microMax <= 1000 && (!s4.flow || s4.flow.maxMs <= 1800), { microMaxMs:microMax, flow:s4.flow });
   check("5b. one visible moment during a long rapid burst", s4.maxSim <= 1, { maxSim:s4.maxSim, sims:s4.sims });
 
   /* 5c — forced stress: several systems ask for the screen at once */

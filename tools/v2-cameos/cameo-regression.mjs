@@ -93,7 +93,10 @@ async function tapWorld(g, n){
 /* Start the day with a real tap, then let the clock "run out" through the game's own handler. */
 async function breakTheDam(g){
   await tapWorld(g, 1);
-  return g.page.evaluate(() => { handleDayTimeout(); return { phase:state.phase, shown:document.getElementById("timeUpCard").classList.contains("show"), at:performance.now() }; });
+  await g.page.evaluate(() => { handleDayTimeout(); });
+  /* V2.2.10: the failure is a ~7–11 s cinematic (dam break, flood, reaction) before THE DAM BROKE card shows — wait for the card, then measure from there. */
+  try { await g.page.waitForFunction(() => document.getElementById("timeUpCard").classList.contains("show"), null, { timeout:30000 }); } catch {}
+  return g.page.evaluate(() => ({ phase:state.phase, shown:document.getElementById("timeUpCard").classList.contains("show"), at:performance.now() }));
 }
 /* 40 ms sampler: visible cameo count, sequence, first-appearance time, button coverage, overflow. */
 const SAMPLER = () => {

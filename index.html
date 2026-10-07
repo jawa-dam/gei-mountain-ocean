@@ -3531,11 +3531,14 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       <!-- v2: timer failure -->
       <div class="gameOverCard timeUpCard" id="timeUpCard" role="alertdialog" aria-labelledby="timeUpTitle">
         <div class="gameOverInner">
-          <div class="timeUpArt"><img id="timeUpArt" alt="" aria-hidden="true" decoding="async"><span class="timeUpArtFallback" aria-hidden="true">💥</span></div>
-          <div class="gameOverTitle" id="timeUpTitle">The Dam Broke!</div>
-          <div class="damQuip timeUpQuip" id="timeUpQuip"></div>
-          <div class="gameOverSub">The water escaped before the step was completed.<br><span id="timeUpDetail"></span><br><span class="timeUpTip" id="timeUpTip"></span></div>
-          <button class="rebuildBtn" id="retryDayBtn">Try Day Again</button>
+          <div class="fmeEdu">
+            <div class="timeUpArt"><img id="timeUpArt" alt="" aria-hidden="true" decoding="async"><span class="timeUpArtFallback" aria-hidden="true">💥</span></div>
+            <div class="gameOverTitle" id="timeUpTitle">🌊 THE DAM BROKE!</div>
+            <div class="damQuip timeUpQuip" id="timeUpQuip"></div>
+            <div class="gameOverSub">You ran out of time before completing the hydraulic sequence.<br><span id="timeUpDetail"></span><span class="timeUpTip" id="timeUpTip"></span></div>
+            <div class="fmeTip" id="timeUpGuide"><div class="fmeTipHead">DAM GUIDE TIP</div><span>Control the flow.</span><span>Watch the pressure.</span><span>Keep the system moving.</span></div>
+          </div>
+          <button class="rebuildBtn" id="retryDayBtn">🔄 TRY DAY AGAIN</button>
         </div>
       </div>
 
@@ -5819,6 +5822,7 @@ function activateStation(index){
 
 function flowSegment(index){
   state.busy = true;
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.dayComplete(index, currentRemainingMs()); }catch(err){}   // V2.2.10: success language (calm, controlled)
   segments[index].classList.add("flowing");
   segments[index].style.strokeDashoffset = "0";
   playFlowSound();
@@ -5844,6 +5848,7 @@ function beginDay(index){
   state.currentStep = index;
   state.tapCount = 0;
   resetDamIteCombo("new-day");
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.reset(); }catch(err){}   // V2.2.10: fresh pressure state + combo streak for the new day
   state.phase = "playing";
   activateStation(index);
   updateProgressDots();
@@ -5983,6 +5988,7 @@ function renderTimer(){
   timerBox.classList.toggle("idle", phase === "ready" || WOW_TIMER_ENGINE.timerPaused);
   timerBox.classList.toggle("expired", phase === "timeout");
   timerFill.style.width = (rem / WOW_TIMER_ENGINE.fullBudgetMs() * 100) + "%";
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.sync(rem, live); }catch(err){}   // V2.2.10 — Flow Moment Engine: pressure state + 4/3/2/1 s warnings
 }
 
 function handleDayTimeout(){
@@ -6001,7 +6007,11 @@ function handleDayTimeout(){
   $("timeUpQuip").textContent = getDamHumor("timeout");
   $("timeUpTip").textContent = "💡 " + getDamHumor("figurative");
   pickTimeUpArt();
-  timeUpCard.classList.add("show");
+  /* V2.2.10 — the failure is a cinematic (freeze → pressure → cracks → break → flood → reaction) and only THEN the educational card.
+     The state changes above are untouched; if the engine is missing or declines, the original instant card + flood run. */
+  const showTimeUpCard = () => timeUpCard.classList.add("show");
+  try{ if(window.FlowMomentEngine && window.FlowMomentEngine.failure({ onCard: showTimeUpCard })) return; }catch(err){ safeWarn("Flow Moment failure skipped: " + err); }
+  showTimeUpCard();
   breakTheDam();
 }
 
@@ -6058,6 +6068,7 @@ function drainFlood(){
 function retryDay(){
   if(state.phase !== "timeout") return;
   timeUpCard.classList.remove("show");
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.recover(); }catch(err){}   // V2.2.10: drain the cinematic flood, restore the dam
   drainFlood();
   beginDay(state.currentStep);
 }
@@ -6088,6 +6099,7 @@ function reachOcean(){
   triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});
   showDamIteComboFlash("DAM-ITE FLOW MASTERED",true);
   resetDamIteCombo("level-complete");
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.success(); }catch(err){}   // V2.2.10: YOU CONTROLLED THE FLOW!
   triggerDamItePersonality("level",{level:state.level});
   oceanGroup.classList.add("reached");
   playOceanSound();
@@ -9151,6 +9163,7 @@ function registerDamIteCombo(context,power=1){
   damIteCombo.timer=setTimeout(()=>resetDamIteCombo("timeout"),DAM_ITE_COMBO_WINDOW_MS+80);
   renderDamIteCombo();
   const n=damIteCombo.count;
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.combo(n); }catch(err){}   // V2.2.10: big escalating callouts (throttled inside the engine)
   if(n>=2){
     triggerDamIteHydraulicReaction(context,{index:state.currentStep,power:Math.max(power,n>=6?3:n>=3?2:1),combo:n});
   }
@@ -12684,6 +12697,7 @@ function restoreVisualProgress(){
   <script src="/personal-guide-v223.js" defer></script>
   <script src="/victory-capsule-v226.js" defer></script>
   <script src="/achievement-audio-director-v227.js" defer></script>
+  <script src="/flow-moment-engine-v2210.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>

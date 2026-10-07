@@ -209,6 +209,7 @@
   var lane = { q:[], cur:null, ducked:false, endT:0, token:0 };
   function otherSpeaking(){
     try{ var a = GA(); if(!a) return false; if(a.beaver && a.beaver.speaking) return true; if(a.wow && a.wow.speaking) return true; if(a.zone === "DAM_MAP") return true; }catch(e){}
+    try{ if(window.FlowMomentEngine && window.FlowMomentEngine.voiceBusy()) return true; }catch(e){}   // V2.2.10: a Flow Moment voice (priority 1–2) is never talked over
     return false;
   }
   function duck(on){
