@@ -125,6 +125,7 @@
   function blocked(ctx, t){
     var fs = FM.state();
     if(fs.cinematic || fs.levelComplete || fs.cardShown || fs.transition) return "cinematic";
+    if(wowNear()) return "wow";                                                                  // a RARE WOW is the higher-value personality moment: it owns the stage
     var st = gameState(); if(config.requirePlaying && st.phase && st.phase !== "playing" && !ctx.afterDay) return "phase";
     if(!ctx.afterDay){ if(fs.flowLevel >= 4) return "final-push"; if(ctx.remMs != null && ctx.remMs < config.minRemMs) return "clock"; if(fs.pressure && fs.pressure.on && fs.pressure.stage >= 2) return "pressure"; }
     return "";
@@ -140,6 +141,7 @@
     return "";
   }
   function voiceFree(){ return !FM.voiceBusy() && !FM.fx.othersSpeaking() && FM.fx.sinceVoice() >= 900; }
+  function wowNear(){ try{ var w = window.RareWowMomentEngine; return !!(w && (w.active() || w.recent(5000))); }catch(e){ return false; } }
   function stemClaims(){ try{ var s = window.StemIntelligenceEngine; return !!(s && s.claimed && s.claimed()); }catch(e){ return false; } }   // STEM teaches the recovery / retry itself ("Test it. Learn it. Improve it.")
 
   /* ================================================================== SHOW + SPEAK */

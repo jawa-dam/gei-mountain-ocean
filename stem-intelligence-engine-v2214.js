@@ -208,7 +208,8 @@
     if(S.perDay >= config.maxPerDay && !ctx.afterDay && !ctx.major && !ctx.force) return "day-cap";
     return "";
   }
-  function voiceFree(){ return !FM.voiceBusy() && !FM.fx.othersSpeaking() && FM.fx.sinceVoice() >= config.minGapAfterVoiceMs; }
+  function wowNear(){ try{ var w = window.RareWowMomentEngine; return !!(w && w.active()); }catch(e){ return false; } }      // a WOW on stage: STEM waits its turn (held), never talks over it
+  function voiceFree(){ return !wowNear() && !FM.voiceBusy() && !FM.fx.othersSpeaking() && FM.fx.sinceVoice() >= config.minGapAfterVoiceMs; }
 
   /* trigger(event, ctx) — the ONE entry point. Game code raises STEM events; it never plays an MP3 itself. */
   SE.trigger = function(event, ctx){

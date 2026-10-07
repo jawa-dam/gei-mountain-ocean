@@ -271,7 +271,7 @@ async function suitePriority(){
   const b = await page.evaluate(async () => {
     const P = PersonalityTriggerEngine, F = FlowMomentEngine, out = {}; SETUP_FN({});
     const tryFire = (ctx) => { const n = P.state().log.length; P.consider("combo", 1, Object.assign({ ts:performance.now(), remMs:5000, force:true }, ctx)); return P.state().log.length > n; };
-    out.free = tryFire({});
+    F.stopVoice(); await new Promise(r => setTimeout(r, 1100)); out.free = tryFire({});
     SETUP_FN({}); F.setFlowLevel(4); out.finalPush = tryFire({}); F.setFlowLevel(0);
     SETUP_FN({}); out.lastSeconds = tryFire({ remMs:1800 });
     SETUP_FN({}); let ok = false; F.failure({ onCard:() => {} }); await new Promise(r => setTimeout(r, 300)); out.cinematic = tryFire({ afterDay:true }); F.recover();

@@ -40,7 +40,7 @@
     again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3"
   };
   /* spoken-voice priority (smaller number wins): failure cinematic · level complete · ONE MORE · timer warnings · milestone progress · achievement / combo · character reaction (music = ducked, not a voice) */
-  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, nextChallenge:4.5, stem:4.8, achievement:5, personality:6, reaction:7 };
+  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, nextChallenge:4.5, stem:4.8, achievement:5, wow:5.5, personality:6, reaction:7 };
 
   var config = {
     comedyChance: .15,                 // WHO TURNED THAT WATER ON?! — 10–20 % of failures
@@ -969,6 +969,7 @@
   }
   var fx = { burst: function(x, y, n, o){ if(ensure()) burst(x, y, n, o); }, ring: function(x, y){ if(ensure()) ring(x, y); }, box: function(){ return ensure() ? box() : { w: 360, h: 560, l: 0, t: 0 }; },
     damPoint: function(){ return ensure() ? damPoint() : { x: 180, y: 140, s: 100 }; }, slow: slow, unslow: unslow, shake: function(a, ms){ shake(a, ms); },
+    probe: function(url){ return new Promise(function(res){ var a = new Audio(), done = false, t; function fin(ok, why){ if(done) return; done = true; clearTimeout(t); try{ a.onloadedmetadata = a.onerror = null; a.removeAttribute("src"); a.load(); }catch(e){} res({ ok: ok, why: why || "" }); } t = setTimeout(function(){ fin(false, "timeout"); }, 7000); a.preload = "metadata"; a.onloadedmetadata = function(){ fin(true); }; a.onerror = function(){ fin(false, "error"); }; try{ a.src = url; }catch(e){ fin(false, "exception"); } }); },
     top: function(){ ensure(); placeTop(); return topEl; }, charImage: charImage, quality: quality, reduced: reduced, othersSpeaking: othersSpeaking, sinceVoice: function(){ return lane.cur ? 0 : now() - lane.endAt; }, broken: function(){ return Object.keys(brokenClips); } };
 
   /* ------------------------------------------------------------------ MILESTONE FLOW LEVEL (5 MORE … ONE MORE): the environment builds toward the finish */
@@ -1069,7 +1070,7 @@
   function selfTest(){
     var r = []; function t(n, f){ var ok = false; try{ ok = !!f(); }catch(e){} r.push({ name: n, ok: ok }); }
     t("dom mounts inside the world", function(){ return ensure() && root.parentNode === world; });
-    t("one voice lane / priorities ordered", function(){ return PRI.milestone < PRI.nextChallenge && PRI.nextChallenge < PRI.stem && PRI.stem < PRI.achievement && PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
+    t("one voice lane / priorities ordered", function(){ return PRI.milestone < PRI.nextChallenge && PRI.nextChallenge < PRI.stem && PRI.stem < PRI.achievement && PRI.achievement < PRI.wow && PRI.wow < PRI.personality && PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
     t("all twelve clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 12 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
     t("too-much-flow uses the corrected URL", function(){ return urlOf("toomuch") === "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/too-much-flow-8Yz9tQO0XI2GCwby.mp3"; });
     t("combo ladder", function(){ return COMBO[2].text === "FLOW COMBO" && COMBO[3].text === "HYDRAULIC SURGE" && COMBO[5].text === "MAXIMUM FLOW" && COMBO[7].text === "PRESSURE BOOST" && COMBO[10].text === "DAM-ITE OVERDRIVE"; });
