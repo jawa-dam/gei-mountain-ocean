@@ -40,7 +40,7 @@
     again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3"
   };
   /* spoken-voice priority (smaller number wins): failure cinematic · level complete · ONE MORE · timer warnings · milestone progress · achievement / combo · character reaction (music = ducked, not a voice) */
-  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, achievement:5, reaction:6 };
+  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, achievement:5, personality:6, reaction:7 };
 
   var config = {
     comedyChance: .15,                 // WHO TURNED THAT WATER ON?! — 10–20 % of failures
@@ -403,6 +403,13 @@
     clearTimeout(lane.duckT);
     lane.duckT = setTimeout(function(){ if(!lane.cur && lane.ducked){ lane.ducked = false; try{ var a = GA(); a && a.voiceEnd("fme"); }catch(e){} } }, delay == null ? 380 : delay);
   }
+  /* is any OTHER voice system (Beaver / WOW / narrator / achievement director / event vocabulary) speaking right now? */
+  function othersSpeaking(){
+    try{ var a = GA(); if(a){ if(a.beaver && a.beaver.speaking) return true; if(a.wow && a.wow.speaking) return true; } }catch(e){}
+    try{ var d = window.__GEI_ACHIEVEMENT_DIRECTOR__; if(d && d.state){ var st = d.state(); if(st && st.playing) return true; } }catch(e){}
+    try{ var v = window.__GEI_V2203_VOICE_EVENT__; if(v && v.state){ var vs = v.state(); if(vs && vs.current) return true; } }catch(e){}
+    return false;
+  }
   function silenceOthers(){
     try{ var a = GA(); if(a){ a.stopFemale && a.stopFemale(); a.stopWow && a.stopWow(); a.stopBeaver && a.stopBeaver(); } }catch(e){}
     try{ var d = window.__GEI_ACHIEVEMENT_DIRECTOR__; if(d && d.cancel) d.cancel(); }catch(e){}
@@ -419,8 +426,9 @@
     return new Promise(function(res){
       try{
         if(!enabled || audioMuted() || zoneBlocked() || document.hidden) return res(false);
+        if(o.polite && othersSpeaking()) return res(false);                 // personality never talks over or silences anyone else
         if(lane.cur){ if(lane.cur.pri < pri) return res(false); settle(lane.cur, false); }   // higher priority is speaking → drop; equal/lower → interrupt
-        silenceOthers();
+        if(!o.polite) silenceOthers();
         var el = laneEl(), item = { id: o.label || id, pri: pri, res: res, el: el, done: false, t: 0 };
         lane.cur = item; lane.lastAt = now(); lane.log.push(o.label || id); if(lane.log.length > 24) lane.log.shift();
         duckOn();
@@ -456,6 +464,9 @@
 
   /* ------------------------------------------------------------------ callouts + combo escalation */
   var co = { cur: null, lastKey: {}, lastChar: 0, streak: 0, n: 0, pending: null };
+  /* gei:flow-event — a read-only stream of what the player just did (tap / combo / day / fail / level / start). Listeners (PersonalityTriggerEngine) react to ACTIONS, never to a timer. */
+  function emit(type, d){ try{ var o = d || {}; o.type = type; o.at = now(); window.dispatchEvent(new CustomEvent("gei:flow-event", { detail: o })); }catch(e){} }
+  function tap(info){ try{ var o = info || {}; o.streak = co.streak; emit("tap", o); }catch(e){} }
   var lv = { id: "", maxStreak: 0, fails: 0, minRem: 1e9, finalRem: 0, days: 0, oneMoreAt: 0 };   // per-level performance (feeds the victory voice)
   var DUR = { 1: 900, 2: 1000, 3: 1150, 4: 1300, 5: 1700, warn: 950, good: 1300 };
   var moments = {};
@@ -542,6 +553,7 @@
       if(!(n > 1)){ co.streak = 1; return false; }
       co.streak = Math.max(co.streak + 1, n);
       if(co.streak > lv.maxStreak) lv.maxStreak = co.streak;
+      emit("combo", { n: n, streak: co.streak });
       var m = COMBO[co.streak];
       if(!m) return false;
       /* Held for one tick: if a milestone word ("3 MORE!") fires for the same tap it absorbs the combo as its small line instead of two words fighting. */
@@ -645,6 +657,7 @@
     if(cine.active || cine.cardShown) recover();
     pr.fired = {}; pr.minRem = 1e9; co.streak = 0; pressureOff(); lvSync(); lv.oneMoreAt = 0; setFlowLevel(0);
     try{ window.dispatchEvent(new CustomEvent("gei:flow-reset")); }catch(e){}
+    emit("start", { level: lv.id });
     if(!lane.warmed){ lane.warmed = true; try{ (window.requestIdleCallback || function(f){ return setTimeout(f, 1800); })(function(){ warm(); }, { timeout: 4000 }); }catch(e){} }
   }
 
@@ -888,7 +901,7 @@
     try{
       opts = opts || {};
       if(!enabled || cine.active || !ensure() || typeof opts.onCard !== "function") return false;
-      pressureOff(); setFlowLevel(0); lvSync(); lv.fails++; cleanVisuals(false);
+      pressureOff(); setFlowLevel(0); lvSync(); lv.fails++; emit("fail", { fails: lv.fails }); unslow(); cleanVisuals(false);
       cine.active = true; cine.cardShown = false; cine.onCard = opts.onCard; cine.skippable = false; cine.extra = cine.extra || [];
       var plan = cine.plan = makePlan(); plan.nearMiss = !!(lv.oneMoreAt && now() - lv.oneMoreAt < 9000); var forced = opts.plan || config.forcePlan; if(forced) Object.keys(forced).forEach(function(k){ plan[k] = forced[k]; }); cine.lastEvent = plan.event; cine.lastReaction = plan.reaction; var id = ++cine.id;
       silenceOthers(); try{ var g = GA(); g && g.voiceBegin("fme-cine"); }catch(e){}
@@ -915,6 +928,7 @@
     try{
       if(!enabled || cine.active) return;
       var closeCall = pr.on || (remMs > 0 && remMs < 3000) || pr.minRem < 3000;
+      emit("day", { index: index, remMs: remMs > 0 ? remMs : 0, closeCall: closeCall, streak: co.streak, fails: lv.fails, maxStreak: lv.maxStreak });
       pressureOff(); setFlowLevel(0); lvSync(); lv.days++; lv.minRem = Math.min(lv.minRem, remMs > 0 ? remMs : 0); lv.finalRem = remMs > 0 ? remMs : 0; lv.oneMoreAt = 0;
       pr.fired = {}; pr.minRem = 1e9; co.streak = 0;
       if(lane.cur && lane.cur.pri === PRI.warning) stopVoice(PRI.warning);
@@ -927,6 +941,24 @@
       if(index === 1 || index === 3){ var d = damPoint(); ring(d.x, d.y); }
     }catch(e){ warn(e); }
   }
+  /* ------------------------------------------------------------------ slow-motion (signature moments): visual only — game clocks are untouched */
+  var slowS = { anims: [], t: 0 };
+  function unslow(){
+    clearTimeout(slowS.t); slowS.anims.forEach(function(a){ try{ a.updatePlaybackRate(1); }catch(e){} }); slowS.anims = [];
+  }
+  function slow(rate, ms){
+    try{
+      if(reduced() || !document.getAnimations) return false;
+      unslow();
+      slowS.anims = document.getAnimations().filter(function(a){ var t = a.effect && a.effect.target; return t && !(t.closest && t.closest("#fmeTop,.fmePers")); });
+      slowS.anims.forEach(function(a){ try{ a.updatePlaybackRate(rate); }catch(e){} });
+      slowS.t = setTimeout(unslow, ms); return true;
+    }catch(e){ warn(e); return false; }
+  }
+  var fx = { burst: function(x, y, n, o){ if(ensure()) burst(x, y, n, o); }, ring: function(x, y){ if(ensure()) ring(x, y); }, box: function(){ return ensure() ? box() : { w: 360, h: 560, l: 0, t: 0 }; },
+    damPoint: function(){ return ensure() ? damPoint() : { x: 180, y: 140, s: 100 }; }, slow: slow, unslow: unslow, shake: function(a, ms){ shake(a, ms); },
+    top: function(){ ensure(); placeTop(); return topEl; }, charImage: charImage, quality: quality, reduced: reduced, othersSpeaking: othersSpeaking };
+
   /* ------------------------------------------------------------------ MILESTONE FLOW LEVEL (5 MORE … ONE MORE): the environment builds toward the finish */
   function lvSync(){
     var L = 0; try{ L = (typeof state !== "undefined" && state) ? state.level : 0; }catch(e){}
@@ -983,7 +1015,7 @@
     try{
       opts = opts || {};
       if(!enabled || cine.active || vc.active || typeof opts.onCard !== "function" || !ensure()) return false;
-      var perf = levelPerf(); lv.id = ""; lv.oneMoreAt = 0;
+      var perf = levelPerf(); emit("level", { perf: perf }); unslow(); lv.id = ""; lv.oneMoreAt = 0;
       pressureOff(); setFlowLevel(0); clearCallout();
       vc.active = true; vc.onCard = opts.onCard; vc.skippable = false; var id = ++vc.id, A = function(){ return vc.active && vc.id === id; };
       document.addEventListener("visibilitychange", vcHidden);
@@ -1025,7 +1057,7 @@
   function selfTest(){
     var r = []; function t(n, f){ var ok = false; try{ ok = !!f(); }catch(e){} r.push({ name: n, ok: ok }); }
     t("dom mounts inside the world", function(){ return ensure() && root.parentNode === world; });
-    t("one voice lane / priorities ordered", function(){ return PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.reaction; });
+    t("one voice lane / priorities ordered", function(){ return PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
     t("all twelve clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 12 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
     t("too-much-flow uses the corrected URL", function(){ return urlOf("toomuch") === "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/too-much-flow-8Yz9tQO0XI2GCwby.mp3"; });
     t("combo ladder", function(){ return COMBO[2].text === "FLOW COMBO" && COMBO[3].text === "HYDRAULIC SURGE" && COMBO[5].text === "MAXIMUM FLOW" && COMBO[7].text === "PRESSURE BOOST" && COMBO[10].text === "DAM-ITE OVERDRIVE"; });
@@ -1035,7 +1067,7 @@
   var API = {
     version: VERSION, config: config, clips: CLIPS, priorities: PRI,
     callout: callout, combo: combo, register: register, trigger: trigger,
-    sync: sync, reset: reset, dayComplete: dayComplete, levelComplete: levelComplete, setFlowLevel: setFlowLevel, claimCombo: claimCombo, markOneMore: markOneMore, levelPerf: levelPerf, clearCallout: clearCallout,
+    sync: sync, reset: reset, dayComplete: dayComplete, tap: tap, fx: fx, levelComplete: levelComplete, setFlowLevel: setFlowLevel, claimCombo: claimCombo, markOneMore: markOneMore, levelPerf: levelPerf, clearCallout: clearCallout,
     failure: failure, recover: recover, abort: abort, skip: skip,
     say: say, stopVoice: stopVoice, voiceBusy: voiceBusy, warm: warm,
     setEnabled: function(v){ enabled = !!v; if(!enabled) recover(); },
