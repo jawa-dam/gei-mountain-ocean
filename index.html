@@ -5785,6 +5785,7 @@ world.addEventListener("click", (e)=>{
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
   try{ if(window.MilestoneProgressEngine) window.MilestoneProgressEngine.onProgress({ remaining: requiredTaps - state.tapCount, required: requiredTaps, key: state.level + ":" + index, remMs: currentRemainingMs() }); }catch(err){}   // V2.2.11: "5 MORE … ONE MORE!" voice + word
+  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.tap({ remaining: requiredTaps - state.tapCount, required: requiredTaps, index: index, remMs: currentRemainingMs() }); }catch(err){}   // V2.2.12: what the player just did → Personality Trigger Engine (after the milestone voice, so it never talks first)
 
   if(state.tapCount === 1){
     g.classList.add("highlight");
@@ -12705,6 +12706,7 @@ function restoreVisualProgress(){
   <script src="/achievement-audio-director-v227.js" defer></script>
   <script src="/flow-moment-engine-v2210.js" defer></script>
   <script src="/flow-moment-voices-v2211.js" defer></script>
+  <script src="/flow-moment-personality-v2212.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
