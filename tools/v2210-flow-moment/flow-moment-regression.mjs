@@ -98,6 +98,7 @@ async function suiteCallouts(){
   console.log("F2 callouts");
   const h = await boot(); const { page } = h;
   await page.evaluate(() => { window.__co = []; new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.classList && n.classList.contains("fmeCo")) window.__co.push({ txt:n.innerText.replace(/\s+/g, " ").trim(), cls:n.className, rect:null }); }))).observe(document.body, { subtree:true, childList:true }); });
+  await page.evaluate(() => { MilestoneProgressEngine.enabled = false; });   // V2.2.11: with the milestone engine on, "3 MORE!" absorbs the combo word (tested in the v2211 suite)
   await h.start();
   for (let i = 0; i < 5; i++){ await h.tap(); await sleep(i === 2 ? 60 : 150); }
   const mid = await page.evaluate(() => { const el = document.querySelector(".fmeCo"); if (!el) return null; const t = el.querySelector(".fmeCoT"), cs = getComputedStyle(t); const r = el.getBoundingClientRect(); return { font:parseFloat(cs.fontSize), w:r.width, vw:innerWidth }; });
@@ -334,11 +335,12 @@ async function suiteSuccess(){
     const req = await page.evaluate(() => getRequiredTaps(state.level));
     for (let i = 0; i < req; i++){ await h.tap(); await sleep(230); }
   }
-  await page.waitForFunction(() => window.__co.some(t => /YOU CONTROLLED THE FLOW/.test(t)), null, { timeout:15000 });   // the finale fires from reachOcean(), ~1 s after the last tap
+  await page.waitForFunction(() => window.__co.some(t => /LEVEL COMPLETE!/.test(t)), null, { timeout:15000 });   // the finale fires from reachOcean(), ~1 s after the last tap
   await sleep(300);
   const r = await page.evaluate(() => ({ co:window.__co, flo:state.levelFlOz, tot:state.totalFlOz, done:state.completedLevels }));
   check("F8a. GATE OPEN! (day 4) and WATERWHEEL POWER! (day 5) celebrate the right days", r.co.some(t => /GATE OPEN/.test(t)) && r.co.some(t => /WATERWHEEL POWER/.test(t)), r.co);
-  check("F8b. the finale says FACTORY ONLINE! then YOU CONTROLLED THE FLOW!", r.co.slice(-2).join("|").includes("FACTORY ONLINE") && /YOU CONTROLLED THE FLOW/.test(r.co[r.co.length - 1]), r.co.slice(-3));
+  const fin = r.co.slice(-4).join("|");
+  check("F8b. the finale runs DAM STABILIZED → CONTROLLED RELEASE → POWER ON! → LEVEL COMPLETE!", /DAM STABILIZED.*CONTROLLED RELEASE.*POWER ON.*LEVEL COMPLETE!/.test(fin), r.co.slice(-5));
   check("F8c. progress and economy are exactly as before: 6 × 111 = 666 FL OZ, one level completed", r.flo === 666 && r.tot === 666 && r.done === 1, r);
   const fail = await page.evaluate(() => FlowMomentEngine.state().cinematic);
   check("F8d. success never triggers the failure cinematic; no uncaught errors", !fail && h.errors.length === 0, h.errors);

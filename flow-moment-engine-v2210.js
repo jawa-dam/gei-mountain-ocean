@@ -39,7 +39,8 @@
     who:      "who-turned-that-water-on-2yJFhN0Ls4FOt51a.mp3",
     again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3"
   };
-  var PRI = { cinematic:1, warning:2, achievement:3, reaction:4 };
+  /* spoken-voice priority (smaller number wins): failure cinematic · level complete · ONE MORE · timer warnings · milestone progress · achievement / combo · character reaction (music = ducked, not a voice) */
+  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, achievement:5, reaction:6 };
 
   var config = {
     comedyChance: .15,                 // WHO TURNED THAT WATER ON?! — 10–20 % of failures
@@ -235,11 +236,31 @@
 "@keyframes fmeInvite{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}",
 "@media (max-height:700px){.timeUpCard .timeUpArt{height:clamp(44px,11vh,80px)}}",
 "@media (max-height:600px){.timeUpCard .timeUpArt,.timeUpCard .timeUpQuip{display:none}.fmeTip span{display:inline;font-size:.82rem}.fmeTip span::after{content:' '}}",
+/* milestone progress words ("3 MORE!" + the spoken phrase), water-flow strip, anticipation, level-complete sequence */
+".fmeCoL{font-weight:900;font-size:clamp(1rem,5.6vw,1.55rem);line-height:1.1;letter-spacing:.03em;text-transform:uppercase;color:#fff;text-wrap:balance;max-width:92%;overflow-wrap:anywhere;text-shadow:0 0 .5em var(--c1),0 .08em 0 rgba(0,25,70,.85);margin-top:.15em}",
+".fmeCoWave{width:min(72%,270px);height:12px;overflow:hidden;position:relative;border-radius:6px;margin-top:.2em}",
+".fmeCoWave::before{content:'';position:absolute;left:-28px;right:-28px;top:0;bottom:0;background:radial-gradient(circle at 14px 100%,var(--c1) 9px,transparent 10px) 0 0/28px 12px repeat-x;animation:fmeWaveX2 .6s linear infinite}",
+"@keyframes fmeWaveX2{from{transform:translate3d(0,0,0)}to{transform:translate3d(28px,0,0)}}",
+".fmeCo.ms4 .fmeCoT{font-size:clamp(2.1rem,12vw,4.2rem)}.fmeCo.ms3 .fmeCoT{font-size:clamp(2.3rem,13vw,4.6rem)}",
+".fmeCo.ms2 .fmeCoT{font-size:clamp(2.5rem,14.5vw,5rem)}.fmeCo.ms2 .fmeCoL{font-size:clamp(1.1rem,6.2vw,1.7rem)}",
+".fmeCo.ms1 .fmeCoT{font-size:clamp(2.8rem,16.5vw,5.8rem)}.fmeCo.ms1 .fmeCoL{font-size:clamp(1.15rem,6.6vw,1.8rem)}.fmeCo.ms1 .fmeCoE{animation:fmeNum .3s ease-in-out infinite alternate}",
+".fmeCo.lc .fmeCoT{font-size:clamp(2.2rem,12.5vw,4.6rem)}",
+".fmeTop.short .fmeCo .fmeCoE,.fmeTop.short .fmeCo .fmeCoWave{display:none}",
+".fmeTop.short .fmeCo .fmeCoT{font-size:clamp(1.5rem,9vw,2.5rem)}.fmeTop.short .fmeCo .fmeCoM{font-size:clamp(1.8rem,10vw,2.8rem)}",
+".fmeTop.short .fmeCo .fmeCoL{font-size:clamp(.85rem,4.6vw,1.1rem)}.fmeTop.short .fmeCo .fmeCoS{font-size:.66rem}",
+".fmeRoot.ant .fmeWarn{opacity:.55;box-shadow:inset 0 0 70px 14px rgba(255,214,90,.55);animation:fmeAntPulse .85s ease-in-out infinite alternate}",
+"@keyframes fmeAntPulse{from{opacity:.25}to{opacity:.7}}",
+".world.fmeAnticip{--fme-amp:.7}.world.fmeAnticip #worldSVG{animation:fmeRumble .16s linear infinite}",
+".fmeRoot.calm .fmePulse{background:radial-gradient(ellipse at 50% 42%,rgba(120,220,255,.5),rgba(255,226,140,.18) 45%,transparent 66%)}",
+".station .body.fmeSpinSlow{animation:fmeSpin .7s linear infinite!important;transform-box:fill-box;transform-origin:50% 50%}",
+".station .body.fmeGlow{animation:fmeGlowPulse .7s ease-in-out infinite alternate!important}",
+"@keyframes fmeGlowPulse{from{filter:brightness(1)}to{filter:brightness(1.45) drop-shadow(0 0 8px rgba(255,226,120,.9))}}",
 /* reduced motion + low power */
 "@media (prefers-reduced-motion:reduce){.fmeCo{animation:fmeCoFade var(--d,1000ms) linear forwards!important}.fmeCo::before,.fmeCo::after,.fmeCoChar{display:none}",
 ".fmeBanner.go,.fmeBanner.hold.go{animation:fmeCoFade var(--ms,900ms) linear forwards!important}.fmePulse.go,.fmeFlash.go,.fmeWarn.go{animation:none}",
 ".world.fmePressure #worldSVG,.world.fmeRumble #worldSVG,.world.fmeShake{animation:none!important}.station .body.fmeShake1,.station .body.fmeShake2,.station .body.fmeShake3,.station .body.fmeSpin{animation:none!important}",
-".timerBox.fmeUrgent .timerNum{animation:none}.timeUpCard.show .rebuildBtn,.timeUpCard.show .fmeTip span{animation:none}}"
+".timerBox.fmeUrgent .timerNum{animation:none}.timeUpCard.show .rebuildBtn,.timeUpCard.show .fmeTip span{animation:none}",
+".fmeCoWave::before,.fmeCo.ms1 .fmeCoE,.fmeRoot.ant .fmeWarn,.world.fmeAnticip #worldSVG,.station .body.fmeSpinSlow,.station .body.fmeGlow{animation:none!important}}"
   ].join("\n");
 
   function addStyle(){
@@ -299,8 +320,10 @@
   /* The callout layer lives ABOVE the floating action dock (z-index 9996) but is pinned to the board's rectangle, so big words are never cut off. */
   function placeTop(){
     if(!topEl || !world) return;
-    var r = world.getBoundingClientRect(), s = topEl.style;
-    s.left = Math.round(r.left) + "px"; s.top = Math.round(r.top) + "px"; s.width = Math.round(r.width) + "px"; s.height = Math.round(r.height) + "px";
+    var r = world.getBoundingClientRect(), s = topEl.style, top = Math.max(r.top, 0), bottom = Math.min(r.bottom, window.innerHeight || r.bottom), h = Math.max(120, bottom - top);
+    /* pinned to the VISIBLE part of the board: on short phones the page cuts the board off, big words must stay on screen */
+    s.left = Math.round(r.left) + "px"; s.top = Math.round(top) + "px"; s.width = Math.round(r.width) + "px"; s.height = Math.round(h) + "px";
+    topEl.classList.toggle("short", h < 300); s.setProperty("--fme-h", Math.round(h) + "px");
   }
   function announce(t){ try{ if(liveEl){ liveEl.textContent = ""; liveEl.textContent = t; } }catch(e){} }
   function box(){ var r = root.getBoundingClientRect(); return { w: r.width || 360, h: r.height || 560, l: r.left, t: r.top }; }
@@ -398,8 +421,8 @@
         if(!enabled || audioMuted() || zoneBlocked() || document.hidden) return res(false);
         if(lane.cur){ if(lane.cur.pri < pri) return res(false); settle(lane.cur, false); }   // higher priority is speaking → drop; equal/lower → interrupt
         silenceOthers();
-        var el = laneEl(), item = { id: id, pri: pri, res: res, el: el, done: false, t: 0 };
-        lane.cur = item; lane.lastAt = now(); lane.log.push(id); if(lane.log.length > 12) lane.log.shift();
+        var el = laneEl(), item = { id: o.label || id, pri: pri, res: res, el: el, done: false, t: 0 };
+        lane.cur = item; lane.lastAt = now(); lane.log.push(o.label || id); if(lane.log.length > 24) lane.log.shift();
         duckOn();
         el.onended = function(){ settle(item, true); };
         el.onerror = function(){ settle(item, false); };
@@ -432,7 +455,8 @@
   function noise(d, a, b, g){ try{ if(typeof window.playWaterNoise === "function") window.playWaterNoise(d, a, b, g); }catch(e){} }
 
   /* ------------------------------------------------------------------ callouts + combo escalation */
-  var co = { cur: null, lastKey: {}, lastChar: 0, streak: 0, n: 0 };
+  var co = { cur: null, lastKey: {}, lastChar: 0, streak: 0, n: 0, pending: null };
+  var lv = { id: "", maxStreak: 0, fails: 0, minRem: 1e9, finalRem: 0, days: 0, oneMoreAt: 0 };   // per-level performance (feeds the victory voice)
   var DUR = { 1: 900, 2: 1000, 3: 1150, 4: 1300, 5: 1700, warn: 950, good: 1300 };
   var moments = {};
   function register(id, def){ if(id && def) moments[id] = def; return API; }
@@ -444,7 +468,9 @@
     placeTop();
     var cur = co.cur;
     if(cur && cur.el.parentNode && !cur.out){
+      if(cur.hold && t - cur.at < cur.hold && !def.force) return false;   // ONE MORE holds the stage for a beat
       if(!(rank > cur.rank || t - cur.at >= (def.gap != null ? def.gap : config.calloutGapMs))) return false;
+      if(cur.rank >= 6 && rank < 5 && t - cur.at < 500) return false;     // a timer warning is never wiped by a fresh small word
     }
     if(co.lastKey[key] && t - co.lastKey[key] < (def.cooldown != null ? def.cooldown : 900)) return false;
     co.lastKey[key] = t;
@@ -457,12 +483,16 @@
     if(def.emoji) html += '<div class="fmeCoE">' + def.emoji + "</div>";
     html += '<div class="fmeCoT"></div>';
     if(def.mult) html += '<div class="fmeCoM"></div>';
+    if(def.line2) html += '<div class="fmeCoL"></div>';
+    if(def.wave) html += '<div class="fmeCoWave"></div>';
     if(def.sub) html += '<div class="fmeCoS"></div>';
     el.innerHTML = html;
+    if(def.cls) el.className += " " + def.cls;
+    if(def.line2) el.querySelector(".fmeCoL").textContent = def.line2;
     el.querySelector(".fmeCoT").textContent = def.text;
     if(def.mult) el.querySelector(".fmeCoM").textContent = def.mult;
     if(def.sub) el.querySelector(".fmeCoS").textContent = def.sub;
-    var rec = { el: el, rank: rank, at: t, out: false }; co.cur = rec;
+    var rec = { el: el, rank: rank, at: t, out: false, hold: def.hold || 0 }; co.cur = rec;
     calloutsEl.appendChild(el);
     /* optional character reaction (rare, big words only) */
     if(def.char !== false && rank >= 4 && rank < 6 && t - co.lastChar > 3500 && !reduced()){
@@ -511,10 +541,17 @@
       if(!enabled) return false;
       if(!(n > 1)){ co.streak = 1; return false; }
       co.streak = Math.max(co.streak + 1, n);
+      if(co.streak > lv.maxStreak) lv.maxStreak = co.streak;
       var m = COMBO[co.streak];
-      return m ? callout({ key: "combo" + co.streak, emoji: m.emoji, text: m.text, mult: m.mult, sub: m.sub, tier: m.tier, cooldown: 400 }) : false;
+      if(!m) return false;
+      /* Held for one tick: if a milestone word ("3 MORE!") fires for the same tap it absorbs the combo as its small line instead of two words fighting. */
+      co.pending = { key: "combo" + co.streak, emoji: m.emoji, text: m.text, mult: m.mult, sub: m.sub, tier: m.tier, cooldown: 400, at: now() };
+      fxT.later(flushCombo, 0);
+      return true;
     }catch(e){ warn(e); return false; }
   }
+  function flushCombo(){ var p = co.pending; co.pending = null; if(p) callout(p); }
+  function claimCombo(){ var p = co.pending; if(!p) return null; co.pending = null; return { text: p.text + (p.mult ? " " + p.mult : ""), tier: p.tier }; }
   function trigger(id, extra){
     var d = moments[id]; if(!d) return false;
     var o = {}; Object.keys(d).forEach(function(k){ o[k] = d[k]; }); if(extra) Object.keys(extra).forEach(function(k){ o[k] = extra[k]; });
@@ -547,6 +584,8 @@
   }
 
   /* ------------------------------------------------------------------ PRESSURE STATE */
+  var FLOW_PW = [0, 2, 3.4, 5.4, 7.6, 10.5];                // milestone flow level 0..5 → resting height of the flow band (%)
+  var fl = { level: 0, tick: 0 };
   var pr = { on: false, stage: 0, fired: {}, lastDrip: 0, lastMusic: 0, minRem: 1e9, timerBox: null };
   var WARN = [
     { at: 4000, clip: "pressure", text: "PRESSURE CRITICAL!", emoji: "⚠️" },
@@ -558,7 +597,7 @@
   function pressureApply(stage){
     pr.stage = stage; pr.on = true;
     if(!reduced()){ world.classList.add("fmePressure"); world.style.setProperty("--fme-amp", String(.5 + stage * .55)); }
-    pwEl.classList.add("on"); pwEl.classList.toggle("fast", stage >= 2); pwEl.style.setProperty("--pw", (3 + stage * 2.4) + "%");
+    applyPW();
     var tb = pr.timerBox || (pr.timerBox = $("timerBox"));
     if(tb){ tb.classList.add("fmeUrgent"); tb.classList.toggle("fmeCritical", stage >= 3); }
   }
@@ -566,8 +605,13 @@
     if(!pr.on && !pr.stage) return;
     pr.on = false; pr.stage = 0;
     if(world){ world.classList.remove("fmePressure"); world.style.removeProperty("--fme-amp"); }
-    if(pwEl){ pwEl.classList.remove("on", "fast"); pwEl.style.setProperty("--pw", "0%"); }
+    applyPW();
     var tb = pr.timerBox || $("timerBox"); if(tb) tb.classList.remove("fmeUrgent", "fmeCritical");
+  }
+  function applyPW(){
+    if(!pwEl) return;
+    var press = pr.on ? 3 + pr.stage * 2.4 : 0, floor = FLOW_PW[fl.level] || 0, v = Math.max(press, floor);
+    pwEl.classList.toggle("on", v > 0); pwEl.classList.toggle("fast", pr.stage >= 2 || fl.level >= 4); pwEl.style.setProperty("--pw", v + "%");
   }
   /* sync(remainingMs, live): called by the game on every timer render (≈10 Hz and on pause/stop). */
   function sync(rem, live){
@@ -599,7 +643,8 @@
   }
   function reset(){
     if(cine.active || cine.cardShown) recover();
-    pr.fired = {}; pr.minRem = 1e9; co.streak = 0; pressureOff();
+    pr.fired = {}; pr.minRem = 1e9; co.streak = 0; pressureOff(); lvSync(); lv.oneMoreAt = 0; setFlowLevel(0);
+    try{ window.dispatchEvent(new CustomEvent("gei:flow-reset")); }catch(e){}
     if(!lane.warmed){ lane.warmed = true; try{ (window.requestIdleCallback || function(f){ return setTimeout(f, 1800); })(function(){ warm(); }, { timeout: 4000 }); }catch(e){} }
   }
 
@@ -771,7 +816,7 @@
     cineT.later(function(){ if(cine.id !== id || !cine.active) return; say("again", { pri: PRI.cinematic, maxMs: 4500 }).then(function(){ try{ var g = GA(); g && g.voiceEnd("fme-cine"); }catch(e){} }); }, 220);
     cineT.later(function(){ try{ var g = GA(); g && g.voiceEnd("fme-cine"); }catch(e){} }, 5200);
   }
-  function skip(){ if(cine.active && cine.skippable) showCard(); }
+  function skip(){ if(vc.active && vc.skippable) vcFinish(); else if(cine.active && cine.skippable) showCard(); }
 
   async function runFailure(id, plan){
     var A = function(){ return alive(id); }, rm = plan.rm, k = rm ? .6 : 1;
@@ -818,7 +863,7 @@
       if(plan.weather !== "none") wxEl.className = "fmeWx " + plan.weather; if(plan.weather === "storm") cineT.later(function(){ wxEl.classList.add("bolt"); }, 500);
       if(rm) root.classList.add("rm");
       floodRise(plan, plan.mega); foamLoop(rm ? 0 : 2400);
-      cineT.later(function(){ if(!A()) return; if(plan.event !== "wheel" && EVENT_TAG[plan.event]) tagShow(EVENT_TAG[plan.event]); }, 350);
+      cineT.later(function(){ if(!A()) return; if(plan.event !== "wheel" && EVENT_TAG[plan.event]) tagShow(EVENT_TAG[plan.event]); else if(plan.nearMiss && plan.event === "normal") tagShow("😬 SO CLOSE — ONE TAP AWAY"); }, 350);
       if(plan.event === "wheel"){ var wb2 = stationBody(4); cineT.later(function(){ wb2 && wb2.classList.remove("fmeSpin"); }, 900); }
       if(plan.event === "hydrant") hydrants(plan);
       if(plan.event === "mega"){ cineT.later(function(){ if(A()){ shake(10 * plan.shake, 700); var b = box(); jets(b.w * rand(.3, .7), b.h * .6, 6, 140, 260); } }, 700); }
@@ -843,9 +888,9 @@
     try{
       opts = opts || {};
       if(!enabled || cine.active || !ensure() || typeof opts.onCard !== "function") return false;
-      pressureOff(); cleanVisuals(false);
+      pressureOff(); setFlowLevel(0); lvSync(); lv.fails++; cleanVisuals(false);
       cine.active = true; cine.cardShown = false; cine.onCard = opts.onCard; cine.skippable = false; cine.extra = cine.extra || [];
-      var plan = cine.plan = makePlan(); var forced = opts.plan || config.forcePlan; if(forced) Object.keys(forced).forEach(function(k){ plan[k] = forced[k]; }); cine.lastEvent = plan.event; cine.lastReaction = plan.reaction; var id = ++cine.id;
+      var plan = cine.plan = makePlan(); plan.nearMiss = !!(lv.oneMoreAt && now() - lv.oneMoreAt < 9000); var forced = opts.plan || config.forcePlan; if(forced) Object.keys(forced).forEach(function(k){ plan[k] = forced[k]; }); cine.lastEvent = plan.event; cine.lastReaction = plan.reaction; var id = ++cine.id;
       silenceOthers(); try{ var g = GA(); g && g.voiceBegin("fme-cine"); }catch(e){}
       root.classList.toggle("rm", false); document.documentElement.classList.add("fmeCineOn");
       document.addEventListener("visibilitychange", onHidden);
@@ -870,39 +915,117 @@
     try{
       if(!enabled || cine.active) return;
       var closeCall = pr.on || (remMs > 0 && remMs < 3000) || pr.minRem < 3000;
-      pressureOff(); pr.fired = {}; pr.minRem = 1e9; co.streak = 0;
+      pressureOff(); setFlowLevel(0); lvSync(); lv.days++; lv.minRem = Math.min(lv.minRem, remMs > 0 ? remMs : 0); lv.finalRem = remMs > 0 ? remMs : 0; lv.oneMoreAt = 0;
+      pr.fired = {}; pr.minRem = 1e9; co.streak = 0;
       if(lane.cur && lane.cur.pri === PRI.warning) stopVoice(PRI.warning);
       if(!ensure()) return;
       clearCallout();                                           // the celebration card gets a clean stage
-      if(index === 5) return;                                   // the final day is announced by success()
+      if(index === 5) return;                                   // the final day is announced by levelComplete()
       if(closeCall) trigger("justInTime", { gap: 0, cooldown: 0 });
       else if(DAY_MOMENT[index] && (index === 3 || index === 4)) trigger(DAY_MOMENT[index], { gap: 0, cooldown: 0 });
       /* calm, controlled visuals: a gentle ripple on the dam, no shake */
       if(index === 1 || index === 3){ var d = damPoint(); ring(d.x, d.y); }
     }catch(e){ warn(e); }
   }
-  function success(){
+  /* ------------------------------------------------------------------ MILESTONE FLOW LEVEL (5 MORE … ONE MORE): the environment builds toward the finish */
+  function lvSync(){
+    var L = 0; try{ L = (typeof state !== "undefined" && state) ? state.level : 0; }catch(e){}
+    if(lv.id !== String(L)){ lv.id = String(L); lv.maxStreak = 0; lv.fails = 0; lv.minRem = 1e9; lv.finalRem = 0; lv.days = 0; lv.oneMoreAt = 0; }
+  }
+  function markOneMore(){ lv.oneMoreAt = now(); }
+  function levelPerf(){
+    lvSync(); var st = {}; try{ st = (typeof state !== "undefined" && state) || {}; }catch(e){}
+    return { level: st.level | 0, completed: st.completedLevels | 0, first: (st.completedLevels | 0) <= 1, maxCombo: lv.maxStreak, fails: lv.fails,
+      minRemMs: lv.minRem === 1e9 ? 0 : lv.minRem, finalRemMs: lv.finalRem, days: lv.days };
+  }
+  function flowDrip(){
+    if(!root || cine.active || !fl.level) return;
+    var d = damPoint(), n = fl.level >= 4 ? 2 : 1, spd = 1 - fl.level * .09;
+    for(var i = 0; i < n; i++){
+      var a = rand(-1, 1);
+      particle(d.x + rand(-d.s * .35, d.s * .35), d.y + d.s * .2, { cls: Math.random() < .4 ? "foam" : "", dx: Math.sin(a) * rand(30, 70 + fl.level * 14), dy: rand(34, 90), my: -rand(12, 36 + fl.level * 6), sz: rand(4, 7 + fl.level), dur: rand(520, 820) * spd });
+    }
+    if(fl.level >= 3){ var w = stationBody(4), r = w && w.getBoundingClientRect ? w.getBoundingClientRect() : null, b = box();
+      if(r && r.width > 4) particle(r.left - b.l + r.width / 2 + rand(-r.width * .3, r.width * .3), r.top - b.t + r.height * .5, { cls: "foam", dx: rand(-50, 50), dy: rand(20, 60), my: -rand(10, 30), sz: rand(3, 6), dur: rand(450, 700) * spd }); }
+  }
+  /* setFlowLevel(0..5): 1 = "5 MORE" … 5 = "ONE MORE". Slightly more water, ambient droplets, faster flow band; at 5 peak anticipation (gold edge pulse + faint tremor). */
+  function setFlowLevel(l){
+    l = clamp(l | 0, 0, 5);
+    if(!root && !l) return; if(!ensure()) return;
+    var was = fl.level; fl.level = l; applyPW();
+    root.classList.toggle("ant", l >= 5);
+    world.classList.toggle("fmeAnticip", l >= 5 && !reduced());
+    root.style.setProperty("--fme-fl", String(l));
+    fxT.clear(fl.tick); fl.tick = 0;
+    if(l >= 1 && !reduced()) fl.tick = fxT.every(flowDrip, Math.max(170, 640 - l * 100));
+    if(l >= 2 && l > was && !reduced()){ root.style.setProperty("--fme-glow", l >= 5 ? "rgba(255,214,90,.75)" : "rgba(80,190,255,.6)"); retrigger(pulseEl, "go"); }
+  }
+
+  /* ------------------------------------------------------------------ LEVEL COMPLETE SEQUENCE: stabilise → controlled release → wheel reacts → ONE victory voice → LEVEL COMPLETE! → card */
+  var vc = { active: false, id: 0, onCard: null, skippable: false }, vcT = Timers();
+  register("stabilized", { emoji: "🧱", text: "DAM STABILIZED", tier: "good", top: 30, ms: 950 });
+  register("release",    { emoji: "💧", text: "CONTROLLED RELEASE", tier: "good", top: 30, ms: 950 });
+  register("power",      { emoji: "⚙️", text: "POWER ON!", tier: 3, top: 30, ms: 950 });
+  function vcWait(ms){ return new Promise(function(res){ vcT.later(function(){ res(true); }, ms); }); }
+  function vcClean(){
+    vcT.clearAll(); vc.skippable = false;
+    var w = stationBody(4), m = stationBody(5); if(w) w.classList.remove("fmeSpinSlow"); if(m) m.classList.remove("fmeGlow");
+    if(root) root.classList.remove("skippable", "calm");
+    document.removeEventListener("visibilitychange", vcHidden);
+  }
+  function vcFinish(){
+    if(!vc.active) return; vc.active = false;
+    var cb = vc.onCard; vc.onCard = null; vc.id++; vcClean();
+    try{ cb && cb(); }catch(e){ warn(e); }
+  }
+  function vcHidden(){ if(document.hidden) vcFinish(); }
+  function levelComplete(opts){
     try{
-      if(!enabled || cine.active || !ensure()) return;
-      pressureOff();
-      var b = box(), d = damPoint(); ring(d.x, d.y);
-      trigger("factoryOnline", { top: 28, cooldown: 0, gap: 0 });
-      cineT.later(function(){
-        trigger("controlled", { cooldown: 0, gap: 0 });
+      opts = opts || {};
+      if(!enabled || cine.active || vc.active || typeof opts.onCard !== "function" || !ensure()) return false;
+      var perf = levelPerf(); lv.id = ""; lv.oneMoreAt = 0;
+      pressureOff(); setFlowLevel(0); clearCallout();
+      vc.active = true; vc.onCard = opts.onCard; vc.skippable = false; var id = ++vc.id, A = function(){ return vc.active && vc.id === id; };
+      document.addEventListener("visibilitychange", vcHidden);
+      vcT.later(function(){ if(A()) vcFinish(); }, 9000);              // never trap the player before the Level Complete card
+      (async function(){
+        var b = box(), d = damPoint(), rm = reduced(), k = rm ? .6 : 1;
+        /* STEP 2 — stabilise */
+        root.classList.add("calm"); ring(d.x, d.y); noise(.5, 200, 500, .06); tone(392, .25, "sine"); trigger("stabilized", { gap: 0, cooldown: 0 });
+        await vcWait(560 * k); if(!A()) return;
+        /* STEP 3 — controlled water release */
+        trigger("release", { gap: 0, cooldown: 0 }); noise(.9, 300, 1200, .09);
+        var until = now() + 900; var rid = vcT.every(function(){ if(now() > until){ vcT.clear(rid); return; } var q = damPoint(); particle(q.x + rand(-q.s * .3, q.s * .3), q.y + q.s * .25, { cls: "foam", dx: rand(-26, 26), dy: rand(70, 150), my: rand(0, 16), sz: rand(5, 9), dur: rand(600, 900) }); }, 90);
+        await vcWait(560 * k); if(!A()) return;
+        /* STEP 4 — waterwheel + factory react */
+        var w = stationBody(4), m = stationBody(5); if(w && !rm) w.classList.add("fmeSpinSlow"); if(m && !rm) m.classList.add("fmeGlow");
+        trigger("power", { gap: 0, cooldown: 0 }); tone(523, .12, "triangle"); tone(659, .12, "triangle", .1); tone(784, .2, "triangle", .2);
+        vc.skippable = true; vcT.later(function(){ if(A() && root) root.classList.add("skippable"); }, 300);
+        await vcWait(520 * k); if(!A()) return;
+        /* STEP 5/6 — ONE victory voice + a big LEVEL COMPLETE! */
+        var LCV = window.LevelCompleteVoiceEngine, pick = null, vp = null;
+        try{ if(LCV){ pick = LCV.pick(perf); vp = LCV.speak(pick); } }catch(e){ warn(e); }
+        callout({ key: "levelComplete", emoji: "🌊", text: "LEVEL COMPLETE!", sub: pick ? pick.text : "", tier: 5, top: 34, ms: 2300, cooldown: 0, gap: 0, wave: true, cls: "lc" });
         burst(b.w / 2, b.h * .34, 30, { cls: "spk", spread: 220, up: 110, fall: 120, min: 5, max: 12, durMax: 1400 });
-        burst(b.w / 2, b.h * .34, 18, { spread: 200, up: 90, fall: 100 });
+        burst(b.w / 2, b.h * .34, 16, { spread: 200, up: 90, fall: 100 });
         noise(.9, 300, 1800, .09); tone(784, .2, "triangle", .05); tone(988, .2, "triangle", .2); tone(1318, .4, "triangle", .36);
-      }, 520);
-    }catch(e){ warn(e); }
+        announce("Level complete! " + (pick ? pick.text : ""));
+        await Promise.all([vcWait(1100 * k), vp ? Promise.race([vp, vcWait(2400)]) : null]); if(!A()) return;
+        await vcWait(150); if(!A()) return;
+        /* STEP 7–10 — rewards, XP, unlocks and CONTINUE → are the Level Complete card */
+        vcFinish();
+      })().catch(function(e){ warn(e); vcFinish(); });
+      return true;
+    }catch(e){ warn(e); vc.active = false; vcClean(); return false; }
   }
 
   /* ------------------------------------------------------------------ public API */
   function state(){ return { version: VERSION, enabled: enabled, cinematic: cine.active, plan: cine.plan, cardShown: cine.cardShown, skippable: cine.skippable, pressure: { on: pr.on, stage: pr.stage, fired: Object.keys(pr.fired) },
-    streak: co.streak, voice: lane.cur ? { id: lane.cur.id, pri: lane.cur.pri } : null, voiceLog: lane.log.slice(), particles: liveP, timers: fxT.count() + cineT.count() }; }
+    streak: co.streak, flowLevel: fl.level, levelComplete: vc.active, voice: lane.cur ? { id: lane.cur.id, pri: lane.cur.pri } : null, voiceLog: lane.log.slice(), particles: liveP, timers: fxT.count() + cineT.count() }; }
   function selfTest(){
     var r = []; function t(n, f){ var ok = false; try{ ok = !!f(); }catch(e){} r.push({ name: n, ok: ok }); }
     t("dom mounts inside the world", function(){ return ensure() && root.parentNode === world; });
-    t("one voice lane / priorities ordered", function(){ return PRI.cinematic < PRI.warning && PRI.warning < PRI.achievement && PRI.achievement < PRI.reaction; });
+    t("one voice lane / priorities ordered", function(){ return PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.reaction; });
     t("all twelve clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 12 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
     t("too-much-flow uses the corrected URL", function(){ return urlOf("toomuch") === "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/too-much-flow-8Yz9tQO0XI2GCwby.mp3"; });
     t("combo ladder", function(){ return COMBO[2].text === "FLOW COMBO" && COMBO[3].text === "HYDRAULIC SURGE" && COMBO[5].text === "MAXIMUM FLOW" && COMBO[7].text === "PRESSURE BOOST" && COMBO[10].text === "DAM-ITE OVERDRIVE"; });
@@ -912,7 +1035,7 @@
   var API = {
     version: VERSION, config: config, clips: CLIPS, priorities: PRI,
     callout: callout, combo: combo, register: register, trigger: trigger,
-    sync: sync, reset: reset, dayComplete: dayComplete, success: success,
+    sync: sync, reset: reset, dayComplete: dayComplete, levelComplete: levelComplete, setFlowLevel: setFlowLevel, claimCombo: claimCombo, markOneMore: markOneMore, levelPerf: levelPerf, clearCallout: clearCallout,
     failure: failure, recover: recover, abort: abort, skip: skip,
     say: say, stopVoice: stopVoice, voiceBusy: voiceBusy, warm: warm,
     setEnabled: function(v){ enabled = !!v; if(!enabled) recover(); },
@@ -921,8 +1044,8 @@
   };
   window.FlowMomentEngine = API; window.GEI_FLOW_MOMENT = API;
 
-  window.addEventListener("pagehide", function(){ try{ endCine(false); stopVoice(); releaseWarm(); }catch(e){} });
-  document.addEventListener("click", function(e){ if(cine.active && cine.skippable && root && root.contains(e.target)) skip(); }, true);
-  document.addEventListener("keydown", function(e){ if(cine.active && cine.skippable && (e.key === "Enter" || e.key === " " || e.key === "Escape")) skip(); });
+  window.addEventListener("pagehide", function(){ try{ vcClean(); endCine(false); stopVoice(); releaseWarm(); }catch(e){} });
+  document.addEventListener("click", function(e){ if(((cine.active && cine.skippable) || (vc.active && vc.skippable)) && root && root.contains(e.target)) skip(); }, true);
+  document.addEventListener("keydown", function(e){ if(((cine.active && cine.skippable) || (vc.active && vc.skippable)) && (e.key === "Enter" || e.key === " " || e.key === "Escape")) skip(); });
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", ensure, { once: true }); else ensure();
 })();

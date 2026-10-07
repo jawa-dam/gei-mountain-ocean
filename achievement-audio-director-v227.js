@@ -315,7 +315,7 @@
   /* the capsule's timeline, as events — the audio is locked to what the player sees */
   var HANDLERS = {
     show:function(){
-      enqueueVoice("level-complete", 1);
+      if(!(window.LevelCompleteVoiceEngine && window.LevelCompleteVoiceEngine.spokeRecently(12000))) enqueueVoice("level-complete", 1);   // V2.2.11: the Level Complete Voice Engine already spoke this victory
       if(cur.tier >= 2) layer(null, "sparkle");
       if(cur.plan.rare) layer("rare-wow", "shimmer");
     },
