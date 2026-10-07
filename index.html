@@ -7518,7 +7518,14 @@ function continueToNextLevel(){
   if(state.phase !== "redeemed") return;
   levelCard.classList.remove("show");
   resetSystem();
-  showTribeReveal(state.lastTribe, ()=>{ beginDay(0); showToast(getDamHumor("continue")); });
+  /* V2.2.13 — NEXT CHALLENGE: the next level no longer starts by itself. A short downstream journey (water → next flow station → preview → ENTER FLOW) hands the
+     ORIGINAL start back exactly once (ENTER FLOW / SKIP); no engine or any problem → the original immediate start. */
+  showTribeReveal(state.lastTribe, ()=>{
+    const startNext = () => { beginDay(0); showToast(getDamHumor("continue")); };
+    let took = false;
+    try{ took = !!(window.NextChallengeEngine && window.NextChallengeEngine.run({ onStart: startNext })); }catch(err){ safeWarn("Next challenge transition skipped: " + err); }
+    if(!took) startNext();
+  });
 }
 
 /* The original -ite reveal, kept as a secondary reward shown after the level is redeemed. */
@@ -12707,6 +12714,7 @@ function restoreVisualProgress(){
   <script src="/flow-moment-engine-v2210.js" defer></script>
   <script src="/flow-moment-voices-v2211.js" defer></script>
   <script src="/flow-moment-personality-v2212.js" defer></script>
+  <script src="/next-challenge-engine-v2213.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
