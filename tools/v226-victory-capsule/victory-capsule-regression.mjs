@@ -285,8 +285,8 @@ async function suiteAudio(browser, base){
   await page.evaluate(() => {
     window.__calls = 0;
     const v = window.damVoice, n = window.damNoise;
-    window.damVoice = o => { if (/victory-capsule-v226/.test(new Error().stack)) window.__calls++; return v(o); };
-    window.damNoise = o => { if (/victory-capsule-v226/.test(new Error().stack)) window.__calls++; return n(o); };
+    window.damVoice = o => { if (/victory-capsule-v226|achievement-audio-director-v227/.test(new Error().stack)) window.__calls++; return v(o); };
+    window.damNoise = o => { if (/victory-capsule-v226|achievement-audio-director-v227/.test(new Error().stack)) window.__calls++; return n(o); };
     window.GEI_AUDIO.setMuted(true);
   });
   await complete(page, { level:2, rescue:false });
@@ -296,7 +296,7 @@ async function suiteAudio(browser, base){
   await ctx.close();
   const c2 = await newCtx(browser, base, { viewport:{ width:390, height:844 }, isMobile:true, hasTouch:true });
   const p2 = await boot(c2, base);
-  await p2.evaluate(() => { window.__calls = 0; const v = window.damVoice, n = window.damNoise; window.damVoice = o => { if (/victory-capsule-v226/.test(new Error().stack)) window.__calls++; return v(o); }; window.damNoise = o => { if (/victory-capsule-v226/.test(new Error().stack)) window.__calls++; return n(o); }; });
+  await p2.evaluate(() => { window.__calls = 0; const v = window.damVoice, n = window.damNoise; window.damVoice = o => { if (/victory-capsule-v226|achievement-audio-director-v227/.test(new Error().stack)) window.__calls++; return v(o); }; window.damNoise = o => { if (/victory-capsule-v226|achievement-audio-director-v227/.test(new Error().stack)) window.__calls++; return n(o); }; });
   await complete(p2, { level:2, rescue:false });
   await p2.evaluate(() => { window.__calls = 0; });
   await p2.click("#lcBtn"); await sleep(1200);

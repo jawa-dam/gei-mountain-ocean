@@ -84,7 +84,7 @@
     "STEM: Machines use that energy to do work."
   ];
 
-  var S = { card:null, inner:null, btn:null, shown:false, flowing:false, flowDone:false, passing:false, timers:[], open:false, mounted:false, stemI:0, m:null, lastSeg:null };
+  var S = { card:null, inner:null, btn:null, shown:false, flowing:false, flowDone:false, passing:false, timers:[], open:false, mounted:false, stemI:0, m:null, lastSeg:null, charId:"" };
 
   function $(id){ return document.getElementById(id); }
   function q(sel, ctx){ return (ctx || document).querySelector(sel); }
@@ -96,9 +96,14 @@
   function muted(){ try{ return !!(window.GEI_AUDIO && window.GEI_AUDIO.muted); }catch(e){ return false; } }
   function fmtN(n){ try{ return typeof fmt === "function" ? fmt(n) : String(n); }catch(e){ return String(n); } }
 
-  /* ---------- audio: two tiny cues, the game's own synth voices ---------- */
+  /* ---------- audio: the capsule only announces what is on screen; achievement-audio-director-v227.js decides what to hear.
+     Without the director the original two tiny synth cues remain. ---------- */
+  function emit(type, detail){
+    if(window.__GEI_ACHIEVEMENT_DIRECTOR__){ try{ var d = { type:type }; if(detail) for(var k in detail) d[k] = detail[k]; window.dispatchEvent(new CustomEvent("gei:achievement", { detail:d })); }catch(e){} return; }
+    sound(type === "continue" ? "flow" : type === "arrive" ? "next" : type === "xp" || type === "release" ? "reward" : "", !!(detail && detail.gesture));
+  }
   function sound(kind, gesture){
-    if(muted()) return;
+    if(muted() || !kind) return;
     var V = window.damVoice, N = window.damNoise, g = !!gesture;
     try{
       if(kind === "reward" && typeof V === "function"){ V({ freq:1318, time:.09, gain:.008, gesture:g, priority:0 }); V({ freq:1760, time:.12, gain:.006, delay:.07, gesture:g, priority:0 }); }
@@ -285,6 +290,8 @@
       "@keyframes hvcFade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}",
       "@keyframes hvcHero{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}",
       "@keyframes hvcSpin{from{opacity:0;transform:rotate(-200deg) scale(.2)}to{opacity:1;transform:none}}",
+      C+".hvcWow #levelInner{animation:hvcWowGlow 1.6s ease-out .2s 1}",
+      "@keyframes hvcWowGlow{0%,100%{filter:none}35%{filter:brightness(1.18) saturate(1.3) drop-shadow(0 0 18px "+mix("var(--gold)",80)+")}}",
       "@keyframes hvcWave{to{transform:translateX(14px)}}",
       "@keyframes hvcBub{0%{transform:translateY(45%);opacity:0}25%{opacity:1}100%{transform:translateY(-70%);opacity:0}}",
       "@keyframes hvcDripIcon{0%,78%,100%{transform:translateY(0) scale(1);opacity:1}86%{transform:translateY(5px) scale(.85);opacity:.55}93%{transform:translateY(-2px) scale(1.12);opacity:1}}",
@@ -326,7 +333,7 @@
       /* ===== reduced motion: static, a glowing path from the finished station to the next stop ===== */
       "@media (prefers-reduced-motion:reduce){"+
         I+"::before,"+I+" .hvcHero::after,"+I+" .lcBtn{animation:none!important}"+
-        C+".hvcIn #levelInner *{animation:none!important}"+
+        C+".hvcIn #levelInner *,"+C+".hvcWow #levelInner{animation:none!important}"+
         C+".hvcDissolve #levelInner,"+C+".hvcDissolve .hvcFlood i{animation:none!important}"+
         "#geiDamMapPage.hvcMapFlow #dmwSt0{animation:none!important}"+
         I+" .hvcWater,"+I+" .hvcWater::before,"+I+" .hvcWater::after,"+I+" .hvcSeg,"+I+" .hvcDam,"+I+" .hvcDam::before,"+I+" .hvcDrop{animation:none!important;transition:none!important}"+
@@ -437,6 +444,7 @@
 
     var c = null; try{ c = typeof getActiveCharacter === "function" ? getActiveCharacter() : null; }catch(e){}
     var say = $("hvcSay"), img = q("img", say);
+    S.charId = c && c.id ? String(c.id) : "";
     if(c && c.img) img.src = c.img; else img.removeAttribute("src");
     say.lastChild.textContent = pick(GUIDE_SAY[remKey(S.m)], S.m, "say");
 
@@ -445,9 +453,10 @@
 
   /* ---------- the miniature dam: state is derived from the level; the newest tank fills AFTER the completion state shows ---------- */
   function segs(){ return Array.prototype.slice.call(S.inner.querySelectorAll(".hvcSeg")); }
-  function fillLatest(){
+  function fillLatest(quiet){
     var seg = S.lastSeg; if(!seg || seg.classList.contains("f")) return;
     seg.classList.add("f");
+    if(!quiet) emit("fill");
     if(!reduced()){ seg.classList.add("lock"); later(function(){ seg.classList.remove("lock"); }, 850); }
   }
   function composeMilestone(level){
@@ -481,11 +490,11 @@
   function unlockMoment(){
     var bar = $("hvcBar"), goal = $("hvcNextNode"), card = S.card;
     bar.classList.add("hvcCharged");
-    if(reduced()){ bar.classList.add("hvcDone"); goal.textContent = "🔓"; goal.classList.add("lit"); return; }
-    later(function(){ bar.classList.add("hvcRise"); sound("reward"); }, 300);
+    if(reduced()){ bar.classList.add("hvcDone"); goal.textContent = "🔓"; goal.classList.add("lit"); later(function(){ emit("rise"); }, 300); later(function(){ emit("release"); }, 750); return; }
+    later(function(){ bar.classList.add("hvcRise"); emit("rise"); }, 300);
     later(function(){
       bar.classList.add("hvcRelease", "hvcDone"); goal.textContent = "🔓"; goal.classList.add("lit");
-      spawnBurst(); sound("next");
+      spawnBurst(); emit("release");
       var msg = $("hvcMsg"); msg.style.animation = "hvcMsPulse .6s ease-out"; later(function(){ msg.style.animation = ""; }, 700);
     }, 750);
   }
@@ -528,14 +537,23 @@
     var nn = $("hvcNextNode"); if(nn) nn.classList.remove("lit");
     S.btn.removeAttribute("aria-busy");
     compose();
+    /* audio timeline, locked to the visual one (CSS delays: medal .35 s, FL OZ .5 s, message .8 s); every cue is optional and never gates CONTINUE */
+    var D = window.__GEI_ACHIEVEMENT_DIRECTOR__, plan = null;
+    if(D){ try{ plan = D.begin({ level:S.m.level, milestone:S.m, characterId:S.charId }); }catch(e){} }
+    S.card.classList.toggle("hvcWow", !!(plan && plan.rare));
+    if(plan) S.card.setAttribute("data-hvc-audio-tier", plan.tier); else S.card.removeAttribute("data-hvc-audio-tier");
     void S.card.offsetWidth;
     if(!reduced()) S.card.classList.add("hvcIn");
-    if(reduced()){ fillLatest(); if(S.m.complete) unlockMoment(); }
+    if(reduced()){ fillLatest(true); later(function(){ emit("fill"); }, 750); if(S.m.complete) later(unlockMoment, 1250); }   // visuals are instant, the audio timeline is unchanged
     else{ later(function(){ fillLatest(); }, 750); if(S.m.complete) later(unlockMoment, 1250); }
+    later(function(){ emit("show"); }, 200);
+    later(function(){ emit("badge"); }, 350);
+    later(function(){ emit("xp"); }, 500);
+    later(function(){ emit("message"); }, 800);
     var say = $("hvcSay");
     later(function(){ say.classList.add("on"); }, 650);
     later(function(){ say.classList.remove("on"); }, 2700);
-    later(function(){ sound("reward"); }, 520);     // plays only if audio is already unlocked (no gesture)
+
   }
   function onHide(){
     clearTimers();
@@ -545,6 +563,7 @@
     S.card.classList.remove("hvcDissolve", "hvcIn"); S.inner.classList.remove("hvcFlowing", "hvcPath");
     var say = $("hvcSay"); if(say) say.classList.remove("on");
     unmarkMap();
+    emit("hide");
   }
 
   /* ---------- FLOW FORWARD ---------- */
@@ -578,16 +597,17 @@
     S.btn.setAttribute("aria-busy", "true");
     closePanel();
     var nn = $("hvcNextNode"), done = S.m && S.m.complete;
-    fillLatest();                                       // a tap never leaves the dam showing a stale count
+    fillLatest(true);                                   // a tap never leaves the dam showing a stale count
     if(reduced()){
+      emit("continue", { gesture:true }); later(function(){ emit("arrive", { gesture:true }); }, 200);
       S.inner.classList.add("hvcPath");
       if(done && nn) nn.classList.add("lit");
       later(release, FLOW_MS_REDUCED);
       return;
     }
     S.inner.classList.add("hvcFlowing");
-    sound("flow", true);
-    later(function(){ if(done && nn) nn.classList.add("lit"); sound("next", true); }, 250);
+    emit("continue", { gesture:true });
+    later(function(){ if(done && nn) nn.classList.add("lit"); emit("arrive", { gesture:true }); }, 250);
     later(function(){ S.card.classList.add("hvcDissolve"); }, 260);
     later(release, FLOW_MS);
   }
