@@ -125,6 +125,7 @@
   function blocked(ctx, t){
     var fs = FM.state();
     if(fs.cinematic || fs.levelComplete || fs.cardShown || fs.transition) return "cinematic";
+    if(wowNear()) return "wow";                                                                  // a RARE WOW is the higher-value personality moment: it owns the stage
     var st = gameState(); if(config.requirePlaying && st.phase && st.phase !== "playing" && !ctx.afterDay) return "phase";
     if(!ctx.afterDay){ if(fs.flowLevel >= 4) return "final-push"; if(ctx.remMs != null && ctx.remMs < config.minRemMs) return "clock"; if(fs.pressure && fs.pressure.on && fs.pressure.stage >= 2) return "pressure"; }
     return "";
@@ -139,7 +140,9 @@
     if(S.kinds.length >= 3 && S.kinds.slice(-3).every(function(k){ return k === kind; })) return "repeat-kind";
     return "";
   }
-  function voiceFree(){ return !FM.voiceBusy() && !FM.fx.othersSpeaking(); }
+  function voiceFree(){ return !FM.voiceBusy() && !FM.fx.othersSpeaking() && FM.fx.sinceVoice() >= 900; }
+  function wowNear(){ try{ var w = window.RareWowMomentEngine; return !!(w && (w.active() || w.recent(5000))); }catch(e){ return false; } }
+  function stemClaims(){ try{ var s = window.StemIntelligenceEngine; return !!(s && s.claimed && s.claimed()); }catch(e){ return false; } }   // STEM teaches the recovery / retry itself ("Test it. Learn it. Improve it.")
 
   /* ================================================================== SHOW + SPEAK */
   var css = [
@@ -244,7 +247,7 @@
     var done = d.required != null && d.remaining != null ? d.required - d.remaining : 0, ctx = { ts: d.ts, remMs: d.remMs, index: d.index };
     var c = [], recent3 = S.ivs.slice(-3), r3 = mean(recent3), streak = d.streak | 0;
     if(longPause) c.push(["idle", .7]);
-    if(done === 1 && (S.recover || d.index === 0)) c.push([S.recover ? "return" : "start", .8]);        // a new run, or coming back after a failure
+    if(done === 1 && (S.recover || d.index === 0) && !(S.recover && stemClaims())) c.push([S.recover ? "return" : "start", .8]);        // a new run, or coming back after a failure
     if(S.run >= 4 && recent3.length === 3 && r3 < tc.burstIv && S.base > tc.burstBaseMin && r3 < S.base * tc.burstRatio) c.push(["burst", 1]);
     if(streak >= 10) c.push(["combo", .9]); else if(streak >= 7) c.push(["combo", .7]);
     if(S.run >= 8 && cv(S.ivs.slice(-7)) < tc.steadyCv) c.push(["flow", .65]);
@@ -264,7 +267,7 @@
     if(near || d.closeCall && left < 1500) tries.push(["surprise", 1, { special: true }]);                   // unexpected success / recovery from near-failure
     else if(left >= bud * .86) tries.push(["surprise", .6, { special: true }]);                              // so fast it is funny
     if(d.streak >= 24 || (S.cleanDays >= 5 && (d.maxStreak | 0) >= 16)) tries.push(["epic", .95, { special: true }]);   // long streak → THE WATER KNOWS YOUR NAME
-    if(S.recover){ tries.push(["recover", .8, {}]); }
+    if(S.recover && !stemClaims()){ tries.push(["recover", .8, {}]); }
     if(S.cleanDays >= 3) tries.push(["streak", S.cleanDays >= 5 ? .85 : .65, {}]);
     if(d.index >= 3) tries.push(["power", .8, {}]);
     if(steady && fast) tries.push(["clean", .85, {}]);

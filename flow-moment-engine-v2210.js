@@ -40,7 +40,7 @@
     again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3"
   };
   /* spoken-voice priority (smaller number wins): failure cinematic · level complete · ONE MORE · timer warnings · milestone progress · achievement / combo · character reaction (music = ducked, not a voice) */
-  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, nextChallenge:4.5, achievement:5, personality:6, reaction:7 };
+  var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, nextChallenge:4.5, stem:4.8, achievement:5, wow:5.5, personality:6, reaction:7 };
 
   var config = {
     comedyChance: .15,                 // WHO TURNED THAT WATER ON?! — 10–20 % of failures
@@ -376,7 +376,8 @@
   function lerp(a, b, t){ return a + (b - a) * t; }
 
   /* ------------------------------------------------------------------ voice lane (ONE spoken clip at a time, priority aware) */
-  var lane = { el: null, cur: null, primed: false, warmEls: [], duckT: 0, ducked: false, lastAt: 0, log: [] };
+  var lane = { el: null, cur: null, primed: false, warmEls: [], duckT: 0, ducked: false, lastAt: 0, endAt: -1e9, log: [] };
+  var brokenClips = {};                                             // url → true once it failed to load (reported once, never silent)
   var SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
   function GA(){ return window.GEI_AUDIO || null; }
   function audioMuted(){ try{ var a = GA(); return !!(a && a.muted); }catch(e){ return false; } }
@@ -416,7 +417,7 @@
   }
   function settle(item, played){
     if(!item || item.done) return; item.done = true; clearTimeout(item.t);
-    if(lane.cur === item){ lane.cur = null; try{ item.el.onended = item.el.onerror = null; item.el.pause(); }catch(e){} duckOff(); }
+    if(lane.cur === item){ lane.cur = null; lane.endAt = now(); try{ item.el.onended = item.el.onerror = null; item.el.pause(); }catch(e){} duckOff(); }
     try{ item.res(played); }catch(e){}
   }
   /* say(id, {pri, maxMs}) → Promise<boolean>. Resolves when the clip ENDS (or is skipped / interrupted / blocked), never rejects. */
@@ -432,12 +433,23 @@
         var el = laneEl(), item = { id: o.label || id, pri: pri, res: res, el: el, done: false, t: 0 };
         lane.cur = item; lane.lastAt = now(); lane.log.push(o.label || id); if(lane.log.length > 24) lane.log.shift();
         duckOn();
+        /* candidate URLs: the supplied one first, then explicit fallbacks, then an automatic ".mp3t" → ".mp3" repair; a URL that cannot load is reported (once) and the next one is tried */
+        var urls = [url]; (o.fallbacks || []).forEach(function(u){ if(urls.indexOf(u) < 0) urls.push(u); }); var fixed = url.replace(/\.mp3t$/i, ".mp3"); if(urls.indexOf(fixed) < 0) urls.push(fixed);
+        urls = urls.filter(function(u, i){ return !(brokenClips[u] && i < urls.length - 1); });
+        var ui = 0, att = 0;
+        var startUrl = function(){
+          var my = ++att;
+          el.muted = false; el.src = urls[ui]; el.volume = clamp(config.voiceGain * masterVol(), 0, 1);
+          var pr = el.play(); if(pr && pr.catch) pr.catch(function(err){ if(err && err.name === "NotAllowedError") return settle(item, false); failUrl(my); });
+        };
+        var failUrl = function(my){
+          if(item.done || (my && my !== att)) return; var bad = urls[ui]; if(!brokenClips[bad]){ brokenClips[bad] = true; warn("audio failed to load: " + bad); try{ window.dispatchEvent(new CustomEvent("gei:audio-broken", { detail: { url: bad } })); }catch(e){} }
+          if(ui + 1 < urls.length){ ui++; startUrl(); } else settle(item, false);
+        };
         el.onended = function(){ settle(item, true); };
-        el.onerror = function(){ settle(item, false); };
-        el.muted = false; el.src = url; el.volume = clamp(config.voiceGain * masterVol(), 0, 1);
+        el.onerror = function(){ failUrl(att); };
         item.t = setTimeout(function(){ settle(item, false); }, o.maxMs || config.maxVoiceMs);
-        var p = el.play();
-        if(p && p.catch) p.catch(function(){ settle(item, false); });
+        startUrl();
       }catch(e){ warn(e); res(false); }
     });
   }
@@ -957,7 +969,8 @@
   }
   var fx = { burst: function(x, y, n, o){ if(ensure()) burst(x, y, n, o); }, ring: function(x, y){ if(ensure()) ring(x, y); }, box: function(){ return ensure() ? box() : { w: 360, h: 560, l: 0, t: 0 }; },
     damPoint: function(){ return ensure() ? damPoint() : { x: 180, y: 140, s: 100 }; }, slow: slow, unslow: unslow, shake: function(a, ms){ shake(a, ms); },
-    top: function(){ ensure(); placeTop(); return topEl; }, charImage: charImage, quality: quality, reduced: reduced, othersSpeaking: othersSpeaking };
+    probe: function(url){ return new Promise(function(res){ var a = new Audio(), done = false, t; function fin(ok, why){ if(done) return; done = true; clearTimeout(t); try{ a.onloadedmetadata = a.onerror = null; a.removeAttribute("src"); a.load(); }catch(e){} res({ ok: ok, why: why || "" }); } t = setTimeout(function(){ fin(false, "timeout"); }, 7000); a.preload = "metadata"; a.onloadedmetadata = function(){ fin(true); }; a.onerror = function(){ fin(false, "error"); }; try{ a.src = url; }catch(e){ fin(false, "exception"); } }); },
+    top: function(){ ensure(); placeTop(); return topEl; }, charImage: charImage, quality: quality, reduced: reduced, othersSpeaking: othersSpeaking, sinceVoice: function(){ return lane.cur ? 0 : now() - lane.endAt; }, broken: function(){ return Object.keys(brokenClips); } };
 
   /* ------------------------------------------------------------------ MILESTONE FLOW LEVEL (5 MORE … ONE MORE): the environment builds toward the finish */
   function lvSync(){
@@ -1057,7 +1070,7 @@
   function selfTest(){
     var r = []; function t(n, f){ var ok = false; try{ ok = !!f(); }catch(e){} r.push({ name: n, ok: ok }); }
     t("dom mounts inside the world", function(){ return ensure() && root.parentNode === world; });
-    t("one voice lane / priorities ordered", function(){ return PRI.milestone < PRI.nextChallenge && PRI.nextChallenge < PRI.achievement && PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
+    t("one voice lane / priorities ordered", function(){ return PRI.milestone < PRI.nextChallenge && PRI.nextChallenge < PRI.stem && PRI.stem < PRI.achievement && PRI.achievement < PRI.wow && PRI.wow < PRI.personality && PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
     t("all twelve clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 12 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
     t("too-much-flow uses the corrected URL", function(){ return urlOf("toomuch") === "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/too-much-flow-8Yz9tQO0XI2GCwby.mp3"; });
     t("combo ladder", function(){ return COMBO[2].text === "FLOW COMBO" && COMBO[3].text === "HYDRAULIC SURGE" && COMBO[5].text === "MAXIMUM FLOW" && COMBO[7].text === "PRESSURE BOOST" && COMBO[10].text === "DAM-ITE OVERDRIVE"; });
