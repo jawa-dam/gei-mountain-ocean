@@ -39,7 +39,7 @@ FlowMomentEngine.say("someClipUrlOrId", { pri: FlowMomentEngine.priorities.achie
 
 ## Voice lane
 
-Priority 1 cinematic · 2 critical warning · 3 achievement · 4 character reaction (5 = music, ducked through `GEI_AUDIO.voiceBegin/End`).
+Priority (smaller wins): 1 failure cinematic · 2 level complete · 3 ONE MORE · 3.5 timer warnings · 4 milestone progress · 5 achievement / combo · 6 character reaction (music is ducked through `GEI_AUDIO.voiceBegin/End`, never a voice).
 A higher priority interrupts a lower one; a lower one is dropped while a higher one speaks. While a Flow Moment voice speaks, the female narrator
 (`GEI_AUDIO.addFemaleGate`) and the achievement director (`voiceBusy()`) are held back; starting a voice silences the narrator / WOW / Beaver / achievement lines.
 One shared `<audio>` element is unlocked on the first gesture, so later clips are not blocked by autoplay rules. Mute, hidden tab and the Dam Map zone are respected.

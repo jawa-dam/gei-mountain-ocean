@@ -250,6 +250,8 @@ async function desktopSuite(browser, base){
     if ((st.phase === "playing" || st.phase === "ready") && !st.busy) await g.tapAt(p.x, p.y);
     await sleep(110);
   }
+  /* V2.2.11: the card now follows a ~3 s victory sequence (stabilise → release → voice → LEVEL COMPLETE!) */
+  try { await page.waitForFunction(() => document.getElementById("levelCard").classList.contains("show"), null, { timeout:15000 }); } catch {}
   await sleep(2500);
   const lv = await page.evaluate(SAMPLE_READ);
   check("3b. a full level completes and shows the level card", phase === "levelComplete" && lv.levelSamples > 5, { phase, levelSamples:lv.levelSamples });

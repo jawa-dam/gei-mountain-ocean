@@ -5784,6 +5784,7 @@ world.addEventListener("click", (e)=>{
   finally{ GEI_TAP_PERFORMANCE.exitLane(tapLane); }
   const requiredTaps = getRequiredTaps(state.level);
   const tapRatio = state.tapCount / requiredTaps;
+  try{ if(window.MilestoneProgressEngine) window.MilestoneProgressEngine.onProgress({ remaining: requiredTaps - state.tapCount, required: requiredTaps, key: state.level + ":" + index, remMs: currentRemainingMs() }); }catch(err){}   // V2.2.11: "5 MORE … ONE MORE!" voice + word
 
   if(state.tapCount === 1){
     g.classList.add("highlight");
@@ -6099,13 +6100,18 @@ function reachOcean(){
   triggerDamIteHydraulicReaction("ocean",{index:MILL_INDEX,power:3,source:"level"});
   showDamIteComboFlash("DAM-ITE FLOW MASTERED",true);
   resetDamIteCombo("level-complete");
-  try{ if(window.FlowMomentEngine) window.FlowMomentEngine.success(); }catch(err){}   // V2.2.10: YOU CONTROLLED THE FLOW!
   triggerDamItePersonality("level",{level:state.level});
   oceanGroup.classList.add("reached");
   playOceanSound();
   world.classList.add("flash");
   setTimeout(()=>world.classList.remove("flash"), 400);
-  setTimeout(()=> showLevelComplete(), 900);
+  /* V2.2.11 — a short victory sequence (stabilise → controlled release → wheel reacts → ONE victory voice → LEVEL COMPLETE!) before the card.
+     No engine / any problem → the original 900 ms hand-off. */
+  let lcShown = false;
+  const goLevelCard = () => { if(lcShown) return; lcShown = true; showLevelComplete(); };
+  let seq = false;
+  try{ seq = !!(window.FlowMomentEngine && window.FlowMomentEngine.levelComplete({ onCard: goLevelCard })); }catch(err){ safeWarn("Victory sequence skipped: " + err); }
+  if(!seq) setTimeout(goLevelCard, 900);
 }
 
 /* =========================================================
@@ -12698,6 +12704,7 @@ function restoreVisualProgress(){
   <script src="/victory-capsule-v226.js" defer></script>
   <script src="/achievement-audio-director-v227.js" defer></script>
   <script src="/flow-moment-engine-v2210.js" defer></script>
+  <script src="/flow-moment-voices-v2211.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
