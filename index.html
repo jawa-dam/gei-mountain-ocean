@@ -5276,6 +5276,20 @@ function safeAddFlOz(amount){
   return true;
 }
 
+/* V2.2.16 — XP REWARD ENGINE hook. PRESENTATION ONLY: called strictly AFTER an award was committed by the economy above; it broadcasts a read-only
+   snapshot (the amount that was actually added + the resulting balances). The engine listening to it can show and say, never award, change or verify anything. */
+const XP_SOURCE_BY_STEP = { mountain:"MISSION", dam:"MISSION", millpond:"PRESSURE_CONTROL", sluice:"GATE_CONTROL", wheel:"WATERWHEEL", mill:"LEVEL_COMPLETION" };
+function announceXP(detail){
+  try{ window.dispatchEvent(new CustomEvent("gei:xp-event", { detail: Object.assign({ total: state.totalFlOz, levelTotal: state.levelFlOz, levelMax: LEVEL_REWARD_FL_OZ, unlockCost: UNLOCK_COST_FL_OZ }, detail) })); }catch(err){}
+}
+function announceRewardResult(res, source){        // wheel / DAM machine results, announced at the REVEAL (never at the commit, so a spin is not spoiled)
+  try{
+    if(!res || res.kind === "freeSpin") return;
+    if(res.amount > 0) announceXP({ kind:"flowpoints", amount:res.amount, source, jackpot:!!(res.jackpot || (res.prize && res.prize.jackpot)) });
+    if(res.unlockedId) announceXP({ kind:"reward", amount:0, source:"UNLOCK", label: res.kind === "song" ? "NEW SONG" : res.kind === "character" ? "NEW CHARACTER" : "NEW REWARD" });
+  }catch(err){}
+}
+
 function saveGame(){
   normalizeEconomyNumbers();
   normalizeEconomyCollections();
@@ -5881,6 +5895,7 @@ function awardDay(index){
   renderHud();
   showDayReward(index);
   setTimeout(playDayRewardSound, 220);
+  announceXP({ kind:"xp", amount:DAY_REWARD_FL_OZ, source:XP_SOURCE_BY_STEP[DAM_DAYS[index].stepId] || "MISSION", index, final:index === DAYS_PER_LEVEL - 1, counts:"level" });   // V2.2.16
   return true;
 }
 
@@ -6427,6 +6442,7 @@ function revealBonusResult(result){
     else if(result.amount >= LEVEL_REWARD_FL_OZ || result.unlockedId) { spawnBonusBurst(18, false); playSongUnlockSound(); }
     else { spawnBonusBurst(12, false); playDayRewardSound(); }
   }
+  announceRewardResult(result, "BONUS");     // V2.2.16: presentation only — the prize was committed before the spin
   $("bwStatus").textContent = `Bonus prize: ${result.title}${result.detail ? " — " + result.detail : ""}`;
   setTimeout(()=>{ btn.disabled = false; try{ btn.focus({ preventScroll:true }); }catch(e){} }, 450);   // blocks accidental double-taps
 }
@@ -6932,6 +6948,7 @@ function revealDamResult(token, ids){
   dmCard().classList.toggle("jackpotWin", !!(res && res.jackpot));
   livingMachineHook("onReveal", res, ids);              // V2.1.12: win glow / surge AFTER the single commit above
   if(res) presentDamMachineWin(res);                    // v2.6.3: presentation only — reward already committed above
+  if(res) announceRewardResult(res, "BONUS");           // V2.2.16: XP Reward Engine (presentation only)
   if(res) triggerDamItePersonality("machine",{result:res});
   else presentDamMachineNoFlow();
 }
@@ -12717,6 +12734,7 @@ function restoreVisualProgress(){
   <script src="/next-challenge-engine-v2213.js" defer></script>
   <script src="/stem-intelligence-engine-v2214.js" defer></script>
 <script src="/rare-wow-moment-engine-v2215.js" defer></script>
+  <script src="/xp-reward-engine-v2216.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
