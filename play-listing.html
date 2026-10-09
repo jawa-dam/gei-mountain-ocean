@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#ffffff">
 <meta property="og:title" content="TapLites: GEI Mountain Ocean">
 <meta property="og:description" content="TAP WATER. MAKE WAVES. SAVE THE -ITES. A six-part hydraulic STEM adventure from mountain to ocean.">
-<meta property="og:image" content="listing/screens/01-splash-mountain-to-ocean.webp">
+<meta property="og:image" content="https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/taplites-logo-JpNImKbfJzanxuaj.png">
 <!--
   TAPLITES — GOOGLE PLAY–STYLE LISTING CARD (promotional mockup)
   Self-contained: no external scripts, fonts or stylesheets (fits the repo's vercel.json CSP).
@@ -21,6 +21,7 @@
 -->
 <style>
 :root{
+  --shot-h:clamp(300px,82vw,400px);
   /* Store chrome (Play-like) */
   --bg:#ffffff; --surface:#ffffff; --surface-2:#f1f3f4; --line:#e3e6ea;
   --text:#1f1f1f; --text-2:#444746; --text-3:#5f6368;
@@ -90,14 +91,14 @@ a{color:var(--link)}
 .gallery-wrap{position:relative;margin:22px calc(var(--gutter) * -1) 6px}
 .gallery{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding:0 var(--gutter);padding:2px var(--gutter) 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .gallery::-webkit-scrollbar{display:none}
-.shot{flex:none;scroll-snap-align:start;margin:0;width:clamp(142px,40vw,200px);aspect-ratio:1/2;border:0;padding:0;border-radius:var(--radius-shot);overflow:hidden;background:var(--ink);cursor:zoom-in;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.shot{flex:none;scroll-snap-align:start;margin:0;height:var(--shot-h);width:auto;aspect-ratio:var(--ar,9/19.5);border:0;padding:0;border-radius:var(--radius-shot);overflow:hidden;background:var(--ink);cursor:zoom-in;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .shot img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
 .shot:hover img{transform:scale(1.02)}
 .shot:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .shot .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 7px;color:#fff;font:600 10.5px/1.2 var(--font);letter-spacing:.4px;text-transform:uppercase;text-align:left;background:linear-gradient(to top,rgba(6,7,13,.88),rgba(6,7,13,0));pointer-events:none}
 .shot .cap i{display:block;width:22px;height:3px;border-radius:2px;margin-bottom:5px;background:var(--brand-grad)}
 /* promo hero tile (first card): uses brand art direction around a real screenshot */
-.shot.promo{width:clamp(250px,74vw,400px);aspect-ratio:auto;height:calc(clamp(142px,40vw,200px) * 2);background:var(--ink);display:grid;grid-template-columns:1fr auto;cursor:zoom-in}
+.shot.promo{width:auto;aspect-ratio:auto;height:var(--shot-h);background:var(--ink);display:grid;grid-template-columns:1fr auto;cursor:zoom-in}
 .promo-copy{position:relative;z-index:1;padding:18px 0 18px 18px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;color:#fff}
 .promo-copy .eyebrow{font:700 10px/1 var(--font);letter-spacing:1.6px;color:var(--cyan);text-transform:uppercase}
 .promo-copy .big{margin-top:8px;font:900 clamp(18px,5.4vw,26px)/1.02 var(--font);letter-spacing:-.2px}
@@ -105,7 +106,8 @@ a{color:var(--link)}
 .promo-copy .big .m{color:var(--pink)}
 .promo-copy .big .c{background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
 .promo-copy .tag{margin-top:10px;font-size:11px;color:#c9cbe6;line-height:1.35}
-.promo-phone{align-self:center;margin:14px 14px 14px 10px;height:calc(100% - 28px);aspect-ratio:1/2;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(243,16,186,.28),0 0 0 6px rgba(47,210,255,.08)}
+.promo-copy{width:clamp(150px,40vw,210px)}
+.promo-phone{align-self:center;margin:14px 14px 14px 10px;height:calc(100% - 28px);aspect-ratio:var(--ar,9/19.5);border-radius:16px;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.14),0 10px 30px rgba(243,16,186,.28),0 0 0 6px rgba(47,210,255,.08)}
 .promo-phone img{width:100%;height:100%;object-fit:cover}
 .shot.promo::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 0% 100%,rgba(61,61,234,.55),transparent 60%),radial-gradient(90% 70% at 100% 0%,rgba(243,16,186,.35),transparent 60%),radial-gradient(70% 60% at 40% 30%,rgba(47,210,255,.18),transparent 70%)}
 .shot.promo:hover img{transform:none}
@@ -164,7 +166,7 @@ a{color:var(--link)}
 .lb{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(10,10,14,.92);padding:56px 12px 24px}
 .lb.open{display:flex}
 .lb figure{margin:0;height:100%;max-height:900px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.lb img{height:calc(100% - 30px);width:auto;max-width:92vw;aspect-ratio:1/2;object-fit:contain;border-radius:14px;background:var(--ink)}
+.lb img{height:calc(100% - 30px);width:auto;max-width:92vw;object-fit:contain;border-radius:14px;background:var(--ink)}
 .lb figcaption{color:#e8eaed;font-size:13px;text-align:center}
 .lb button{position:absolute;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer}
 .lb button:hover{background:rgba(255,255,255,.22)}
@@ -194,8 +196,7 @@ a{color:var(--link)}
   .gallery-wrap{margin-left:0;margin-right:0}
   .gallery{padding-left:0;padding-right:0;scroll-padding:0}
   .nav-btn{display:flex}
-  .shot{width:180px}
-  .shot.promo{width:380px;height:360px}
+  :root{--shot-h:380px}
   .side{display:block;grid-column:2;grid-row:1/span 6;padding-top:8px}
   .side h3{margin:0 0 10px;font-size:16px;font-weight:500}
   .main{grid-column:1}
@@ -327,7 +328,7 @@ a{color:var(--link)}
     </section>
 
     <footer class="foot">
-      <p>Promotional mockup of a store listing. Screenshots are captured from the current build of TapLites: GEI Mountain Ocean. No ratings, reviews, download counts or age ratings are shown because none exist yet.</p>
+      <p>Promotional mockup of a store listing. Screenshots are from TapLites: GEI Mountain Ocean as played on an Android phone. No ratings, reviews, download counts or age ratings are shown because none exist yet.</p>
       <p>Google Play is a trademark of Google LLC. This page is not affiliated with or endorsed by Google.</p>
     </footer>
   </div>
@@ -356,11 +357,8 @@ var LISTING_CONFIG = {
   googlePlayUrl: "",
   /* Live web edition (current production deployment of the game). */
   liveGameUrl: "https://gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app/",
-  /* Real TapLites logo (same asset the game's showcase uses). */
-  iconUrl: "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
-  /* Base path for screenshots. "" = relative to this page. Use an absolute URL
-     (e.g. "https://<your-domain>/") if this card is embedded on another site. */
-  assetBase: "",
+  /* Square TapLites store icon. */
+  iconUrl: "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/taplites-logo-JpNImKbfJzanxuaj.png",
   developerUrl: "https://www.yalltoo.com/",
   supportEmail: "contact@yalltoo.com",
   release: {
@@ -369,13 +367,16 @@ var LISTING_CONFIG = {
   }
 };
 
+/* Screenshots, in gallery order. The first sits inside the branded promo tile.
+   Add a short `cap` (e.g. "Interactive DAM MAP") to show a caption on a tile,
+   and describe the scene in `alt` for screen readers. */
 var SCREENS = [
-  { src:"listing/screens/01-splash-mountain-to-ocean.webp", cap:"Mountain to Ocean", alt:"Cinematic splash: water pours from a mountain dam into a glowing bottle", promo:true },
-  { src:"listing/screens/02-dam-map.webp",            cap:"Interactive DAM MAP",     alt:"DAM MAP screen showing the mountain path, factories online and next factory unlock" },
-  { src:"listing/screens/03-six-days-stem.webp",     cap:"Six Days of STEM",        alt:"Gameplay showing the six-day station rail from Day 1 Tributaries to Day 6 Factory" },
-  { src:"listing/screens/04-level-complete.webp",    cap:"Level complete rewards",  alt:"Level 6 complete card with 666 FL OZ earned and milestone progress" },
-  { src:"listing/screens/05-bonus-flow-waterwheel.webp", cap:"BONUS FLOW Waterwheel", alt:"Bonus Flow waterwheel prize wheel with FL OZ, song and crew prizes" },
-  { src:"listing/screens/06-dam-machine.webp",       cap:"DAM MACHINE bonus game",  alt:"DAM MACHINE free hydraulic arcade with three reels" }
+  { src:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/screenshot_20261009-080158-BVzZ9nAKZl4DrX5q.png", cap:"", alt:"TapLites gameplay screenshot 1", promo:true },
+  { src:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/screenshot_20261009-080146-f2P63OvCoEGjTRVt.png", cap:"", alt:"TapLites gameplay screenshot 2" },
+  { src:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/screenshot_20261009-080122-HGyC70o3TQR1KCfc.png", cap:"", alt:"TapLites gameplay screenshot 3" },
+  { src:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/screenshot_20261009-080025-Nmb5l0Fb3lz0TUfo.png", cap:"", alt:"TapLites gameplay screenshot 4" },
+  { src:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/screenshot_20261009-075940-OaSsEfUFs67maGfE.png", cap:"", alt:"TapLites gameplay screenshot 5" },
+  { src:"https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/screenshot_20261009-075848-Akr5qGfs0hIK8Xa5.png", cap:"", alt:"TapLites gameplay screenshot 6" }
 ];
 
 (function(){
@@ -387,7 +388,7 @@ var SCREENS = [
     try{ var x = new URL(u.trim(), location.href); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; }
     catch(e){ return ""; }
   }
-  function asset(p){ return (C.assetBase || "") + p; }
+  function asset(p){ return safeUrl(p); }
 
   /* ---------- Install destination ---------- */
   var play = safeUrl(C.googlePlayUrl), live = safeUrl(C.liveGameUrl);
@@ -424,16 +425,20 @@ var SCREENS = [
     var b = document.createElement("button");
     b.type = "button";
     b.className = "shot" + (s.promo ? " promo" : "");
-    b.setAttribute("aria-label", "Screenshot " + (i+1) + " of " + SCREENS.length + ": " + s.cap + ". Open larger view");
-    var img = '<img src="' + asset(s.src) + '" alt="' + s.alt + '" width="540" height="1080" ' + (i < 3 ? 'loading="eager" fetchpriority="' + (i===0?"high":"auto") + '"' : 'loading="lazy"') + ' decoding="async" draggable="false">';
+    b.setAttribute("aria-label", "Screenshot " + (i+1) + " of " + SCREENS.length + (s.cap ? ": " + s.cap : "") + ". Open larger view");
+    var img = '<img src="' + asset(s.src) + '" alt="' + s.alt + '" ' + (i < 3 ? 'loading="eager" fetchpriority="' + (i===0?"high":"auto") + '"' : 'loading="lazy"') + ' decoding="async" draggable="false">';
     if(s.promo){
       b.innerHTML = '<div class="promo-copy"><span class="eyebrow">TapLites · GEI</span>' +
-        '<span class="big"><span>TAP WATER.</span><span class="m">MAKE WAVES.</span><span class="c">SAVE&nbsp;THE&nbsp;‑ITES.</span></span>' +
+        '<span class="big"><span>TAP WATER.</span><span class="m">MAKE WAVES.</span><span class="c">SAVE&nbsp;THE<br>‑ITES.</span></span>' +
         '<span class="tag">A six-part STEM adventure from mountain to ocean.</span></div>' +
         '<div class="promo-phone">' + img + '</div>';
     }else{
-      b.innerHTML = img + '<span class="cap"><i></i>' + s.cap + '</span>';
+      b.innerHTML = img + (s.cap ? '<span class="cap"><i></i>' + s.cap + '</span>' : '');
     }
+    /* size each tile to its screenshot's real shape: no cropping, no stretching */
+    var im = b.querySelector("img");
+    function fit(){ if(im.naturalWidth && im.naturalHeight){ var ar = im.naturalWidth + "/" + im.naturalHeight; (s.promo ? b.querySelector(".promo-phone") : b).style.setProperty("--ar", ar); requestAnimationFrame(update); } }
+    if(im.complete) fit(); else im.addEventListener("load", fit, { once:true });
     b.addEventListener("click", function(){ if(!dragMoved) openLB(i); });
     gal.appendChild(b);
     dots.appendChild(document.createElement("i"));
@@ -484,7 +489,7 @@ var SCREENS = [
   function show(i){
     cur = (i + SCREENS.length) % SCREENS.length;
     lbImg.src = asset(SCREENS[cur].src); lbImg.alt = SCREENS[cur].alt;
-    lbCap.textContent = (cur+1) + " / " + SCREENS.length + " · " + SCREENS[cur].cap;
+    lbCap.textContent = (cur+1) + " / " + SCREENS.length + (SCREENS[cur].cap ? " · " + SCREENS[cur].cap : "");
   }
   var framed = window.parent !== window;
   function openLB(i){
