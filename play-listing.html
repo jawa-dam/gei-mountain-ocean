@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TapLites: GEI Mountain Ocean — Store Listing Preview</title>
+<meta name="description" content="TapLites: GEI Mountain Ocean by YallToo / Genesis Engineered Interpretations. Tap water. Make waves. Save the -ites. A six-part hydraulic STEM adventure from mountain to ocean.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="TapLites: GEI Mountain Ocean">
+<meta property="og:description" content="TAP WATER. MAKE WAVES. SAVE THE -ITES. A six-part hydraulic STEM adventure from mountain to ocean.">
+<meta property="og:image" content="listing/screens/01-splash-mountain-to-ocean.webp">
+<!--
+  TAPLITES — GOOGLE PLAY–STYLE LISTING CARD (promotional mockup)
+  Self-contained: no external scripts, fonts or stylesheets (fits the repo's vercel.json CSP).
+  Does not touch the game, its storage keys, audio, purchases or routes.
+
+  ▶ TO SWITCH TO THE OFFICIAL GOOGLE PLAY LISTING AFTER PUBLICATION:
+    set LISTING_CONFIG.googlePlayUrl below to the verified URL, e.g.
+    "https://play.google.com/store/apps/details?id=<your.package.id>"
+    and update the `release` fields. Everything else adapts automatically.
+-->
+<style>
+:root{
+  /* Store chrome (Play-like) */
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#f1f3f4; --line:#e3e6ea;
+  --text:#1f1f1f; --text-2:#444746; --text-3:#5f6368;
+  --play-blue:#0b57d0; --play-blue-hover:#0a4bb5; --play-blue-press:#083f99; --on-blue:#ffffff;
+  --link:#0b57d0; --focus:#0b57d0;
+  /* YallToo / TapLites brand accents */
+  --cyan:#2fd2ff; --indigo:#3d3dea; --magenta:#f310ba; --pink:#ff9df2; --ink:#06070d;
+  --brand-grad:linear-gradient(135deg,var(--cyan) 0%,var(--indigo) 52%,var(--magenta) 100%);
+  --radius-icon:22%; --radius-shot:14px;
+  --gutter:16px;
+  --font:Roboto,"Google Sans","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.45;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:var(--link)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---------- mockup notice ---------- */
+.notice{display:flex;gap:10px;align-items:flex-start;margin:0;padding:10px var(--gutter);background:#fff7e0;border-bottom:1px solid #f3dfa5;color:#5c4400;font-size:12.5px}
+.notice b{font-weight:600}
+.notice svg{flex:none;margin-top:1px}
+
+/* ---------- page frame ---------- */
+.listing{max-width:1040px;margin:0 auto;padding:20px var(--gutter) 40px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:0 48px}
+
+/* ---------- header ---------- */
+.head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.icon{width:72px;height:72px;border-radius:var(--radius-icon);overflow:hidden;position:relative;background:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18),0 2px 8px rgba(61,61,234,.18)}
+.icon img{width:100%;height:100%;object-fit:cover}
+.icon .fallback{position:absolute;inset:0}
+.icon.loaded .fallback{display:none}
+.title{margin:0;font-size:22px;line-height:1.2;font-weight:500;letter-spacing:0;overflow-wrap:anywhere}
+.dev{display:inline-block;margin-top:4px;color:var(--play-blue);font-weight:500;font-size:14px;text-decoration:none}
+.dev:hover{text-decoration:underline}
+.sub{margin-top:2px;color:var(--text-3);font-size:12px}
+
+/* ---------- stats row ---------- */
+.stats{display:flex;margin:20px 0 4px;padding:0;list-style:none;overflow-x:auto;scrollbar-width:none}
+.stats::-webkit-scrollbar{display:none}
+.stat{flex:1 0 auto;min-width:96px;padding:0 12px;text-align:center;position:relative}
+.stat+.stat::before{content:"";position:absolute;left:0;top:50%;height:24px;margin-top:-12px;border-left:1px solid var(--line)}
+.stat .v{font-weight:500;font-size:14px;display:flex;align-items:center;justify-content:center;gap:4px;min-height:22px;white-space:nowrap}
+.stat .k{color:var(--text-3);font-size:12px;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:500;color:var(--text-2)}
+
+/* ---------- actions ---------- */
+.actions{margin:16px 0 4px;display:grid;gap:8px}
+.install{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 24px;border-radius:999px;background:var(--play-blue);color:var(--on-blue);font-size:15px;font-weight:500;text-decoration:none;letter-spacing:.1px;transition:background-color .15s ease,box-shadow .15s ease;box-shadow:0 1px 2px rgba(11,87,208,.25)}
+.install:hover{background:var(--play-blue-hover);box-shadow:0 2px 6px rgba(11,87,208,.35)}
+.install:active{background:var(--play-blue-press)}
+.install:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:999px}
+.install-note{color:var(--text-3);font-size:12px;text-align:center}
+.sec-actions{display:flex;gap:4px;justify-content:center}
+.ghost{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:none;color:var(--play-blue);font:500 14px var(--font);cursor:pointer}
+.ghost:hover{background:#eef3fd}
+.ghost svg{flex:none}
+.labels{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--text-3);font-size:12px;margin:10px 0 0;justify-content:center}
+.labels span::before{content:"•";margin-right:6px;color:#9aa0a6}
+.labels span:first-child::before{content:none}
+
+/* ---------- gallery ---------- */
+.gallery-wrap{position:relative;margin:22px calc(var(--gutter) * -1) 6px}
+.gallery{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding:0 var(--gutter);padding:2px var(--gutter) 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.gallery::-webkit-scrollbar{display:none}
+.shot{flex:none;scroll-snap-align:start;margin:0;width:clamp(142px,40vw,200px);aspect-ratio:1/2;border:0;padding:0;border-radius:var(--radius-shot);overflow:hidden;background:var(--ink);cursor:zoom-in;position:relative;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.shot img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+.shot:hover img{transform:scale(1.02)}
+.shot:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.shot .cap{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 7px;color:#fff;font:600 10.5px/1.2 var(--font);letter-spacing:.4px;text-transform:uppercase;text-align:left;background:linear-gradient(to top,rgba(6,7,13,.88),rgba(6,7,13,0));pointer-events:none}
+.shot .cap i{display:block;width:22px;height:3px;border-radius:2px;margin-bottom:5px;background:var(--brand-grad)}
+/* promo hero tile (first card): uses brand art direction around a real screenshot */
+.shot.promo{width:clamp(250px,74vw,400px);aspect-ratio:auto;height:calc(clamp(142px,40vw,200px) * 2);background:var(--ink);display:grid;grid-template-columns:1fr auto;cursor:zoom-in}
+.promo-copy{position:relative;z-index:1;padding:18px 0 18px 18px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;color:#fff}
+.promo-copy .eyebrow{font:700 10px/1 var(--font);letter-spacing:1.6px;color:var(--cyan);text-transform:uppercase}
+.promo-copy .big{margin-top:8px;font:900 clamp(18px,5.4vw,26px)/1.02 var(--font);letter-spacing:-.2px}
+.promo-copy .big span{display:block}
+.promo-copy .big .m{color:var(--pink)}
+.promo-copy .big .c{background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.promo-copy .tag{margin-top:10px;font-size:11px;color:#c9cbe6;line-height:1.35}
+.promo-phone{align-self:center;margin:14px 14px 14px 10px;height:calc(100% - 28px);aspect-ratio:1/2;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(243,16,186,.28),0 0 0 6px rgba(47,210,255,.08)}
+.promo-phone img{width:100%;height:100%;object-fit:cover}
+.shot.promo::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 0% 100%,rgba(61,61,234,.55),transparent 60%),radial-gradient(90% 70% at 100% 0%,rgba(243,16,186,.35),transparent 60%),radial-gradient(70% 60% at 40% 30%,rgba(47,210,255,.18),transparent 70%)}
+.shot.promo:hover img{transform:none}
+.nav-btn{position:absolute;top:50%;margin-top:-22px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--text);display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:2}
+.nav-btn:hover{background:var(--surface-2)}
+.nav-btn[disabled]{opacity:0;pointer-events:none}
+.nav-prev{left:6px}.nav-next{right:6px}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:2px}
+.dots i{width:6px;height:6px;border-radius:50%;background:#c4c7c5;transition:background .2s,width .2s}
+.dots i.on{width:16px;border-radius:3px;background:var(--play-blue)}
+
+/* ---------- sections ---------- */
+.section{margin-top:26px}
+.section h2{margin:0 0 10px;font-size:18px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.headline{margin:0 0 8px;font-weight:800;font-size:15px;letter-spacing:.3px;background:var(--brand-grad);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+.about p{margin:0 0 10px;color:var(--text-2);font-size:14px}
+.about .more{display:none}
+.about.open .more{display:block}
+.toggle{margin-top:2px;padding:6px 0;border:0;background:none;color:var(--play-blue);font:500 14px var(--font);cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding:0;list-style:none}
+.chips li{padding:5px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;color:var(--text-2);background:#fff}
+.features{display:grid;gap:10px;margin:14px 0 0;padding:0;list-style:none}
+.features li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;color:var(--text-2)}
+.features b{color:var(--text);font-weight:500}
+.fi{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:15px;background:#f3f4ff}
+.days{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.days li{padding:8px 4px;border-radius:10px;text-align:center;background:#f6f7fb;border:1px solid #eceefa}
+.days .n{display:block;font:700 10px/1 var(--font);letter-spacing:.8px;color:var(--indigo)}
+.days .s{display:block;margin-top:4px;font-size:11.5px;line-height:1.2;color:var(--text);font-weight:500;overflow-wrap:anywhere}
+.days li:nth-child(1){border-top:3px solid var(--cyan)}.days li:nth-child(2){border-top:3px solid #3a8df0}
+.days li:nth-child(3){border-top:3px solid var(--indigo)}.days li:nth-child(4){border-top:3px solid #8b3bea}
+.days li:nth-child(5){border-top:3px solid var(--magenta)}.days li:nth-child(6){border-top:3px solid var(--pink)}
+
+.info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;margin:0}
+.info div{min-width:0}
+.info dt{font-size:13px;font-weight:500;color:var(--text)}
+.info dd{margin:2px 0 0;font-size:13px;color:var(--text-3);overflow-wrap:anywhere}
+.demo{display:inline-block;margin-left:4px;padding:0 5px;border-radius:4px;background:#fff1c2;color:#6b4e00;font-size:10.5px;font-weight:600;letter-spacing:.3px;vertical-align:1px}
+
+.ratings{display:flex;gap:16px;align-items:center;padding:14px;border:1px dashed #cfd3d8;border-radius:12px;color:var(--text-3)}
+.ratings .big{font-size:40px;line-height:1;color:#c4c7c5;font-weight:400}
+.ratings p{margin:0}
+
+.support{display:grid;gap:4px}
+.support a{display:flex;gap:14px;align-items:center;padding:10px 4px;border-radius:10px;text-decoration:none;color:var(--text)}
+.support a:hover{background:var(--surface-2)}
+.support .si{width:24px;color:var(--text-3);flex:none;display:grid;place-items:center}
+.support .t{display:block;font-weight:500;font-size:14px}
+.support .d{display:block;color:var(--text-3);font-size:12.5px;overflow-wrap:anywhere}
+
+.side{display:none}
+.foot{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--text-3);font-size:11.5px}
+.foot p{margin:0 0 6px}
+
+/* ---------- lightbox ---------- */
+.lb{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(10,10,14,.92);padding:56px 12px 24px}
+.lb.open{display:flex}
+.lb figure{margin:0;height:100%;max-height:900px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.lb img{height:calc(100% - 30px);width:auto;max-width:92vw;aspect-ratio:1/2;object-fit:contain;border-radius:14px;background:var(--ink)}
+.lb figcaption{color:#e8eaed;font-size:13px;text-align:center}
+.lb button{position:absolute;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer}
+.lb button:hover{background:rgba(255,255,255,.22)}
+.lb-close{top:10px;right:10px}.lb-prev{left:10px;top:50%;margin-top:-22px}.lb-next{right:10px;top:50%;margin-top:-22px}
+
+/* ---------- tablet ---------- */
+@media (min-width:600px){
+  :root{--gutter:24px}
+  .icon{width:96px;height:96px}
+  .title{font-size:28px}
+  .actions{grid-template-columns:auto auto 1fr;align-items:center;justify-items:start}
+  .install{min-width:200px}
+  .install-note{grid-column:1/-1;text-align:left;margin-top:-2px}
+  .sec-actions{justify-content:flex-start}
+  .labels{justify-content:flex-start}
+  .stats{justify-content:flex-start}
+  .stat{flex:0 0 auto;padding:0 24px}
+  .stat:first-child{padding-left:0}
+  .info{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+/* ---------- desktop ---------- */
+@media (min-width:960px){
+  .listing{padding-top:36px}
+  .layout{grid-template-columns:minmax(0,1fr) 280px}
+  .icon{width:112px;height:112px}
+  .title{font-size:34px}
+  .gallery-wrap{margin-left:0;margin-right:0}
+  .gallery{padding-left:0;padding-right:0;scroll-padding:0}
+  .nav-btn{display:flex}
+  .shot{width:180px}
+  .shot.promo{width:380px;height:360px}
+  .side{display:block;grid-column:2;grid-row:1/span 6;padding-top:8px}
+  .side h3{margin:0 0 10px;font-size:16px;font-weight:500}
+  .main{grid-column:1}
+  .support-mobile{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<p class="notice" role="note">
+  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/></svg>
+  <span id="statusNotice"><b>Promotional preview.</b> TapLites is not yet published on Google Play. This page mirrors a store-listing layout; the button opens the live web edition.</span>
+</p>
+
+<main class="listing" id="top">
+  <div class="layout">
+  <div class="main">
+
+    <header class="head">
+      <div class="icon" id="appIcon">
+        <!-- Fallback icon (shown until / unless the real TapLites logo loads) -->
+        <svg class="fallback" viewBox="0 0 96 96" aria-hidden="true">
+          <defs><linearGradient id="ig" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fd2ff"/><stop offset=".55" stop-color="#3d3dea"/><stop offset="1" stop-color="#f310ba"/></linearGradient></defs>
+          <rect width="96" height="96" fill="#06070d"/>
+          <path d="M0 70 L30 30 L46 50 L60 34 L96 72 V96 H0Z" fill="url(#ig)" opacity=".9"/>
+          <path d="M48 14c7 10 12 17 12 23a12 12 0 0 1-24 0c0-6 5-13 12-23Z" fill="#fff"/>
+          <path d="M0 78c12-6 20 6 32 0s20-6 32 0 20 6 32 0v18H0Z" fill="#2fd2ff" opacity=".85"/>
+        </svg>
+        <img id="appIconImg" alt="TapLites app icon" width="112" height="112" decoding="async">
+      </div>
+      <div>
+        <h1 class="title">TapLites: GEI Mountain Ocean</h1>
+        <a class="dev" id="devLink" href="https://www.yalltoo.com/" target="_top" rel="noopener">YallToo · Genesis Engineered Interpretations</a>
+        <div class="sub" id="iapSub">Contains in-app purchases</div>
+      </div>
+    </header>
+
+    <ul class="stats" aria-label="Listing status">
+      <li class="stat"><div class="v" id="statRating">—</div><div class="k">No ratings yet</div></li>
+      <li class="stat"><div class="v" id="statRelease">Pre-release</div><div class="k">Google Play status</div></li>
+      <li class="stat"><div class="v"><span class="pill">Pending</span></div><div class="k">Content rating</div></li>
+      <li class="stat"><div class="v">Free</div><div class="k">To start playing</div></li>
+    </ul>
+
+    <div class="actions">
+      <a class="install" id="installBtn" href="#" target="_top" rel="noopener" aria-describedby="installNote">Install</a>
+      <div class="sec-actions">
+        <button class="ghost" id="shareBtn" type="button" aria-label="Share this listing">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 16.1c-.8 0-1.5.3-2 .8l-7.1-4.2c.1-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2a3 3 0 1 0-1-2.2c0 .2 0 .5.1.7L8 9.8A3 3 0 1 0 8 14.2l7.1 4.2c-.1.2-.1.4-.1.6a3 3 0 1 0 3-2.9Z"/></svg>
+          <span id="shareLabel">Share</span>
+        </button>
+      </div>
+      <div class="install-note" id="installNote">Opens the live web edition until the Google Play release.</div>
+    </div>
+    <div class="labels" aria-label="Listing labels">
+      <span>Educational</span><span>Phone · Tablet · Desktop</span><span id="adsLabel">No ads in current build</span>
+    </div>
+
+    <!-- Screenshot gallery -->
+    <section class="gallery-wrap" aria-roledescription="carousel" aria-label="Game screenshots">
+      <button class="nav-btn nav-prev" id="prevBtn" type="button" aria-label="Previous screenshots" disabled>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>
+      </button>
+      <div class="gallery" id="gallery" tabindex="0" aria-label="Screenshots, swipe or use arrow keys"></div>
+      <button class="nav-btn nav-next" id="nextBtn" type="button" aria-label="Next screenshots">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z"/></svg>
+      </button>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </section>
+
+    <section class="section about" id="about" aria-labelledby="aboutH">
+      <h2 id="aboutH">About this game</h2>
+      <p class="headline">TAP WATER. MAKE WAVES. SAVE&nbsp;THE&nbsp;‑ITES.</p>
+      <p>Explore the mountain, operate the dam, power the waterwheel, earn FL OZ rewards, and journey through an imaginative six-part STEM learning adventure from mountain to ocean.</p>
+      <div class="more" id="aboutMore">
+        <p>TapLites turns real hydraulic ideas into a fast, tactile tap game. Each level follows water through six stations — every tap moves the flow, every completed day banks FL OZ, and every level ends at the factory your water helped power.</p>
+        <p>Along the way you rescue the trapped -ites, unlock characters and songs, and discover how reservoirs store energy, how gates control pressure and how a waterwheel turns flow into work — part of the Genesis Engineered Interpretations (GEI) Divide · Assign · Manage framework.</p>
+        <ul class="days" aria-label="The six days of each level">
+          <li><span class="n">DAY 1</span><span class="s">Mountain</span></li>
+          <li><span class="n">DAY 2</span><span class="s">Dam</span></li>
+          <li><span class="n">DAY 3</span><span class="s">Millpond</span></li>
+          <li><span class="n">DAY 4</span><span class="s">Sluice Gate</span></li>
+          <li><span class="n">DAY 5</span><span class="s">Waterwheel</span></li>
+          <li><span class="n">DAY 6</span><span class="s">Factory</span></li>
+        </ul>
+        <ul class="features">
+          <li><span class="fi" aria-hidden="true">💧</span><span><b>Interactive hydraulics.</b> Tap the glowing station to move water through the system and keep your flow combo alive.</span></li>
+          <li><span class="fi" aria-hidden="true">🗺️</span><span><b>DAM MAP.</b> Follow the water from the mountain peak and track the factories your levels bring online.</span></li>
+          <li><span class="fi" aria-hidden="true">🏆</span><span><b>Progression &amp; rewards.</b> Earn 111 FL OZ per day and 666 per level, with milestone celebrations as you advance.</span></li>
+          <li><span class="fi" aria-hidden="true">🎡</span><span><b>BONUS FLOW Waterwheel.</b> Milestone levels unlock a free spin for FL OZ, songs and crew.</span></li>
+          <li><span class="fi" aria-hidden="true">🎰</span><span><b>DAM MACHINE.</b> A free hydraulic arcade — three reels, zero dam breaks — played with earned free plays.</span></li>
+          <li><span class="fi" aria-hidden="true">📖</span><span><b>Educational storytelling.</b> Narrated voices, a Beaver buddy guide and STEM notes tie each day to a real engineering idea.</span></li>
+        </ul>
+      </div>
+      <button class="toggle" id="aboutToggle" type="button" aria-expanded="false" aria-controls="aboutMore">Read more</button>
+      <ul class="chips" aria-label="Categories">
+        <li>Educational</li><li>STEM</li><li>Hydraulics</li><li>Casual</li><li>Faith &amp; learning</li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="ratingsH">
+      <h2 id="ratingsH">Ratings and reviews</h2>
+      <div class="ratings">
+        <div class="big" aria-hidden="true">—</div>
+        <p>No ratings or reviews yet. They will appear here once TapLites is published and players review it on Google Play.</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="infoH">
+      <h2 id="infoH">App info</h2>
+      <dl class="info">
+        <div><dt>Edition</dt><dd id="infoEdition">Web (browser) · pre-release</dd></div>
+        <div><dt>Version</dt><dd id="infoVersion">V2.2.16</dd></div>
+        <div><dt>Works on</dt><dd>Phones, tablets and desktop browsers</dd></div>
+        <div><dt>In-app purchases</dt><dd>Yes — characters, songs and FL OZ</dd></div>
+        <div><dt>Ads</dt><dd>None in the current build</dd></div>
+        <div><dt>Downloads</dt><dd>Not available — not yet on Google Play</dd></div>
+        <div><dt>Content rating</dt><dd>Pending Google Play rating</dd></div>
+        <div><dt>Offered by</dt><dd>YallToo / Genesis Engineered Interpretations</dd></div>
+      </dl>
+    </section>
+
+    <section class="section support-mobile" aria-labelledby="supportH">
+      <h2 id="supportH">App support</h2>
+      <div class="support" data-support></div>
+    </section>
+
+    <footer class="foot">
+      <p>Promotional mockup of a store listing. Screenshots are captured from the current build of TapLites: GEI Mountain Ocean. No ratings, reviews, download counts or age ratings are shown because none exist yet.</p>
+      <p>Google Play is a trademark of Google LLC. This page is not affiliated with or endorsed by Google.</p>
+    </footer>
+  </div>
+
+  <aside class="side" aria-labelledby="supportH2">
+    <h3 id="supportH2">App support</h3>
+    <div class="support" data-support></div>
+  </aside>
+  </div>
+</main>
+
+<div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Screenshot viewer" hidden>
+  <button class="lb-close" id="lbClose" type="button" aria-label="Close screenshot viewer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button>
+  <button class="lb-prev" id="lbPrev" type="button" aria-label="Previous screenshot"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></button>
+  <figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+  <button class="lb-next" id="lbNext" type="button" aria-label="Next screenshot"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4 4.6 4.6z"/></svg></button>
+</div>
+
+<script>
+/* =====================================================================
+   LISTING CONFIG — the only block you should need to edit.
+   ===================================================================== */
+var LISTING_CONFIG = {
+  /* After Google Play publication, paste the verified listing URL here.
+     Leave "" until then — the Install button will open liveGameUrl. */
+  googlePlayUrl: "",
+  /* Live web edition (current production deployment of the game). */
+  liveGameUrl: "https://gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app/",
+  /* Real TapLites logo (same asset the game's showcase uses). */
+  iconUrl: "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+  /* Base path for screenshots. "" = relative to this page. Use an absolute URL
+     (e.g. "https://<your-domain>/") if this card is embedded on another site. */
+  assetBase: "",
+  developerUrl: "https://www.yalltoo.com/",
+  supportEmail: "contact@yalltoo.com",
+  release: {
+    published: false,            /* set true once live on Google Play */
+    version: "V2.2.16"
+  }
+};
+
+var SCREENS = [
+  { src:"listing/screens/01-splash-mountain-to-ocean.webp", cap:"Mountain to Ocean", alt:"Cinematic splash: water pours from a mountain dam into a glowing bottle", promo:true },
+  { src:"listing/screens/02-dam-map.webp",            cap:"Interactive DAM MAP",     alt:"DAM MAP screen showing the mountain path, factories online and next factory unlock" },
+  { src:"listing/screens/03-six-days-stem.webp",     cap:"Six Days of STEM",        alt:"Gameplay showing the six-day station rail from Day 1 Tributaries to Day 6 Factory" },
+  { src:"listing/screens/04-level-complete.webp",    cap:"Level complete rewards",  alt:"Level 6 complete card with 666 FL OZ earned and milestone progress" },
+  { src:"listing/screens/05-bonus-flow-waterwheel.webp", cap:"BONUS FLOW Waterwheel", alt:"Bonus Flow waterwheel prize wheel with FL OZ, song and crew prizes" },
+  { src:"listing/screens/06-dam-machine.webp",       cap:"DAM MACHINE bonus game",  alt:"DAM MACHINE free hydraulic arcade with three reels" }
+];
+
+(function(){
+  "use strict";
+  var C = LISTING_CONFIG;
+  function $(id){ return document.getElementById(id); }
+  function safeUrl(u){
+    if(typeof u !== "string" || !u.trim()) return "";
+    try{ var x = new URL(u.trim(), location.href); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : ""; }
+    catch(e){ return ""; }
+  }
+  function asset(p){ return (C.assetBase || "") + p; }
+
+  /* ---------- Install destination ---------- */
+  var play = safeUrl(C.googlePlayUrl), live = safeUrl(C.liveGameUrl);
+  var onPlay = !!play;
+  var btn = $("installBtn");
+  btn.href = onPlay ? play : (live || "#");
+  btn.setAttribute("aria-label", onPlay ? "Install TapLites from Google Play" : "Install — opens the TapLites live web edition");
+  $("installNote").textContent = onPlay ? "Get it on Google Play" : "Opens the live web edition until the Google Play release.";
+  if(onPlay && C.release && C.release.published){
+    $("statusNotice").innerHTML = "<b>Now on Google Play.</b> Ratings, downloads and content rating are shown on the official listing.";
+    $("statRelease").textContent = "Available";
+    $("infoEdition").textContent = "Android (Google Play) · Web";
+  }
+  if(C.release && C.release.version) $("infoVersion").textContent = C.release.version;
+  $("devLink").href = safeUrl(C.developerUrl) || "#";
+
+  /* ---------- Icon ---------- */
+  var icon = $("appIconImg"), iconWrap = $("appIcon");
+  icon.addEventListener("load", function(){ if(icon.naturalWidth > 2) iconWrap.classList.add("loaded"); });
+  icon.addEventListener("error", function(){ icon.remove(); });
+  if(safeUrl(C.iconUrl)) icon.src = C.iconUrl; else icon.remove();
+
+  /* ---------- Support links ---------- */
+  var mail = String(C.supportEmail || "");
+  var supportHTML =
+    '<a href="' + (safeUrl(C.developerUrl) || "#") + '" target="_top" rel="noopener"><span class="si" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 6h-3a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8ZM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4ZM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4H4.3Zm.8 2h3a15.7 15.7 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16Zm3-8h-3a8 8 0 0 1 4.4-3.6C8.9 5.5 8.4 6.7 8.1 8ZM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4Zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4Zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h3a8 8 0 0 1-4.4 3.6Zm1.7-5.6a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4h-3.4Z"/></svg></span><span><span class="t">Website</span><span class="d">yalltoo.com</span></span></a>' +
+    (mail ? '<a href="mailto:' + encodeURIComponent(mail).replace("%40","@") + '?subject=' + encodeURIComponent("TapLites support") + '" target="_top"><span class="si" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg></span><span><span class="t">Support email</span><span class="d">' + mail.replace(/[<>&"]/g,"") + '</span></span></a>' : "") +
+    '<a href="' + (live || "#") + '" target="_top" rel="noopener"><span class="si" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg></span><span><span class="t">Play the web edition</span><span class="d">Runs in your browser — no download</span></span></a>';
+  document.querySelectorAll("[data-support]").forEach(function(el){ el.innerHTML = supportHTML; });
+
+  /* ---------- Gallery ---------- */
+  var gal = $("gallery"), dots = $("dots");
+  SCREENS.forEach(function(s, i){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "shot" + (s.promo ? " promo" : "");
+    b.setAttribute("aria-label", "Screenshot " + (i+1) + " of " + SCREENS.length + ": " + s.cap + ". Open larger view");
+    var img = '<img src="' + asset(s.src) + '" alt="' + s.alt + '" width="540" height="1080" ' + (i < 3 ? 'loading="eager" fetchpriority="' + (i===0?"high":"auto") + '"' : 'loading="lazy"') + ' decoding="async" draggable="false">';
+    if(s.promo){
+      b.innerHTML = '<div class="promo-copy"><span class="eyebrow">TapLites · GEI</span>' +
+        '<span class="big"><span>TAP WATER.</span><span class="m">MAKE WAVES.</span><span class="c">SAVE&nbsp;THE&nbsp;‑ITES.</span></span>' +
+        '<span class="tag">A six-part STEM adventure from mountain to ocean.</span></div>' +
+        '<div class="promo-phone">' + img + '</div>';
+    }else{
+      b.innerHTML = img + '<span class="cap"><i></i>' + s.cap + '</span>';
+    }
+    b.addEventListener("click", function(){ if(!dragMoved) openLB(i); });
+    gal.appendChild(b);
+    dots.appendChild(document.createElement("i"));
+  });
+  var shots = gal.children, dotEls = dots.children;
+
+  function step(){ var s = shots[1] || shots[0]; return s.getBoundingClientRect().width + 10; }
+  function update(){
+    var max = gal.scrollWidth - gal.clientWidth - 2;
+    $("prevBtn").disabled = gal.scrollLeft <= 2;
+    $("nextBtn").disabled = gal.scrollLeft >= max;
+    var gl = gal.getBoundingClientRect().left, best = 0, bestD = 1e9;
+    for(var i=0;i<shots.length;i++){ var d = Math.abs(shots[i].getBoundingClientRect().left - gl - parseFloat(getComputedStyle(gal).paddingLeft)); if(d < bestD){ bestD = d; best = i; } }
+    if(gal.scrollLeft >= max) best = shots.length - 1;
+    for(var j=0;j<dotEls.length;j++) dotEls[j].classList.toggle("on", j === best);
+  }
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function by(n){ gal.scrollBy({ left: n * step(), behavior: reduce ? "auto" : "smooth" }); }
+  $("prevBtn").addEventListener("click", function(){ by(-2); });
+  $("nextBtn").addEventListener("click", function(){ by(2); });
+  gal.addEventListener("scroll", function(){ window.requestAnimationFrame(update); }, { passive:true });
+  gal.addEventListener("keydown", function(e){
+    if(e.key === "ArrowRight"){ e.preventDefault(); by(1); }
+    else if(e.key === "ArrowLeft"){ e.preventDefault(); by(-1); }
+  });
+  window.addEventListener("resize", update);
+  update();
+
+  /* Mouse drag-to-scroll on desktop (touch uses native swipe + scroll-snap). */
+  var dragging = false, dragMoved = false, startX = 0, startL = 0;
+  gal.addEventListener("pointerdown", function(e){
+    if(e.pointerType !== "mouse" || e.button !== 0) return;
+    dragging = true; dragMoved = false; startX = e.clientX; startL = gal.scrollLeft;
+  });
+  window.addEventListener("pointermove", function(e){
+    if(!dragging) return;
+    var dx = e.clientX - startX;
+    if(Math.abs(dx) > 5){ dragMoved = true; gal.style.scrollSnapType = "none"; gal.scrollLeft = startL - dx; }
+  });
+  window.addEventListener("pointerup", function(){
+    if(!dragging) return; dragging = false;
+    gal.style.scrollSnapType = "";
+    setTimeout(function(){ dragMoved = false; }, 0);
+  });
+
+  /* ---------- Lightbox ---------- */
+  var lb = $("lightbox"), lbImg = $("lbImg"), lbCap = $("lbCap"), cur = 0, lastFocus = null;
+  function show(i){
+    cur = (i + SCREENS.length) % SCREENS.length;
+    lbImg.src = asset(SCREENS[cur].src); lbImg.alt = SCREENS[cur].alt;
+    lbCap.textContent = (cur+1) + " / " + SCREENS.length + " · " + SCREENS[cur].cap;
+  }
+  var framed = window.parent !== window;
+  function openLB(i){
+    if(framed) return; /* auto-height iframe embeds: no fixed overlay; gallery stays swipeable */
+    lastFocus = document.activeElement; show(i);
+    lb.hidden = false; lb.classList.add("open"); document.body.style.overflow = "hidden";
+    $("lbClose").focus();
+  }
+  function closeLB(){
+    lb.classList.remove("open"); lb.hidden = true; document.body.style.overflow = "";
+    if(lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $("lbClose").addEventListener("click", closeLB);
+  $("lbPrev").addEventListener("click", function(){ show(cur-1); });
+  $("lbNext").addEventListener("click", function(){ show(cur+1); });
+  lb.addEventListener("click", function(e){ if(e.target === lb) closeLB(); });
+  document.addEventListener("keydown", function(e){
+    if(!lb.classList.contains("open")) return;
+    if(e.key === "Escape") closeLB();
+    else if(e.key === "ArrowRight") show(cur+1);
+    else if(e.key === "ArrowLeft") show(cur-1);
+    else if(e.key === "Tab"){ /* keep focus inside the dialog */
+      var f = lb.querySelectorAll("button"), first = f[0], last = f[f.length-1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+  });
+  var tx = null;
+  lb.addEventListener("touchstart", function(e){ tx = e.touches[0].clientX; }, { passive:true });
+  lb.addEventListener("touchend", function(e){
+    if(tx === null) return; var dx = e.changedTouches[0].clientX - tx; tx = null;
+    if(Math.abs(dx) > 40) show(cur + (dx < 0 ? 1 : -1));
+  });
+
+  /* ---------- About: read more ---------- */
+  $("aboutToggle").addEventListener("click", function(){
+    var open = $("about").classList.toggle("open");
+    this.setAttribute("aria-expanded", String(open));
+    this.textContent = open ? "Show less" : "Read more";
+  });
+
+  /* ---------- Share ---------- */
+  $("shareBtn").addEventListener("click", function(){
+    var url = onPlay ? play : location.href, data = { title:"TapLites: GEI Mountain Ocean", text:"TAP WATER. MAKE WAVES. SAVE THE -ITES.", url:url };
+    if(navigator.share){ navigator.share(data).catch(function(){}); return; }
+    var label = $("shareLabel");
+    function done(t){ label.textContent = t; setTimeout(function(){ label.textContent = "Share"; }, 1800); }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function(){ done("Link copied"); }, function(){ done("Copy failed"); });
+    else done("Copy failed");
+  });
+
+  /* ---------- iframe embed support (Hostinger) ---------- */
+  if(window.parent !== window && "ResizeObserver" in window){
+    var last = 0;
+    new ResizeObserver(function(){
+      var h = Math.ceil(document.documentElement.scrollHeight);
+      if(h !== last){ last = h; try{ window.parent.postMessage({ type:"taplites-listing-height", height:h }, "*"); }catch(e){} }
+    }).observe(document.body);
+  }
+})();
+</script>
+</body>
+</html>
