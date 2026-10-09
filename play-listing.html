@@ -87,6 +87,25 @@ a{color:var(--link)}
 .labels span::before{content:"•";margin-right:6px;color:#9aa0a6}
 .labels span:first-child::before{content:none}
 
+/* ---------- share panel (inline, so it also works inside an auto-height iframe) ---------- */
+.share-panel{grid-column:1/-1;justify-self:stretch;margin:4px 0 2px;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 4px 18px rgba(31,31,31,.08)}
+.share-panel[hidden]{display:none}
+.sp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sp-title{font-weight:500;font-size:15px}
+.sp-x{width:36px;height:36px;border:0;border-radius:50%;background:none;color:var(--text-3);display:grid;place-items:center;cursor:pointer}
+.sp-x:hover{background:var(--surface-2)}
+.sp-copy{display:flex;gap:8px;margin-bottom:14px}
+.sp-copy input{flex:1;min-width:0;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--text-2);font:13px var(--font)}
+.sp-copy button{flex:none;height:40px;padding:0 16px;border:0;border-radius:999px;background:var(--play-blue);color:#fff;font:500 14px var(--font);cursor:pointer}
+.sp-copy button:hover{background:var(--play-blue-hover)}
+.sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin:0;padding:0;list-style:none}
+.sp-grid a,.sp-grid button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;border:0;border-radius:12px;background:none;color:var(--text-2);font:12px/1.2 var(--font);text-decoration:none;text-align:center;cursor:pointer;width:100%}
+.sp-grid a:hover,.sp-grid button:hover{background:var(--surface-2)}
+.sp-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.sp-ic svg{width:22px;height:22px}
+.sp-status{margin:8px 0 0;min-height:1.2em;font-size:12.5px;color:#137333}
+.sp-status.err{color:#b3261e}
+
 /* ---------- gallery ---------- */
 .gallery-wrap{position:relative;margin:22px calc(var(--gutter) * -1) 6px}
 .gallery{display:flex;gap:10px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding:0 var(--gutter);padding:2px var(--gutter) 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -209,10 +228,7 @@ a{color:var(--link)}
 </head>
 <body>
 
-<p class="notice" role="note">
-  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/></svg>
-  <span id="statusNotice"><b>Promotional preview.</b> TapLites is not yet published on Google Play. This page mirrors a store-listing layout; the button opens the live web edition.</span>
-</p>
+
 
 <main class="listing" id="top">
   <div class="layout">
@@ -245,12 +261,24 @@ a{color:var(--link)}
     </ul>
 
     <div class="actions">
-      <a class="install" id="installBtn" href="#" target="_top" rel="noopener" aria-describedby="installNote">Install</a>
+      <a class="install" id="installBtn" href="#" target="_top" rel="noopener" aria-describedby="installNote">Play Now!</a>
       <div class="sec-actions">
-        <button class="ghost" id="shareBtn" type="button" aria-label="Share this listing">
+        <button class="ghost" id="shareBtn" type="button" aria-expanded="false" aria-controls="sharePanel">
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 16.1c-.8 0-1.5.3-2 .8l-7.1-4.2c.1-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2a3 3 0 1 0-1-2.2c0 .2 0 .5.1.7L8 9.8A3 3 0 1 0 8 14.2l7.1 4.2c-.1.2-.1.4-.1.6a3 3 0 1 0 3-2.9Z"/></svg>
           <span id="shareLabel">Share</span>
         </button>
+      </div>
+      <div class="share-panel" id="sharePanel" role="region" aria-label="Share TapLites" hidden>
+        <div class="sp-head">
+          <span class="sp-title">Share TapLites</span>
+          <button class="sp-x" id="shareClose" type="button" aria-label="Close share options"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg></button>
+        </div>
+        <div class="sp-copy">
+          <input id="shareLink" type="text" readonly aria-label="Link to share" spellcheck="false">
+          <button id="copyBtn" type="button">Copy link</button>
+        </div>
+        <ul class="sp-grid" id="shareGrid"></ul>
+        <p class="sp-status" id="shareStatus" role="status" aria-live="polite"></p>
       </div>
       <div class="install-note" id="installNote">Opens the live web edition until the Google Play release.</div>
     </div>
@@ -356,10 +384,16 @@ var LISTING_CONFIG = {
      Leave "" until then — the Install button will open liveGameUrl. */
   googlePlayUrl: "",
   /* Live web edition (current production deployment of the game). */
-  liveGameUrl: "https://gei-mountain-ocean-9zlg7rw1j-god-9915.vercel.app/",
+  liveGameUrl: "https://gei-mountain-ocean.vercel.app/",
   /* Square TapLites store icon. */
   iconUrl: "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/taplites-logo-JpNImKbfJzanxuaj.png",
   developerUrl: "https://www.yalltoo.com/",
+  /* Link people share. "" = the Google Play listing once googlePlayUrl is set,
+     otherwise the live game. Put a page URL here (e.g. your yalltoo.com page
+     that shows this card) if you would rather people share the listing itself. */
+  shareUrl: "",
+  shareTitle: "TapLites: GEI Mountain Ocean",
+  shareText: "TAP WATER. MAKE WAVES. SAVE THE -ITES. Play TapLites: GEI Mountain Ocean, a six-part STEM adventure from mountain to ocean.",
   supportEmail: "contact@yalltoo.com",
   release: {
     published: false,            /* set true once live on Google Play */
@@ -395,10 +429,11 @@ var SCREENS = [
   var onPlay = !!play;
   var btn = $("installBtn");
   btn.href = onPlay ? play : (live || "#");
-  btn.setAttribute("aria-label", onPlay ? "Install TapLites from Google Play" : "Install — opens the TapLites live web edition");
+  if(onPlay) btn.textContent = "Install";
+  btn.setAttribute("aria-label", onPlay ? "Install TapLites from Google Play" : "Play Now! Opens TapLites in your browser");
   $("installNote").textContent = onPlay ? "Get it on Google Play" : "Opens the live web edition until the Google Play release.";
   if(onPlay && C.release && C.release.published){
-    $("statusNotice").innerHTML = "<b>Now on Google Play.</b> Ratings, downloads and content rating are shown on the official listing.";
+    if($("statusNotice")) $("statusNotice").innerHTML = "<b>Now on Google Play.</b> Ratings, downloads and content rating are shown on the official listing.";
     $("statRelease").textContent = "Available";
     $("infoEdition").textContent = "Android (Google Play) · Web";
   }
@@ -532,14 +567,105 @@ var SCREENS = [
   });
 
   /* ---------- Share ---------- */
-  $("shareBtn").addEventListener("click", function(){
-    var url = onPlay ? play : location.href, data = { title:"TapLites: GEI Mountain Ocean", text:"TAP WATER. MAKE WAVES. SAVE THE -ITES.", url:url };
-    if(navigator.share){ navigator.share(data).catch(function(){}); return; }
-    var label = $("shareLabel");
-    function done(t){ label.textContent = t; setTimeout(function(){ label.textContent = "Share"; }, 1800); }
-    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function(){ done("Link copied"); }, function(){ done("Copy failed"); });
-    else done("Copy failed");
+  /* Works in a normal page AND inside a Hostinger iframe: every option is a plain
+     link opened in a new tab (or the mail / messages app), copying has a
+     fallback that needs no clipboard permission, and the phone's own share
+     sheet is offered only where the browser allows it. */
+  var shareUrl = safeUrl(C.shareUrl) || play || live || location.href;
+  var shareTitle = C.shareTitle || document.title, shareText = C.shareText || "";
+  var E = encodeURIComponent, U = E(shareUrl), T = E(shareText), TU = E(shareText + " " + shareUrl);
+  var glyph = {
+    native:'<path fill="currentColor" d="M18 16.1c-.8 0-1.5.3-2 .8l-7.1-4.2c.1-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2a3 3 0 1 0-1-2.2c0 .2 0 .5.1.7L8 9.8A3 3 0 1 0 8 14.2l7.1 4.2c-.1.2-.1.4-.1.6a3 3 0 1 0 3-2.9Z"/>',
+    sms:'<path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM8 11H6V9h2v2Zm5 0h-2V9h2v2Zm5 0h-2V9h2v2Z"/>',
+    whatsapp:'<path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/>',
+    facebook:'<path fill="currentColor" d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.8c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1v2.4H7.6V14h2.7v8h3.2Z"/>',
+    messenger:'<path fill="currentColor" d="M12 2C6.4 2 2 6.1 2 11.6c0 2.9 1.2 5.4 3.2 7.1V22l3-1.7c.9.3 1.8.4 2.8.4 5.6 0 10-4.1 10-9.6S17.6 2 12 2Zm1 12.9-2.5-2.7-5 2.7 5.5-5.8 2.6 2.7 4.9-2.7-5.5 5.8Z"/>',
+    x:'<path fill="currentColor" d="M17.8 3h3l-6.6 7.5L22 21h-6l-4.7-6.1L5.9 21h-3l7-8L2.2 3h6.1l4.2 5.6L17.8 3Zm-1 16.2h1.7L7.3 4.7H5.5l11.3 14.5Z"/>',
+    threads:'<path fill="currentColor" d="M16.7 11.3c-.1 0-.2-.1-.3-.1-.2-3.1-1.9-4.9-4.8-4.9-1.7 0-3.1.7-4 2l1.6 1.1c.7-1 1.7-1.2 2.4-1.2 1 0 1.7.3 2.2.8.3.4.6 1 .7 1.7a12 12 0 0 0-2.7-.1c-2.7.2-4.4 1.7-4.3 3.9.1 1.1.6 2.1 1.6 2.7.8.5 1.9.8 3 .7 1.4-.1 2.6-.6 3.3-1.6.6-.8 1-1.7 1.1-2.9.7.4 1.2 1 1.5 1.6.5 1.1.5 2.9-1 4.3-1.3 1.3-2.8 1.8-5.2 1.8-2.6 0-4.6-.9-5.9-2.5C3.9 15.6 3.3 13.6 3.3 11c0-2.6.6-4.6 1.8-6.1C6.4 3.3 8.4 2.5 11 2.5c2.6 0 4.6.8 6 2.4.7.8 1.2 1.8 1.5 2.9l1.9-.5c-.4-1.4-1-2.6-1.9-3.7C16.7 1.6 14.2.6 11 .6 7.8.6 5.3 1.6 3.6 3.6 2.1 5.4 1.3 7.9 1.3 11c0 3.1.8 5.6 2.3 7.4 1.7 2 4.2 3 7.4 3h.1c2.9 0 4.9-.8 6.6-2.4 2.2-2.2 2.1-4.9 1.4-6.6-.5-1.1-1.4-2-2.4-2.6Zm-4.8 4.5c-1.2.1-2.4-.5-2.5-1.5 0-.8.6-1.7 2.5-1.8h.6c.7 0 1.4.1 2 .2-.2 2.4-1.4 3-2.6 3.1Z"/>',
+    bluesky:'<path fill="currentColor" d="M6.3 4.1C8.6 5.8 11 9.2 12 11.1c1-1.9 3.4-5.3 5.7-7 1.6-1.2 4.3-2.2 4.3.9 0 .6-.4 5.1-.6 5.8-.6 2.5-3.2 3.1-5.4 2.7 3.9.7 4.9 2.9 2.8 5.1-4 4.1-5.8-1-6.2-2.4l-.6-1.6-.6 1.6c-.4 1.4-2.2 6.5-6.2 2.4-2.1-2.2-1.1-4.4 2.8-5.1-2.2.4-4.8-.2-5.4-2.7C2.4 10.1 2 5.6 2 5c0-3.1 2.7-2.1 4.3-.9Z"/>',
+    telegram:'<path fill="currentColor" d="M21.9 4.3 18.6 20c-.2 1.1-.9 1.4-1.8.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1L18 6.5c.4-.4-.1-.6-.6-.2L6.1 13.4l-4.9-1.5c-1.1-.3-1.1-1.1.2-1.6L20.5 2.9c.9-.3 1.7.2 1.4 1.4Z"/>',
+    reddit:'<path fill="currentColor" d="M22 12.1a2.2 2.2 0 0 0-3.7-1.6 10.8 10.8 0 0 0-5.8-1.8l1-4.6 3.2.7a1.6 1.6 0 1 0 .2-1l-3.6-.8a.5.5 0 0 0-.6.4l-1.1 5.2a10.9 10.9 0 0 0-5.9 1.8A2.2 2.2 0 1 0 3.3 14a4.2 4.2 0 0 0 0 .7c0 3.4 3.9 6.1 8.7 6.1s8.7-2.7 8.7-6.1v-.7a2.2 2.2 0 0 0 1.3-1.9ZM7 13.7a1.6 1.6 0 1 1 1.6 1.6A1.6 1.6 0 0 1 7 13.7Zm9.1 4.3a5.9 5.9 0 0 1-4.1 1.3 5.9 5.9 0 0 1-4.1-1.3.4.4 0 0 1 .6-.6 5.1 5.1 0 0 0 3.5 1.1 5.1 5.1 0 0 0 3.5-1.1.4.4 0 1 1 .6.6Zm-.4-2.7a1.6 1.6 0 1 1 1.6-1.6 1.6 1.6 0 0 1-1.6 1.6Z"/>',
+    linkedin:'<path fill="currentColor" d="M20.4 2H3.6C2.7 2 2 2.7 2 3.6v16.8c0 .9.7 1.6 1.6 1.6h16.8c.9 0 1.6-.7 1.6-1.6V3.6c0-.9-.7-1.6-1.6-1.6ZM8 19H5V9.5h3V19ZM6.5 8.2a1.7 1.7 0 1 1 0-3.5 1.7 1.7 0 0 1 0 3.5ZM19 19h-3v-4.6c0-1.1 0-2.5-1.5-2.5S12.8 13 12.8 14.3V19h-3V9.5h2.8v1.3c.4-.8 1.4-1.6 2.9-1.6 3.1 0 3.6 2 3.6 4.6V19Z"/>',
+    pinterest:'<path fill="currentColor" d="M12 2a10 10 0 0 0-3.6 19.3c-.1-.8-.2-2 0-2.9l1.2-5s-.3-.6-.3-1.5c0-1.4.8-2.4 1.8-2.4.8 0 1.2.6 1.2 1.4 0 .9-.5 2.1-.8 3.3-.2 1 .5 1.8 1.5 1.8 1.8 0 3.1-1.9 3.1-4.6 0-2.4-1.7-4.1-4.2-4.1a4.4 4.4 0 0 0-4.6 4.4c0 .9.3 1.8.8 2.3.1.1.1.2.1.3l-.3 1.2c0 .2-.2.2-.4.1-1.3-.6-2.1-2.5-2.1-4 0-3.3 2.4-6.3 6.9-6.3 3.6 0 6.4 2.6 6.4 6 0 3.6-2.3 6.5-5.4 6.5-1.1 0-2.1-.6-2.4-1.2l-.7 2.5c-.2.9-.9 2.1-1.3 2.8A10 10 0 1 0 12 2Z"/>',
+    email:'<path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/>'
+  };
+  var img = safeUrl(C.iconUrl);
+  var TARGETS = [
+    { id:"native",    label:"More apps", color:"#5f6368", native:true },
+    { id:"sms",       label:"Text",      color:"#1a73e8", href:"sms:?&body=" + TU, app:true },
+    { id:"whatsapp",  label:"WhatsApp",  color:"#25d366", href:"https://wa.me/?text=" + TU },
+    { id:"facebook",  label:"Facebook",  color:"#1877f2", href:"https://www.facebook.com/sharer/sharer.php?u=" + U },
+    { id:"messenger", label:"Messenger", color:"#0a7cff", href:"fb-messenger://share/?link=" + U, mobileOnly:true, app:true },
+    { id:"x",         label:"X",         color:"#000000", href:"https://twitter.com/intent/tweet?text=" + T + "&url=" + U },
+    { id:"threads",   label:"Threads",   color:"#000000", href:"https://www.threads.net/intent/post?text=" + TU },
+    { id:"bluesky",   label:"Bluesky",   color:"#1185fe", href:"https://bsky.app/intent/compose?text=" + TU },
+    { id:"telegram",  label:"Telegram",  color:"#26a5e4", href:"https://t.me/share/url?url=" + U + "&text=" + T },
+    { id:"reddit",    label:"Reddit",    color:"#ff4500", href:"https://www.reddit.com/submit?url=" + U + "&title=" + E(shareTitle) },
+    { id:"linkedin",  label:"LinkedIn",  color:"#0a66c2", href:"https://www.linkedin.com/sharing/share-offsite/?url=" + U },
+    { id:"pinterest", label:"Pinterest", color:"#e60023", href:"https://www.pinterest.com/pin/create/button/?url=" + U + (img ? "&media=" + E(img) : "") + "&description=" + T },
+    { id:"email",     label:"Email",     color:"#ea4335", href:"mailto:?subject=" + E(shareTitle) + "&body=" + E(shareText + "\n\n" + shareUrl), app:true }
+  ];
+  var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+  var nativeData = { title:shareTitle, text:shareText, url:shareUrl };
+  var canNative = !!(navigator.share && (!navigator.canShare || navigator.canShare(nativeData)));
+
+  var panel = $("sharePanel"), shareBtn = $("shareBtn"), grid = $("shareGrid"), linkBox = $("shareLink"), status = $("shareStatus");
+  linkBox.value = shareUrl;
+  TARGETS.forEach(function(t){
+    if(t.native && !canNative) return;
+    if(t.mobileOnly && !isMobile) return;
+    if(t.id === "sms" && !isMobile && !/Macintosh/.test(navigator.userAgent)) return;   /* texting needs a phone (or a Mac) */
+    var li = document.createElement("li"), el;
+    var face = '<span class="sp-ic" style="background:' + t.color + '" aria-hidden="true"><svg viewBox="0 0 24 24">' + glyph[t.id] + '</svg></span><span>' + t.label + '</span>';
+    if(t.native){
+      el = document.createElement("button"); el.type = "button"; el.innerHTML = face;
+      el.setAttribute("aria-label", "Share with another app");
+      el.addEventListener("click", nativeShare);
+    }else{
+      el = document.createElement("a"); el.href = t.href; el.innerHTML = face;
+      /* web share pages open in a new tab; mail / text / app links hand off to the app */
+      if(t.app){ el.target = "_top"; } else { el.target = "_blank"; el.rel = "noopener noreferrer"; }
+      el.setAttribute("aria-label", "Share on " + t.label + (t.app ? "" : " (opens in a new tab)"));
+      el.addEventListener("click", function(){ say("Opening " + t.label + "…"); });
+    }
+    li.appendChild(el); grid.appendChild(li);
   });
+
+  function say(msg, err){ status.textContent = msg; status.classList.toggle("err", !!err); }
+  function openPanel(){
+    panel.hidden = false; shareBtn.setAttribute("aria-expanded", "true"); say("");
+    try{ linkBox.focus({ preventScroll:true }); linkBox.select(); }catch(e){}
+  }
+  function closePanel(returnFocus){
+    panel.hidden = true; shareBtn.setAttribute("aria-expanded", "false");
+    if(returnFocus) shareBtn.focus();
+  }
+  shareBtn.addEventListener("click", function(){ panel.hidden ? openPanel() : closePanel(false); });
+  $("shareClose").addEventListener("click", function(){ closePanel(true); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && !panel.hidden) closePanel(true); });
+  document.addEventListener("click", function(e){
+    if(!panel.hidden && !panel.contains(e.target) && !shareBtn.contains(e.target)) closePanel(false);
+  });
+
+  function nativeShare(){
+    navigator.share(nativeData).then(function(){ say("Thanks for sharing!"); }).catch(function(err){
+      if(err && err.name === "AbortError") return;               /* user closed the sheet */
+      say("Your browser blocked its share menu here — use any option below or copy the link.", true);
+    });
+  }
+
+  /* Copy: clipboard API first, then a fallback that works in iframes without permission. */
+  function legacyCopy(){
+    try{ linkBox.focus({ preventScroll:true }); linkBox.select(); linkBox.setSelectionRange(0, shareUrl.length); return document.execCommand("copy"); }
+    catch(e){ return false; }
+  }
+  $("copyBtn").addEventListener("click", function(){
+    function ok(){ say("Link copied — paste it anywhere."); $("copyBtn").textContent = "Copied"; setTimeout(function(){ $("copyBtn").textContent = "Copy link"; }, 1800); }
+    function fallback(){ if(legacyCopy()) ok(); else { linkBox.focus(); linkBox.select(); say("Press Ctrl+C (or long-press → Copy) to copy the selected link.", true); } }
+    if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(shareUrl).then(ok, fallback); }
+    else fallback();
+  });
+  linkBox.addEventListener("focus", function(){ linkBox.select(); });
 
   /* ---------- iframe embed support (Hostinger) ---------- */
   if(window.parent !== window && "ResizeObserver" in window){
