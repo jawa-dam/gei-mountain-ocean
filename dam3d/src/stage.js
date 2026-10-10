@@ -184,7 +184,7 @@ export function startStage(S){
 
   S.dispose = function(){
     ro.disconnect(); S.hotList.forEach(o => o.b.remove()); adv.remove(); fc.remove();
-    scene.traverse(o => { if(o.geometry) o.geometry.dispose(); if(o.material){ (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { for(const k in m){ const v = m[k]; if(v && v.isTexture) v.dispose(); } if(m.uniforms) for(const k in m.uniforms){ const v = m.uniforms[k].value; if(v && v.isTexture) v.dispose(); } m.dispose(); }); } });
+    scene.traverse(o => { if(o.geometry) o.geometry.dispose(); if(o.material){ (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { for(const k in m){ const v = m[k]; if(v && v.isTexture) v.dispose(); } if(m.uniforms) for(const k in m.uniforms){ const v = m.uniforms[k].value; if(v && v.isTexture) v.dispose(); } if(m.dispose) m.dispose(); }); } });
     if(world.reflections) world.reflections.forEach(r => r.dispose());
     Object.values(world.T).forEach(t => Object.values(t).forEach(x => x && x.dispose && x.dispose()));
     if(scene.environment) scene.environment.dispose();

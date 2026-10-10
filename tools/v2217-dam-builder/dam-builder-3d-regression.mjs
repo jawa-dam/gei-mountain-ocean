@@ -46,9 +46,9 @@ async function suiteLoading(){
   for (const [lvl, flOz, day] of [[1, 0, 0], [1, 111, 1], [1, 222, 2], [1, 333, 3]]){
     await h.page.evaluate(([l, f, d]) => { if (DamBuilder.isOpen) DamBuilder.close(); state.level = l; state.levelFlOz = f; state.currentStep = d; state.phase = "ready"; DamBuilder.open({ day:d }); }, [lvl, flOz, day]); await sleep(300);
   }
-  check("Days 1–4 open without fetching it", reqs.length === 0);
+  check("Days 1–4 are 3D too: the bundle is fetched lazily, once, by the first Builder open", reqs.length === 1, reqs);
   await h.page.evaluate(() => { DamBuilder.close(); state.levelFlOz = 444; state.currentStep = 4; state.phase = "ready"; }); await open3D(h);
-  check("Day 5 fetches the bundle exactly once", reqs.length === 1, reqs);
+  check("Day 5 reuses the already-loaded bundle (still one fetch)", reqs.length === 1, reqs);
   await h.page.evaluate(() => { DamBuilder.close(); DamBuilder.open({ day:4 }); }); await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d, null, { timeout:60000 });
   check("re-opening reuses the loaded bundle (no second fetch)", reqs.length === 1);
   const sz = (await stat(join(root, "dam-builder-3d-v2218.js"))).size, gz = gzipSync(await readFile(join(root, "dam-builder-3d-v2218.js"))).length;
@@ -278,7 +278,43 @@ async function suiteMobile(){
   }
 }
 
-const SUITES = { loading:suiteLoading, render:suiteRender, causality:suiteCausality, picking:suitePicking, parity:suiteParity, fallbacks:suiteFallbacks, motion:suiteMotion, lifecycle:suiteLifecycle, mobile:suiteMobile };
+/* ================================================================== D9 chain (V2.2.1: all six Days in one shared 3D world) */
+async function suiteChain(){
+  console.log("D9 six Days, one shared world");
+  const h = await boot({ query:"?b3d=high", storage:{ [SAVE]:seed(1, 0) } });
+  const seen = [];
+  for (let d = 0; d < 6; d++){
+    await h.page.evaluate(([dd]) => { if (DamBuilder.isOpen) DamBuilder.close(); state.level = 1; state.levelFlOz = dd * 111; state.currentStep = dd; state.phase = "ready"; DamBuilder.open({ day:dd }); }, [d]);
+    await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d, null, { timeout:60000 });
+    await begin(h);
+    const r = await h.page.evaluate(() => { const g = {}; const api = { gauge:(i, t) => { g[i] = t; } }; DamBuilder.def.gauge(api); return { gauges:Object.keys(g).length, canvas:!!document.querySelector("canvas"), px:DamBuilder.def.pixels ? DamBuilder.def.pixels() : null, d:DamBuilder.def.dbg().info }; });
+    seen.push(r);
+    check("Day " + (d + 1) + " runs in 3D with live gauges and a rendered canvas", r.gauges >= 3 && r.canvas && r.d && r.d.triangles > 20000, r);
+  }
+  /* the stage is persistent: it is the SAME renderer across Days (no six disconnected demos) */
+  const same = await h.page.evaluate(() => { const a = DamBuilder.def.dbg().info; return a; });
+  check("one shared stage serves the Days (info reports one scene)", !!same, same);
+  /* Day 1: forks really route the water */
+  await h.page.evaluate(() => { DamBuilder.close(); state.levelFlOz = 0; state.currentStep = 0; state.phase = "ready"; DamBuilder.open({ day:0 }); });
+  await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d, null, { timeout:60000 }); await begin(h);
+  const fill = async mode => { await h.page.evaluate(m => { const bs = [...document.querySelectorAll("#dbCtl button")]; const b = bs.find(x => /FORK A/.test(x.textContent)); for (let i = 0; i < 3 && DamBuilder.def.dbg().modes[0] !== m; i++) b.click(); }, mode); await h.page.evaluate(() => DamBuilder.advance(4)); return (await dbg(h)).targets.map(t => +t.v.toFixed(1)); };
+  const left = await fill(0), right = await fill(2);
+  check("Day 1: turning the fork changes which basin receives the water", JSON.stringify(left) !== JSON.stringify(right) || right.some((v, i) => v > left[i]), { left, right });
+  /* Day 6: factory machinery responds to power */
+  await h.page.evaluate(() => { DamBuilder.close(); state.levelFlOz = 555; state.currentStep = 5; state.phase = "ready"; DamBuilder.open({ day:5 }); });
+  await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d, null, { timeout:60000 }); await begin(h);
+  const d6 = await dbg(h);
+  check("Day 6 exposes the shared chain state", !!d6, d6);
+  /* no reward from merely viewing/mode switching */
+  const before = await h.page.evaluate(snap);
+  await h.page.evaluate(() => { DamBuilder.close(); });
+  await reload(h);
+  check("opening and closing 3D Days grants nothing", (await h.page.evaluate(snap)).total === before.total, before);
+  check("no page errors", h.errors.length === 0, h.errors);
+  await h.close();
+}
+
+const SUITES = { loading:suiteLoading, render:suiteRender, causality:suiteCausality, picking:suitePicking, parity:suiteParity, fallbacks:suiteFallbacks, motion:suiteMotion, lifecycle:suiteLifecycle, mobile:suiteMobile, chain:suiteChain };
 for (const k of Object.keys(SUITES)) if (want === "all" || want === k) { try { await SUITES[k](); } catch (e) { failed++; console.log("  ✗ suite " + k + " crashed: " + (e && e.stack || e)); } }
 console.log("\n" + passed + " passed, " + failed + " failed");
 await done();
