@@ -1,0 +1,57 @@
+PRE    arcade:v2-adaptive-voice/v2198-adaptive-voice-regression   6 passed  0s
+        AssertionError [ERR_ASSERTION]: new-player pacing
+PRE    arcade:v2-ambient/ambient-regression             0 passed  250s
+        ✗ exited 1:    "name": "P3. no new page errors (home)", |    "name": "P4. no new page errors (level/wheel)",
+INFRA  arcade:v2-cameos/cameo-regression                0 passed  139s  (re-run after infra timeout; first attempt: INFRA)
+PRE    arcade:v2-chaos/economy-chaos                    0 passed  0s
+        ✗ exited 1:       "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+PRE    arcade:v2-chaos/regression-gate                  0 passed  0s
+        V2.0.29 REGRESSION GATE FAILED: one or more economy security tests failed.
+PRE    arcade:v2-contextual-voice/v2197-contextual-voice-regression  11 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only
+PRE    arcade:v2-dam-map/dam-map-regression             0 passed  158s
+        ✗ exited 1:    "name": "F3. no new script errors", |    "name": "G7. no new script errors during the milestone flow",
+PRE    arcade:v2-milestone-voice/milestone-voice-regression   5 passed  0s
+        FAIL female voice fallback
+PRE    arcade:v2-quiet-tap/quiet-tap-regression         0 passed  86s
+        ✗ exited 1:    "name": "no new script errors (only the 4 pre-existing unparseable modules)",
+PRE    arcade:v2-soundtrack/soundtrack-regression       0 passed  59s
+        ✗ exited 1:         "errors": 0, |         "errors": 0,
+PASS   arcade:v2-voice-director/v2194-voice-director-regression  12 passed  0s
+PASS   arcade:v2-voice-discovery/v2201-voice-discovery-regression  15 passed  0s
+PRE    arcade:v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression  69 passed  49s
+        FAIL A1 vocabulary has exactly the 38 supplied recordings  → 49
+        FAIL A3 no event URL outside the supplied list (no invented assets)
+        FAIL A8 V2.2.03 core reference equals the original 14
+        FAIL B1 selfTest: 38 assets, unique hosted URLs, no core overlap, core matches reference  → {"version":"V2.2.03","eventAssets":49,"categories":{"START":4,"SUCCESS":15,"ENCOURAGEMENT":3,"WARNING":6,"COMPLETION":8,"HYDRAULIC":10,"SPECIAL_ACTION":3},"everyWordOneCategory":true,"uniqueEventUrl
+        FAIL B23 hooks/guards/styles installed exactly once (no duplicated listeners)  → {"dir":true,"hooks":[true,true,true,true,true,true,true,true,true,false],"styles":1,"layers":1}
+PASS   arcade:v2-voice-memory/v2199-voice-memory-regression  14 passed  0s
+PRE    arcade:v2-voice-reactions/v2196-voice-reactions-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only
+PRE    arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only boundary
+PRE    arcade:v2-voice-showcase/v2200-voice-showcase-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: accessible dialog
+PRE    arcade:v2-voice-ui/v2195-voice-ui-regression     1 passed  0s
+        AssertionError [ERR_ASSERTION]: Female default
+PRE    arcade:v2-welcome/welcome-regression             0 passed  60s
+        ✗ exited 1:    "name": "A12. no page errors (new visitor)", |    "name": "C6. no page errors (dismissed visitor)",
+PASS   arcade:v22-engineering-world/engineering-world-regression   0 passed  293s
+PRE    arcade:v2210-flow-moment/flow-moment-regression  51 passed, 2 failed  373s
+        ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops
+        ✗ suite failure crashed: page.waitForFunction: Timeout 30000ms exceeded.
+PRE    arcade:v2211-flow-voices/flow-voices-regression  53 passed, 3 failed  280s
+        ✗ suite level crashed: page.waitForFunction: Timeout 15000ms exceeded.
+        ✗ V8e. 390×844: milestone words are centred, readable (≥ 28 px; ≥ 22 px on 568-high phones), inside the viewport, no scrolling
+        ✗ V8e. 430×932: milestone words are centred, readable (≥ 28 px; ≥ 22 px on 568-high phones), inside the viewport, no scrolling
+PASS   arcade:v2212-personality/personality-regression  57 passed  152s
+PASS   arcade:v2213-next-challenge/next-challenge-regression  45 passed  173s
+PASS   arcade:v2214-stem/stem-regression               60 passed  174s
+PASS   arcade:v2215-rare-wow/rare-wow-regression       51 passed  301s
+PASS   arcade:v2216-xp-reward/xp-reward-regression     83 passed  235s
+PASS   arcade:v223-personal-guide/personal-guide-regression   0 passed  78s
+PASS   arcade:v225-flow-welcome/flow-welcome-regression  80 passed  273s
+PASS   arcade:v226-victory-capsule/victory-capsule-regression  91 passed  168s
+PASS   arcade:v227-achievement-audio/achievement-audio-regression  29 passed  51s
+
+31 suites · 757 assertions passed · genuine FAIL: 0 · unresolved INFRA: 1 · failing identically on the pre-Builder baseline: 17 · passed only after an infra re-run: 0

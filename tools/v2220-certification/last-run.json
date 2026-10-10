@@ -1,49 +1,175 @@
 {
- "when": "2026-10-10T22:28:43.944Z",
+ "when": "2026-10-10T23:52:46.127Z",
  "results": [
   {
-   "name": "arcade:v2-cameos/cameo-regression",
-   "status": "INFRA",
-   "passed": 0,
-   "failed": null,
-   "secs": 136,
+   "name": "builder-svg",
+   "status": "PASS",
+   "passed": 229,
+   "failed": 0,
+   "secs": 258,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:loading",
+   "status": "PASS",
+   "passed": 7,
+   "failed": 0,
+   "secs": 99,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:render",
+   "status": "PASS",
+   "passed": 7,
+   "failed": 0,
+   "secs": 70,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:causality",
+   "status": "PASS",
+   "passed": 18,
+   "failed": 0,
+   "secs": 124,
    "bad": [],
    "killed": false,
    "retry": true,
    "first": {
     "status": "INFRA",
-    "passed": 0,
-    "failed": null,
-    "bad": [],
+    "passed": 15,
+    "failed": 1,
+    "bad": [
+     "  ✗ suite causality crashed: page.waitForFunction: Timeout 15000ms exceeded."
+    ],
     "killed": false
    }
   },
   {
-   "name": "arcade:v2210-flow-moment/flow-moment-regression",
-   "status": "PRE-EXISTING",
-   "passed": 56,
-   "failed": 1,
-   "secs": 429,
-   "bad": [
-    "  ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops"
-   ],
-   "killed": false,
-   "baseline": {
-    "status": "FAIL",
-    "passed": 56,
-    "bad": [
-     "  ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops"
-    ]
-   },
-   "sameFailures": true,
-   "newFailures": []
+   "name": "builder-3d:picking",
+   "status": "PASS",
+   "passed": 7,
+   "failed": 0,
+   "secs": 47,
+   "bad": [],
+   "killed": false
   },
   {
-   "name": "arcade:v2211-flow-voices/flow-voices-regression",
+   "name": "builder-3d:parity",
    "status": "PASS",
-   "passed": 57,
+   "passed": 3,
    "failed": 0,
-   "secs": 290,
+   "secs": 39,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:fallbacks",
+   "status": "PASS",
+   "passed": 9,
+   "failed": 0,
+   "secs": 94,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:motion",
+   "status": "PASS",
+   "passed": 6,
+   "failed": 0,
+   "secs": 46,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:lifecycle",
+   "status": "PASS",
+   "passed": 3,
+   "failed": 0,
+   "secs": 204,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:mobile",
+   "status": "PASS",
+   "passed": 8,
+   "failed": 0,
+   "secs": 105,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:chain",
+   "status": "PASS",
+   "passed": 11,
+   "failed": 0,
+   "secs": 418,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:chain",
+   "status": "PASS",
+   "passed": 28,
+   "failed": 0,
+   "secs": 118,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:routing",
+   "status": "PASS",
+   "passed": 6,
+   "failed": 0,
+   "secs": 30,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:cycle",
+   "status": "PASS",
+   "passed": 20,
+   "failed": 0,
+   "secs": 364,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:rewards",
+   "status": "PASS",
+   "passed": 28,
+   "failed": 0,
+   "secs": 498,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:fallback",
+   "status": "PASS",
+   "passed": 15,
+   "failed": 0,
+   "secs": 114,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:mobile",
+   "status": "PASS",
+   "passed": 10,
+   "failed": 0,
+   "secs": 954,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "golden-day5",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 15,
    "bad": [],
    "killed": false
   }
