@@ -27,7 +27,10 @@ export const srv = await new Promise(ok => {
 });
 export const base = "http://127.0.0.1:" + srv.address().port;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
-export const browser = await chromium.launch({ args:["--autoplay-policy=no-user-gesture-required", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const LAUNCH = { args:["--autoplay-policy=no-user-gesture-required", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] };
+export let browser = await chromium.launch(LAUNCH);
+/* test isolation: software-GL contexts accumulate inside one browser process, so long multi-suite runs get slower and slower. A fresh browser per suite removes that coupling. */
+export async function freshBrowser(){ try { await browser.close(); } catch {} browser = await chromium.launch(LAUNCH); return browser; }
 function wav(ms){ const sr = 8000, n = sr * ms / 1000 | 0, b = Buffer.alloc(44 + n * 2); b.write("RIFF", 0); b.writeUInt32LE(36 + n * 2, 4); b.write("WAVEfmt ", 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write("data", 36); b.writeUInt32LE(n * 2, 40); return b; }
 const PNG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#c58a4a"/></svg>';
 

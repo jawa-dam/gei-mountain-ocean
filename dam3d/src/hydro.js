@@ -21,7 +21,7 @@ export function createHydro(level, up = {}, opt = {}){
   H.resCap = 150 * (1 + 0.1 * liner); H.resV = (opt.resFrac != null ? opt.resFrac : (FULL - MINL) / (MAXL - MINL)) * H.resCap;
   H.pondCap = 60; H.pin = opt.pin == null ? null : opt.pin; H.pinSupply = H.Qref; H.pondV = 0.8 * H.pondCap;
   H.inflow = opt.inflow || (() => 12); H.relCoef = opt.relCoef || 40; H.relSat = !!opt.relSat; H.relSet = opt.rel == null ? 1 : opt.rel; H.relA = H.relSet; H.gateSet = 0; H.gateA = 0;
-  H.resL = 0; H.pondL = 0; H.Qin = 0; H.Qrel = 0; H.spillRes = 0; H.spillPond = 0; H.Qg = 0; H.P = 0; H.D = 0; H.f = 1; H.rpm = 0; H.Qriver = 0; H.units = 0; H.overtopped = false; H.dynamicLake = !!opt.dynamicLake;
+  H.resL = 0; H.pondL = 0; H.Qin = 0; H.Qrel = 0; H.spillRes = 0; H.spillPond = 0; H.Qg = 0; H.P = 0; H.D = 0; H.f = 1; H.rpm = 0; H.Qriver = 0; H.units = 0; H.overtopped = false; H.dynamicLake = !!opt.dynamicLake; H.freeRel = !!opt.freeRel;
   H.setGate = v => { H.gateSet = cl(Math.round(v / 5) * 5, 0, 100); };
   H.setRelease = v => { H.relSet = cl(v, 0, 1); };
   H.engage = (i, on) => { if(i >= 0 && i < H.M) H.as[i] = on == null ? !H.as[i] : !!on; };
@@ -37,7 +37,8 @@ export function createHydro(level, up = {}, opt = {}){
     H.spillRes = H.resL > FULL ? 12 * Math.pow(H.resL - FULL, 1.5) : 0;
     const hp = cl((H.pondL - SILL) / (FULL - SILL), 0, 1.3);
     H.Qg = H.gateA * 13 * Math.sqrt(hp);
-    if(H.pin != null){ H.spillPond = Math.max(0, H.pinSupply - H.Qg); H.Qrel = H.Qg + H.spillPond; }
+    if(H.freeRel){ H.spillPond = 0; }                       // Day 3: the release runs down a free channel — the valve alone sets what leaves the lake
+    else if(H.pin != null){ H.spillPond = Math.max(0, H.pinSupply - H.Qg); H.Qrel = H.Qg + H.spillPond; }
     else { H.spillPond = H.pondL > FULL ? 14 * Math.pow(H.pondL - FULL, 1.5) : 0; H.pondV = cl(H.pondV + (H.Qrel - H.Qg - H.spillPond) * dt, 0, H.pondCap); }
     H.Qin = H.inflow(H.t);
     if(H.pin == null || H.dynamicLake){ H.resV = cl(H.resV + (H.Qin - H.Qrel - H.spillRes) * dt, 0, H.resCap); }
@@ -50,7 +51,7 @@ export function createHydro(level, up = {}, opt = {}){
     H.rpm += (target - H.rpm) * Math.min(1, dt * 2.5);
     H.defs.forEach((m, i) => { H.run[i] = i < H.M && H.as[i] && H.Qg > 0 && H.P >= m.d - 1e-9; });
     if(H.D > 0 && H.Qg > 0) H.defs.forEach((m, i) => { if(i < H.M && H.as[i]) H.units += m.r * H.f * dt; });
-    H.Qriver = H.Qg + H.spillPond + H.spillRes;
+    H.Qriver = H.Qg + H.spillPond + H.spillRes + (H.freeRel ? H.Qrel : 0);
   };
 
   /* plain-language feedback for the HUD: is the whole system working well, or does it need adjusting? */

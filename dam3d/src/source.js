@@ -2,7 +2,7 @@
    A spring head feeds stone troughs that fork at wooden diverter flaps; the branches end in the RESERVOIR chute (a real waterfall down the slope into the lake),
    terrace basins, or a scree drain where water is simply lost. In Day 1 the player turns the forks; in every other Day the terrace runs a default route and the waterfall
    into the lake follows the shared inflow (so a storm is visible at its source). Layouts 1–3 are the same fork graphs as the SVG Day 1. */
-import { Group, Mesh, MeshStandardMaterial, IcosahedronGeometry, PlaneGeometry, Vector3, CylinderGeometry, CatmullRomCurve3 } from "three";
+import { DirectionalLight, Group, Mesh, MeshStandardMaterial, IcosahedronGeometry, PlaneGeometry, Vector3, CylinderGeometry, CatmullRomCurve3 } from "three";
 import { box, cyl, place, merge } from "./geo.js";
 import { waterMaterial, ribbonGeometry } from "./water.js";
 import { waterfallPath, heightAt } from "./terrain.js";
@@ -80,8 +80,11 @@ export function buildSource(S){
   /* state: route {forkId: mode 0|1|2}, flows {nodeId: L/s into it}, edge flows computed by the caller → {a>b: q}, fill {targetId: 0..1}, srcQ */
   SRC.apply = st => { SRC.state = st; };
   const flapAng = [0.6, 0, -0.6];
+  /* the terrace faces west, away from the sun, so the source shot gets a soft warm key from the valley side (only while that shot is on screen; no shadows, no cost elsewhere) */
+  const key = new DirectionalLight(0xffe9c8, 0); key.position.set(TERRACE.x0 - 40, TERRACE.top + 34, (TERRACE.z0 + TERRACE.z1) / 2 + 12); key.target.position.set((TERRACE.x0 + TERRACE.x1) / 2, TERRACE.top, (TERRACE.z0 + TERRACE.z1) / 2); S.scene.add(key, key.target); S.extras.push(key);
   S.hook.push((vs, dt, time, rd, intro) => {
     const st = SRC.state, Qmax = st.Qmax || 12; const em = S.em;
+    key.intensity += ((S.shotName() === "source" ? 2.6 : 0) - key.intensity) * Math.min(1, dt * 4);
     SRC.edges.forEach(e => { const q = (st.edge && st.edge[e.a + ">" + e.b]) || 0, u = e.rib.material.uniforms, f = clamp(q / Qmax, 0, 1); e.rib.visible = f > 0.01; u.uSpeed.value = rd ? 0 : 0.6 + 2.4 * f; u.uFlow.value = 0.3 + 0.7 * f; e.rib.scale.x = 0.5 + 0.5 * Math.sqrt(f); });
     Object.keys(SRC.flaps).forEach(id => { const f = SRC.flaps[id], tgt = flapAng[SRC.nodes[id].m]; f.rotation.y += (tgt - f.rotation.y) * Math.min(1, dt * 8); });
     Object.keys(SRC.basins).forEach(id => { const b = SRC.basins[id], k = clamp((st.fill && st.fill[id]) || 0, 0, 1); b.wp.position.y = lerp(b.y0, b.y1, k); });

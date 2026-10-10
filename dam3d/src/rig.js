@@ -59,7 +59,7 @@ export function buildWaterRig(world, drive){
     // tail + river + spill + stream
     const rf = clamp(S.rpm / 48, 0, 1.2);
     R.tail.visible = vis > 0.5; set(R.tail, { uSpeed:flowSpeed * (0.6 + 1.6 * f), uFlow:0.35 + 0.65 * Math.max(f, rf), uFoam:0.55 + 0.9 * rf });
-    R.river.visible = vis > 0.3; set(R.river, { uSpeed:flowSpeed * 0.9, uFlow:0.55 + 0.25 * f });
+    R.river.visible = vis > 0.3; set(R.river, { uSpeed:flowSpeed * 0.9 * clamp(0.3 + 0.7 * (S.Qriver == null ? S.Qref : S.Qriver) / S.Qref, 0.3, 1.5), uFlow:0.55 + 0.25 * f });   // the river carries gate outflow + every overflow on to the sea (13 L/s = the approved look)
     R.spill.visible = R.stream.visible = fs > 0.02 && vis > 0.6;
     if(R.spill.visible){ const o = 0.35 + 0.55 * Math.min(1, fs * 2.2); set(R.spill, { uSpeed:flowSpeed * (1.4 + 3 * fs), uFlow:0.35 + 0.65 * fs, uOpacity:o, uWhite:0.12 + 0.2 * fs }); set(R.stream, { uSpeed:flowSpeed * (0.7 + 1.6 * fs), uFlow:0.4 + 0.6 * fs, uFoam:0.5 + fs }); R.spill.scale.x = 0.45 + 0.55 * Math.sqrt(fs); }
     // bucket water: fill depends on where the bucket is (filling at the top, spilling on the way down, empty at the tailwater)

@@ -28,7 +28,7 @@ export function mkBtn(ctl, label, fn, min = "72px"){ const b = document.createEl
 export function publish(S, H, extra){
   const v = S.vs;
   if(S.source && !S.source.manual){ const q = Math.max(0, H.Qin); S.source.apply({ Qmax:12, edge:{ "src>F1":q, "F1>T1":q }, fall:q, fill:{} }); }      // the default terrace: the spring feeds the lake at the shared inflow rate
-  v.gateA = H.gateA; v.relA = H.relA; v.resL = H.resL; v.pondL = H.pondL; v.Qg = H.Qg; v.Qref = H.Qref; v.spill = H.spillPond + H.spillRes; v.Qriver = H.Qriver;
+  v.gateA = H.gateA; v.relA = H.relA; v.Qrel = H.Qrel; v.resL = H.resL; v.pondL = H.pondL; v.Qg = H.Qg; v.Qref = H.Qref; v.spill = H.spillPond + H.spillRes; v.Qriver = H.Qriver;
   v.rpm = H.rpm; v.as = H.as; v.run = H.run; v.M = H.M; v.P = H.P; v.D = H.D; v.units = H.units;
   if(extra) Object.assign(v, extra);
 }
@@ -164,7 +164,7 @@ export function day3(env, S){
   const b = 5 + 0.3 * k, a = 3 + 0.35 * k, Out = Math.ceil(1.2 * (b + a) * 10) / 10, D = 36 + 2 * Math.min(L - 1, 6), valves = L >= 4 ? 2 : 1;
   const pts = [8 + ((L * 3) % 5), 19 + ((L * 2) % 4), 29 + (L % 4)];
   const inflow = tt => { let s = b + 0.5 * Math.sin(0.9 * tt); pts.forEach(p => { const x = (tt - p) / 6; if(Math.abs(x) < 1) s += a * (1 - x * x); }); return s; };
-  const H = createHydro(level, up, { pin:7.8, M:1, inflow, relCoef:Out, relSat:true, dynamicLake:true, rel:0 });
+  const H = createHydro(level, up, { pin:7.8, M:1, inflow, relCoef:Out, relSat:true, dynamicLake:true, rel:0, freeRel:true });
   H.resCap = 240 * (1 + 0.1 * (up.liner | 0)); H.resV = (8.7 - 6.0) / 3.8 * H.resCap; H.relSet = 0; H.relA = 0; H.gateSet = 40; H.gateA = 0.4; H.engage(0, true);
   const LO = 8.2, HI = 9.2, st = { t:0, stress:0, inBand:0, done:false, failed:false, why:"", open:[false, false] };
   S.setShot("lake", true);
@@ -309,7 +309,7 @@ export function day2(env, S){
   const fillBtn = mkBtn(ctl, "▶ FILL RESERVOIR", () => { if(st.phase !== "build") return; if(used() === 0){ api.say("Build some wall first — tap a lift on the model."); api.sfx("bad"); return; } st.phase = "fill"; st.attempts++; api.sfx("splash"); }, "150px");
   const clrBtn = mkBtn(ctl, "CLEAR WALL", () => { if(st.phase !== "build") return; for(let r = 0; r < R; r++) th[r] = 0; apply(); api.sfx("click"); }, "110px");
   const hots = []; for(let r = 0; r < R; r++){ const yMid = ((DAM_BD[r] + DAM_BD[r + 1]) / 2 + 3) * LAB.sc;
-    hots.push({ label:"L" + (r + 1) + " · " + th[r], text:() => "L" + (r + 1) + " · " + th[r], aria:"Wall lift " + (r + 1), anchor:new Vector3(LAB.x - 2.1 * LAB.k, (0.55 + yMid) * LAB.k, LAB.z - 0.2 * LAB.k), fn:() => tap(r), state:() => ({ on:th[r] >= need[r], run:false }) }); }
+    hots.push({ label:"L" + (r + 1) + " · " + th[r], text:() => "L" + (r + 1) + " · " + th[r], aria:"Wall lift " + (r + 1), pill:true, anchor:new Vector3(LAB.x + (LAB.w / 2 + 0.55) * LAB.k, (0.55 + yMid) * LAB.k, LAB.z - 0.3 * LAB.k), fn:() => tap(r), state:() => ({ on:th[r] >= need[r], run:false }) }); }
   S.setHot(hots);
   S.pickList = lab.hits.map(h => ({ object:h, id:"row" + h.userData.row })).concat([{ object:S.parts.dam, id:"dam" }]);
   S.onTap = id => { if(id.indexOf("row") === 0) tap(+id.slice(3)); else api.inspect(id); }; S.hotHidden = false;
@@ -399,7 +399,7 @@ export function day1(env, S){
     efficient(){ return st.done && st.t <= TL * 0.8; },
     failReason(){ return "Time ran out. " + targets.map(k => N[k].name + " " + Math.round(frac(k) * 100) + "%").join(" · ") + "."; },
     celebrate(){ S.celebrate(); }, skipIntro(){ S.skipIntro(); }, project:(x, y2, z) => S.project(x, y2, z), pixels:() => S.pixels(), _view:{ cam:S.cam },
-    dbg(){ const si = S.info(); return { Q0, need, TL, t:st.t, modes:forks.map(k => N[k].m), targets:targets.map(k => ({ id:k, name:N[k].name, v:v[k], need })), spilled:st.spilled, c, introDone:S.introDone, info:si.info, mem:si.mem, quality:si.quality, resL:S.vs.resL }; },
+    dbg(){ const si = S.info(); return { Q0, need, TL, t:st.t, modes:forks.map(k => N[k].m), targets:targets.map(k => ({ id:k, name:N[k].name, v:v[k], need })), flows:Object.assign({}, route.flows), lost:Object.keys(route.drain).reduce((a, k) => a + route.drain[k], 0), spilled:st.spilled, fall:route.flows.T1 || 0, c, introDone:S.introDone, info:si.info, mem:si.mem, quality:si.quality, resL:S.vs.resL }; },
     gauge(g){
       g.gauge("q", fmt(Q0) + " L/s", 1);
       targets.forEach(k => { const f = frac(k); g.gauge(k, Math.round(f * 100) + "%", f, { tone:f >= 0.999 ? "good" : "" }); });

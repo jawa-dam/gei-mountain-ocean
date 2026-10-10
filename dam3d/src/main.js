@@ -19,8 +19,8 @@ function stageFor(env){
   return h.stage;
 }
 window.DamBuilder3D = {
-  version:"V2.2.19", supported, tier,
+  version:"V2.2.20", supported, tier,
   has:i => !!DAYS[i],
-  create(i, env){ const f = DAYS[i]; if(!f) return null; const S = stageFor(env); return f(env, S); },
+  create(i, env){ const f = DAYS[i]; if(!f) return null; const S = stageFor(env); const d = f(env, S); if(d) d.probe = () => S.probe(); return d; },
   dispose(holder){ if(holder && holder.stage){ holder.stage.dispose(); holder.stage = null; } }
 };
