@@ -299,7 +299,65 @@ async function suiteRewards(){
   await h.close();
 }
 
-const SUITES = { chain:suiteChain, routing:suiteRouting, cycle:suiteCycle, rewards:suiteRewards };
+/* ================================================================== E5 : mobile layout audit — every Day, several phones */
+async function suiteMobile(){
+  console.log("E5 mobile layout audit (3D Days): overflow, touch targets, clipped / overlapping hotspots, truncated labels");
+  const VPS = [[360, 640], [390, 844], [412, 915], [320, 568], [844, 390]];
+  for (const [w, hh] of VPS){
+    const h = await boot({ query:Q, viewport:{ width:w, height:hh }, storage:{ [SAVE]:seed(5, 0) } });
+    const bad = [];
+    for (let d = 0; d < 6; d++){
+      await h.page.evaluate(([dd]) => { if (DamBuilder.isOpen) DamBuilder.close(); state.level = 5; state.levelFlOz = dd * 111; state.currentStep = dd; state.phase = "ready"; DamBuilder.open({ day:dd }); }, [d]);
+      await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d, null, { timeout:90000 }); await begin(h);
+      await h.page.evaluate(() => { for (let i = 0; i < 20; i++) DamBuilder.def.draw(0.1); });
+      const r = await h.page.evaluate(() => {
+        const out = { over:[], small:[], clip:[], overlap:[], trunc:[] }, vis = e => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.display !== "none" && cs.visibility !== "hidden"; };
+        if (document.documentElement.scrollWidth > innerWidth + 1) out.over.push("page " + document.documentElement.scrollWidth + ">" + innerWidth);
+        const st = document.getElementById("dbStage").getBoundingClientRect();
+        const hots = [...document.querySelectorAll(".db3dHot")].filter(vis);
+        hots.forEach(b => { const r = b.getBoundingClientRect(); if (r.height < 43.5 || r.width < 43.5) out.small.push("hot " + b.textContent.trim() + " " + Math.round(r.width) + "x" + Math.round(r.height)); if (r.left < st.left - 2 || r.right > st.right + 2 || r.top < st.top - 2 || r.bottom > st.bottom + 2) out.clip.push("hot " + b.textContent.trim() + " outside the stage"); });
+        for (let i = 0; i < hots.length; i++) for (let j = i + 1; j < hots.length; j++){ const a = hots[i].getBoundingClientRect(), b = hots[j].getBoundingClientRect(), ox = Math.min(a.right, b.right) - Math.max(a.left, b.left), oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top); if (ox > 0 && oy > 0 && ox * oy > 0.5 * Math.min(a.width * a.height, b.width * b.height)) out.overlap.push(hots[i].textContent.trim() + " / " + hots[j].textContent.trim()); }
+        [...document.querySelectorAll("#dbCtl button, #dbRoot .dbSeg button, #dbRoot .dbIcon, #dbRoot .dbDay")].filter(vis).forEach(b => { const r = b.getBoundingClientRect(); if (r.height < 43.5) out.small.push("btn " + b.textContent.trim().slice(0, 14) + " h" + Math.round(r.height)); if (r.right > innerWidth + 1 || r.left < -1) out.clip.push("btn " + b.textContent.trim().slice(0, 14) + " off-screen"); });
+        document.querySelectorAll("#dbRoot [data-g], #dbRoot .dbG, #dbCtl label, #dbCtl output, .db3dAdvice").forEach(e => { if (vis(e) && e.scrollWidth > e.clientWidth + 2 && getComputedStyle(e).overflow !== "visible") out.trunc.push((e.textContent || "").trim().slice(0, 24)); });
+        const dock = document.querySelector("#dbCtl"); if (dock){ for (let e = dock.parentElement; e && e !== document.body; e = e.parentElement){ const oy = getComputedStyle(e).overflowY; if ((oy === "auto" || oy === "scroll") && e.scrollHeight > e.clientHeight) e.scrollTop = e.scrollHeight; } const r = dock.getBoundingClientRect(); if (r.bottom > innerHeight + 1) out.clip.push("controls unreachable: bottom " + Math.round(r.bottom) + " > " + innerHeight + " even after scrolling"); }
+        return out;
+      });
+      for (const k of Object.keys(r)) r[k].forEach(m => bad.push("Day " + (d + 1) + " " + k + ": " + m));
+    }
+    check(w + "×" + hh + ": all six 3D Days — no overflow, touch targets ≥ 44 px, nothing clipped / overlapping / truncated", bad.length === 0, bad.slice(0, 12));
+    check(w + "×" + hh + ": no page errors", h.errors.length === 0, h.errors);
+    await h.close();
+  }
+}
+
+/* ================================================================== E6 : fallbacks on the V2.2.19 Days (the SVG Days themselves are certified, all six, by dam-builder-regression.mjs under ?b3d=off) */
+async function suiteFallback(){
+  console.log("E6 WebGL2 unavailable / disabled / lost on Days 1, 3 and 6");
+  for (const D of [0, 2, 5]){
+    const label = "Day " + (D + 1);
+    let h = await boot({ query:"?b3d=off", storage:{ [SAVE]:seed(1, D * 111) } });
+    await h.page.evaluate(d => DamBuilder.open({ day:d }), D); await sleep(1200);
+    check(label + ": ?b3d=off → SVG Day, no canvas, no 3D bundle", await h.page.evaluate(() => !DamBuilder.run.is3d && !document.querySelector(".db3d") && !window.DamBuilder3D && !!document.querySelector("#dbStage svg")));
+    await h.close();
+    h = await boot({ query:"?b3d=high", storage:{ [SAVE]:seed(1, D * 111) } });
+    await h.page.evaluate(() => { const g = HTMLCanvasElement.prototype.getContext; HTMLCanvasElement.prototype.getContext = function(t){ if (/webgl/i.test(t)) return null; return g.apply(this, arguments); }; });
+    const t0 = await h.page.evaluate(snap); await h.page.evaluate(d => DamBuilder.open({ day:d }), D);
+    await h.page.waitForFunction(() => DamBuilder.run && !DamBuilder.run.is3d && !!document.querySelector("#dbStage svg"), null, { timeout:60000 });
+    check(label + ": WebGL2 unavailable → SVG Day with a notice, ledger untouched", await h.page.evaluate(() => /simple view/i.test(document.getElementById("dbToast").textContent)) && (await h.page.evaluate(snap)).total === t0.total);
+    await h.close();
+    h = await boot({ query:"?b3d=high", storage:{ [SAVE]:seed(1, D * 111) } });
+    const a = await h.page.evaluate(snap); await open3D(h, D); await begin(h); await run(h, 1, 2);
+    await h.page.evaluate(() => { document.querySelector(".db3d").dispatchEvent(new Event("webglcontextlost", { cancelable:true })); });
+    await h.page.waitForFunction(() => DamBuilder.run && !DamBuilder.run.is3d, null, { timeout:30000 });
+    const b = await h.page.evaluate(snap);
+    check(label + ": context lost mid-run → seamless SVG fallback, nothing paid, no canvas left behind", !(await h.page.evaluate(() => !!document.querySelector(".db3d"))) && b.total === a.total && b.lvl === a.lvl, [a, b]);
+    check(label + ": the fallback Day is live (intro or playing) and the Day bar still works", await h.page.evaluate(() => ["intro", "playing"].includes(DamBuilder.status) && !!document.querySelector(".dbDay")));
+    check(label + ": no page errors", h.errors.length === 0, h.errors);
+    await h.close();
+  }
+}
+
+const SUITES = { chain:suiteChain, routing:suiteRouting, cycle:suiteCycle, rewards:suiteRewards, mobile:suiteMobile, fallback:suiteFallback };
 for (const k of Object.keys(SUITES)) if (want === "all" || want === k) { if (want === "all") await freshBrowser(); try { await SUITES[k](); } catch (e) { failed++; console.log("  ✗ suite " + k + " crashed: " + (e && e.stack || e)); } }
 console.log("\n" + passed + " passed, " + failed + " failed");
 await done();

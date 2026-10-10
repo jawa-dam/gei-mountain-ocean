@@ -64,6 +64,30 @@ export function startStage(S){
   const cam = { yaw:0, pitch:0, yawT:0, pitchT:0, hold:0, intro:0, celeb:0 };
   const cur = { target:new Vector3(...SHOTS.wheel.target), dir:new Vector3(...SHOTS.wheel.dir).normalize(), tall:SHOTS.wheel.tall, wide:SHOTS.wheel.wide }, from = { target:new Vector3(), dir:new Vector3(), tall:0, wide:0 };
   let shot = "wheel", shotT = 1, drag = null, time = 0, dirty = true, lastRender = 0, celebrating = false;
+
+  /* ---------- on-device performance recorder (V2.2.20) ----------
+     Passive: it only timestamps frames. Add ?b3dperf=1 to the URL to get a small on-screen readout with a COPY REPORT button, or call DamBuilder3D.perfReport() from a remote-debugging
+     console. Gaps > 1 s (loop paused: sheet open, tab hidden) are not counted as frames. Nothing here is a measurement until it is run on a real device. */
+  const perf = { t0:performance.now(), last:0, dts:[], lost:0, builtMs:S.buildMs || null }, PERF_MAX = 3600;
+  function perfTick(){ const n = performance.now(); if(perf.last){ const d = n - perf.last; if(d > 0 && d < 1000){ perf.dts.push(d); if(perf.dts.length > PERF_MAX) perf.dts.shift(); } } perf.last = n; }
+  world.lost.push(() => { perf.lost++; });
+  S.perfReport = () => {
+    const a = perf.dts.slice().sort((x, y) => x - y), n = a.length, pct = p => n ? a[Math.min(n - 1, Math.floor(p * n))] : null, mean = n ? a.reduce((x, y) => x + y, 0) / n : null, ex = renderer.getContext().getExtension("WEBGL_debug_renderer_info");
+    return { frames:n, fps:mean ? +(1000 / mean).toFixed(1) : null, p50ms:pct(0.5) && +pct(0.5).toFixed(1), p95ms:pct(0.95) && +pct(0.95).toFixed(1), p99ms:pct(0.99) && +pct(0.99).toFixed(1), worstMs:n ? +a[n - 1].toFixed(1) : null,
+      over16:n ? +(a.filter(x => x > 16.9).length / n * 100).toFixed(1) : null, over33:n ? +(a.filter(x => x > 33.5).length / n * 100).toFixed(1) : null, quality:q, dpr:+(dpr).toFixed(2), devicePixelRatio:window.devicePixelRatio, viewport:[innerWidth, innerHeight], canvas:[canvas.width, canvas.height],
+      draw:renderer.info.render.calls, tris:renderer.info.render.triangles, geoms:renderer.info.memory.geometries, textures:renderer.info.memory.textures, shadows:!!sun.castShadow, contextLost:perf.lost,
+      gpu:ex ? renderer.getContext().getParameter(ex.UNMASKED_RENDERER_WEBGL) : "unavailable", vendor:ex ? renderer.getContext().getParameter(ex.UNMASKED_VENDOR_WEBGL) : "unavailable",
+      jsHeapMB:performance.memory ? +(performance.memory.usedJSHeapSize / 1048576).toFixed(1) : null, cores:navigator.hardwareConcurrency || null, deviceMemoryGB:navigator.deviceMemory || null, saveData:!!(navigator.connection && navigator.connection.saveData),
+      reducedMotion:reduced(), buildMs:perf.builtMs, seconds:+((performance.now() - perf.t0) / 1000).toFixed(1), ua:navigator.userAgent };
+  };
+  S.perfReset = () => { perf.dts.length = 0; perf.last = 0; perf.t0 = performance.now(); };
+  if(/[?&]b3dperf=1/.test(location.search)){
+    const o = document.createElement("div"); o.setAttribute("style", "position:absolute;left:6px;top:6px;z-index:9;padding:4px 7px;border-radius:8px;background:rgba(0,0,0,.72);color:#9fe;font:700 10px/1.3 monospace;pointer-events:auto;white-space:pre");
+    const bt = document.createElement("button"); bt.type = "button"; bt.textContent = "COPY REPORT"; bt.setAttribute("style", "display:block;margin-top:3px;min-height:32px;padding:0 8px;font:700 10px monospace;border-radius:6px;border:1px solid #2fd2ff;background:#06070d;color:#fff");
+    const tx = document.createElement("span"); o.appendChild(tx); o.appendChild(bt); stageEl.appendChild(o);
+    bt.addEventListener("click", ev => { ev.stopPropagation(); const j = JSON.stringify(S.perfReport(), null, 1); try{ navigator.clipboard.writeText(j); }catch(e){} window.__damPerf = j; bt.textContent = "COPIED (also window.__damPerf)"; setTimeout(() => bt.textContent = "COPY REPORT", 1800); });
+    const iv = setInterval(() => { if(!o.isConnected){ clearInterval(iv); return; } const r = S.perfReport(); tx.textContent = (r.fps || "–") + " fps  p95 " + (r.p95ms || "–") + " ms\n" + r.quality + "  dpr " + r.dpr + "  " + r.draw + " calls"; }, 500);
+  }
   S.shots = SHOTS; S.shotName = () => shot;
   S.setShot = (name, instant) => {
     const d = SHOTS[name]; if(!d || (name === shot && shotT >= 1)) return; shot = name;
@@ -143,6 +167,7 @@ export function startStage(S){
   let runSecs = 0, lift = 0, beltX = SAW.fastX, lever = 0, blade = 0, saw0 = 0, stoneA = 0;
   S.vis = { get lift(){ return lift; }, get beltX(){ return beltX; }, get saw(){ return vs.M >= 2 ? mach.arbor.rotation.x : null; } };
   S.frame = function(dt){
+    perfTick();
     dt = Math.min(dt, 0.1); time += dt;
     if(!S.introDone && (reduced() || (env.isPlaying ? env.isPlaying() : true))) cam.intro += dt * (env.fast ? 2.6 : 1);
     const rd = reduced(), rpmV = vs.rpm * 0.2, om = rpmV * Math.PI * 2 / 60, introAll = rd ? 1 : clamp(cam.intro / 3.2, 0, 1);
@@ -177,7 +202,11 @@ export function startStage(S){
     if(!rd){ em.rain.update(dt, 0, 0, 0); em.smoke.update(dt, -0.5, 0.3, 2.2); em.spark.update(dt, 9, 0.2, -0.4); }
     if(!rd){ em.spray.update(dt, 9, 0.5, 0.7); em.mist.update(dt, -0.3, 0.8, 1.6); em.dust.update(dt, -0.02, 0.6, 1.4); em.chips.update(dt, 9, 0.4, 0.2); }
     const hw = canvas.clientWidth, hh = canvas.clientHeight;
-    S.hotList.forEach(o => { proj.copy(o.anchor).project(camera); const vis = proj.z < 1 && introAll > 0.95 && !S.hotHidden; o.b.style.display = vis ? "flex" : "none"; if(vis){ o.b.style.transform = "translate(" + ((proj.x * 0.5 + 0.5) * hw - 22).toFixed(0) + "px," + ((-proj.y * 0.5 + 0.5) * hh - 22).toFixed(0) + "px)"; if(o.text){ const t = o.text(); if(t !== o.k){ o.k = t; o.span.textContent = t; } } const st = o.state ? o.state() : null; o.b.classList.toggle("on", !!(st && st.on)); o.b.classList.toggle("run", !!(st && st.run)); } });
+    const placed = [];
+    S.hotList.forEach(o => { proj.copy(o.anchor).project(camera); const vis = proj.z < 1 && introAll > 0.95 && !S.hotHidden; o.b.style.display = vis ? "flex" : "none"; if(vis){ o.px = (proj.x * 0.5 + 0.5) * hw; o.py = (-proj.y * 0.5 + 0.5) * hh; o.w = o.b.offsetWidth || 44; if(o.text){ const t = o.text(); if(t !== o.k){ o.k = t; o.span.textContent = t; } } const st = o.state ? o.state() : null; o.b.classList.toggle("on", !!(st && st.on)); o.b.classList.toggle("run", !!(st && st.run)); placed.push(o); } });
+    /* keep markers apart on small screens: nudge overlapping ones vertically (never moves a marker that has no neighbour, so a lone marker sits exactly on its anchor) */
+    for(let pass = 0; pass < 4; pass++) for(let a = 0; a < placed.length; a++) for(let b = a + 1; b < placed.length; b++){ const A = placed[a], B = placed[b], ox = (A.w + B.w) / 2 - Math.abs(A.px - B.px), oy = 46 - Math.abs(A.py - B.py); if(ox > 0 && oy > 0){ const up = A.py <= B.py ? A : B, dn = up === A ? B : A, m = oy / 2 + 1; up.py -= m; dn.py += m; } }
+    placed.forEach(o => { o.b.style.transform = "translate(" + (o.px - o.w / 2).toFixed(0) + "px," + (clamp(o.py, 22, hh - 22) - 22).toFixed(0) + "px)"; });
     renderer.render(scene, camera); lastRender = time; dirty = false;
     if(dt > 0.034) slow += dt; else slow = Math.max(0, slow - dt);
     if(slow > 1.2 && dpr > 0.7){ dpr = Math.max(0.7, dpr * 0.8); slow = 0; size(); } else if(slow > 1.2 && sun.castShadow){ sun.castShadow = false; slow = 0; }
