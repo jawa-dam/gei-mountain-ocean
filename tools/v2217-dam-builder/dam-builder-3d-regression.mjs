@@ -35,6 +35,7 @@ const dbg = h => h.page.evaluate(() => DamBuilder.def.dbg());
 const gate = (h, v) => h.page.evaluate(x => { const el = document.getElementById("db3dGate"); el.value = x; el.dispatchEvent(new Event("input", { bubbles:true })); }, v);
 const ctlBtn = (h, re) => h.page.evaluate(r => { const b = [...document.querySelectorAll("#dbCtl button")].find(x => new RegExp(r, "i").test(x.textContent)); if (b) b.click(); return !!b; }, re);
 async function run3D(h, seconds, frames = 3){ await h.page.evaluate(([s, f]) => { DamBuilder.advance(s); for (let i = 0; i < f; i++) DamBuilder.def.draw(0.05); }, [seconds, frames]); }
+async function settle(h, n = 40){ await h.page.evaluate(k => { for (let i = 0; i < k; i++) DamBuilder.def.draw(0.1); }, n); }   // let the visual easing (clutch lift, belt shift) play out
 
 /* ================================================================== D1 loading */
 async function suiteLoading(){
@@ -98,13 +99,14 @@ async function suiteCausality(){
   check("wheel rotation tracks flow: more water → turns faster (" + dA100.toFixed(2) + " rad vs " + dA40.toFixed(2) + " rad per 2 s)", dA100 > dA40 * 1.4 && dA40 > 0, { dA40, dA100 });
   check("wheel speed is the model's (13 L/s unloaded → 48 sim-rpm → 9.6 rpm shown)", Math.abs(a.rpm - 48 * Math.min(13 / 14, 1.3)) < 0.5, a.rpm);
   const s0 = a.stoneAngle; await run3D(h, 1); check("mill not engaged: millstone does not turn, lantern disengaged", Math.abs((await dbg(h)).stoneAngle - s0) < 1e-6);
-  await ctlBtn(h, "MILL"); await run3D(h, 3); a = await dbg(h);
+  await ctlBtn(h, "MILL"); await run3D(h, 3, 0); await settle(h); a = await dbg(h);
   check("engage mill: lantern pinion meshes (lift → 0) and the millstone turns", a.as[0] === true && a.lift < 0.05 && Math.abs(a.stoneAngle) > 0.3, { lift:a.lift, st:a.stoneAngle });
-  const lastS = a.stoneAngle; await run3D(h, 2); const dS = Math.abs((await dbg(h)).stoneAngle - lastS);
-  check("millstone speed follows the 36:19 gear ratio (stone/wheel angular speed ≈ 1.89)", await h.page.evaluate(([dS]) => { const d = DamBuilder.def.dbg(); const w0 = d.wheelAngle; DamBuilder.advance(1); for (let i = 0; i < 4; i++) DamBuilder.def.draw(0.05); const w1 = DamBuilder.def.dbg().wheelAngle, s1 = DamBuilder.def.dbg().stoneAngle; return true; }, [dS]) && dS > 0.5);
-  check("saw belt rides the LOOSE pulley until engaged (blade still)", a.beltX > 5.0 && Math.abs(a.saw) < 1e-6 || true);
-  await ctlBtn(h, "SAW"); await run3D(h, 3); a = await dbg(h);
-  check("engage saw: belt shifts to the fast pulley, blade spins", a.beltX < 4.7 && a.run[1] === true, { beltX:a.beltX, run:a.run });
+  const ratio = await h.page.evaluate(() => { const d0 = DamBuilder.def.dbg(); for (let i = 0; i < 10; i++) DamBuilder.def.draw(0.1); const d1 = DamBuilder.def.dbg(); return (d1.stoneAngle - d0.stoneAngle) / (d1.wheelAngle - d0.wheelAngle); });
+  check("millstone / wheel angular speed follows the 36-cog : 19-stave ratio (≈ 1.89; sign: opposite axes)", Math.abs(Math.abs(ratio) - 36 / 19) < 0.12, ratio);
+  const looseBlade = await h.page.evaluate(() => DamBuilder.def.dbg().saw);
+  check("saw belt rides the LOOSE pulley before engagement (belt at x ≈ 5.18)", a.beltX > 5.1, a.beltX);
+  await ctlBtn(h, "SAW"); await run3D(h, 3, 0); await settle(h); a = await dbg(h); const bladeA = a.saw; await settle(h, 5); const bladeB = (await dbg(h)).saw;
+  check("engage saw: belt shifts to the fast pulley (x ≈ 4.62) and the blade spins", a.beltX < 4.7 && a.run[1] === true && Math.abs(bladeB - bladeA) > 0.5, { beltX:a.beltX, run:a.run, bladeA, bladeB });
   check("both machines run → 'ALL RUNNING' hold counts up", a.holdT > 0, a.holdT);
   // low flow starves machines
   await gate(h, 30); await run3D(h, 6); a = await dbg(h);
