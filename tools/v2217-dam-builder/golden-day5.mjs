@@ -5,12 +5,12 @@
 import { createRequire } from "node:module"; import { readFile, writeFile } from "node:fs/promises"; import { resolve } from "node:path";
 const require = createRequire("/opt/node-tools/node_modules/noop.js"); const { chromium } = require("playwright");
 const root = resolve(new URL("../..", import.meta.url).pathname), golden = resolve(root, "tools/v2217-dam-builder/golden/day5-approved.png");
-const update = process.argv.includes("--update"), extra = process.argv.find(a => a.startsWith("--out="));
+const update = process.argv.includes("--update"), extra = process.argv.find(a => a.startsWith("--out=")), bundleArg = process.argv.find(a => a.startsWith("--bundle="));
 const b = await chromium.launch({ args:["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const p = await b.newPage({ viewport:{ width:390, height:600 }, deviceScaleFactor:1 });
 p.on("pageerror", e => console.log("ERR", e.message));
-await p.setContent("<body style='margin:0;background:#000'><div id=st style='position:relative;width:390px;height:600px;overflow:hidden'><canvas id=c style='position:absolute;inset:0;width:100%;height:100%'></canvas></div><div id=ctl></div></body>");
-await p.addScriptTag({ path:resolve(root, "dam-builder-3d-v2218.js") });
+await p.setContent("<style>.db3dHot{display:none!important}</style><body style='margin:0;background:#000'><div id=st style='position:relative;width:390px;height:600px;overflow:hidden'><canvas id=c style='position:absolute;inset:0;width:100%;height:100%'></canvas></div><div id=ctl></div></body>");
+await p.addScriptTag({ path:bundleArg ? bundleArg.slice(9) : resolve(root, "dam-builder-3d-v2218.js") });
 await p.evaluate(async () => {
   let s = 12345; Math.random = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
   const api = { gauge(){}, inspect(){}, sfx(){} }, kit = { reduced:() => false };
@@ -35,6 +35,6 @@ else {
     return { mean:sum / (da.length / 4), movedPct:moved / (da.length / 4) * 100 };
   }, [g, n]);
   console.log(JSON.stringify(r));
-  process.exitCode = (r.mean < 3.0 && r.movedPct < 6) ? 0 : 1;
+  process.exitCode = (r.mean < 4.5 && r.movedPct < 4.5) ? 0 : 1;   // V2.2.1 intentionally adds the reservoir-release tower behind the gate house and lengthens the river to the sea
 }
 await b.close();

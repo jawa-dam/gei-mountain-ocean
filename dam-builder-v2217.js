@@ -169,7 +169,7 @@
   }
 
   /* ============================================================ DOM + CSS */
-  var heavySkip = 0, envKeep = null, root = null, els = {}, run = null, raf = 0, lastTs = 0, acc = 0, fx = null, defs = {}, sceneG = null, svgEl = null, introSeen = {}, openFlag = false, sheetOpen = false, pillTimer = 0, uiCache = {};
+  var holder3D = {}, heavySkip = 0, envKeep = null, root = null, els = {}, run = null, raf = 0, lastTs = 0, acc = 0, fx = null, defs = {}, sceneG = null, svgEl = null, introSeen = {}, openFlag = false, sheetOpen = false, pillTimer = 0, uiCache = {};
   var CSS = [
     "#dbRoot{position:fixed;inset:0;z-index:10050;display:flex;flex-direction:column;background:#06070d;color:#eaf8ff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow:hidden}",
     "#dbRoot[hidden]{display:none}",
@@ -201,6 +201,9 @@
     ".db3dHot{position:absolute;left:0;top:0;z-index:3;width:44px;height:44px;border-radius:50%;border:2px solid #ff9df2;background:rgba(6,7,13,.72);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:0;font:900 9px system-ui,sans-serif;letter-spacing:.04em;animation:dbHot 1.6s ease-in-out infinite;will-change:transform}",
     ".db3dHot i{width:14px;height:14px;border-radius:50%;border:3px solid #ff9df2;border-top-color:transparent;margin-bottom:1px}",
     ".db3dHot.on{border-color:#2fd2ff}.db3dHot.on i{border-color:#2fd2ff;border-top-color:transparent}.db3dHot.run{border-color:#6dffb0;animation:none}.db3dHot.run i{border-color:#6dffb0;border-top-color:transparent}",
+    ".db3dAdvice{position:absolute;left:8px;bottom:8px;right:104px;z-index:4;min-height:34px;padding:6px 10px;border-radius:12px;font:800 11.5px/1.25 system-ui,sans-serif;letter-spacing:.02em;background:rgba(6,7,13,.84);border:1px solid #2fd2ff;color:#eaf8ff;display:flex;align-items:center;pointer-events:none}",
+    ".db3dAdvice[hidden]{display:none}.db3dAdvice.good{border-color:#6dffb0;color:#c9ffe1}.db3dAdvice.warn{border-color:#ff9df2}.db3dAdvice.bad{border-color:#ff5b8a;color:#ffd0dc}",
+    ".db3dFc{position:absolute;right:8px;top:8px;width:128px;height:44px;z-index:3;pointer-events:none}.db3dFc[hidden]{display:none}",
     ".dbView{position:absolute;right:8px;bottom:8px;z-index:7;min-height:34px;border-radius:17px;border:1px solid rgba(47,210,255,.6);background:rgba(6,7,13,.78);font:900 10.5px system-ui,sans-serif;letter-spacing:.05em;padding:0 11px;color:#eaf8ff}",
     ".dbView[hidden]{display:none}",
     "@keyframes dbSpin{to{transform:rotate(360deg)}}@keyframes dbHot{0%,100%{box-shadow:0 0 0 0 rgba(255,157,242,.55)}50%{box-shadow:0 0 0 9px rgba(255,157,242,0)}}",
@@ -514,7 +517,7 @@
   var lastGauges = "";
   /* ---- 3D (optional, lazy): only Day 5 has a real-time WebGL scene so far. Everything else — and every device without WebGL — keeps the SVG Days. ---- */
   var mountToken = 0, load3DP = null;
-  var HAS3D = { 4:true };
+  var HAS3D = { 0:true, 1:true, 2:true, 3:true, 4:true, 5:true };
   function url3D(){ try{ var m = /[?&]b3d=(off|low|medium|high)/.exec(location.search); return m ? m[1] : ""; }catch(e){ return ""; } }
   function saveData(){ try{ return !!(navigator.connection && navigator.connection.saveData); }catch(e){ return false; } }
   function want3D(i){ return !!HAS3D[i] && store.r3d !== false && url3D() !== "off" && !saveData(); }
@@ -541,9 +544,11 @@
     o = o || {};
     if(!root) build();
     var prev = run, token = ++mountToken;
-    unmount();
+    var go3d = want3D(i) && !o.force2d;
+    unmount(go3d && !!holder3D.stage);                  // moving between 3D Days keeps the one shared world alive (no rebuild)
+    if(!go3d) disposeStage();
     var L = level();
-    if(want3D(i) && !o.force2d){ mount3D(i, o, prev, token); return; }
+    if(go3d){ mount3D(i, o, prev, token); return; }
     var factory = defs[i]; if(!factory){ warn("Day " + i + " is not registered"); return; }
     svgEl = S("svg", { viewBox:"0 0 360 270", preserveAspectRatio:"xMidYMid meet", role:"group", "aria-label":"Day " + (i + 1) + " " + DAYS[i].name + " challenge" });
     els.dbStage.insertBefore(svgEl, els.dbStage.firstChild);
@@ -563,27 +568,33 @@
     }
   }
 
+  function disposeStage(){
+    try{ if(holder3D.stage && window.DamBuilder3D) window.DamBuilder3D.dispose(holder3D); }catch(e){ warn(e); }
+    holder3D = {}; if(canvasEl && canvasEl.parentNode) canvasEl.parentNode.removeChild(canvasEl); canvasEl = null;
+  }
   function mount3D(i, o, prev, token){
     var fallback = function(why){ if(token !== mountToken || !openFlag) return; warn("3D unavailable (" + why + ") — using the simple view"); toast("3D view unavailable on this device — using the simple view."); mountDay(i, { attempts:o.attempts, keepIntro:o.keepIntro, autostart:o.autostart, force2d:true }); };
-    var ld = document.createElement("div"); ld.className = "db3dLoad"; ld.innerHTML = "<i></i><span>BUILDING THE HYDRAULIC WORLD…</span>"; els.dbStage.appendChild(ld);
+    var ld = document.createElement("div"); ld.className = "db3dLoad"; ld.innerHTML = "<i></i><span>BUILDING THE HYDRAULIC WORLD…</span>"; var reuse = !!(holder3D.stage && canvasEl);
+    if(!reuse) els.dbStage.appendChild(ld);
     els.dbCtl.innerHTML = ""; els.dbGauges.innerHTML = "";
+    var mk = function(D){
+      var q = url3D(); if(q === "off") q = "";
+      var env = { level:level(), up:{ bear:store.up.bear, liner:store.up.liner, act:store.up.act }, canvas:canvasEl, stageEl:els.dbStage, ctl:els.dbCtl, api:api(), kit:kit, day:i, quality:q || undefined, fast:!!o.autostart, holder:holder3D,
+        isPlaying:function(){ return !!(run && run.status === "playing" && !sheetOpen); }, onLost:function(){ if(token === mountToken) fallback("WebGL context lost"); } };
+      var def = D.create(i, env);
+      if(!def){ ld.remove(); throw new Error("scene refused to build"); }
+      ld.remove(); finishMount(i, def, env, o, prev, true);
+    };
     load3D().then(function(D){
       if(token !== mountToken || !openFlag){ ld.remove(); return; }
       if(!D.supported()) throw new Error("no WebGL2");
-      // let the loading screen paint before the (synchronous) world build
-      return new Promise(function(r){ setTimeout(r, 40); }).then(function(){
+      if(reuse){ mk(D); return; }
+      return new Promise(function(r){ setTimeout(r, 40); }).then(function(){       // let the loading screen paint before the (synchronous) world build
         if(token !== mountToken || !openFlag){ ld.remove(); return; }
-        var cv = document.createElement("canvas"); cv.className = "db3d"; cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "3D scene: a dam, sluice gate, flume, waterwheel, gears, mill and sawmill");
-        els.dbStage.insertBefore(cv, els.dbStage.firstChild); canvasEl = cv;
-        var q = url3D(); if(q === "off") q = "";
-        var env = { level:level(), up:{ bear:store.up.bear, liner:store.up.liner, act:store.up.act }, canvas:cv, stageEl:els.dbStage, ctl:els.dbCtl, api:api(), kit:kit, day:i, quality:q || undefined, fast:!!o.autostart,
-          isPlaying:function(){ return !!(run && run.status === "playing" && !sheetOpen); }, onLost:function(){ if(token === mountToken) fallback("WebGL context lost"); } };
-        var def = D.create(i, env);
-        if(!def){ cv.remove(); canvasEl = null; ld.remove(); throw new Error("scene refused to build"); }
-        ld.remove();
-        finishMount(i, def, env, o, prev, true);
+        var cv = document.createElement("canvas"); cv.className = "db3d"; cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "3D scene: a mountain reservoir, dam, millpond, sluice gate, waterwheel, gears, mill and the river running to the sea");
+        els.dbStage.insertBefore(cv, els.dbStage.firstChild); canvasEl = cv; mk(D);
       });
-    }).catch(function(e){ ld.remove(); fallback(e && e.message || e); });
+    }).catch(function(e){ ld.remove(); disposeStage(); fallback(e && e.message || e); });
   }
 
   /* shared by the SVG and 3D mounts: gauges, copy, run record, intro */
@@ -601,12 +612,12 @@
   }
 
   var canvasEl = null;
-  function unmount(){
+  function unmount(keep3d){
     if(run && run.def && run.def.destroy){ try{ run.def.destroy(); }catch(e){} }
     if(svgEl && svgEl.parentNode) svgEl.parentNode.removeChild(svgEl);
-    if(canvasEl && canvasEl.parentNode) canvasEl.parentNode.removeChild(canvasEl);
+    if(!keep3d && canvasEl && canvasEl.parentNode){ canvasEl.parentNode.removeChild(canvasEl); }
     var ld = els.dbStage && els.dbStage.querySelector(".db3dLoad"); if(ld) ld.remove();
-    svgEl = null; sceneG = null; fx = null; run = null; canvasEl = null;
+    svgEl = null; sceneG = null; fx = null; run = null; if(!keep3d) canvasEl = null;
     if(els.dbCtl){ els.dbCtl.innerHTML = ""; els.dbGauges.innerHTML = ""; }
   }
 
@@ -733,7 +744,7 @@
   }
   function closeBuilder(o){
     if(!openFlag) return;
-    openFlag = false; mountToken++; stopLoop(); hideSheet(); unmount();
+    openFlag = false; mountToken++; stopLoop(); hideSheet(); unmount(); disposeStage();
     if(root) root.hidden = true;
     uiCache.days = null;
     updatePill();

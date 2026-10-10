@@ -22,12 +22,21 @@ export function materials(T, tierN){
 function mesh(geo, mat, shadow = true, name){ const m = new Mesh(geo, mat); m.castShadow = shadow; m.receiveShadow = true; if(name) m.name = name; return m; }
 
 /* profile in (sx = -z, sy = y) extruded along world X from x0 to x1 */
-function damSegment(M, x0, x1, pts, mat){
+export function damGeometry(x0, x1, pts){
   const s = new Shape(); pts.forEach((p, i) => i ? s.lineTo(p[0], p[1]) : s.moveTo(p[0], p[1]));
   const g = new ExtrudeGeometry(s, { depth:x1 - x0, bevelEnabled:true, bevelSize:0.12, bevelThickness:0.12, bevelSegments:1, curveSegments:4 });
   g.rotateY(Math.PI / 2); g.translate(x0, 0, 0);         // local z → world x, local x → world −z
   g.attributes.uv.array.forEach((v, i, a) => a[i] = v * 0.22);
-  return mesh(g, mat, true, "dam");
+  return g;
+}
+function damSegment(M, x0, x1, pts, mat){ return mesh(damGeometry(x0, x1, pts), mat, true, "dam"); }
+/* the wall as FIVE STACKED LIFTS (metres of thickness each, bottom → top) with a stepped downstream face; null = the approved smooth profile */
+export const DAM_BD = [-3, 0, 3.2, 6.0, 8.2, 10.2];
+export function damProfile(c, t){
+  if(!t) return MAIN(c);
+  const p = [[17.6, -7], [17.6, c]];
+  for(let r = 4; r >= 0; r--){ p.push([17.6 - t[r], r === 4 ? c : DAM_BD[r + 1]], [17.6 - t[r], DAM_BD[r]]); }
+  p.push([17.6 - t[0], -7]); return p;
 }
 const MAIN = c => [[17.6, -7], [17.6, c], [14.0, c], [13.7, 9.4], [12.9, 6.8], [11.8, 3.6], [10.2, 0], [8.4, -3], [6.9, -7]];
 const SPILL = () => {   // lip at the lake level, then a stepped chute
@@ -43,8 +52,9 @@ export function buildArchitecture(T, tierN, quality){
 
   /* ---- dam ---- */
   const dam = new Group(); dam.name = "damGroup";
-  dam.add(damSegment(M, -22, -16, MAIN(CREST_Y), M.concrete), damSegment(M, -16, -9, SPILL(), M.concrete), damSegment(M, -9, 5.3, MAIN(CREST_Y), M.concrete),
-          damSegment(M, 5.3, 8.7, INTAKE, M.concreteDark), damSegment(M, 8.7, 22, MAIN(CREST_Y), M.concrete));
+  const mainSegs = [[-22, -16], [-9, 5.3], [8.7, 22]].map(r => { const m = damSegment(M, r[0], r[1], MAIN(CREST_Y), M.concrete); m.userData.x0 = r[0]; m.userData.x1 = r[1]; return m; });
+  dam.add(mainSegs[0], damSegment(M, -16, -9, SPILL(), M.concrete), mainSegs[1], damSegment(M, 5.3, 8.7, INTAKE, M.concreteDark), mainSegs[2]);
+  A.rebuildDam = t => mainSegs.forEach(m => { const old = m.geometry; m.geometry = damGeometry(m.userData.x0, m.userData.x1, damProfile(CREST_Y, t)); old.dispose(); });
   // crest: upstream parapet, downstream steel railing, lamp posts, a dark inspection gallery on the face
   const par = []; par.push(place(box(14.2, 0.8, 0.35), -15, CREST_Y + 0.4, -17.4)); par.push(place(box(26.8, 0.8, 0.35), 8.6, CREST_Y + 0.4, -17.4));
   dam.add(mesh(merge(par), M.concrete));

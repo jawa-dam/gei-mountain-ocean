@@ -1,6 +1,8 @@
-/* DAM BUILDER 3D — lazy-loaded bundle entry. window.DamBuilder3D.create(dayIndex, env) → a Day definition (same interface as the SVG Days) or null. */
+/* DAM BUILDER 3D — lazy-loaded bundle entry. window.DamBuilder3D.create(dayIndex, env) → a Day definition (same interface as the SVG Days) or null.
+   env.holder is the shell's persistent holder: the 3D world (stage) is built ONCE and shared by every Day of the session. */
 import { tier } from "./world.js";
-import { createDay5 } from "./day5.js";
+import { createStage, startStage } from "./stage.js";
+import { day1, day2, day3, day4, day5, day6 } from "./days.js";
 
 function supported(){
   try{
@@ -10,8 +12,15 @@ function supported(){
     return true;
   }catch(e){ return false; }
 }
+const DAYS = { 0:day1, 1:day2, 2:day3, 3:day4, 4:day5, 5:day6 };
+function stageFor(env){
+  const h = env.holder || (env.holder = {});
+  if(!h.stage){ h.stage = startStage(createStage(env)); }
+  return h.stage;
+}
 window.DamBuilder3D = {
-  version:"V2.2.18", supported, tier,
-  has:i => i === 4,
-  create(i, env){ if(i === 4) return createDay5(env); return null; }
+  version:"V2.2.19", supported, tier,
+  has:i => !!DAYS[i],
+  create(i, env){ const f = DAYS[i]; if(!f) return null; const S = stageFor(env); return f(env, S); },
+  dispose(holder){ if(holder && holder.stage){ holder.stage.dispose(); holder.stage = null; } }
 };

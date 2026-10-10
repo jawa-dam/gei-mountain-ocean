@@ -1,8 +1,8 @@
 import { WebGLCubeRenderTarget, CubeCamera, HalfFloatType, LinearMipmapLinearFilter, WebGLRenderer, Scene, PerspectiveCamera, DirectionalLight, HemisphereLight, FogExp2, ACESFilmicToneMapping, SRGBColorSpace, PCFSoftShadowMap, Vector3, Mesh, Color } from "three";
 import { makeTextures } from "./tex.js";
 import { makeSky, makeEnv, SUN_DIR, FOG } from "./sky.js";
-import { buildTerrain, buildForest, buildLake, buildFar } from "./terrain.js";
-import { makeWaterUniforms, lakeMaterial, WATER_MATS } from "./water.js";
+import { buildTerrain, buildForest, buildLake, buildFar, buildSea } from "./terrain.js";
+import { makeWaterUniforms, lakeMaterial, seaMaterial, WATER_MATS } from "./water.js";
 import { buildArchitecture, buildProps } from "./structures.js";
 
 export function tier(){
@@ -29,7 +29,8 @@ export function createWorld(canvas, opts = {}){
   const world = { renderer, scene, camera, sun, T, shared, q, sky, lost };
   const terrain = buildTerrain(T, q); scene.add(terrain); world.terrain = terrain; scene.add(buildFar(terrain.material, q));
   const lake = buildLake(lakeMaterial(shared)); scene.add(lake); world.lake = lake;
-  world.forest = buildForest(q === "low" ? 260 : q === "high" ? 700 : 480); scene.add(world.forest);
+  const sea = buildSea(seaMaterial(shared)); scene.add(sea); world.sea = sea;
+  world.forest = buildForest(q === "low" ? 260 : q === "high" ? 700 : 480, (x, z) => (x > 37 && x < 54 && z > -72 && z < -30) || (x > -9 && x < 6 && z > 8 && z < 24) || (x > -19 && x < -8 && z > -9 && z < 4)); scene.add(world.forest);
   const arch = buildArchitecture(T, opts.tier || 0, q); scene.add(arch.root); world.arch = arch; scene.add(buildProps(arch.M));
   return world;
 }
@@ -44,11 +45,11 @@ export function resize(world, w, h, dpr){
    instead of just a sky gradient. Water, particles and anything in `hide` are excluded from the capture. */
 export function bakeReflections(world, hide){
   const { renderer, scene, q, sky } = world, size = q === "low" ? 128 : 256;
-  const was = hide.map(o => o.visible); hide.forEach(o => o.visible = false); world.lake.visible = false;
+  const was = hide.map(o => o.visible); hide.forEach(o => o.visible = false); world.lake.visible = false; world.sea.visible = false;
   sky.material.uniforms.uLin.value = 1;
   const mk = (x, y, z) => { const rt = new WebGLCubeRenderTarget(size, { type:HalfFloatType, generateMipmaps:true, minFilter:LinearMipmapLinearFilter }), c = new CubeCamera(1, 3000, rt); c.position.set(x, y, z); scene.add(c); c.update(renderer, scene); scene.remove(c); return rt; };
   const lakeRT = mk(0, 13, -34), riverRT = mk(6, 4, 6);
-  sky.material.uniforms.uLin.value = 0; world.lake.visible = true; hide.forEach((o, i) => o.visible = was[i]);
+  sky.material.uniforms.uLin.value = 0; world.lake.visible = true; world.sea.visible = true; hide.forEach((o, i) => o.visible = was[i]);
   WATER_MATS.forEach(m => { m.uniforms.uEnv.value = (m === world.lake.material ? lakeRT : riverRT).texture; m.uniforms.uEnvAmt.value = 1; });
   world.reflections = [lakeRT, riverRT];
 }

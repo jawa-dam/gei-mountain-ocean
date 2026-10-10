@@ -3,7 +3,7 @@
 import { Group, Mesh, CatmullRomCurve3, Vector3, InstancedMesh, SphereGeometry, MeshStandardMaterial, Object3D, Matrix4, Euler, Quaternion, MeshPhysicalMaterial } from "three";
 import { waterMaterial, ribbonGeometry } from "./water.js";
 import { FLUME_X, FLUME_Y, FLUME_Z0, FLUME_Z1, GATE_SILL } from "./structures.js";
-import { WHEEL, riverX, STREAM, WATER_Y, waterfallPath } from "./terrain.js";
+import { WHEEL, riverX, riverY, STREAM, WATER_Y, waterfallPath } from "./terrain.js";
 import { sstep, lerp, clamp } from "./util.js";
 
 export const NB = 20;
@@ -24,8 +24,8 @@ export function buildWaterRig(world, drive){
   // tailrace and river
   { const pts = []; for(let i = 0; i <= 20; i++) pts.push(V(WHEEL.x, 0.32 - 0.00 * i, lerp(-2.9, 6.2, i / 20)));
     R.tail = mk(pts, 3.45, (i) => i < 7 ? 0.95 : 0.35, { speed:1, amp:1.2, scale:0.28, stretch:0.45, shallow:"#7fc7cc", deep:"#2d7fa0", opacity:0.9, clear:0.2, edgeFoam:0.7 }); }
-  { const pts = []; for(let i = 0; i <= 56; i++){ const z = lerp(6.0, 110, Math.pow(i / 56, 1.25)); pts.push(V(riverX(z), lerp(0.3, -0.3, sstep(4, 18, z)), z)); }
-    R.river = mk(pts, (i, t) => lerp(4.4, 9, t), (i) => 0.25 + 0.45 * Math.abs(Math.sin(i * 0.8)) * (i < 30 ? 1 : 0.4), { speed:0.9, amp:1.0, scale:0.12, stretch:0.3, across:2.4, shallow:"#69b4b8", deep:"#216e8d", opacity:0.92, clear:0.4, edgeFoam:0.9 }); }
+  { const pts = []; for(let i = 0; i <= 80; i++){ const z = lerp(6.0, 150, Math.pow(i / 80, 1.15)); pts.push(V(riverX(z), riverY(z) + 0.02, z)); }
+    R.river = mk(pts, (i, t) => lerp(4.4, 22, Math.pow(t, 1.6)), (i) => 0.25 + 0.45 * Math.abs(Math.sin(i * 0.8)) * (i < 30 ? 1 : 0.4), { speed:0.9, amp:1.0, scale:0.12, stretch:0.3, across:2.4, shallow:"#69b4b8", deep:"#216e8d", opacity:0.92, clear:0.4, edgeFoam:0.9 }); }
   // spillway sheet down the stepped chute, plunge pool stream
   { const pts = []; let sx = 14.4, y = WATER_Y; pts.push(V(-12.5, y + 0.06, -sx - 1.2), V(-12.5, y + 0.06, -sx));
     for(let k = 0; k < 6; k++){ const ny = y - 1.5; pts.push(V(-12.5, y + 0.07, -(sx - 0.15)), V(-12.5, ny + 0.5, -(sx - 0.15) + 0.05), V(-12.5, ny + 0.07, -(sx - 0.15) + 0.1)); y = ny; sx -= 0.62; pts.push(V(-12.5, ny + 0.07, -sx)); }
@@ -45,7 +45,7 @@ export function buildWaterRig(world, drive){
 
   const spill = { x:-12.5, y:0.35, z:-8.9 };
   R.update = function(S, dt, time, rot, em, reduced, intro){
-    const f = clamp(S.Q / S.Q0, 0, 1), fs = clamp((S.Q0 - S.Q) / S.Q0, 0, 1), flowSpeed = reduced ? 0 : 1, vis = intro;
+    const f = clamp(S.Qg / S.Qref, 0, 1), fs = clamp(S.spill / S.Qref, 0, 1), flowSpeed = reduced ? 0 : 1, vis = intro;
     const set = (m, o) => { const u = m.material.uniforms; for(const k in o) u[k].value = o[k]; };
     // gate outflow + flume
     R.gateOut.visible = R.flume.visible = f > 0.03 && vis > 0.4;

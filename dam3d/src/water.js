@@ -86,3 +86,7 @@ export function ribbonGeometry(pts, width, foam, side){
 export function lakeMaterial(shared){
   return waterMaterial(shared, { speed:0.05, amp:0.45, scale:0.1, across:0.1, deep:"#0c3c66", shallow:"#2f7f95", opacity:1, clear:1, edgeFoam:0, transparent:false, depthWrite:true });
 }
+
+export function seaMaterial(shared){
+  return waterMaterial(shared, { speed:0.07, amp:0.7, scale:0.05, across:0.05, deep:"#0a4a78", shallow:"#2aa3b8", opacity:1, clear:1, edgeFoam:0, foam:1.2, transparent:false, depthWrite:true });
+}
