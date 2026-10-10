@@ -13,14 +13,15 @@ function supported(){
   }catch(e){ return false; }
 }
 const DAYS = { 0:day1, 1:day2, 2:day3, 3:day4, 4:day5, 5:day6 };
+let lastStage = null;
 function stageFor(env){
   const h = env.holder || (env.holder = {});
-  if(!h.stage){ h.stage = startStage(createStage(env)); }
+  if(!h.stage){ const t0 = performance.now(); const st = createStage(env); st.buildMs = Math.round(performance.now() - t0); h.stage = startStage(st); lastStage = h.stage; }
   return h.stage;
 }
 window.DamBuilder3D = {
   version:"V2.2.20", supported, tier,
-  has:i => !!DAYS[i],
+  has:i => !!DAYS[i], perfReport:() => lastStage && lastStage.perfReport ? lastStage.perfReport() : null, perfReset:() => lastStage && lastStage.perfReset && lastStage.perfReset(),
   create(i, env){ const f = DAYS[i]; if(!f) return null; const S = stageFor(env); const d = f(env, S); if(d) d.probe = () => S.probe(); return d; },
   dispose(holder){ if(holder && holder.stage){ holder.stage.dispose(); holder.stage = null; } }
 };

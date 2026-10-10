@@ -22,7 +22,7 @@ const B = "tools/v2217-dam-builder/";
 const builder = [
   ["builder-svg", B + "dam-builder-regression.mjs", 900],
   ...["loading", "render", "causality", "picking", "parity", "fallbacks", "motion", "lifecycle", "mobile", "chain"].map(s => ["builder-3d:" + s, B + "dam-builder-3d-regression.mjs " + s, 600]),
-  ...["chain", "routing", "cycle", "rewards"].map(s => ["e2e:" + s, B + "dam-builder-e2e.mjs " + s, 1500]),
+  ...["chain", "routing", "cycle", "rewards", "fallback", "mobile"].map(s => ["e2e:" + s, B + "dam-builder-e2e.mjs " + s, 1500]),
   ["golden-day5", B + "golden-day5.mjs", 300]
 ];
 const arcade = [];
