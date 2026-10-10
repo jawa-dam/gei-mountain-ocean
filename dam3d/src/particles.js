@@ -9,7 +9,7 @@ export function makeParticles(max, color, opts = {}){
   const mat = new ShaderMaterial({
     transparent:true, depthWrite:false, blending:NormalBlending,
     uniforms:{ uColor:{ value:new Color(color) }, uScale:{ value:400 } },
-    vertexShader:`attribute float aSize; attribute float aAlpha; varying float vA; uniform float uScale; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = clamp(aSize * uScale / -mv.z, 1.0, 96.0); vA = aAlpha; }`,
+    vertexShader:`attribute float aSize; attribute float aAlpha; varying float vA; uniform float uScale; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = clamp(aSize * uScale / -mv.z, 1.0, 56.0); vA = aAlpha; }`,
     fragmentShader:`varying float vA; uniform vec3 uColor; void main(){ vec2 c = gl_PointCoord - 0.5; float d = length(c) * 2.0; float a = smoothstep(1.0, 0.2, d) * vA; if(a < 0.01) discard; gl_FragColor = vec4(uColor, a); }`
   });
   const pts = new Points(g, mat); pts.frustumCulled = false; pts.renderOrder = 5;
