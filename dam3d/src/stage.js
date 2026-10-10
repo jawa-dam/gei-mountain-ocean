@@ -22,16 +22,17 @@ const phase = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
 /* Camera shots: same lens, same elevation language, same orbit rules — only the framing changes. `wheel` is the APPROVED composition and must not drift. */
 export const SHOTS = {
   wheel:   { target:[2.0, 7.2, -9.0],  dir:[0.5, 0.16, 0.85],  tall:56, wide:34 },
-  lab:     { target:[0.0, 4.0, 0.0],   dir:[0.34, 0.2, 0.92],  tall:66, wide:44 },
+  lab:     { target:[-1.5, 4.3, 15.5], dir:[0.88, 0.26, -0.38], tall:24, wide:17 },       // the engineer's section model, seen from its open side
   gate:    { target:[7.0, 9.0, -13.0], dir:[0.3, 0.24, 0.92],  tall:38, wide:25 },
   dam:     { target:[2.0, 5.5, -13.0], dir:[0.38, 0.12, 0.92], tall:62, wide:40 },
   lake:    { target:[0.0, 9.0, -42.0], dir:[0.08, 0.3, 0.95],  tall:74, wide:48 },
-  source:  { target:[43.0, 22.0, -48.0], dir:[-0.62, 0.52, 0.30],  tall:50, wide:32 },
-  factory: { target:[-3.0, 3.6, -1.0], dir:[0.34, 0.26, 0.90], tall:70, wide:46 },
-  ocean:   { target:[6.0, 0.0, 62.0],  dir:[0.0, 0.3, -0.95], tall:110, wide:72 }
+  source:  { target:[44.5, 24.0, -50.0], dir:[-0.50, 0.80, 0.30],  tall:58, wide:40 },
+  factory: { target:[-6.0, 3.6, -1.0], dir:[0.36, 0.28, 0.89], tall:52, wide:40 },
+  ocean:   { target:[5.0, 0.0, 74.0],  dir:[0.0, 0.46, -0.89], tall:104, wide:70 }
 };
 
 export function createStage(env){
+  const _SHOTS = SHOTS;
   const { canvas, stageEl, kit, level } = env, up = env.up, reduced = () => kit.reduced();
   const tierN = level >= 6 ? 2 : level >= 3 ? 1 : 0;
   const world = createWorld(canvas, { tier:tierN, quality:env.quality });
@@ -49,7 +50,7 @@ export function createStage(env){
   const S = { world, scene, camera, renderer, sun, q, mats:M, T, parts, mach, em, rig, lamp, tierN, env, extras:[], hotList:[], pickList:[], onTap:null };
   S.hook = [];                                                    // extra per-frame visual updaters (millpond, ocean, source works …)
   buildMillpond(S); buildFactory(S); S.lab = buildDamLab(S); buildSource(S);
-  S.vs = { gateA:0, relA:1, resL:9.0, pondL:9.0, Qg:0, Qref:13, spill:0, Qriver:0, rpm:0, as:[false, false, false], run:[false, false, false], M:2, P:0, D:0, units:0, rain:0 };
+  S.vs = { gateA:0, relA:1, Qrel:0, resL:9.0, pondL:9.0, Qg:0, Qref:13, spill:0, Qriver:0, rpm:0, as:[false, false, false], run:[false, false, false], M:2, P:0, D:0, units:0, rain:0 };
   return S;
 }
 
@@ -63,6 +64,7 @@ export function startStage(S){
   const cam = { yaw:0, pitch:0, yawT:0, pitchT:0, hold:0, intro:0, celeb:0 };
   const cur = { target:new Vector3(...SHOTS.wheel.target), dir:new Vector3(...SHOTS.wheel.dir).normalize(), tall:SHOTS.wheel.tall, wide:SHOTS.wheel.wide }, from = { target:new Vector3(), dir:new Vector3(), tall:0, wide:0 };
   let shot = "wheel", shotT = 1, drag = null, time = 0, dirty = true, lastRender = 0, celebrating = false;
+  S.shots = SHOTS; S.shotName = () => shot;
   S.setShot = (name, instant) => {
     const d = SHOTS[name]; if(!d || (name === shot && shotT >= 1)) return; shot = name;
     from.target.copy(cur.target); from.dir.copy(cur.dir); from.tall = cur.tall; from.wide = cur.wide;
@@ -87,7 +89,7 @@ export function startStage(S){
   /* ---------- hotspots (DOM buttons anchored to 3D points) + picking ---------- */
   S.setHot = list => {
     S.hotList.forEach(o => o.b.remove()); S.hotList = [];
-    (list || []).forEach(h => { const b = document.createElement("button"); b.type = "button"; b.className = "db3dHot"; b.innerHTML = "<i></i><span>" + h.label + "</span>"; b.setAttribute("aria-label", h.aria || h.label); b.addEventListener("click", ev => { ev.stopPropagation(); h.fn(); }); stageEl.appendChild(b); S.hotList.push({ b, anchor:h.anchor, state:h.state, text:h.text, span:b.querySelector("span"), k:h.label }); });
+    (list || []).forEach(h => { const b = document.createElement("button"); b.type = "button"; b.className = "db3dHot" + ((h.pill != null ? h.pill : String(h.label).length > 4) ? " pill" : ""); b.innerHTML = "<i></i><span>" + h.label + "</span>"; b.setAttribute("aria-label", h.aria || h.label); b.addEventListener("click", ev => { ev.stopPropagation(); h.fn(); }); stageEl.appendChild(b); S.hotList.push({ b, anchor:h.anchor, state:h.state, text:h.text, span:b.querySelector("span"), k:h.label }); });
   };
   const ray = new Raycaster(), nd = new Vector2();
   function onPick(e){
@@ -102,11 +104,11 @@ export function startStage(S){
 
   /* ---------- HUD: system advice + storm forecast ---------- */
   const adv = document.createElement("div"); adv.className = "db3dAdvice"; adv.setAttribute("role", "status"); adv.setAttribute("aria-live", "polite"); adv.hidden = true; stageEl.appendChild(adv);
-  const fc = document.createElementNS("http://www.w3.org/2000/svg", "svg"); fc.setAttribute("class", "db3dFc"); fc.setAttribute("viewBox", "0 0 100 34"); fc.setAttribute("aria-label", "Rain forecast"); fc.hidden = true;
+  const fc = document.createElementNS("http://www.w3.org/2000/svg", "svg"); fc.setAttribute("class", "db3dFc"); fc.setAttribute("viewBox", "0 0 100 34"); fc.setAttribute("aria-label", "Rain forecast"); fc.style.cssText = "width:128px;height:44px;display:none";     // inline: the shell's generic ".dbStage svg" rule would otherwise stretch it over the whole scene, and SVG has no `hidden` property
   fc.innerHTML = '<rect x="0" y="0" width="100" height="34" rx="6" fill="rgba(6,7,13,.7)" stroke="#6a72d8"/><text x="50" y="9" text-anchor="middle" font-size="5.2" font-weight="800" fill="#9bdcf2" font-family="system-ui">RAIN FORECAST · NEXT 14 s</text><polyline points="" fill="none" stroke="#2fd2ff" stroke-width="1.6" stroke-linejoin="round"/><line x1="6" x2="6" y1="12" y2="31" stroke="#ff9df2" stroke-width="1"/>'; stageEl.appendChild(fc);
   let advK = "";
   S.setAdvice = a => { if(!a){ adv.hidden = true; advK = ""; return; } const k = a.tone + "|" + a.text; if(k === advK) return; advK = k; adv.hidden = false; adv.className = "db3dAdvice " + a.tone; adv.textContent = a.text; };
-  S.setForecast = (fn, t0, horizon = 14, lo = 0, hi = 1) => { if(!fn){ fc.hidden = true; return; } fc.hidden = false; let pts = ""; for(let q = 0; q <= 28; q++){ const v = fn(t0 + q * horizon / 28); pts += (6 + q * 3.3).toFixed(1) + "," + (31 - clamp((v - lo) / (hi - lo), 0, 1) * 17).toFixed(1) + " "; } fc.querySelector("polyline").setAttribute("points", pts); };
+  S.setForecast = (fn, t0, horizon = 14, lo = 0, hi = 1) => { if(!fn){ fc.style.display = "none"; return; } fc.style.display = "block"; let pts = ""; for(let q = 0; q <= 28; q++){ const v = fn(t0 + q * horizon / 28); pts += (6 + q * 3.3).toFixed(1) + "," + (31 - clamp((v - lo) / (hi - lo), 0, 1) * 17).toFixed(1) + " "; } fc.querySelector("polyline").setAttribute("points", pts); };
 
   /* ---------- sizing + adaptive resolution ---------- */
   let dpr = Math.min(window.devicePixelRatio || 1, q === "high" ? 2 : q === "medium" ? 1.5 : 1), slow = 0;
@@ -167,7 +169,7 @@ export function startStage(S){
     buildIn(cam.intro, rd);
     frameCamera(dt);
     world.lake.position.y = vs.resL - 9.0;
-    rig.update({ Qg:vs.Qg, Qref:vs.Qref, spill:vs.spill, rpm:vs.rpm }, dt, time, mach.drive.rotation.x, em, rd, introAll);
+    rig.update({ Qg:vs.Qg, Qref:vs.Qref, spill:vs.spill, rpm:vs.rpm, Qriver:vs.Qriver }, dt, time, mach.drive.rotation.x, em, rd, introAll);
     for(const h of S.hook) h(vs, dt, time, rd, introAll);
     renderer.toneMappingExposure = 1.05 + (celebrating ? 0.22 * Math.sin(clamp(cam.celeb / 1.6, 0, 1) * Math.PI) : 0);
     world.shared.uTime.value = rd ? 0 : time; world.sky.material.uniforms.uTime.value = rd ? 0 : time;
@@ -182,6 +184,9 @@ export function startStage(S){
   };
   S.mat_glass = v => { S.mats.glass.emissiveIntensity = v; };
 
+  /* read-only probe of what is actually on screen (used by the certification tests to prove the visuals follow the shared hydraulic state) */
+  S.probe = () => ({ lakeY:world.lake.position.y, gateY:parts.gate.position.y, relGateY:parts.releaseGate ? parts.releaseGate.position.y : null, wheelAngle:mach.drive.rotation.x, lanternAngle:mach.lantern.rotation.y, arborAngle:mach.arbor.rotation.x,
+    lampI:lamp.intensity, hammerAngle:parts.hammer ? parts.hammer.rotation.x : null, hammerVisible:parts.factory ? parts.factory.visible : null, flumeVisible:rig.flume.visible, spillVisible:rig.spill.visible, riverU:rig.river.material.uniforms.uSpeed.value, tailU:rig.tail.material.uniforms.uSpeed.value, flumeU:rig.flume.material.uniforms.uSpeed.value });
   S.dispose = function(){
     ro.disconnect(); S.hotList.forEach(o => o.b.remove()); adv.remove(); fc.remove();
     scene.traverse(o => { if(o.geometry) o.geometry.dispose(); if(o.material){ (Array.isArray(o.material) ? o.material : [o.material]).forEach(m => { for(const k in m){ const v = m[k]; if(v && v.isTexture) v.dispose(); } if(m.uniforms) for(const k in m.uniforms){ const v = m.uniforms[k].value; if(v && v.isTexture) v.dispose(); } if(m.dispose) m.dispose(); }); } });

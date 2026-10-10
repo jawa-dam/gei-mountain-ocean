@@ -10,7 +10,7 @@
  *   D8 mobile      portrait phones + landscape: canvas fills the stage, controls reachable, hotspots ≥ 44 px
  *   node tools/v2217-dam-builder/dam-builder-3d-regression.mjs [suite]
  */
-import { boot, reload, sleep, done, root, browser } from "./harness.mjs";
+import { boot, reload, sleep, done, root, browser, freshBrowser } from "./harness.mjs";
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
@@ -232,7 +232,7 @@ async function suiteMotion(){
   const cls = await h.page.evaluate(() => document.getElementById("dbRoot").classList.contains("dbRM"));
   await h.page.click('[data-act="start"]').catch(() => {}); await sleep(150);
   check("OS reduced-motion honoured: no cinematic (scene is complete immediately)", cls && (await dbg(h)).introDone === true);
-  await gate(h, 100); await ctlBtn(h, "MILL"); await run3D(h, 6, 3);
+  await gate(h, 100); await ctlBtn(h, "MILL"); await run3D(h, 6, 3); await h.page.evaluate(() => DamBuilder.def.draw(0.3));      // one frame past the reduced-motion render throttle so the pose is current
   const a0 = (await dbg(h)).wheelAngle; await h.page.evaluate(() => { for (let i = 0; i < 6; i++) DamBuilder.def.draw(0.1); }); const a1 = (await dbg(h)).wheelAngle;
   check("wheel shows a speed-proportional POSE, it does not spin", Math.abs(a1 - a0) < 1e-6 && Math.abs(a0) > 0.1, { a0, a1 });
   const calls = await h.page.evaluate(() => { const i0 = DamBuilder.def.dbg().info.frame; for (let k = 0; k < 8; k++) DamBuilder.def.draw(0.016); return DamBuilder.def.dbg().info.frame - i0; });
@@ -315,7 +315,7 @@ async function suiteChain(){
 }
 
 const SUITES = { loading:suiteLoading, render:suiteRender, causality:suiteCausality, picking:suitePicking, parity:suiteParity, fallbacks:suiteFallbacks, motion:suiteMotion, lifecycle:suiteLifecycle, mobile:suiteMobile, chain:suiteChain };
-for (const k of Object.keys(SUITES)) if (want === "all" || want === k) { try { await SUITES[k](); } catch (e) { failed++; console.log("  ✗ suite " + k + " crashed: " + (e && e.stack || e)); } }
+for (const k of Object.keys(SUITES)) if (want === "all" || want === k) { if (want === "all") await freshBrowser(); try { await SUITES[k](); } catch (e) { failed++; console.log("  ✗ suite " + k + " crashed: " + (e && e.stack || e)); } }
 console.log("\n" + passed + " passed, " + failed + " failed");
 await done();
 process.exit(failed ? 1 : 0);
