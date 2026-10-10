@@ -778,9 +778,24 @@
     }catch(e){}
     return false;
   }
+  /* The selector floats over Arcade, but it must never sit on the middle of the tap world: on short phones (320×568) the world's centre is exactly where the bottom pill would be,
+     and a tap meant for Arcade would hit the pill instead. When they would collide, the pill rides just above the world's centre (re-evaluated on scroll / resize). */
+  var pillRaf = 0;
+  function placePill(){
+    var p = $("dbPill"), w = $("world"); if(!p || !w || !p.classList.contains("on")) return;
+    p.style.bottom = "";
+    var r = w.getBoundingClientRect(), pr = p.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, H = window.innerHeight, pad = 14;
+    if(r.width > 0 && cx > pr.left - pad && cx < pr.right + pad && cy > pr.top - pad && cy < pr.bottom + pad){
+      var edge = Math.max(pr.height + 4, cy - pad - 30);                          // y of the pill's bottom edge: clear of the centre, never above the screen
+      p.style.bottom = Math.max(6, Math.round(H - edge)) + "px";
+    }
+  }
+  function schedulePill(){ if(pillRaf) return; pillRaf = requestAnimationFrame(function(){ pillRaf = 0; placePill(); }); }
+  window.addEventListener("resize", schedulePill); window.addEventListener("scroll", schedulePill, { passive:true, capture:true }); window.addEventListener("orientationchange", schedulePill);
   function updatePill(){
     var p = $("dbPill"); if(!p) return;
     p.classList.toggle("on", !openFlag && !overlayBlocking());
+    placePill();
   }
 
   /* ============================================================ public API */
