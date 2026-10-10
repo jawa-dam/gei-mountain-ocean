@@ -1,0 +1,51 @@
+{
+ "when": "2026-10-10T22:28:43.944Z",
+ "results": [
+  {
+   "name": "arcade:v2-cameos/cameo-regression",
+   "status": "INFRA",
+   "passed": 0,
+   "failed": null,
+   "secs": 136,
+   "bad": [],
+   "killed": false,
+   "retry": true,
+   "first": {
+    "status": "INFRA",
+    "passed": 0,
+    "failed": null,
+    "bad": [],
+    "killed": false
+   }
+  },
+  {
+   "name": "arcade:v2210-flow-moment/flow-moment-regression",
+   "status": "PRE-EXISTING",
+   "passed": 56,
+   "failed": 1,
+   "secs": 429,
+   "bad": [
+    "  ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops"
+   ],
+   "killed": false,
+   "baseline": {
+    "status": "FAIL",
+    "passed": 56,
+    "bad": [
+     "  ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops"
+    ]
+   },
+   "sameFailures": true,
+   "newFailures": []
+  },
+  {
+   "name": "arcade:v2211-flow-voices/flow-voices-regression",
+   "status": "PASS",
+   "passed": 57,
+   "failed": 0,
+   "secs": 290,
+   "bad": [],
+   "killed": false
+  }
+ ]
+}
