@@ -61,7 +61,7 @@
   }
 
   /* ============================================================ PARTS STORE (isolated; never the game save, never FL OZ) */
-  function freshStore(){ return { v:1, parts:0, earned:0, up:{ bear:0, liner:0, act:0 }, clears:{}, motion:null, mode:"arcade" }; }
+  function freshStore(){ return { v:1, parts:0, earned:0, up:{ bear:0, liner:0, act:0 }, clears:{}, motion:null, mode:"arcade", r3d:null }; }
   function sanitize(d){
     var s = freshStore();
     if(!d || typeof d !== "object") return s;
@@ -70,6 +70,7 @@
     if(d.clears && typeof d.clears === "object") Object.keys(d.clears).slice(0, 3000).forEach(function(k){ if(/^\d{1,7}:[1-6]$/.test(k)) s.clears[k] = int(d.clears[k], 1, 3); });
     s.motion = d.motion === true || d.motion === false ? d.motion : null;
     s.mode = d.mode === "builder" ? "builder" : "arcade";
+    s.r3d = d.r3d === false ? false : null;
     return s;
   }
   var store = (function(){ try{ return sanitize(JSON.parse(window.localStorage.getItem(KEY))); }catch(e){ return freshStore(); } })();
@@ -168,7 +169,7 @@
   }
 
   /* ============================================================ DOM + CSS */
-  var envKeep = null, root = null, els = {}, run = null, raf = 0, lastTs = 0, acc = 0, fx = null, defs = {}, sceneG = null, svgEl = null, introSeen = {}, openFlag = false, sheetOpen = false, pillTimer = 0, uiCache = {};
+  var heavySkip = 0, envKeep = null, root = null, els = {}, run = null, raf = 0, lastTs = 0, acc = 0, fx = null, defs = {}, sceneG = null, svgEl = null, introSeen = {}, openFlag = false, sheetOpen = false, pillTimer = 0, uiCache = {};
   var CSS = [
     "#dbRoot{position:fixed;inset:0;z-index:10050;display:flex;flex-direction:column;background:#06070d;color:#eaf8ff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);overflow:hidden}",
     "#dbRoot[hidden]{display:none}",
@@ -194,6 +195,15 @@
     ".dbStage.swap{opacity:0;transform:translateY(8px)}",
     ".dbStage svg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}",
     ".dbStage [data-eq]{cursor:pointer;outline:none}.dbStage [data-eq]:focus-visible{outline:2px solid #ffd35e;outline-offset:2px}",
+    ".db3d{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}",
+    ".db3dLoad{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(#10163f,#06070d);font-size:12px;font-weight:900;letter-spacing:.08em;color:#9bdcf2}",
+    ".db3dLoad i{width:46px;height:46px;border-radius:50%;border:3px solid rgba(47,210,255,.25);border-top-color:#2fd2ff;animation:dbSpin 1s linear infinite}",
+    ".db3dHot{position:absolute;left:0;top:0;z-index:3;width:44px;height:44px;border-radius:50%;border:2px solid #ff9df2;background:rgba(6,7,13,.72);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:0;font:900 9px system-ui,sans-serif;letter-spacing:.04em;animation:dbHot 1.6s ease-in-out infinite;will-change:transform}",
+    ".db3dHot i{width:14px;height:14px;border-radius:50%;border:3px solid #ff9df2;border-top-color:transparent;margin-bottom:1px}",
+    ".db3dHot.on{border-color:#2fd2ff}.db3dHot.on i{border-color:#2fd2ff;border-top-color:transparent}.db3dHot.run{border-color:#6dffb0;animation:none}.db3dHot.run i{border-color:#6dffb0;border-top-color:transparent}",
+    ".dbView{position:absolute;right:8px;bottom:8px;z-index:4;min-height:34px;border-radius:17px;border:1px solid rgba(47,210,255,.6);background:rgba(6,7,13,.78);font:900 10.5px system-ui,sans-serif;letter-spacing:.05em;padding:0 11px;color:#eaf8ff}",
+    ".dbView[hidden]{display:none}",
+    "@keyframes dbSpin{to{transform:rotate(360deg)}}@keyframes dbHot{0%,100%{box-shadow:0 0 0 0 rgba(255,157,242,.55)}50%{box-shadow:0 0 0 9px rgba(255,157,242,0)}}",
     ".dbInspect{position:absolute;left:8px;right:8px;top:6px;z-index:3;pointer-events:none;background:rgba(6,7,13,.82);border:1px solid rgba(255,157,242,.55);border-radius:10px;padding:5px 9px;font-size:11.5px;line-height:1.3;display:none}",
     ".dbInspect.on{display:block}.dbInspect b{color:#ff9df2;letter-spacing:.05em}",
     ".dbPanel{flex:0 0 auto;padding:7px 8px calc(8px + env(safe-area-inset-bottom,0px));background:linear-gradient(#0b0f2a,#06070d);display:flex;flex-direction:column;gap:6px}",
@@ -292,7 +302,7 @@
       '<div class="dbStat" id="dbStat"></div>' +
       '<div class="dbDays" id="dbDays" role="tablist" aria-label="Days"></div>' +
       '<div class="dbMain">' +
-      '<div class="dbStage" id="dbStage"><div class="dbInspect" id="dbInspect" role="status" aria-live="polite"></div><div class="dbToast" id="dbToast"></div></div>' +
+      '<div class="dbStage" id="dbStage"><div class="dbInspect" id="dbInspect" role="status" aria-live="polite"></div><button type="button" class="dbView" id="dbView" hidden></button><div class="dbToast" id="dbToast"></div></div>' +
       '<div class="dbPanel">' +
         '<div class="dbGoal"><div style="flex:1;min-width:0"><b id="dbConcept"></b> <span id="dbObj"></span></div><button type="button" class="dbHelp" id="dbHelp" aria-label="How this works">?</button></div>' +
         '<div class="dbGauges" id="dbGauges"></div>' +
@@ -301,13 +311,14 @@
       '<div class="dbSheet" id="dbSheet" hidden></div>' +
       '</div>';
     document.body.appendChild(root);
-    ["dbStage", "dbInspect", "dbToast", "dbDays", "dbStat", "dbGauges", "dbCtl", "dbSheet", "dbConcept", "dbObj", "dbSnd", "dbMot", "dbShop", "dbParts", "dbHelp"].forEach(function(id){ els[id] = $(id); });
+    ["dbStage", "dbInspect", "dbToast", "dbDays", "dbStat", "dbGauges", "dbCtl", "dbSheet", "dbConcept", "dbObj", "dbSnd", "dbMot", "dbShop", "dbParts", "dbHelp", "dbView"].forEach(function(id){ els[id] = $(id); });
     root.addEventListener("click", onRootClick);
     els.dbSheet.addEventListener("click", sheetClick);
     els.dbSnd.addEventListener("click", function(){ try{ if(window.GEI_AUDIO) window.GEI_AUDIO.toggleMute(); }catch(e){} syncChrome(); sfx("tick"); });
     els.dbMot.addEventListener("click", function(){ store.motion = !reduced(); persist(); applyMotion(); syncChrome(); });
     els.dbShop.addEventListener("click", function(){ showWorkshop(); });
     els.dbHelp.addEventListener("click", function(){ if(run) showIntro(run.i, true); });
+    els.dbView.addEventListener("click", function(){ store.r3d = store.r3d === false ? null : false; persist(); if(run){ var at = run.attempts; mountDay(run.i, { attempts:at, autostart:run.status === "playing", force2d:store.r3d === false }); } });
     document.addEventListener("visibilitychange", function(){ if(document.hidden) stopLoop(); else if(openFlag) startLoop(); });
     window.addEventListener("keydown", function(e){ if(openFlag && e.key === "Escape"){ if(!els.dbSheet.hidden && sheetOpen !== "result") hideSheet(); else if(els.dbSheet.hidden) closeBuilder(); } });
     window.addEventListener("pagehide", stopLoop);
@@ -501,13 +512,39 @@
   }
 
   var lastGauges = "";
+  /* ---- 3D (optional, lazy): only Day 5 has a real-time WebGL scene so far. Everything else — and every device without WebGL — keeps the SVG Days. ---- */
+  var mountToken = 0, load3DP = null;
+  var HAS3D = { 4:true };
+  function url3D(){ try{ var m = /[?&]b3d=(off|low|medium|high)/.exec(location.search); return m ? m[1] : ""; }catch(e){ return ""; } }
+  function saveData(){ try{ return !!(navigator.connection && navigator.connection.saveData); }catch(e){ return false; } }
+  function want3D(i){ return !!HAS3D[i] && store.r3d !== false && url3D() !== "off" && !saveData(); }
+  function load3D(){
+    if(window.DamBuilder3D) return Promise.resolve(window.DamBuilder3D);
+    if(load3DP) return load3DP;
+    load3DP = new Promise(function(ok, bad){
+      var sc = document.createElement("script"); sc.src = "/dam-builder-3d-v2218.js"; sc.async = true;
+      var to = setTimeout(function(){ bad(new Error("3D bundle timeout")); }, 20000);
+      sc.onload = function(){ clearTimeout(to); window.DamBuilder3D ? ok(window.DamBuilder3D) : bad(new Error("3D bundle missing API")); };
+      sc.onerror = function(){ clearTimeout(to); bad(new Error("3D bundle failed to load")); };
+      document.head.appendChild(sc);
+    }).catch(function(e){ load3DP = null; throw e; });
+    return load3DP;
+  }
+  function syncViewChip(i){
+    if(!els.dbView) return;
+    var has = !!HAS3D[i];
+    els.dbView.hidden = !has;
+    if(has){ var is3 = !!(run && run.is3d); els.dbView.textContent = is3 ? "SIMPLE VIEW" : "3D VIEW"; els.dbView.setAttribute("aria-label", is3 ? "Switch to the simple 2D view" : "Switch to the 3D view"); }
+  }
+
   function mountDay(i, o){
     o = o || {};
     if(!root) build();
-    var prev = run;
+    var prev = run, token = ++mountToken;
     unmount();
-    var factory = defs[i]; if(!factory){ warn("Day " + i + " is not registered"); return; }
     var L = level();
+    if(want3D(i) && !o.force2d){ mount3D(i, o, prev, token); return; }
+    var factory = defs[i]; if(!factory){ warn("Day " + i + " is not registered"); return; }
     svgEl = S("svg", { viewBox:"0 0 360 270", preserveAspectRatio:"xMidYMid meet", role:"group", "aria-label":"Day " + (i + 1) + " " + DAYS[i].name + " challenge" });
     els.dbStage.insertBefore(svgEl, els.dbStage.firstChild);
     skyDefs(svgEl, i); backdrop(svgEl, i);
@@ -518,27 +555,58 @@
     var env = { level:L, up:{ bear:store.up.bear, liner:store.up.liner, act:store.up.act }, svg:sceneG, root:svgEl, ctl:els.dbCtl, api:api(), kit:kit, day:i };
     var def;
     try{ def = factory(env); }catch(e){ warn(e); toast("This challenge could not load."); return; }
-    (def.gauges || []).forEach(function(g){ var d = document.createElement("div"); d.className = "dbG"; d.setAttribute("data-g", g.id); d.innerHTML = "<label>" + esc(g.label) + "</label><b>–</b><i><u></u><s hidden></s></i>"; els.dbGauges.appendChild(d); });
-    els.dbConcept.textContent = LESSON[i].concept + ".";
-    els.dbObj.textContent = def.objective || LESSON[i].obj;
-    run = { i:i, def:def, status:"intro", attempts:(o.attempts != null ? o.attempts : (o.keepIntro && prev && prev.i === i ? prev.attempts : 0)), t:0, inspectId:null, inspectT:0, finished:false, finishedPaid:false };
-    acc = 0; lastGauges = "";
+    finishMount(i, def, env, o, prev, false);
     // construction animation: each top-level piece of the scene is wrapped and rises into place in sequence (a wrapper, because a CSS transform would override the piece's own SVG transform)
     if(!reduced()){
       var kids = Array.prototype.slice.call(sceneG.children);
       kids.forEach(function(kid, k){ var w = S("g", { "class":"dbBuildIn" }, sceneG); w.style.setProperty("--i", String(Math.min(k, 12))); w.appendChild(kid); });
     }
+  }
+
+  function mount3D(i, o, prev, token){
+    var fallback = function(why){ if(token !== mountToken || !openFlag) return; warn("3D unavailable (" + why + ") — using the simple view"); toast("3D view unavailable on this device — using the simple view."); mountDay(i, { attempts:o.attempts, keepIntro:o.keepIntro, autostart:o.autostart, force2d:true }); };
+    var ld = document.createElement("div"); ld.className = "db3dLoad"; ld.innerHTML = "<i></i><span>BUILDING THE HYDRAULIC WORLD…</span>"; els.dbStage.appendChild(ld);
+    els.dbCtl.innerHTML = ""; els.dbGauges.innerHTML = "";
+    load3D().then(function(D){
+      if(token !== mountToken || !openFlag){ ld.remove(); return; }
+      if(!D.supported()) throw new Error("no WebGL2");
+      // let the loading screen paint before the (synchronous) world build
+      return new Promise(function(r){ setTimeout(r, 40); }).then(function(){
+        if(token !== mountToken || !openFlag){ ld.remove(); return; }
+        var cv = document.createElement("canvas"); cv.className = "db3d"; cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "3D scene: a dam, sluice gate, flume, waterwheel, gears, mill and sawmill");
+        els.dbStage.insertBefore(cv, els.dbStage.firstChild); canvasEl = cv;
+        var q = url3D(); if(q === "off") q = "";
+        var env = { level:level(), up:{ bear:store.up.bear, liner:store.up.liner, act:store.up.act }, canvas:cv, stageEl:els.dbStage, ctl:els.dbCtl, api:api(), kit:kit, day:i, quality:q || undefined, fast:!!o.autostart,
+          isPlaying:function(){ return !!(run && run.status === "playing" && !sheetOpen); }, onLost:function(){ if(token === mountToken) fallback("WebGL context lost"); } };
+        var def = D.create(i, env);
+        if(!def){ cv.remove(); canvasEl = null; ld.remove(); throw new Error("scene refused to build"); }
+        ld.remove();
+        finishMount(i, def, env, o, prev, true);
+      });
+    }).catch(function(e){ ld.remove(); fallback(e && e.message || e); });
+  }
+
+  /* shared by the SVG and 3D mounts: gauges, copy, run record, intro */
+  function finishMount(i, def, env, o, prev, is3d){
+    (def.gauges || []).forEach(function(g){ var d = document.createElement("div"); d.className = "dbG"; d.setAttribute("data-g", g.id); d.innerHTML = "<label>" + esc(g.label) + "</label><b>–</b><i><u></u><s hidden></s></i>"; els.dbGauges.appendChild(d); });
+    els.dbConcept.textContent = LESSON[i].concept + ".";
+    els.dbObj.textContent = def.objective || LESSON[i].obj;
+    run = { i:i, def:def, is3d:is3d, status:"intro", attempts:(o.attempts != null ? o.attempts : (o.keepIntro && prev && prev.i === i ? prev.attempts : 0)), t:0, inspectId:null, inspectT:0, finished:false, finishedPaid:false };
+    acc = 0; lastGauges = ""; envKeep = env;
     try{ def.draw(0); def.gauge && def.gauge(env.api); }catch(e){ warn(e); }
-    syncChrome(); updateInspect(true);
-    envKeep = env;
+    syncChrome(); syncViewChip(i); updateInspect(true);
     if(o.keepIntro || o.autostart) run.status = "playing";          // rebuilt after an upgrade / retry: play (the sim stays paused while a sheet is open)
     else if(!introSeen[i]) showIntro(i, false);                      // first visit this session: concept + objective + demo first
     else run.status = "playing";
   }
+
+  var canvasEl = null;
   function unmount(){
     if(run && run.def && run.def.destroy){ try{ run.def.destroy(); }catch(e){} }
     if(svgEl && svgEl.parentNode) svgEl.parentNode.removeChild(svgEl);
-    svgEl = null; sceneG = null; fx = null; run = null;
+    if(canvasEl && canvasEl.parentNode) canvasEl.parentNode.removeChild(canvasEl);
+    var ld = els.dbStage && els.dbStage.querySelector(".db3dLoad"); if(ld) ld.remove();
+    svgEl = null; sceneG = null; fx = null; run = null; canvasEl = null;
     if(els.dbCtl){ els.dbCtl.innerHTML = ""; els.dbGauges.innerHTML = ""; }
   }
 
@@ -589,6 +657,7 @@
       }
     }
     if(run.inspectT > 0){ run.inspectT -= dt; if(run.inspectT <= 0) updateInspect(true); }
+    if(run.is3d && sheetOpen && (++heavySkip % 3)) return;           // a sheet covers the scene: render it at a third of the rate
     try{ run.def.draw(dt); if(run.def.gauge) run.def.gauge(envKeep.api); if(fx) fx.update(dt); }catch(e){ warn(e); }
     if(run && run.inspectId) updateInspect(false);
   }
@@ -627,7 +696,9 @@
     if(fx && !reduced()){ fx.burst(180, 120, 22, "#2fd2ff", 95); fx.burst(180, 120, 12, "#ff9df2", 70); }
     if(svgEl && !reduced()){ var sw = S("rect", { x:0, y:0, width:360, height:270, fill:"#fff", opacity:.0, "class":"dbSweep" }, svgEl); sw.setAttribute("opacity", ".18"); setTimeout(function(){ if(sw.parentNode) sw.parentNode.removeChild(sw); }, 1200); }
     syncChrome();
-    showResult({ ok:true, paid:res.paid, reason:res.reason, parts:parts, stars:st });
+    var info = { ok:true, paid:res.paid, reason:res.reason, parts:parts, stars:st }, myRun = run;
+    if(def.celebrate && !reduced()){ try{ def.celebrate(); }catch(e){ warn(e); } setTimeout(function(){ if(run === myRun && openFlag) showResult(info); }, def.celebrateMs || 1500); }
+    else showResult(info);
   }
 
   /* Day 6 cleared: hand over to the game's own level-complete flow. */
@@ -662,7 +733,7 @@
   }
   function closeBuilder(o){
     if(!openFlag) return;
-    openFlag = false; stopLoop(); hideSheet(); unmount();
+    openFlag = false; mountToken++; stopLoop(); hideSheet(); unmount();
     if(root) root.hidden = true;
     uiCache.days = null;
     updatePill();
