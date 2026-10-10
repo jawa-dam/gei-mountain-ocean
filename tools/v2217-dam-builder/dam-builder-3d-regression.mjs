@@ -92,11 +92,13 @@ async function suiteCausality(){
   check("gate 40% → flow 5.2 L/s (13 × 0.4) after the gate has travelled", Math.abs(a.Q - 5.2) < 1e-6, a.Q);
   await sleep(1500); const g1 = await h.page.evaluate(() => document.querySelector('[data-g="f0"] b').textContent);
   check("the flow gauge shows it", /^5\.2 L\/s/.test(g1), g1);
-  const gateY40 = a.gateY; const ang0 = a.wheelAngle; await run3D(h, 2); const ang1 = (await dbg(h)).wheelAngle; const dA40 = Math.abs(ang1 - ang0);
+  const gateY40 = a.gateY;
+  const spin = () => h.page.evaluate(() => { const d0 = DamBuilder.def.dbg().wheelAngle; for (let i = 0; i < 10; i++) DamBuilder.def.draw(0.1); return Math.abs(DamBuilder.def.dbg().wheelAngle - d0); });   // synchronous: no render-loop frames can interleave
+  const dA40 = await spin();
   await gate(h, 100); await run3D(h, 8); a = await dbg(h);
   check("gate 100% → flow 13 L/s and the gate plate is physically higher", Math.abs(a.Q - 13) < 1e-6 && a.gateY > gateY40 + 0.9, { Q:a.Q, up:a.gateY - gateY40 });
-  const b0 = a.wheelAngle; await run3D(h, 2); const dA100 = Math.abs((await dbg(h)).wheelAngle - b0);
-  check("wheel rotation tracks flow: more water → turns faster (" + dA100.toFixed(2) + " rad vs " + dA40.toFixed(2) + " rad per 2 s)", dA100 > dA40 * 1.4 && dA40 > 0, { dA40, dA100 });
+  const dA100 = await spin();
+  check("wheel rotation tracks flow: more water → turns faster (" + dA100.toFixed(2) + " rad vs " + dA40.toFixed(2) + " rad per 1 s)", dA100 > dA40 * 1.8 && dA40 > 0, { dA40, dA100 });
   check("wheel speed is the model's (13 L/s unloaded → 48 sim-rpm → 9.6 rpm shown)", Math.abs(a.rpm - 48 * Math.min(13 / 14, 1.3)) < 0.5, a.rpm);
   const s0 = a.stoneAngle; await run3D(h, 1); check("mill not engaged: millstone does not turn, lantern disengaged", Math.abs((await dbg(h)).stoneAngle - s0) < 1e-6);
   await ctlBtn(h, "MILL"); await run3D(h, 3, 0); await settle(h); a = await dbg(h);
