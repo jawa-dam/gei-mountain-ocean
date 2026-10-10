@@ -4,14 +4,15 @@ import { PlaneGeometry, BufferAttribute, Mesh, MeshStandardMaterial, Color, Inst
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { fbm, ridged, sstep, lerp, clamp, rng, vnoise } from "./util.js";
 
-export const WATER_Y = 9.0, CREST_Y = 10.2, DAM_Z = -16.0;
+export const WATER_Y = 9.0, CREST_Y = 10.2, DAM_Z = -16.0, SEA_Y = -1.4;
 export const WHEEL = { x:7, y:3.6, z:-1.0, r:3.4 };
 const xc = z => -1 + 6 * Math.sin(z * 0.045 + 0.6) * sstep(-8, 22, z);
+export const riverY = z => z < 18 ? lerp(0.3, -0.3, sstep(4, 18, z)) : -0.3 - 1.1 * sstep(40, 125, z);
 const riverX = z => lerp(WHEEL.x, xc(z) + 1.5, sstep(3, 34, z)) + 4 * Math.sin(z * 0.11) * sstep(8, 40, z);
 function hw(z){
-  const k = [[-140, 40], [-60, 34], [-26, 18], [-20, 15], [-6, 15], [12, 22], [60, 40], [140, 56]];
+  const k = [[-140, 40], [-60, 34], [-26, 18], [-20, 15], [-6, 15], [12, 22], [60, 40], [105, 62], [170, 420]];
   for(let i = 0; i < k.length - 1; i++) if(z <= k[i + 1][0]){ const t = sstep(k[i][0], k[i + 1][0], z); return lerp(k[i][1], k[i + 1][1], t); }
-  return 56;
+  return 420;
 }
 export function heightAt(x, z){
   const d = Math.abs(x - xc(z)), W = hw(z), t = Math.max(0, d - W);
@@ -20,12 +21,12 @@ export function heightAt(x, z){
   h += sstep(6, 50, t) * (rr - 0.35) * 34 + fbm(x * 0.07, z * 0.07, 4, 8) * 4.2 * sstep(0, 12, t) + (fbm(x * 0.35, z * 0.35, 3, 12) - 0.5) * 0.9 * sstep(0, 8, t);
   h += sstep(-100, -150, z) * (30 + 34 * rr);
   const lake = sstep(-6, -17.5, z);                       // upstream of the dam: basin floor
-  const floorY = lerp(-0.012 * Math.max(0, z - 4), -5.5, lake);
+  const floorY = lerp(-0.012 * Math.max(0, z - 4) - 2.5 * sstep(110, 190, z), -5.5, lake);
   h += floorY + (fbm(x * 0.2, z * 0.2, 3, 3) - 0.5) * 0.35 * (1 - lake);
   // river bed + banks downstream of the wheel
   const rx = Math.abs(x - riverX(z)), rz = sstep(-3, 3, z) * (1 - lake);
   const bed = (1 - sstep(2.0, 6.5, rx)) * rz;
-  h = lerp(h, Math.min(h, -0.85 + 0.3 * Math.sin(z * 0.3 + x * 0.2)), bed * 0.95);
+  h = lerp(h, Math.min(h, riverY(z) - 0.55 + 0.18 * Math.sin(z * 0.3 + x * 0.2)), bed * 0.95);
   const ds = streamDist(x, z), sb = (1 - sstep(1.4, 4.2, ds)) * (1 - lake) * sstep(-15, -7, z);
   h = lerp(h, Math.min(h, -0.7), sb * 0.95);
   return h;
@@ -42,7 +43,7 @@ function streamDist(x, z){
 export { riverX, xc };
 
 export function buildTerrain(T, quality){
-  const N = quality === "low" ? 150 : 200, EX = 170, EZ = 150, ZC = -25;
+  const N = quality === "low" ? 150 : 200, EX = 170, EZ = 215, ZC = -5;
   const g = new PlaneGeometry(2, 2, N, N); g.rotateX(-Math.PI / 2);
   const p = g.attributes.position, col = new Float32Array(p.count * 3), uv = g.attributes.uv;
   const warp = t => Math.sign(t) * Math.pow(Math.abs(t), 1.7);
@@ -51,7 +52,7 @@ export function buildTerrain(T, quality){
     p.setX(i, x); p.setZ(i, z); p.setY(i, heightAt(x, z)); uv.setXY(i, x * 0.045, z * 0.045);
   }
   g.computeVertexNormals();
-  const n = g.attributes.normal, C = { rockD:new Color("#45433f"), rockL:new Color("#8c867b"), grassD:new Color("#4d6e30"), grassL:new Color("#7c9a42"), dirt:new Color("#7a6548"), snow:new Color("#f2f6fc"), shore:new Color("#8d8472"), scree:new Color("#7d7468") };
+  const n = g.attributes.normal, C = { rockD:new Color("#45433f"), rockL:new Color("#8c867b"), grassD:new Color("#4d6e30"), grassL:new Color("#7c9a42"), dirt:new Color("#7a6548"), snow:new Color("#f2f6fc"), shore:new Color("#8d8472"), scree:new Color("#7d7468"), sand:new Color("#c4b08c") };
   const tmp = new Color(), tmp2 = new Color();
   for(let i = 0; i < p.count; i++){
     const x = p.getX(i), y = p.getY(i), z = p.getZ(i), up = n.getY(i), noise = fbm(x * 0.09, z * 0.09, 3, 5), strata = Math.sin(y * 1.6 + fbm(x * 0.05, z * 0.05, 3, 2) * 7) * 0.5 + 0.5;
@@ -61,6 +62,7 @@ export function buildTerrain(T, quality){
     tmp2.copy(C.grassD).lerp(C.grassL, fbm(x * 0.18, z * 0.18, 3, 9));
     tmp.lerp(tmp2, gm * 0.95);
     tmp.lerp(C.shore, (1 - sstep(-0.9, -0.1, y)) * 0.9);
+    tmp.lerp(C.sand, sstep(92, 128, z) * (1 - sstep(0.4, 2.6, y)) * 0.92);
     tmp.lerp(C.dirt, (1 - sstep(8.2, 9.8, Math.abs(y - WATER_Y))) * 0.5 * (z < -17 ? 1 : 0));
     const snow = sstep(32 + noise * 14, 46 + noise * 12, y) * sstep(0.3, 0.62, up + 0.15);
     tmp.lerp(C.snow, snow);
@@ -113,7 +115,8 @@ export function buildLake(material){
   const vid = (i, j) => { const k = j * nx + i; if(map[k] < 0){ map[k] = pos.length / 3; pos.push(x0 + i * S, WATER_Y, z0 + j * S); uv.push(x0 + i * S, z0 + j * S); } return map[k]; };
   for(let j = 0; j < nz - 1; j++) for(let i = 0; i < nx - 1; i++){
     const m = Math.min(H[j * nx + i], H[j * nx + i + 1], H[(j + 1) * nx + i], H[(j + 1) * nx + i + 1]);
-    if(m < WATER_Y - 0.05){ const a = vid(i, j), b = vid(i + 1, j), c = vid(i, j + 1), d = vid(i + 1, j + 1); idx.push(a, c, b, b, c, d); }
+    const cx = x0 + (i + 0.5) * S, cz = z0 + (j + 0.5) * S;
+    if(m < WATER_Y + 0.8 && !(cx > 3 && cx < 11 && cz > -26 && cz < -17.5)){ const a = vid(i, j), b = vid(i + 1, j), c = vid(i, j + 1), d = vid(i + 1, j + 1); idx.push(a, c, b, b, c, d); }
   }
   const g = new BufferGeometry(); g.setAttribute("position", new Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new Float32BufferAttribute(uv, 2));
   const n = pos.length / 3, nor = new Float32Array(n * 3), tan = new Float32Array(n * 3); for(let i = 0; i < n; i++){ nor[i * 3 + 1] = 1; tan[i * 3] = 1; }
@@ -123,7 +126,7 @@ export function buildLake(material){
 
 /* Distant ranges: a coarse ring of the same heightfield beyond the detailed valley, so the world has layers of mountains fading into haze. */
 export function buildFar(mat, quality){
-  const EXX = 170, ZMIN = -175, ZMAX = 125, X0 = -1100, X1 = 1100, Z0 = -1000, Z1 = 320, N = quality === "low" ? 70 : 110, MZ = Math.round(N * 0.7);
+  const EXX = 170, ZMIN = -220, ZMAX = 210, X0 = -1300, X1 = 1300, Z0 = -1000, Z1 = 700, N = quality === "low" ? 70 : 110, MZ = Math.round(N * 0.7);
   const pos = [], idx = [], col = [], map = new Int32Array((N + 1) * (MZ + 1)).fill(-1);
   const hv = (i, j) => { const x = X0 + (X1 - X0) * i / N, z = Z0 + (Z1 - Z0) * j / MZ, w = (x < -EXX || x > EXX || z < ZMIN || z > ZMAX); return [x, z, w]; };
   const C1 = new Color("#6c6a68"), C2 = new Color("#9a948a"), CS = new Color("#f2f6fc"), CG = new Color("#4a5a38"), t = new Color();
@@ -146,4 +149,21 @@ export function waterfallPath(x0, z0, yTop){
     pts.push([x, y + 0.35, z]); x -= gx / gl * 1.6; z -= gz / gl * 1.6; y = heightAt(x, z);
   }
   pts.push([x, WATER_Y + 0.05, z]); return pts;
+}
+
+/* The sea: only the cells whose terrain is below sea level (a true shoreline), foam from shallowness, plus a vast quad to the horizon. */
+export function buildSea(material, shoreFoam){
+  const x0 = -260, x1 = 260, z0 = 60, z1 = 330, S = 3, nx = Math.round((x1 - x0) / S) + 1, nz = Math.round((z1 - z0) / S) + 1;
+  const H = new Float32Array(nx * nz); for(let j = 0; j < nz; j++) for(let i = 0; i < nx; i++) H[j * nx + i] = heightAt(x0 + i * S, z0 + j * S);
+  const pos = [], uv = [], fo = [], idx = [], map = new Int32Array(nx * nz).fill(-1);
+  const vid = (i, j) => { const k = j * nx + i; if(map[k] < 0){ map[k] = pos.length / 3; pos.push(x0 + i * S, SEA_Y, z0 + j * S); uv.push(x0 + i * S, z0 + j * S); fo.push(clamp(1 - (SEA_Y - H[k]) / 1.6, 0, 1)); } return map[k]; };
+  for(let j = 0; j < nz - 1; j++) for(let i = 0; i < nx - 1; i++){
+    const m = Math.min(H[j * nx + i], H[j * nx + i + 1], H[(j + 1) * nx + i], H[(j + 1) * nx + i + 1]);
+    if(m < SEA_Y + 0.4){ const a = vid(i, j), b = vid(i + 1, j), c = vid(i, j + 1), d = vid(i + 1, j + 1); idx.push(a, c, b, b, c, d); }
+  }
+  // open ocean to the horizon (a single big quad beyond the detailed grid)
+  const bx = pos.length / 3, F = 2600; [[-F, z1 - 1], [F, z1 - 1], [-F, F], [F, F]].forEach(p => { pos.push(p[0], SEA_Y, p[1]); uv.push(p[0], p[1]); fo.push(0); }); idx.push(bx, bx + 2, bx + 1, bx + 1, bx + 2, bx + 3);
+  const g = new BufferGeometry(), n = pos.length / 3, nor = new Float32Array(n * 3), tan = new Float32Array(n * 3); for(let i = 0; i < n; i++){ nor[i * 3 + 1] = 1; tan[i * 3] = 1; }
+  g.setAttribute("position", new Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new Float32BufferAttribute(uv, 2)); g.setAttribute("normal", new Float32BufferAttribute(nor, 3)); g.setAttribute("aTan", new Float32BufferAttribute(tan, 3)); g.setAttribute("aFoam", new Float32BufferAttribute(new Float32Array(fo), 1)); g.setIndex(idx);
+  const m = new Mesh(g, material); m.name = "sea"; m.renderOrder = 1; m.frustumCulled = false; return m;
 }
