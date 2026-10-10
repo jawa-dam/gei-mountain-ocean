@@ -27,7 +27,7 @@ export const srv = await new Promise(ok => {
 });
 export const base = "http://127.0.0.1:" + srv.address().port;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
-export const browser = await chromium.launch({ args:["--autoplay-policy=no-user-gesture-required"] });
+export const browser = await chromium.launch({ args:["--autoplay-policy=no-user-gesture-required", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 function wav(ms){ const sr = 8000, n = sr * ms / 1000 | 0, b = Buffer.alloc(44 + n * 2); b.write("RIFF", 0); b.writeUInt32LE(36 + n * 2, 4); b.write("WAVEfmt ", 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write("data", 36); b.writeUInt32LE(n * 2, 40); return b; }
 const PNG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#c58a4a"/></svg>';
 
@@ -44,7 +44,7 @@ export async function boot(opts = {}){
   const page = await ctx.newPage();
   page.on("pageerror", e => { if (!/addStyle is not defined/.test(e.message)) errors.push(e.message); });   // pre-existing, unrelated (tap-lites-reward-moments-v2178.js)
   if (opts.storage) await page.addInitScript(s => { if(!sessionStorage.getItem("__seeded")){ for (const k in s) localStorage.setItem(k, s[k]); sessionStorage.setItem("__seeded", "1"); } }, opts.storage);
-  await page.goto(base + "/", { waitUntil:"load" }); await sleep(500);
+  await page.goto(base + "/" + (opts.query == null ? "?b3d=off" : opts.query), { waitUntil:"load" }); await sleep(500);
   await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });
   await sleep(1800);
   await page.evaluate(() => { const b = document.getElementById("geiWelcomeBegin"); if (b) b.click(); }); await sleep(1100);
