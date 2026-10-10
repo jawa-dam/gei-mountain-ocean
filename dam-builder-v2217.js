@@ -201,7 +201,7 @@
     ".db3dHot{position:absolute;left:0;top:0;z-index:3;width:44px;height:44px;border-radius:50%;border:2px solid #ff9df2;background:rgba(6,7,13,.72);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;padding:0;font:900 9px system-ui,sans-serif;letter-spacing:.04em;animation:dbHot 1.6s ease-in-out infinite;will-change:transform}",
     ".db3dHot i{width:14px;height:14px;border-radius:50%;border:3px solid #ff9df2;border-top-color:transparent;margin-bottom:1px}",
     ".db3dHot.on{border-color:#2fd2ff}.db3dHot.on i{border-color:#2fd2ff;border-top-color:transparent}.db3dHot.run{border-color:#6dffb0;animation:none}.db3dHot.run i{border-color:#6dffb0;border-top-color:transparent}",
-    ".dbView{position:absolute;right:8px;bottom:8px;z-index:4;min-height:34px;border-radius:17px;border:1px solid rgba(47,210,255,.6);background:rgba(6,7,13,.78);font:900 10.5px system-ui,sans-serif;letter-spacing:.05em;padding:0 11px;color:#eaf8ff}",
+    ".dbView{position:absolute;right:8px;bottom:8px;z-index:7;min-height:34px;border-radius:17px;border:1px solid rgba(47,210,255,.6);background:rgba(6,7,13,.78);font:900 10.5px system-ui,sans-serif;letter-spacing:.05em;padding:0 11px;color:#eaf8ff}",
     ".dbView[hidden]{display:none}",
     "@keyframes dbSpin{to{transform:rotate(360deg)}}@keyframes dbHot{0%,100%{box-shadow:0 0 0 0 rgba(255,157,242,.55)}50%{box-shadow:0 0 0 9px rgba(255,157,242,0)}}",
     ".dbInspect{position:absolute;left:8px;right:8px;top:6px;z-index:3;pointer-events:none;background:rgba(6,7,13,.82);border:1px solid rgba(255,157,242,.55);border-radius:10px;padding:5px 9px;font-size:11.5px;line-height:1.3;display:none}",

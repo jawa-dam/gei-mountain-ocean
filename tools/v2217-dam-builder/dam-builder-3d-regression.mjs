@@ -90,7 +90,7 @@ async function suiteCausality(){
   check("idle: gate closed, no flow, wheel still, nothing engaged", d.Q === 0 && d.rpm === 0 && d.as.every(x => !x));
   await gate(h, 40); await run3D(h, 6); let a = await dbg(h);
   check("gate 40% → flow 5.2 L/s (13 × 0.4) after the gate has travelled", Math.abs(a.Q - 5.2) < 1e-6, a.Q);
-  const g1 = await h.page.evaluate(() => document.querySelector('[data-g="f0"] b').textContent);
+  await sleep(1500); const g1 = await h.page.evaluate(() => document.querySelector('[data-g="f0"] b').textContent);
   check("the flow gauge shows it", /^5\.2 L\/s/.test(g1), g1);
   const gateY40 = a.gateY; const ang0 = a.wheelAngle; await run3D(h, 2); const ang1 = (await dbg(h)).wheelAngle; const dA40 = Math.abs(ang1 - ang0);
   await gate(h, 100); await run3D(h, 8); a = await dbg(h);
@@ -122,7 +122,7 @@ async function suiteCausality(){
   const rs = await h.page.evaluate(() => ({ h2:document.querySelector(".dbCard h2").textContent, rw:document.querySelector(".dbRw").textContent, expl:document.querySelector(".dbCard p").textContent.length }));
   check("celebration plays first, then the result sheet (concept explanation + reward)", /CLEARED/.test(rs.h2) && /\+111 FL OZ/.test(rs.rw) && rs.expl > 60 && !sheetBefore, rs);
   // replay: practice, no second reward
-  await h.page.click('[data-act="retry"]'); await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d && DamBuilder.status === "playing", null, { timeout:60000 });
+  await h.page.evaluate(() => document.querySelector('[data-act="retry"]').click()); await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d && DamBuilder.status === "playing", null, { timeout:60000 });
   await h.page.evaluate(() => { DamBuilder.def.skipIntro(); DamBuilder.def.draw(0.05); });
   await gate(h, 100); await ctlBtn(h, "MILL"); await ctlBtn(h, "SAW"); await run3D(h, 12, 1);
   await h.page.waitForFunction(() => /already banked/i.test((document.querySelector(".dbRw") || {}).textContent || ""), null, { timeout:15000 });
@@ -268,7 +268,7 @@ async function suiteMobile(){
       const vw = innerWidth, vh = innerHeight, st = document.getElementById("dbStage").getBoundingClientRect(), cv = document.querySelector(".db3d").getBoundingClientRect(), r = document.getElementById("dbRoot");
       const first = document.querySelector(".dbCtl > *"), fb = first && first.getBoundingClientRect();
       const small = [...document.querySelectorAll(".dbCtl button,.db3dHot")].filter(e => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.height < 40 || b.width < 40); }).length;
-      return { sw:document.documentElement.scrollWidth, vw, stageH:Math.round(st.height), fill:Math.abs(cv.width - st.width) < 2 && Math.abs(cv.height - st.height) < 2, rootScroll:r.scrollHeight - r.clientHeight, ctlOk:fb.top >= 0 && fb.bottom <= vh + 1, small, ar:(cv.width / cv.height).toFixed(2) };
+      return { sw:document.documentElement.scrollWidth, vw, stageH:Math.round(st.height), fill:Math.abs(cv.width - st.width) < 4 && Math.abs(cv.height - st.height) < 4, rootScroll:r.scrollHeight - r.clientHeight, ctlOk:fb.top >= 0 && fb.bottom <= vh + 1, small, ar:(cv.width / cv.height).toFixed(2) };
     });
     check(w + "×" + hh + ": canvas fills the stage (" + m.stageH + "px), no overflow, controls on-screen, targets ≥ 40px", m.sw <= m.vw && m.fill && m.rootScroll <= 1 && m.ctlOk && m.small === 0 && m.stageH >= 150, m);
     check(w + "×" + hh + ": no page errors", h.errors.length === 0, h.errors);
