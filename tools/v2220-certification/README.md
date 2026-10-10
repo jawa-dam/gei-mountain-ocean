@@ -58,3 +58,20 @@ The build/test container has **no Android device** (software GL only). Therefore
 ## Still not done (explicitly out of scope for certification)
 * Mid-challenge save/resume (refresh restarts the run, no reward, no penalty — preserved on purpose). Possible future improvement.
 * Premium asset expansion (authored GLB equipment, sculpted terrain, recorded audio, photographic textures).
+
+## Certification results (this environment: headless Chromium, software WebGL)
+Evidence logs are in `results/`. Final Builder gate on the final code (`results/builder-final.log`): **18 suites, 415 assertions, 0 genuine failures, 0 unresolved infrastructure timeouts.** `builder-3d:causality` hit a 15 s boot-wait timeout on its first attempt (INFRA) and passed 18/18 on the automatic fresh-process re-run — reported, not hidden.
+
+| Suite | Result |
+| --- | --- |
+| builder-svg (all six SVG Days, rewards, existing, mobile, motion, workshop) | 229 passed |
+| builder-3d: loading 7 · render 7 · causality 18 · picking 7 · parity 3 · fallbacks 9 · motion 6 · lifecycle 3 · mobile 8 · chain 11 | all passed (run one per process) |
+| e2e chain 28 · routing 6 · cycle 20 · rewards 28 · fallback 15 · mobile 10 | all passed |
+| golden Day 5 | mean 3.90 / 3.5 % moved — inside the 4.5 limit; **not pixel-identical** (the release tower and the longer river are intentional additions) |
+| Arcade: XP reward 83, next-challenge 45, personality 57, stem 60, rare-wow 51, flow-welcome 80, victory-capsule 91, achievement-audio 29, flow-voices 57 (after fix), … | pass |
+
+### Arcade regression found by this certification (introduced in V2.2.17, fixed here)
+`flow-voices` (level + V8e) passed 57/0 before the Builder existed and failed on `main`. Cause: the fixed bottom **DAM BUILDER mode selector sat on the centre of the tap world on short phones** (320×568), so an Arcade tap hit the selector. Fix: `placePill()` keeps the selector clear of the world's centre (re-evaluated on scroll/resize). Re-run: 57/0.
+
+### Arcade suites that fail identically on the pre-Builder baseline (commit `d467a61`, before any Builder code)
+Run with `--baseline <checkout of d467a61>`; the runner compares the *set* of failing checks. 16 suites fail the same way there (mostly source-text assertions in old voice suites, plus the known unrelated `addStyle is not defined` page error from `tap-lites-reward-moments-v2178.js`): adaptive-voice, ambient, economy-chaos, regression-gate, contextual-voice, dam-map, milestone-voice, quiet-tap, soundtrack, voice-event-vocabulary, voice-reactions, voice-rewards, voice-showcase, voice-ui, welcome, flow-moment (F3c). `cameo` fails with a subset of its baseline failures. These are **pre-existing and untouched by this work**, not certified as passing; the `economy-chaos`/`regression-gate` pair in particular was not green before the Builder and was not investigated here.
