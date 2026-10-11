@@ -116,7 +116,7 @@ const E = "window.__GEI_DAM_SURPRISES__";
 
 /* 40 ms sampler: cameo count/sequence/timing, coverage of the given selectors, overflow, on-screen. */
 const SAMPLER = guardSels => {
-  const Q = window.__aq = { max:0, seq:[], modes:[], firstAt:0, spans:[], covered:0, coveredBy:[], overflow:0, outside:0, pe:[], sizes:[], cur:null, curAt:0 };
+  const Q = window.__aq = { max:0, seq:[], modes:[], firstAt:0, spans:[], covered:0, coveredBy:[], coveredInfo:[], overflow:0, outside:0, pe:[], sizes:[], cur:null, curAt:0 };
   const t0 = performance.now();
   Q.iv = setInterval(() => {
     const on = [...document.querySelectorAll(".dscCameo.on")].filter(el => getComputedStyle(el).display !== "none");
@@ -138,7 +138,10 @@ const SAMPLER = guardSels => {
     for (const sel of guardSels){
       document.querySelectorAll(sel).forEach(b => {
         const br = b.getBoundingClientRect(); if (!br.width || b.offsetParent === null) return;
-        if (r.left < br.right && r.right > br.left && r.top < br.bottom && r.bottom > br.top){ Q.covered++; if (!Q.coveredBy.includes(sel)) Q.coveredBy.push(sel); }
+        if (r.left < br.right && r.right > br.left && r.top < br.bottom && r.bottom > br.top){ Q.covered++; if (!Q.coveredBy.includes(sel)) Q.coveredBy.push(sel);
+          /* failure signature (diagnostics only — the assertion is unchanged): who overlapped whom, where, and whether the cameo is really on top of the control's centre */
+          if (Q.coveredInfo.length < 6){ const top = document.elementFromPoint((br.left + br.right) / 2, (br.top + br.bottom) / 2), rd = x => ({ l:Math.round(x.left), t:Math.round(x.top), r:Math.round(x.right), b:Math.round(x.bottom) });
+            Q.coveredInfo.push({ sel, at:Math.round(performance.now() - t0), cameo:on[0].getAttribute("data-cameo"), cameoBox:rd(R), figure:rd(r), guard:rd(br), vp:innerWidth + "x" + innerHeight, pointerEvents:getComputedStyle(on[0]).pointerEvents, hitTest:top ? (top.id || top.className || top.tagName) : null, cameoOnTop:!!(top && top.closest && top.closest(".dscCameo")), cardShow:!!document.querySelector("#levelCard.show") }); } }
       });
     }
   }, 40);
@@ -177,7 +180,7 @@ async function suiteHome(browser, base, device, label){
   check("1b. " + tag + "MENU IDLE: cameos appear on their own (first after ~3–6 s)", q.seq.length >= 2 && q.firstAt >= 2900 && q.firstAt <= 6400 && q.modes.every(m => m === "home"), { firstAt:Math.round(q.firstAt), seq:q.seq });
   check("1c. " + tag + "MENU IDLE: each shows ~1–2 s then disappears; one at a time", q.spans.slice(0, -1).every(ms => ms >= 850 && ms <= 2300) && q.max === 1, { spans:q.spans.map(Math.round), max:q.max });
   check("1d. " + tag + "MENU IDLE: no image repeats within the last several", noRepeatWithin(q.seq, 4), q.seq);
-  check("1e. " + tag + "MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
+  check("1e. " + tag + "MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   check("12a. " + tag + "MOBILE/desktop: no horizontal overflow, cameo stays on screen (home)", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
 
   /* 2 — non-board tap: cameo leaves at once, the screensaver waits again */
@@ -226,7 +229,7 @@ async function suitePregame(browser, base, device, label){
   for (let i = 0; i < 12; i++){ await g.page.evaluate(E + ".debug.show()"); await sleep(260); }
   const q = await g.page.evaluate(SAMPLE_READ);
   check("3a. " + tag + "PRE-GAME: guide open → friendly cameo layer, one at a time", m0 === "pregame" && q.seq.length >= 2 && q.max === 1 && q.modes.every(m => m === "pregame"), { m0, seq:q.seq.length, max:q.max });
-  check("3b. " + tag + "PRE-GAME: START GAME / tabs / close never covered", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
+  check("3b. " + tag + "PRE-GAME: START GAME / tabs / close never covered", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   check("12b. " + tag + "PRE-GAME: no overflow, cameo on screen", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
   await g.page.evaluate(E + ".debug.show()"); await sleep(200);
   await shot(g, "pregame-" + (label || "desktop").replace(/\s/g, ""));
@@ -277,7 +280,7 @@ async function suiteLevel(browser, base, device, label){
   const narrow = await g.page.evaluate(() => innerWidth < 700);
   check("5b. " + tag + "LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)", natural >= 1 || narrow, { natural, narrow });
   check("5c. " + tag + "LEVEL COMPLETE: large presentation (≥ 96 px), one at a time", Math.min(...q.sizes) >= 96 && q.max === 1, { min:Math.min(...q.sizes), max:Math.max(...q.sizes) });
-  check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
+  check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   check("12c. " + tag + "LEVEL COMPLETE: no overflow, cameo on screen", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
 
   /* 8 — collection popout */
@@ -350,7 +353,7 @@ async function suiteTryAgain(browser, base){
   const q = await g.page.evaluate(SAMPLE_READ);
   const music = await g.page.evaluate(() => DAMSoundtrack.playing);
   check("6a. TRY AGAIN: music keeps playing and the random cameo loop continues", m.mode === "idle" && m.music && music && q.seq.length >= 2 && q.max === 1 && noRepeatWithin(q.seq, 1), { m, music, seq:q.seq });
-  check("6b. TRY AGAIN: TRY DAY AGAIN never covered", q.covered === 0, { covered:q.covered, by:q.coveredBy });
+  check("6b. TRY AGAIN: TRY DAY AGAIN never covered", q.covered === 0, { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   for (let i = 0; i < 80; i++){ if (await g.page.evaluate(E + ".visible")) break; await sleep(100); }
   const pt = await g.page.evaluate(() => { const r = document.getElementById("timeUpCard").getBoundingClientRect(); return { x:r.left + 12, y:r.bottom - 14 }; });
   await tap(g, pt.x, pt.y); await sleep(80);
