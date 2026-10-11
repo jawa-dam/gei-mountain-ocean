@@ -194,7 +194,10 @@ async function suiteHome(browser, base, device, label){
   for (let i = 0; i < 90; i++){ if (await g.page.evaluate(E + ".visible")) break; await sleep(100); }
   const w = await g.page.evaluate(() => { const r = document.getElementById("world").getBoundingClientRect(); return { x:r.left + r.width * .45, y:r.top + r.height * .55 }; });
   await tap(g, w.x, w.y); await sleep(80);
-  const t2 = await g.page.evaluate(`({ vis:${E}.visible, mode:${E}.mode, phase:state.phase })`);
+  let t2 = await g.page.evaluate(`({ vis:${E}.visible, mode:${E}.mode, phase:state.phase })`);
+  /* the cameo itself must be gone at once (t2.vis); the director's MODE follows on its next evaluation (setTimeout 0 after the tap, else its 600 ms poll) — on a loaded machine the 80 ms read could still see "home".
+     Allow up to 2 poll periods for the mode to follow; it is still required to become "" and is re-checked after 4 s below. */
+  for (let i = 0; i < 12 && t2.mode !== ""; i++){ await sleep(100); t2 = { ...await g.page.evaluate(`({ vis:${E}.visible, mode:${E}.mode, phase:state.phase })`), vis:t2.vis, waitedMs:(i + 1) * 100 }; }
   await sleep(4000);
   const t3 = await g.page.evaluate(`({ on:document.querySelectorAll(".dscCameo.on").length, mode:${E}.mode, phase:state.phase })`);
   check("2b. " + tag + "MENU TAP: board tap starts play; screensaver stops and stays off during gameplay", !t2.vis && t2.phase === "playing" && t2.mode === "" && (t3.phase !== "playing" || (t3.on === 0 && t3.mode === "")), { t2, t3 });
@@ -323,7 +326,10 @@ async function suiteLevel(browser, base, device, label){
   check("8e. " + tag + "COLLECTION: reads the existing record; saved data / economy unchanged", econ0 === econ1, {});
 
   /* 4 — Bonus Waterwheel */
-  await tapSel(g, "#lcBtn"); await sleep(500);
+  await tapSel(g, "#lcBtn");
+  /* CONTINUE → the Bonus Waterwheel card follows the flow-forward animation, not a fixed 500 ms (it was still on its way on a loaded machine: captured w0 = { show:false, mode:"level" }); wait for the card itself, then let the director's mode follow */
+  await g.page.waitForFunction(() => document.getElementById("bonusCard").classList.contains("show"), null, { timeout: 15000 }).catch(() => {});
+  await sleep(500);
   const w0 = await g.page.evaluate(`({ show:document.getElementById("bonusCard").classList.contains("show"), mode:${E}.mode })`);
   await g.page.evaluate(SAMPLER, ["#bonusBtn", ".bwTitle", ".bwPointer"]);
   let wn = 0;
