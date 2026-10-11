@@ -57,7 +57,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 /* Counts every AudioContext constructed on the page. */
 const INIT = `(() => {
   window.__acCount = 0;
-  const wrap = (Orig) => { if(!Orig) return Orig; const W = function(...a){ window.__acCount++; return new Orig(...a); }; W.prototype = Orig.prototype; return W; };
+  /* V2.2.20 — enforce the autoplay policy this suite assumes. Headless Chromium reports sticky user activation and lets an AudioContext run with no gesture at all (measured: navigator.userActivation.hasBeenActive
+     is true on a fresh page, and the game's own natureNoise() then creates a RUNNING shared context ~0.4 s after load). The soundtrack director correctly starts on "an already-running shared context", so in about
+     half the runs it had started before the test's first click and "nothing starts before a user gesture" failed — and the later idle-lift checks with it. A context now stays suspended, and resume() is a no-op,
+     until a real input event has been seen, exactly what a real browser does. */
+  let gesture = false; for (const t of ["pointerdown", "mousedown", "touchstart", "touchend", "keydown", "click"]) addEventListener(t, e => { if (e.isTrusted) gesture = true; }, true);
+  const wrap = (Orig) => { if(!Orig) return Orig; const stateGet = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Orig.prototype), "state") || Object.getOwnPropertyDescriptor(Orig.prototype, "state");
+    const W = function(...a){ window.__acCount++; const c = new Orig(...a); const res = c.resume.bind(c);
+      c.resume = function(){ return gesture ? res() : Promise.resolve(); };
+      try { c.suspend(); Object.defineProperty(c, "state", { configurable:true, get(){ return gesture && stateGet ? stateGet.get.call(c) : "suspended"; } }); } catch (e) {}
+      return c; }; W.prototype = Orig.prototype; return W; };
   window.AudioContext = wrap(window.AudioContext);
   if (window.webkitAudioContext) window.webkitAudioContext = window.AudioContext;
 })();`;
@@ -68,6 +77,7 @@ async function newPage(browser, base, opts = {}){
   const errors = [];
   page.on("pageerror", e => errors.push("pageerror: " + e.message));
   page.on("console", m => { if (m.type() === "error") errors.push("console: " + m.text()); });
+  const missing = []; page.on("response", r => { if (r.status() === 404) missing.push(new URL(r.url()).pathname); });
   await page.route("**/*", route => {
     const u = route.request().url();
     if (!u.startsWith(base)) return route.abort();                        // offline: no CDN / PayPal / images
@@ -78,12 +88,12 @@ async function newPage(browser, base, opts = {}){
   if (opts.noWebAudio) await page.addInitScript(() => { delete window.AudioContext; delete window.webkitAudioContext; });
   await page.goto(base + "/", { waitUntil:"load" });
   await sleep(600);
-  return { ctx, page, errors };
+  return { ctx, page, errors, missing };
 }
 const ev = (page, fn, arg) => page.evaluate(fn, arg);
 
 async function desktopSuite(browser, base){
-  const { ctx, page, errors } = await newPage(browser, base);
+  const { ctx, page, errors, missing } = await newPage(browser, base);
 
   check("module installed + music button rendered", await ev(page, () => !!window.DAMSoundtrack && !!document.getElementById("damMusicBtn")));
   const pre = await ev(page, () => ({ init: DAMSoundtrack.initialized, playing: DAMSoundtrack.playing }));
@@ -138,7 +148,9 @@ async function desktopSuite(browser, base){
   check("music ducks during reward event (never fully cut)", d.during < 1 && d.g > 0.15, d);
   check("duck recovers smoothly", d.after === 1, d);
 
-  /* idle lift + ceiling */
+  /* idle lift + ceiling. The mixer deliberately caps the music while a game voice is speaking (gameAudioActive), so the calm/idle bands can only be read in a quiet moment — wait for one
+     (the readings below are taken synchronously, so nothing can start in between). */
+  await page.waitForFunction(() => { try { return typeof GEI_TAP_PERFORMANCE === "undefined" || !GEI_TAP_PERFORMANCE.voices || GEI_TAP_PERFORMANCE.voices() === 0; } catch (e) { return true; } }, null, { timeout: 30000 }).catch(() => {});
   const idle = await ev(page, () => {
     const out = {};
     for (const s of [0, 8, 25, 60, 120, 400]){ DAMSoundtrack.debug.simulateIdle(s); out[s] = +DAMSoundtrack.debug.settle().toFixed(3); }
@@ -243,7 +255,7 @@ async function desktopSuite(browser, base){
 
   const own = errors.filter(e => /soundtrack|DAMSoundtrack|2188/i.test(e));
   await ctx.close();
-  return { errors, own };
+  return { errors, own, missing };
 }
 
 async function baselineErrors(browser, base){
@@ -289,8 +301,13 @@ try {
   const base0 = await baselineErrors(browser, base);
   const desk = await desktopSuite(browser, base);
   const baseSet = new Set(base0.map(e => e.replace(/\d+/g, "#")));
-  const newErrors = desk.errors.filter(e => !baseSet.has(e.replace(/\d+/g, "#")));
-  check("no console errors introduced (vs. baseline without V2.1.88)", desk.own.length === 0 && newErrors.length === 0, { own: desk.own, newErrors, baselineCount: base0.length });
+  /* V2.2.20: the achievement-audio engine (V2.2.7) requests /audio/achievements/** clips that are not in the repository yet, so the browser logs "Failed to load resource … 404" lines whenever a longer
+     session triggers more of them (this check failed 10/10 on the baseline and the current build alike). Those lines — and only those: every 404 URL must be under /audio/achievements/ — are a known missing-asset
+     gap, not an error the soundtrack introduced. Any other console error, or a 404 for any other URL, still fails. */
+  const known404 = list => list.length > 0 && list.every(u => /^\/audio\/achievements\//.test(u));
+  const isMissingAsset = e => /Failed to load resource: the server responded with a status of 404/.test(e) && known404(desk.missing);
+  const newErrors = desk.errors.filter(e => !isMissingAsset(e) && !baseSet.has(e.replace(/\d+/g, "#")));
+  check("no console errors introduced (vs. baseline without V2.1.88)", desk.own.length === 0 && newErrors.length === 0, { own: desk.own, newErrors, baselineCount: base0.length, missing404: [...new Set(desk.missing)] });
   const android = pw.devices["Pixel 7"], iphone = pw.devices["iPhone 13"];
   await mobileSuite(browser, base, "Chrome Android (Pixel 7 emulation)", { ...android });
   await mobileSuite(browser, base, "iOS-sized (iPhone 13 emulation on Chromium)", { viewport: iphone.viewport, userAgent: iphone.userAgent, deviceScaleFactor: iphone.deviceScaleFactor, isMobile: true, hasTouch: true });
