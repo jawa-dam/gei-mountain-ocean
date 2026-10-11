@@ -1,0 +1,501 @@
+{
+ "version": "V2.1.90",
+ "passed": 23,
+ "failed": 3,
+ "results": [
+  {
+   "name": "A1. DAM MAP opens from the dock button",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "A2. Escape closes the map and focus returns to the launcher",
+   "pass": true,
+   "detail": {
+    "open": false,
+    "focus": "damMapLauncherBtn"
+   }
+  },
+  {
+   "name": "B1. Level 1, day 3: pin MILLPOND, 2 days ✓, NOW on day 3, water reaches the pond",
+   "pass": true,
+   "detail": {
+    "open": true,
+    "level": "LEVEL 1",
+    "factories": "0 ONLINE",
+    "flow": "ACTIVE",
+    "power": "STANDBY",
+    "nextStat": "LEVEL 6",
+    "railNext": "NEXT: 🌾 LEVEL 6",
+    "pin": "MILLPOND",
+    "pills": [
+     "done:DAY 1 ✓",
+     "done:DAY 2 ✓",
+     "now:DAY 3 · NOW",
+     "future:DAY 4",
+     "future:DAY 5",
+     "future:DAY 6"
+    ],
+    "lit": 2,
+    "locked": [
+     3,
+     4,
+     5
+    ],
+    "cards": [
+     "next:Gristmill",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Advanced Manufacturing"
+    ],
+    "overlaps": 0,
+    "truncated": [],
+    "pillsOnTop": true
+   }
+  },
+  {
+   "name": "B2. Level 1 stats: 0 factories, next LEVEL 6, rail next = Gristmill, rest undiscovered",
+   "pass": true,
+   "detail": {
+    "f": "0 ONLINE",
+    "n": "LEVEL 6",
+    "c": [
+     "next:Gristmill",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural"
+    ]
+   }
+  },
+  {
+   "name": "B3. Level 18 (3 factories): pin SLUICE-GATE, 3 ONLINE, next LEVEL 24, power ACTIVE",
+   "pass": true,
+   "detail": {
+    "open": true,
+    "level": "LEVEL 18",
+    "factories": "3 ONLINE",
+    "flow": "ACTIVE",
+    "power": "ACTIVE",
+    "nextStat": "LEVEL 24",
+    "railNext": "NEXT: 🫒 LEVEL 24",
+    "pin": "SLUICE-GATE",
+    "pills": [
+     "done:DAY 1 ✓",
+     "done:DAY 2 ✓",
+     "done:DAY 3 ✓",
+     "now:DAY 4 · NOW",
+     "future:DAY 5",
+     "future:DAY 6"
+    ],
+    "lit": 3,
+    "locked": [
+     4,
+     5
+    ],
+    "cards": [
+     "operational:Gristmill",
+     "operational:Rice Mill / Huller",
+     "operational newest:Sugar Mill",
+     "next:Oil Mill",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Advanced Manufacturing"
+    ],
+    "overlaps": 0,
+    "truncated": [],
+    "pillsOnTop": true
+   }
+  },
+  {
+   "name": "B4. rail: Sugar Mill newest operational, Oil Mill next, then ??? cards",
+   "pass": true,
+   "detail": [
+    "operational:Gristmill",
+    "operational:Rice Mill / Huller",
+    "operational newest:Sugar Mill",
+    "next:Oil Mill",
+    "future:??? · Agricultural"
+   ]
+  },
+  {
+   "name": "B5. factory pill is named after this block's factory (Sugar Mill)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "B6. level finished: all 6 days ✓, all water lit, pin on the factory (GRISTMILL)",
+   "pass": true,
+   "detail": {
+    "open": true,
+    "level": "LEVEL 6",
+    "factories": "1 ONLINE",
+    "flow": "ACTIVE",
+    "power": "ACTIVE",
+    "nextStat": "LEVEL 12",
+    "railNext": "NEXT: 🍚 LEVEL 12",
+    "pin": "GRISTMILL",
+    "pills": [
+     "done:DAY 1 ✓",
+     "done:DAY 2 ✓",
+     "done:DAY 3 ✓",
+     "done:DAY 4 ✓",
+     "done:DAY 5 ✓",
+     "now:DAY 6 ✓"
+    ],
+    "lit": 5,
+    "locked": [],
+    "cards": [
+     "operational newest:Gristmill",
+     "next:Rice Mill / Huller",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Advanced Manufacturing"
+    ],
+    "overlaps": 0,
+    "truncated": [],
+    "pillsOnTop": true
+   }
+  },
+  {
+   "name": "B7. new level starts back at the MOUNTAIN (not the factory)",
+   "pass": true,
+   "detail": {
+    "open": true,
+    "level": "LEVEL 7",
+    "factories": "1 ONLINE",
+    "flow": "ACTIVE",
+    "power": "ACTIVE",
+    "nextStat": "LEVEL 12",
+    "railNext": "NEXT: 🍚 LEVEL 12",
+    "pin": "MOUNTAIN",
+    "pills": [
+     "now:DAY 1 · NOW",
+     "future:DAY 2",
+     "future:DAY 3",
+     "future:DAY 4",
+     "future:DAY 5",
+     "future:DAY 6"
+    ],
+    "lit": 0,
+    "locked": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "cards": [
+     "operational newest:Gristmill",
+     "next:Rice Mill / Huller",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Agricultural",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Materials",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Industrial",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Advanced Manufacturing",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Specialized Production",
+     "future:??? · Advanced Manufacturing"
+    ],
+    "overlaps": 0,
+    "truncated": [],
+    "pillsOnTop": true
+   }
+  },
+  {
+   "name": "C1. desktop: region pills never overlap or truncate",
+   "pass": true,
+   "detail": {
+    "overlaps": 0,
+    "truncated": []
+   }
+  },
+  {
+   "name": "D1. pin/pills paint above the scene",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "D2. tapping a region pill explains it",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "text": "🧱 DAM · Dividing wall and reservoir control · AHEAD · DAY 2"
+   }
+  },
+  {
+   "name": "E1. map sound toggles, persists, and reports aria-pressed",
+   "pass": true,
+   "detail": {
+    "snd0": "true",
+    "snd1": {
+     "pressed": "false",
+     "ls": "off"
+    },
+    "snd2": "on"
+   }
+  },
+  {
+   "name": "F1. opening, staging-restore and closing the map leave game state unchanged",
+   "pass": true,
+   "detail": {
+    "before": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"tapCount\":0,\"phase\":\"ready\",\"damMachineFreePlays\":0,\"tribes\":0}",
+    "after": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"tapCount\":0,\"phase\":\"ready\",\"damMachineFreePlays\":0,\"tribes\":0}"
+   }
+  },
+  {
+   "name": "F2. selfTest: scene, live state, level hook, launcher",
+   "pass": true,
+   "detail": {
+    "version": "V2.1.90",
+    "sixRegions": true,
+    "factoryRegistry": true,
+    "sixLevelMilestones": true,
+    "derivedState": true,
+    "readsLiveState": true,
+    "scene": true,
+    "station": 0,
+    "daysThisLevel": 0,
+    "factoriesOnline": 0,
+    "level": 1,
+    "launcher": true,
+    "page": true,
+    "levelHook": true,
+    "soundOn": true,
+    "presentationOnly": true
+   }
+  },
+  {
+   "name": "F3. no new script errors",
+   "pass": true,
+   "detail": [
+    "addStyle is not defined"
+   ]
+  },
+  {
+   "name": "C2. [laptop 1280×720] opens by click; pills never overlap/truncate; shell + rail fit the screen",
+   "pass": true,
+   "detail": {
+    "out": {
+     "3": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     },
+     "18": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     },
+     "60": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     }
+    },
+    "geo": {
+     "shellFits": true,
+     "railVisible": true,
+     "noPageScroll": true
+    }
+   }
+  },
+  {
+   "name": "C2. [Pixel 7] opens by touch; pills never overlap/truncate; shell + rail fit the screen",
+   "pass": true,
+   "detail": {
+    "out": {
+     "3": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     },
+     "18": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     },
+     "60": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     }
+    },
+    "geo": {
+     "shellFits": true,
+     "railVisible": true,
+     "noPageScroll": true
+    }
+   }
+  },
+  {
+   "name": "C2. [iPhone SE] opens by touch; pills never overlap/truncate; shell + rail fit the screen",
+   "pass": true,
+   "detail": {
+    "out": {
+     "3": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     },
+     "18": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     },
+     "60": {
+      "overlaps": 0,
+      "truncated": [],
+      "onTop": true,
+      "open": true
+     }
+    },
+    "geo": {
+     "shellFits": true,
+     "railVisible": true,
+     "noPageScroll": true
+    }
+   }
+  },
+  {
+   "name": "G1. level 6 play-through reaches the level card",
+   "pass": true,
+   "detail": "levelComplete"
+  },
+  {
+   "name": "G2. CONTINUE on level 6 shows DAM MAP MILESTONE 01 · GRISTMILL ONLINE over the map",
+   "pass": false,
+   "detail": {
+    "map": false,
+    "milestone": false,
+    "text": "",
+    "bonus": false
+   }
+  },
+  {
+   "name": "G3. milestone CONTINUE closes the map and opens the Bonus Waterwheel",
+   "pass": false,
+   "detail": {
+    "map": false,
+    "bonus": false,
+    "phase": "levelComplete",
+    "levelCard": true
+   }
+  },
+  {
+   "name": "G4. milestone auto-continues to the Bonus Waterwheel after 5.2 s",
+   "pass": false,
+   "detail": {
+    "during": false,
+    "end": {
+     "map": false,
+     "bonus": false,
+     "phase": "levelComplete",
+     "levelCard": true
+    }
+   }
+  },
+  {
+   "name": "G5. a non-milestone level (1) goes straight to the Bonus Waterwheel",
+   "pass": true,
+   "detail": {
+    "map": false,
+    "milestone": false,
+    "text": "",
+    "bonus": true
+   }
+  },
+  {
+   "name": "G6. economy after milestone → wheel identical to b2e7691 (which went straight to the wheel)",
+   "pass": true,
+   "detail": {
+    "now": "{\"totalFlOz\":666,\"level\":6,\"levelFlOz\":666,\"completedLevels\":6,\"damMachineFreePlays\":0}",
+    "base": "{\"totalFlOz\":666,\"level\":6,\"levelFlOz\":666,\"completedLevels\":6,\"damMachineFreePlays\":0}",
+    "beforeContinue": "{\"totalFlOz\":666,\"level\":6,\"levelFlOz\":666,\"completedLevels\":6,\"damMachineFreePlays\":0}"
+   }
+  },
+  {
+   "name": "G7. no new script errors during the milestone flow",
+   "pass": true,
+   "detail": [
+    "addStyle is not defined"
+   ]
+  }
+ ]
+}

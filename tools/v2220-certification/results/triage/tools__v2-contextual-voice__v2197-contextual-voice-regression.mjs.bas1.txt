@@ -1,0 +1,287 @@
+PASS: first-entry moment
+PASS: return moment
+PASS: full-cycle moment
+PASS: character moment
+PASS: session gating
+PASS: persistent one-time state
+PASS: voice director integration
+PASS: randomized contextual copy
+PASS: context toast
+PASS: level completion observation
+PASS: reduced-motion support
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: presentation-only
+    at file:///tmp/claude-0/-home-user/8f068817-439c-54b2-9d62-de6b75d70fb5/scratchpad/prewt/tools/v2-contextual-voice/v2197-contextual-voice-regression.mjs:23:39
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/* V2.1.97 — DAM-ITE CONTEXTUAL VOICE MOMENTS\n' +
+    ' * Presentation/audio-only contextual voice layer.\n' +
+    ' * Uses GEI_VOICE_DIRECTOR for the real Female/Male/Random/Off milestone voices.\n' +
+    ' * Adds short contextual moments: first entry, return, full-cycle completion,\n' +
+    ' * and special-character moments when an appropriate public hook is available.\n' +
+    ' * Does not alter gameplay, economy, XP, progression, purchases, or saves.\n' +
+    ' */\n' +
+    '(function(){\n' +
+    '  "use strict";\n' +
+    '  if(window.__GEI_V2197_CONTEXTUAL_VOICE__)return;\n' +
+    '\n' +
+    '  var VERSION="V2.1.97";\n' +
+    '  var STORAGE="geiDamIteContextVoiceV2197";\n' +
+    '  var DIRECTOR=window.GEI_VOICE_DIRECTOR;\n' +
+    '  var played=Object.create(null);\n' +
+    '  var recent=Object.create(null);\n' +
+    '  var timers=[];\n' +
+    '\n' +
+    '  var COPY={\n' +
+    '    welcome:[\n' +
+    '      "Welcome to DAM-ITE!",\n' +
+    `      "Let's get the water moving!",\n` +
+    '      "Ready to build the flow!"\n' +
+    '    ],\n' +
+    '    return:[\n' +
+    '      "Welcome back, DAM-ITE!",\n' +
+    '      "Back to the mountain!",\n' +
+    '      "Ready for another flow!"\n' +
+    '    ],\n' +
+    '    cycle:[\n' +
+    '      "Hydraulic cycle complete!",\n' +
+    '      "The whole system is flowing!",\n' +
+    '      "DAM-ITE cycle complete!"\n' +
+    '    ],\n' +
+    '    character:[\n' +
+    '      "DAM-ITE moment!",\n' +
+    '      "Look at that character!",\n' +
+    '      "A special DAM-ITE moment!"\n' +
+    '    ]\n' +
+    '  };\n' +
+    '\n' +
+    '  function readState(){\n' +
+    '    try{\n' +
+    '      var raw=localStorage.getItem(STORAGE);\n' +
+    '      var obj=raw?JSON.parse(raw):{};\n' +
+    '      return obj&&typeof obj==="object"?obj:{};\n' +
+    '    }catch(e){return {};}\n' +
+    '  }\n' +
+    '\n' +
+    '  function writeState(obj){\n' +
+    '    try{localStorage.setItem(STORAGE,JSON.stringify(obj||{}));}catch(e){}\n' +
+    '  }\n' +
+    '\n' +
+    '  function markOnce(key){\n' +
+    '    var s=readState();\n' +
+    '    if(s[key])return false;\n' +
+    '    s[key]=Date.now();\n' +
+    '    writeState(s);\n' +
+    '    return true;\n' +
+    '  }\n' +
+    '\n' +
+    '  function recently(key,ms){\n' +
+    '    var t=recent[key]||0,n=performance.now();\n' +
+    '    if(n-t<ms)return true;\n' +
+    '    recent[key]=n;\n' +
+    '    return false;\n' +
+    '  }\n' +
+    '\n' +
+    '  function choose(arr){\n' +
+    '    return arr[Math.floor(Math.random()*arr.length)];\n' +
+    '  }\n' +
+    '\n' +
+    '  function speakText(text){\n' +
+    '    if(!text||!DIRECTOR||typeof DIRECTOR.announce!=="function")return false;\n' +
+    "    /* Contextual copy intentionally uses the existing voice engine's mode and\n" +
+    '       playback/ducking path. A milestone key supplies the matching voice persona. */\n' +
+    '    return true;\n' +
+    '  }\n' +
+    '\n' +
+    '  function contextual(key,anchor,opts){\n' +
+    '    opts=opts||{};\n' +
+    '    if(recently(key,opts.cooldown||5000))return false;\n' +
+    '    var mode=DIRECTOR&&typeof DIRECTOR.getMode==="function"?DIRECTOR.getMode():"female";\n' +
+    '    if(mode==="off"&&!opts.force)return false;\n' +
+    '\n' +
+    '    /* Use the Director for voice persona/ducking by announcing a safe matching\n' +
+    '       milestone anchor, while the visual context identifies the actual event. */\n' +
+    '    var chosen=anchor||"mountain";\n' +
+    '    if(DIRECTOR&&typeof DIRECTOR.announce==="function"){\n' +
+    '      try{\n' +
+    '        var ok=DIRECTOR.announce(chosen,{force:true});\n' +
+    '        if(ok){\n' +
+    '          recent[key]=performance.now();\n' +
+    '          return true;\n' +
+    '        }\n' +
+    '      }catch(e){}\n' +
+    '    }\n' +
+    '    return false;\n' +
+    '  }\n' +
+    '\n' +
+    '  function card(){\n' +
+    '    return document.getElementById("levelCard");\n' +
+    '  }\n' +
+    '\n' +
+    '  function visual(type){\n' +
+    '    var root=card();\n' +
+    '    if(!root)return;\n' +
+    '    root.setAttribute("data-v2197-context",type);\n' +
+    '    root.classList.remove("v2197Context","v2197Welcome","v2197Return","v2197Cycle","v2197Character");\n' +
+    '    void root.offsetWidth;\n' +
+    '    root.classList.add("v2197Context","v2197"+type.charAt(0).toUpperCase()+type.slice(1));\n' +
+    '    timers.push(setTimeout(function(){\n' +
+    '      root.classList.remove("v2197Context","v2197Welcome","v2197Return","v2197Cycle","v2197Character");\n' +
+    '    },type==="cycle"?1350:950));\n' +
+    '  }\n' +
+    '\n' +
+    '  function showToast(text,type){\n' +
+    '    var existing=document.getElementById("v2197ContextToast");\n' +
+    '    if(existing)existing.remove();\n' +
+    '    var toast=document.createElement("div");\n' +
+    '    toast.id="v2197ContextToast";\n' +
+    '    toast.className="v2197ContextToast v2197Toast-"+type;\n' +
+    '    toast.setAttribute("role","status");\n' +
+    '    toast.textContent=text;\n' +
+    '    document.body.appendChild(toast);\n' +
+    '    timers.push(setTimeout(function(){toast.classList.add("hide");},1900));\n' +
+    '    timers.push(setTimeout(function(){toast.remove();},2250));\n' +
+    '  }\n' +
+    '\n' +
+    '  function firstEntry(){\n' +
+    '    if(!markOnce("firstEntry"))return false;\n' +
+    '    visual("welcome");\n' +
+    '    showToast(choose(COPY.welcome),"welcome");\n' +
+    '    return contextual("welcome","mountain",{cooldown:1000});\n' +
+    '  }\n' +
+    '\n' +
+    '  function returnEntry(){\n' +
+    '    if(!markOnce("returnEntry"))return false;\n' +
+    '    visual("return");\n' +
+    '    showToast(choose(COPY.return),"return");\n' +
+    '    return contextual("return","mountain",{cooldown:1000});\n' +
+    '  }\n' +
+    '\n' +
+    '  function fullCycle(){\n' +
+    '    visual("cycle");\n' +
+    '    showToast(choose(COPY.cycle),"cycle");\n' +
+    '    return contextual("cycle","factory",{cooldown:5000});\n' +
+    '  }\n' +
+    '\n' +
+    '  function characterMoment(){\n' +
+    '    visual("character");\n' +
+    '    showToast(choose(COPY.character),"character");\n' +
+    '    return contextual("character","waterwheel",{cooldown:3000});\n' +
+    '  }\n' +
+    '\n' +
+    '  function hook(name,fn){\n' +
+    '    try{\n' +
+    '      var prior=window[name];\n' +
+    '      if(typeof prior==="function"&&!prior.__v2197Wrapped){\n' +
+    '        var wrapped=function(){\n' +
+    '          var out=prior.apply(this,arguments);\n' +
+    '          try{fn.apply(this,arguments);}catch(e){}\n' +
+    '          return out;\n' +
+    '        };\n' +
+    '        wrapped.__v2197Wrapped=true;\n' +
+    '        wrapped.__v2197Original=prior;\n' +
+    '        window[name]=wrapped;\n' +
+    '        return true;\n' +
+    '      }\n' +
+    '    }catch(e){}\n' +
+    '    return false;\n' +
+    '  }\n' +
+    '\n' +
+    '  function installHooks(){\n' +
+    '    hook("showWelcome",firstEntry);\n' +
+    '    hook("openWelcome",firstEntry);\n' +
+    '    hook("showLevelComplete",function(){\n' +
+    '      try{\n' +
+    '        var level=window.state&&Number(window.state.level);\n' +
+    '        if(isFinite(level)&&level>0&&level%6===0)fullCycle();\n' +
+    '      }catch(e){}\n' +
+    '    });\n' +
+    '    hook("showCharacterMoment",characterMoment);\n' +
+    '    hook("playCharacterSignatureMoment",characterMoment);\n' +
+    '  }\n' +
+    '\n' +
+    '  function observeLevelCard(){\n' +
+    '    var c=card();\n' +
+    '    if(!c||c.dataset.v2197Bound)return;\n' +
+    '    c.dataset.v2197Bound="1";\n' +
+    '    var was=c.classList.contains("show");\n' +
+    '    var obs=new MutationObserver(function(){\n' +
+    '      var shown=c.classList.contains("show");\n' +
+    '      if(shown&&!was){\n' +
+    '        var el=document.getElementById("lcLevel"),text=el?el.textContent:"";\n' +
+    '        var m=text.match(/LEVEL\\s+(\\d+)\\s+COMPLETE/i);\n' +
+    '        if(m&&Number(m[1])%6===0)fullCycle();\n' +
+    '      }\n' +
+    '      was=shown;\n' +
+    '    });\n' +
+    '    obs.observe(c,{attributes:true,attributeFilter:["class"]});\n' +
+    '  }\n' +
+    '\n' +
+    '  function sessionEntry(){\n' +
+    '    var key="geiDamIteSessionV2197";\n' +
+    '    var fresh=false;\n' +
+    '    try{\n' +
+    '      fresh=sessionStorage.getItem(key)!=="1";\n' +
+    '      if(fresh)sessionStorage.setItem(key,"1");\n' +
+    '    }catch(e){fresh=false;}\n' +
+    '    if(!fresh)return false;\n' +
+    '    var historic=readState();\n' +
+    '    return historic.firstEntry?returnEntry():firstEntry();\n' +
+    '  }\n' +
+    '\n' +
+    '  function css(){\n' +
+    '    if(document.getElementById("v2197ContextStyle"))return;\n' +
+    '    var s=document.createElement("style");\n' +
+    '    s.id="v2197ContextStyle";\n' +
+    '    s.textContent=\n' +
+    '      ".v2197Context{position:relative;}" +\n' +
+    '      ".v2197ContextToast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 78px);transform:translateX(-50%) translateY(0) scale(1);z-index:8000;max-width:min(92vw,430px);padding:11px 16px;border-radius:18px;background:rgba(8,11,22,.95);border:1px solid rgba(255,255,255,.20);box-shadow:0 12px 34px rgba(0,0,0,.42),0 0 24px rgba(47,210,255,.16);color:#fff;font:900 clamp(.85rem,4vw,1rem)/1.15 Inter,system-ui,sans-serif;text-align:center;backdrop-filter:blur(18px);opacity:1;transition:opacity .25s ease,transform .25s ease;pointer-events:none;}" +\n' +
+    '      ".v2197ContextToast.hide{opacity:0;transform:translateX(-50%) translateY(10px) scale(.97);}" +\n' +
+    '      ".v2197Toast-welcome{box-shadow:0 12px 34px rgba(0,0,0,.42),0 0 28px rgba(47,210,255,.24);}" +\n' +
+    '      ".v2197Toast-cycle{box-shadow:0 12px 38px rgba(0,0,0,.42),0 0 34px rgba(243,16,186,.20);}" +\n' +
+    '      ".v2197Welcome .milestoneCelebration{animation:v2197Welcome .8s cubic-bezier(.18,.9,.18,1) 1;}" +\n' +
+    '      ".v2197Return .milestoneCelebration{animation:v2197Return .75s ease-out 1;}" +\n' +
+    '      ".v2197Cycle .milestoneCelebration{animation:v2197Cycle 1.12s cubic-bezier(.14,.92,.16,1) 1;}" +\n' +
+    '      ".v2197Character .milestoneCelebration{animation:v2197Character .9s cubic-bezier(.18,.9,.18,1) 1;}" +\n' +
+    '      "@keyframes v2197Welcome{0%{transform:scale(.98);opacity:.78}48%{transform:scale(1.035);opacity:1}100%{transform:scale(1)}}" +\n' +
+    '      "@keyframes v2197Return{0%{transform:translateY(7px);opacity:.8}100%{transform:none;opacity:1}}" +\n' +
+    '      "@keyframes v2197Cycle{0%{transform:scale(.975)}30%{transform:scale(1.055)}55%{transform:scale(1.008)}78%{transform:scale(1.025)}100%{transform:scale(1)}}" +\n' +
+    '      "@keyframes v2197Character{0%{transform:rotate(-1deg) scale(.985)}50%{transform:rotate(1deg) scale(1.035)}100%{transform:rotate(0) scale(1)}}" +\n' +
+    '      "@media(prefers-reduced-motion:reduce){.v2197Welcome .milestoneCelebration,.v2197Return .milestoneCelebration,.v2197Cycle .milestoneCelebration,.v2197Character .milestoneCelebration{animation:none}.v2197ContextToast{transition:none}}" ;\n' +
+    '    document.head.appendChild(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  var api={\n' +
+    '    version:VERSION,firstEntry:firstEntry,returnEntry:returnEntry,\n' +
+    '    fullCycle:fullCycle,characterMoment:characterMoment,\n' +
+    '    installHooks:installHooks,observeLevelCard:observeLevelCard,\n' +
+    '    sessionEntry:sessionEntry,presentationOnly:true\n' +
+    '  };\n' +
+    '  window.__GEI_V2197_CONTEXTUAL_VOICE__=api;\n' +
+    '  window.GEI_CONTEXTUAL_VOICE=api;\n' +
+    '\n' +
+    '  function install(){\n' +
+    '    css();\n' +
+    '    installHooks();\n' +
+    '    observeLevelCard();\n' +
+    '    if(DIRECTOR)sessionEntry();\n' +
+    '    window.addEventListener("load",function(){\n' +
+    '      installHooks();observeLevelCard();\n' +
+    '    });\n' +
+    '  }\n' +
+    '\n' +
+    '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});\n' +
+    '  else install();\n' +
+    '})();',
+  expected: /does not alter gameplay, economy, XP, progression, purchases, or saves/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v22.22.0

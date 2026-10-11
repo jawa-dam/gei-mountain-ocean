@@ -1,0 +1,190 @@
+PASS: four voice modes
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Female default
+    at file:///home/user/gei-mountain-ocean/tools/v2-voice-ui/v2195-voice-ui-regression.mjs:21:10
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/* V2.1.95 — DAM-ITE VOICE EXPERIENCE UI\n' +
+    ' * Presentation-only UI layer for GEI_VOICE_DIRECTOR.\n' +
+    ' * Adds a compact, touch-friendly voice selector to an existing Settings/Profile surface\n' +
+    ' * when a suitable host is present; otherwise creates a floating Voice button + popover.\n' +
+    ' * No gameplay/economy/progression/save mutations.\n' +
+    ' */\n' +
+    '(function(){\n' +
+    '  "use strict";\n' +
+    '  if(window.__GEI_V2195_VOICE_UI__) return;\n' +
+    '\n' +
+    '  var VERSION="V2.1.95";\n' +
+    '  var DIRECTOR_KEY="GEI_VOICE_DIRECTOR";\n' +
+    '  var MODES=[\n' +
+    '    {id:"female",icon:"♀",label:"FEMALE",sub:"Friendly voice"},\n' +
+    '    {id:"male",icon:"♂",label:"MALE",sub:"Alternate voice"},\n' +
+    '    {id:"random",icon:"🎲",label:"RANDOM",sub:"Mix it up"},\n' +
+    '    {id:"off",icon:"🔇",label:"OFF",sub:"Voice muted"}\n' +
+    '  ];\n' +
+    '  var styleId="v2195VoiceUIStyle";\n' +
+    '  var rootId="v2195VoiceUI";\n' +
+    '  var buttonId="v2195VoiceButton";\n' +
+    '  var panelId="v2195VoicePanel";\n' +
+    '\n' +
+    '  function director(){ return window[DIRECTOR_KEY]||null; }\n' +
+    '  function currentMode(){\n' +
+    '    try{\n' +
+    '      var d=director();\n' +
+    '      return d&&typeof d.getMode==="function"?d.getMode():"female";\n' +
+    '    }catch(e){return "female";}\n' +
+    '  }\n' +
+    '  function setMode(mode){\n' +
+    '    try{\n' +
+    '      var d=director();\n' +
+    '      if(d&&typeof d.setMode==="function") return d.setMode(mode);\n' +
+    '    }catch(e){}\n' +
+    '    return mode;\n' +
+    '  }\n' +
+    '  function labelFor(id){\n' +
+    '    var m=MODES.find(function(x){return x.id===id;});\n' +
+    '    return m?m.label:"VOICE";\n' +
+    '  }\n' +
+    '\n' +
+    '  function host(){\n' +
+    '    /* Prefer an existing profile/settings control if the current shell exposes one.\n' +
+    '       Never rewrite the host menu; this UI is additive. */\n' +
+    '    return document.querySelector("#profilePanel, #settingsPanel, [data-profile-panel], [data-settings-panel]");\n' +
+    '  }\n' +
+    '\n' +
+    '  function css(){\n' +
+    '    if(document.getElementById(styleId))return;\n' +
+    '    var s=document.createElement("style");s.id=styleId;\n' +
+    '    s.textContent=\n' +
+    '      "#"+rootId+"{position:relative;font-family:inherit;z-index:250;}" +\n' +
+    '      "#"+buttonId+"{appearance:none;border:1px solid rgba(255,255,255,.22);color:#fff;background:linear-gradient(135deg,rgba(47,210,255,.20),rgba(61,61,234,.22),rgba(243,16,186,.18));border-radius:16px;padding:11px 14px;min-height:46px;display:flex;align-items:center;justify-content:center;gap:9px;font-weight:900;font-size:clamp(.85rem,3.8vw,1rem);letter-spacing:.02em;box-shadow:0 8px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12);cursor:pointer;touch-action:manipulation;}" +\n' +
+    '      "#"+buttonId+":active{transform:scale(.98)}" +\n' +
+    '      "#"+panelId+"{position:absolute;top:calc(100% + 8px);right:0;width:min(300px,calc(100vw - 28px));padding:12px;border-radius:20px;background:rgba(8,11,22,.96);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 45px rgba(0,0,0,.42),0 0 30px rgba(47,210,255,.10);backdrop-filter:blur(20px);display:none;}" +\n' +
+    '      "#"+panelId+".show{display:block;animation:v2195Pop .18s ease-out;}" +\n' +
+    '      "#"+panelId+" .v2195Title{font-size:1rem;font-weight:950;letter-spacing:.05em;margin:2px 4px 10px;}" +\n' +
+    '      "#"+panelId+" .v2195Hint{font-size:.78rem;opacity:.72;margin:0 4px 10px;}" +\n' +
+    '      "#"+panelId+" .v2195Grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}" +\n' +
+    '      "#"+panelId+" .v2195Option{appearance:none;color:#fff;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);border-radius:15px;padding:11px 9px;text-align:left;min-height:68px;cursor:pointer;touch-action:manipulation;}" +\n' +
+    '      "#"+panelId+" .v2195Option.active{border-color:rgba(47,210,255,.75);box-shadow:0 0 0 2px rgba(47,210,255,.12),0 0 22px rgba(47,210,255,.10);background:linear-gradient(135deg,rgba(47,210,255,.13),rgba(61,61,234,.12));}" +\n' +
+    '      "#"+panelId+" .v2195Icon{font-size:1.2rem;line-height:1;display:inline-block;margin-right:5px;}" +\n' +
+    '      "#"+panelId+" .v2195Label{font-size:.83rem;font-weight:950;}" +\n' +
+    '      "#"+panelId+" .v2195Sub{display:block;font-size:.68rem;opacity:.68;margin-top:3px;}" +\n' +
+    '      "#"+panelId+" .v2195Status{margin-top:10px;padding:8px 9px;border-radius:12px;background:rgba(255,255,255,.05);font-size:.76rem;}" +\n' +
+    '      "@keyframes v2195Pop{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:none}}" +\n' +
+    '      "@media(prefers-reduced-motion:reduce){#"+panelId+".show{animation:none}}" +\n' +
+    '      "@media(max-width:380px){#"+panelId+"{width:calc(100vw - 20px);right:-4px;}.v2195Grid{grid-template-columns:1fr 1fr;}}";\n' +
+    '    document.head.appendChild(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  function build(){\n' +
+    '    if(document.getElementById(rootId))return document.getElementById(rootId);\n' +
+    '    var wrap=document.createElement("div");wrap.id=rootId;\n' +
+    '\n' +
+    '    var button=document.createElement("button");\n' +
+    '    button.type="button";button.id=buttonId;button.setAttribute("aria-expanded","false");\n' +
+    '    button.setAttribute("aria-controls",panelId);\n' +
+    `    button.innerHTML='<span aria-hidden="true">🎙️</span><span>DAM-ITE VOICE</span>';\n` +
+    '\n' +
+    '    var panel=document.createElement("div");panel.id=panelId;panel.setAttribute("role","dialog");\n' +
+    '    panel.innerHTML=\n' +
+    `      '<div class="v2195Title">VOICE EXPERIENCE</div>'+\n` +
+    `      '<div class="v2195Hint">Choose who speaks at milestone moments.</div>'+\n` +
+    `      '<div class="v2195Grid">'+\n` +
+    '      MODES.map(function(m){\n' +
+    `        return '<button type="button" class="v2195Option" data-v2195-mode="'+m.id+'">'+\n` +
+    `          '<span class="v2195Icon">'+m.icon+'</span><span class="v2195Label">'+m.label+'</span>'+\n` +
+    `          '<span class="v2195Sub">'+m.sub+'</span></button>';\n` +
+    '      }).join("")+\n' +
+    "      '</div>'+\n" +
+    `      '<div class="v2195Status" aria-live="polite"></div>';\n` +
+    '\n' +
+    '    wrap.appendChild(button);wrap.appendChild(panel);\n' +
+    '\n' +
+    '    button.addEventListener("click",function(e){\n' +
+    '      e.stopPropagation();\n' +
+    '      var open=panel.classList.toggle("show");\n' +
+    '      button.setAttribute("aria-expanded",String(open));\n' +
+    '      refresh();\n' +
+    '    });\n' +
+    '\n' +
+    '    panel.addEventListener("click",function(e){\n' +
+    '      var btn=e.target.closest("[data-v2195-mode]");\n' +
+    '      if(!btn)return;\n' +
+    '      var mode=btn.getAttribute("data-v2195-mode");\n' +
+    '      setMode(mode);\n' +
+    '      refresh();\n' +
+    '      announcePreview(mode);\n' +
+    '    });\n' +
+    '\n' +
+    '    document.addEventListener("click",function(e){\n' +
+    '      if(!wrap.contains(e.target)){\n' +
+    '        panel.classList.remove("show");\n' +
+    '        button.setAttribute("aria-expanded","false");\n' +
+    '      }\n' +
+    '    });\n' +
+    '\n' +
+    '    var h=host();\n' +
+    '    if(h){h.appendChild(wrap);}\n' +
+    '    else{\n' +
+    '      wrap.style.position="fixed";\n' +
+    '      wrap.style.right="12px";wrap.style.top="calc(env(safe-area-inset-top) + 76px)";\n' +
+    '      document.body.appendChild(wrap);\n' +
+    '    }\n' +
+    '    refresh();\n' +
+    '    return wrap;\n' +
+    '  }\n' +
+    '\n' +
+    '  function refresh(){\n' +
+    '    var panel=document.getElementById(panelId);if(!panel)return;\n' +
+    '    var mode=currentMode();\n' +
+    '    panel.querySelectorAll("[data-v2195-mode]").forEach(function(btn){\n' +
+    '      var active=btn.getAttribute("data-v2195-mode")===mode;\n' +
+    '      btn.classList.toggle("active",active);\n' +
+    '      btn.setAttribute("aria-pressed",String(active));\n' +
+    '    });\n' +
+    '    var status=panel.querySelector(".v2195Status");\n' +
+    '    if(status) status.textContent="Current voice: "+labelFor(mode);\n' +
+    '    var button=document.getElementById(buttonId);\n' +
+    '    if(button){\n' +
+    `      button.innerHTML='<span aria-hidden="true">'+(mode==="female"?"♀":mode==="male"?"♂":mode==="random"?"🎲":"🔇")+'</span><span>VOICE: '+labelFor(mode)+'</span>';\n` +
+    '    }\n' +
+    '  }\n' +
+    '\n' +
+    '  function announcePreview(mode){\n' +
+    '    var d=director();if(!d||typeof d.announce!=="function"||mode==="off")return;\n' +
+    '    /* A preview is presentation-only and uses the first milestone voice. */\n' +
+    '    setTimeout(function(){try{d.announce("mountain",{force:true});}catch(e){}},60);\n' +
+    '  }\n' +
+    '\n' +
+    '  function install(){\n' +
+    '    if(!director()){\n' +
+    '      window.addEventListener("load",function(){if(director()){css();build();}}, {once:true});\n' +
+    '      return;\n' +
+    '    }\n' +
+    '    css();build();\n' +
+    '  }\n' +
+    '\n' +
+    '  var api={\n' +
+    '    version:VERSION,modes:MODES.map(function(m){return m.id;}),\n' +
+    '    refresh:refresh,open:function(){var p=document.getElementById(panelId);if(p){p.classList.add("show");refresh();}},\n' +
+    '    close:function(){var p=document.getElementById(panelId);if(p)p.classList.remove("show");},\n' +
+    '    presentationOnly:true\n' +
+    '  };\n' +
+    '  window.__GEI_V2195_VOICE_UI__=api;\n' +
+    '  window.GEI_VOICE_UI=api;\n' +
+    '\n' +
+    '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});\n' +
+    '  else install();\n' +
+    '})();',
+  expected: /DEFAULT_MODE="female"/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v22.22.0

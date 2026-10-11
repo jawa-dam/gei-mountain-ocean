@@ -1,0 +1,426 @@
+{
+ "version": "V2.1.90",
+ "passed": 38,
+ "failed": 2,
+ "results": [
+  {
+   "name": "A1. new visitor: Beaver is the active character",
+   "pass": true,
+   "detail": "yall-too-beaver"
+  },
+  {
+   "name": "A2. new visitor: Wilbert is still owned (not replaced)",
+   "pass": true,
+   "detail": [
+    "wilbert-dam-guide",
+    "yall-too-beaver"
+   ]
+  },
+  {
+   "name": "A3. new visitor: Beaver welcome appears, no Pick-a-Player / How-to-Play guide",
+   "pass": true,
+   "detail": {
+    "welcome": true,
+    "mode": "first",
+    "guide": false,
+    "guideTab": "how",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": null,
+    "save": "{\"version\":2,\"savedAt\":1791680614677,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "A4. welcome copy: title, Beaver buddy line, BEGIN / CHOOSE / checkbox / X",
+   "pass": true,
+   "detail": {
+    "title": "HEY, DAM-ITE! WELCOME TO THE FLOW! 🦫💧",
+    "line": "I'm your Beaver buddy. You can choose another player or begin the game.",
+    "begin": "▶ BEGIN THE FLOW",
+    "choose": "👤 CHOOSE ANOTHER PLAYER",
+    "never": true,
+    "x": true,
+    "guideHidden": true
+   }
+  },
+  {
+   "name": "A5. loading never persists dismissal; any boot save carries Beaver",
+   "pass": true,
+   "detail": {
+    "key": null
+   }
+  },
+  {
+   "name": "A6. BEGIN closes the welcome without persisting dismissal",
+   "pass": true,
+   "detail": {
+    "welcome": false,
+    "mode": "first",
+    "guide": false,
+    "guideTab": "how",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": null,
+    "save": "{\"version\":2,\"savedAt\":1791680614677,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "A6b. FL OZ / progression / ownership untouched by the welcome",
+   "pass": true,
+   "detail": {
+    "before": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "after": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}"
+   }
+  },
+  {
+   "name": "A7. after BEGIN, board taps reach the game",
+   "pass": true,
+   "detail": {
+    "tapCount": 2,
+    "phase": "playing"
+   }
+  },
+  {
+   "name": "A8. Beaver persists in the save once play starts",
+   "pass": true,
+   "detail": "yall-too-beaver"
+  },
+  {
+   "name": "A9. welcome never reappears from gameplay taps",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "A10. without X/checkbox the first-impression welcome still greets on reload",
+   "pass": true,
+   "detail": {
+    "welcome": true,
+    "mode": "first",
+    "guide": false,
+    "guideTab": "how",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": null,
+    "save": "{\"version\":2,\"savedAt\":1791680614677,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "A12. no page errors (new visitor)",
+   "pass": false,
+   "detail": [
+    "addStyle is not defined",
+    "addStyle is not defined"
+   ]
+  },
+  {
+   "name": "B1. CHOOSE ANOTHER PLAYER opens the avatar picker",
+   "pass": true,
+   "detail": {
+    "welcome": false,
+    "mode": "first",
+    "guide": true,
+    "guideTab": "avatar",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": null,
+    "save": "{\"version\":2,\"savedAt\":1791680622759,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "B2. Choose without checkbox does not persist dismissal",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "name": "B3. Wilbert is listed in the picker",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "B4. Wilbert can be selected and the game begins",
+   "pass": true,
+   "detail": {
+    "welcome": false,
+    "mode": "first",
+    "guide": false,
+    "guideTab": "avatar",
+    "active": "wilbert-dam-guide",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": null,
+    "save": "{\"version\":2,\"savedAt\":1791680626420,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"wilbert-dam-guide\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "B5. economy unchanged by choosing",
+   "pass": true,
+   "detail": {
+    "before": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "after": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}"
+   }
+  },
+  {
+   "name": "B6. chosen character (Wilbert) stays active after refresh — not reset to Beaver",
+   "pass": true,
+   "detail": "wilbert-dam-guide"
+  },
+  {
+   "name": "C1. X closes the welcome and writes geiWelcomeDismissed=\"true\"",
+   "pass": true,
+   "detail": "true"
+  },
+  {
+   "name": "C2. refresh: welcome does not return, game opens directly",
+   "pass": true,
+   "detail": {
+    "welcome": false,
+    "mode": null,
+    "guide": false,
+    "guideTab": "how",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": "true",
+    "save": "{\"version\":2,\"savedAt\":1791680629995,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "C3. returning visitor keeps Beaver active",
+   "pass": true,
+   "detail": "yall-too-beaver"
+  },
+  {
+   "name": "C4. reopened browser: still dismissed, game opens directly",
+   "pass": true,
+   "detail": {
+    "welcome": false,
+    "mode": null,
+    "guide": false,
+    "guideTab": "how",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": "true",
+    "save": "{\"version\":2,\"savedAt\":1791680629995,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "C5. 12 gameplay taps never open the welcome",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F1. Profile shows 👋 WELCOME AGAIN",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F2. review mode opens with what/how-to-begin/choose/controls",
+   "pass": true,
+   "detail": {
+    "mode": "review",
+    "info": {
+     "shown": true,
+     "text": "🌊 What it is: move water from the ⛰️ Mountain through the 🧱 Dam, 🚪 Sluice, ⚙️ Waterwheel and 🏭 Mill to the Ocean — and rescue the -ites on the way.▶ How to begin: tap BEGIN THE FLOW, then tap anywhere on the board. Your first tap starts the day's clock.👆 Controls: tap to work the glowing station. Finish all six days before the timer runs out to earn FL OZ.👤 Players: tap CHOOSE ANOTHER PLAYER — Beaver and Wilbert are free; more wait in 🛒 BUY-ites.🧭 Top buttons: 🗺️ DAM Map · 📖 full Command Guide · 👤 Profile (this welcome lives there).",
+     "never": "none"
+    }
+   }
+  },
+  {
+   "name": "F3. reopening does not clear gameplay state or the dismissal",
+   "pass": true,
+   "detail": {
+    "key": "true"
+   }
+  },
+  {
+   "name": "F4. day clock is held while the welcome is open",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F5. closing review keeps the preference",
+   "pass": true,
+   "detail": {
+    "key": "true"
+   }
+  },
+  {
+   "name": "F6. reviewing does NOT make the welcome return on startup",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "C6. no page errors (dismissed visitor)",
+   "pass": false,
+   "detail": [
+    "addStyle is not defined",
+    "addStyle is not defined"
+   ]
+  },
+  {
+   "name": "D1. checkbox + BEGIN persists geiWelcomeDismissed",
+   "pass": true,
+   "detail": "true"
+  },
+  {
+   "name": "D2. refresh after checkbox: no welcome",
+   "pass": true,
+   "detail": {
+    "welcome": false,
+    "mode": null,
+    "guide": false,
+    "guideTab": "how",
+    "active": "yall-too-beaver",
+    "unlocked": [
+     "wilbert-dam-guide",
+     "yall-too-beaver"
+    ],
+    "econ": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[]}",
+    "tapCount": 0,
+    "phase": "ready",
+    "key": "true",
+    "save": "{\"version\":2,\"savedAt\":1791680651733,\"level\":1,\"currentStep\":0,\"levelFlOz\":0,\"totalFlOz\":0,\"completedLevels\":0,\"loopCount\":0,\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"activeCharacter\":\"yall-too-beaver\",\"processedReceipts\":[],\"purchaseHistory\":[],\"tribesFound\":[],\"lastTribe\":null,\"tribePortraits\":{},\"charRulesV2\":true,\"millStage\":0,\"damMachineFreePlays\":0,\"damMachineSpins\":0,\"damMachineWins\":0,\"damMachineJackpots\":0,\"damMachineSongsWon\":0,\"damMachineCharactersWon\":0,\"damMachineBestReward\":0,\"damMachineLastResult\":null,\"iteRescueStats\":{\"savedCount\":0,\"rescuedWater\":0,\"currentIteId\":\"danite\",\"savedIteIds\":[],\"lastSavedIteId\":null,\"lastRescueLevel\":0},\"wow\":{\"v\":1,\"activeCollection\":\"fireHydrant\",\"counts\":{\"fireHydrant\":0,\"plumber\":0,\"fireTruck\":0,\"architect\":0,\"waterTower\":0,\"cementMason\":0},\"completed\":[],\"windows\":{},\"awarded\":{},\"currentWindow\":0,\"windowTriggered\":false,\"timerBonusSeconds\":0,\"lastRolledLevel\":0,\"pending\":null,\"campaignComplete\":false,\"completionDate\":null,\"highestLevel\":0}}"
+   }
+  },
+  {
+   "name": "F7. review-mode X never writes the dismissal key",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "name": "H1. in-page command-center self-test: no new failures",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "G1. [Pixel 7] welcome fits the phone, no horizontal scroll",
+   "pass": true,
+   "detail": {
+    "shown": true,
+    "left": 16,
+    "right": 396,
+    "top": 264.25,
+    "bottom": 736,
+    "vw": 412,
+    "vh": 839,
+    "noHScroll": true,
+    "title": 24.72,
+    "line": 17,
+    "begin": 18,
+    "never": 15,
+    "xTarget": 44,
+    "beginH": 54
+   }
+  },
+  {
+   "name": "G2. [Pixel 7] large readable text + big tap targets",
+   "pass": true,
+   "detail": {
+    "shown": true,
+    "left": 16,
+    "right": 396,
+    "top": 264.25,
+    "bottom": 736,
+    "vw": 412,
+    "vh": 839,
+    "noHScroll": true,
+    "title": 24.72,
+    "line": 17,
+    "begin": 18,
+    "never": 15,
+    "xTarget": 44,
+    "beginH": 54
+   }
+  },
+  {
+   "name": "G3. [Pixel 7] touch X dismisses permanently",
+   "pass": true,
+   "detail": "true"
+  },
+  {
+   "name": "G1. [iPhone 13] welcome fits the phone, no horizontal scroll",
+   "pass": true,
+   "detail": {
+    "shown": true,
+    "left": 16,
+    "right": 374,
+    "top": 100.265625,
+    "bottom": 564.671875,
+    "vw": 390,
+    "vh": 664,
+    "noHScroll": true,
+    "title": 23.4,
+    "line": 17,
+    "begin": 18,
+    "never": 15,
+    "xTarget": 44,
+    "beginH": 54
+   }
+  },
+  {
+   "name": "G2. [iPhone 13] large readable text + big tap targets",
+   "pass": true,
+   "detail": {
+    "shown": true,
+    "left": 16,
+    "right": 374,
+    "top": 100.265625,
+    "bottom": 564.671875,
+    "vw": 390,
+    "vh": 664,
+    "noHScroll": true,
+    "title": 23.4,
+    "line": 17,
+    "begin": 18,
+    "never": 15,
+    "xTarget": 44,
+    "beginH": 54
+   }
+  },
+  {
+   "name": "G3. [iPhone 13] touch X dismisses permanently",
+   "pass": true,
+   "detail": "true"
+  }
+ ]
+}

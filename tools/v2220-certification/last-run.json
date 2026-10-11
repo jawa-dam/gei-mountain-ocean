@@ -1,175 +1,158 @@
 {
- "when": "2026-10-10T23:52:46.127Z",
+ "when": "2026-10-11T04:34:17.286Z",
  "results": [
   {
-   "name": "builder-svg",
-   "status": "PASS",
-   "passed": 229,
-   "failed": 0,
-   "secs": 258,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:loading",
-   "status": "PASS",
-   "passed": 7,
-   "failed": 0,
-   "secs": 99,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:render",
-   "status": "PASS",
-   "passed": 7,
-   "failed": 0,
-   "secs": 70,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:causality",
-   "status": "PASS",
-   "passed": 18,
-   "failed": 0,
-   "secs": 124,
-   "bad": [],
-   "killed": false,
-   "retry": true,
-   "first": {
-    "status": "INFRA",
-    "passed": 15,
-    "failed": 1,
-    "bad": [
-     "  ✗ suite causality crashed: page.waitForFunction: Timeout 15000ms exceeded."
-    ],
-    "killed": false
-   }
-  },
-  {
-   "name": "builder-3d:picking",
-   "status": "PASS",
-   "passed": 7,
-   "failed": 0,
-   "secs": 47,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:parity",
-   "status": "PASS",
-   "passed": 3,
-   "failed": 0,
-   "secs": 39,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:fallbacks",
-   "status": "PASS",
-   "passed": 9,
-   "failed": 0,
-   "secs": 94,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:motion",
-   "status": "PASS",
-   "passed": 6,
-   "failed": 0,
-   "secs": 46,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:lifecycle",
-   "status": "PASS",
-   "passed": 3,
-   "failed": 0,
-   "secs": 204,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:mobile",
-   "status": "PASS",
-   "passed": 8,
-   "failed": 0,
-   "secs": 105,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "builder-3d:chain",
-   "status": "PASS",
-   "passed": 11,
-   "failed": 0,
-   "secs": 418,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "e2e:chain",
-   "status": "PASS",
-   "passed": 28,
-   "failed": 0,
-   "secs": 118,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "e2e:routing",
-   "status": "PASS",
-   "passed": 6,
-   "failed": 0,
-   "secs": 30,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "e2e:cycle",
-   "status": "PASS",
-   "passed": 20,
-   "failed": 0,
-   "secs": 364,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "e2e:rewards",
-   "status": "PASS",
-   "passed": 28,
-   "failed": 0,
-   "secs": 498,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "e2e:fallback",
-   "status": "PASS",
-   "passed": 15,
-   "failed": 0,
-   "secs": 114,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "e2e:mobile",
-   "status": "PASS",
-   "passed": 10,
-   "failed": 0,
-   "secs": 954,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "golden-day5",
+   "name": "arcade:v2-chaos/economy-chaos",
    "status": "PASS",
    "passed": 0,
    "failed": null,
-   "secs": 15,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-chaos/regression-gate",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-director/v2194-voice-director-regression",
+   "status": "PASS",
+   "passed": 12,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-discovery/v2201-voice-discovery-regression",
+   "status": "PASS",
+   "passed": 15,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-memory/v2199-voice-memory-regression",
+   "status": "PASS",
+   "passed": 14,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression",
+   "status": "FAIL",
+   "passed": 8,
+   "failed": null,
+   "secs": 0,
+   "bad": [
+    "AssertionError [ERR_ASSERTION]: presentation-only boundary"
+   ],
+   "killed": false
+  },
+  {
+   "name": "arcade:v22-engineering-world/engineering-world-regression",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 284,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2211-flow-voices/flow-voices-regression",
+   "status": "PASS",
+   "passed": 57,
+   "failed": 0,
+   "secs": 286,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2212-personality/personality-regression",
+   "status": "PASS",
+   "passed": 57,
+   "failed": 0,
+   "secs": 152,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2213-next-challenge/next-challenge-regression",
+   "status": "PASS",
+   "passed": 45,
+   "failed": 0,
+   "secs": 175,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2214-stem/stem-regression",
+   "status": "PASS",
+   "passed": 60,
+   "failed": 0,
+   "secs": 173,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2215-rare-wow/rare-wow-regression",
+   "status": "PASS",
+   "passed": 51,
+   "failed": 0,
+   "secs": 300,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2216-xp-reward/xp-reward-regression",
+   "status": "PASS",
+   "passed": 83,
+   "failed": 0,
+   "secs": 233,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v223-personal-guide/personal-guide-regression",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 77,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v225-flow-welcome/flow-welcome-regression",
+   "status": "PASS",
+   "passed": 80,
+   "failed": null,
+   "secs": 273,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v226-victory-capsule/victory-capsule-regression",
+   "status": "PASS",
+   "passed": 91,
+   "failed": null,
+   "secs": 167,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v227-achievement-audio/achievement-audio-regression",
+   "status": "PASS",
+   "passed": 29,
+   "failed": null,
+   "secs": 50,
    "bad": [],
    "killed": false
   }
