@@ -9,8 +9,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  /* V2.2.20: destructured OUTSIDE the try so the drift handler in catch can use them (inside, they were out of scope there and the drift response threw a ReferenceError instead of freezing the entitlement). */
+  const { claimToken, captureID, claimId } = req.body || {};
   try {
-    const { claimToken, captureID, claimId } = req.body || {};
     if (!claimToken || !captureID || !claimId) {
       return res.status(400).json({ error: "Missing entitlement claim information." });
     }

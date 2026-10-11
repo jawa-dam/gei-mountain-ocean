@@ -1,10 +1,8 @@
 import { recordEntitlement } from "../_lib/paypal-ledger.js";
+import { PACKS } from "../_lib/economy-authority.js";
 
-const PACKS = {
-  single: { label: "1 Song", price: "1.00", flOz: 6660 },
-  ten: { label: "10 Songs", price: "3.00", flOz: 66600 },
-  twentyfive: { label: "25 Songs", price: "6.00", flOz: 166500 }
-};
+/* V2.2.20: the webhook carried its own pack table with the pre-V2.1.13 prices (1.00 / 3.00 / 6.00 USD), so every genuine capture charged at the canonical 6 / 12 / 18 USD failed
+   validation here. It now reads the one canonical authority, exactly like create-order and capture-order. */
 
 async function paypalToken() {
   const id = process.env.PAYPAL_CLIENT_ID;
