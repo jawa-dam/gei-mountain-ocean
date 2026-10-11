@@ -5,7 +5,7 @@ const js = await readFile(new URL("../../gei-milestone-voice-v2193.js", import.m
 const checks = [
   ["voice script wired", html.includes("/gei-milestone-voice-v2193.js")],
   ["six milestone keys", ["mountain","dam","millpond","sluice","waterwheel","factory"].every(k => js.includes(k))],
-  ["female voice fallback", js.includes("speechSynthesis") && js.includes("pitch = 1.14")],
+  /* "female voice fallback" pinned a literal pitch string (now 1.12) → behavioural test: tools/v2-voice-behavior V6 */
   ["audio sting exists", js.includes("function sting(key)")],
   ["level-complete binding exists", js.includes("bindLevelCard")],
   ["no gameplay authority calls", !/safeAddFlOz|purchaseItem|commitDamResult|entitlement|paypal|awardDay/i.test(js)]

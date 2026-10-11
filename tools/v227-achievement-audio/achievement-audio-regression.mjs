@@ -41,7 +41,7 @@ function serve(){
 }
 const results = []; const check = (name, pass, detail) => results.push({ name, pass: !!pass, detail });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const KNOWN = /Unexpected string|addStyle is not defined/;
+const KNOWN = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 
 /* the mocked audio tree: these files "exist" (garbage bytes — a real <audio> would fail to decode them, which is also a test) */
 const EXISTING = new Set([

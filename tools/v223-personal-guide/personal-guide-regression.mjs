@@ -39,7 +39,7 @@ const check = (name, pass, detail) => results.push({ name, pass: !!pass, detail 
 async function openGame(browser, base, o = {}){
   const ctx = await browser.newContext(Object.assign({ viewport: { width: 412, height: 915 }, deviceScaleFactor: 1.75, isMobile: true, hasTouch: true }, o));
   const page = await ctx.newPage(); const errors = [], api = [];
-  page.on("pageerror", e => { if (!/addStyle is not defined/.test(e.message)) errors.push(e.message); });
+  page.on("pageerror", e => errors.push(e.message));   // V2.2.20: unfiltered — the former "addStyle is not defined" (tap-lites-reward-moments-v2178.js) is fixed and must not return
   await page.route("**/*", r => { const u = r.request().url(); if (u.includes("/api/")) api.push(u); return u.startsWith(base) ? r.continue() : r.abort(); });
   await page.goto(base + "/", { waitUntil: "load" }); await sleep(700);
   await boot(page);
