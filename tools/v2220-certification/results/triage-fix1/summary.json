@@ -1,0 +1,130 @@
+[
+ {
+  "suite": "tools/v2-ambient/ambient-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 106,
+    "fails": [
+     "6a. TRY AGAIN: music keeps playing and the random cameo loop continues",
+     "1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–6 s)"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "6a. TRY AGAIN: music keeps playing and the random cameo loop continues",
+   "1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–6 s)"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v2-cameos/cameo-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 33,
+    "fails": [
+     "F2. map buttons (BACK, sound, region pills) never covered",
+     "harness ran to completion"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "F2. map buttons (BACK, sound, region pills) never covered",
+   "harness ran to completion"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v2-dam-map/dam-map-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 23,
+    "fails": [
+     "G2. CONTINUE on level 6 shows DAM MAP MILESTONE 01 · GRISTMILL ONLINE over the map",
+     "G3. milestone CONTINUE closes the map and opens the Bonus Waterwheel",
+     "G4. milestone auto-continues to the Bonus Waterwheel after 5.2 s"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "G2. CONTINUE on level 6 shows DAM MAP MILESTONE 01 · GRISTMILL ONLINE over the map",
+   "G3. milestone CONTINUE closes the map and opens the Bonus Waterwheel",
+   "G4. milestone auto-continues to the Bonus Waterwheel after 5.2 s"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v2-milestone-voice/milestone-voice-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 5,
+    "fails": [
+     "female voice fallback"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "female voice fallback"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v2-quiet-tap/quiet-tap-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 30,
+    "fails": [
+     "6d. opening the map changes no gameplay state",
+     "9b. no new or removed saved-state keys"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "6d. opening the map changes no gameplay state",
+   "9b. no new or removed saved-state keys"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v2-welcome/welcome-regression.mjs",
+  "cur": [
+   {
+    "code": 0,
+    "passes": 40,
+    "fails": []
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v225-flow-welcome/flow-welcome-regression.mjs",
+  "cur": [
+   {
+    "code": 0,
+    "passes": 160,
+    "fails": []
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [],
+  "onlyBaseline": [],
+  "stable": true
+ }
+]

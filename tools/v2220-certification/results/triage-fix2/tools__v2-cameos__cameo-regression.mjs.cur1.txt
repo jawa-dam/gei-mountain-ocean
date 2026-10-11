@@ -1,0 +1,715 @@
+{
+ "version": "V2.1.91",
+ "passed": 72,
+ "failed": 1,
+ "results": [
+  {
+   "name": "A1. guide picker shows none of the nine DAM-ITE SURPRISES",
+   "pass": true,
+   "detail": [
+    "wilbert-dam-guide",
+    "yall-too-beaver",
+    "operator-fireman",
+    "operator-moses",
+    "operator-valentine",
+    "operator-sam",
+    "operator-jack-o-lantern",
+    "operator-santa-claus",
+    "operator-woman",
+    "operator-man",
+    "nite",
+    "lite",
+    "jesus",
+    "dam-black-jesus",
+    "devil",
+    "ite-danite",
+    "ite-levite",
+    "ite-israelite",
+    "ite-amorite",
+    "ite-jebusite",
+    "ite-hittite",
+    "ite-hivite",
+    "ite-ammonite",
+    "ite-benjamite",
+    "ite-ephraimite"
+   ]
+  },
+  {
+   "name": "A2. store shelf + characters panel show none of them",
+   "pass": true,
+   "detail": {
+    "store": [],
+    "panel": []
+   }
+  },
+  {
+   "name": "A3. no picker label names a removed character",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "A4. renames: character-6 → DAM Statue, character-8 → DAM Double Burger; no duplicates, no '&'",
+   "pass": true,
+   "detail": {
+    "c6": "DAM Statue",
+    "c8": "DAM Double Burger",
+    "dup": []
+   }
+  },
+  {
+   "name": "A5. image URLs kept in the catalog (cameoOnly flag, not deleted)",
+   "pass": true,
+   "detail": [
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-7-o2nDavc4ykzgRbHC.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-8-vxguDEnb7vK4VLfB.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-6-tIItWTvyZSAcXRqM.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-2-2KiYRNiOOqMrnMox.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-1-RpGbXOI17l5vcLD5.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-3-pFGTZcpgXIovTdjM.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-4-SXcOzsVgiHtGDhDY.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/characters-5-J0CAEYtL5ydwiJmX.png",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/ites-people-3-kSPwRK9aeNJBeCaz.png"
+   ]
+  },
+  {
+   "name": "A6. prize path never awards a surprise (nextLockedItem)",
+   "pass": true,
+   "detail": "operator-fireman"
+  },
+  {
+   "name": "B1. Beaver is the default active character and listed",
+   "pass": true,
+   "detail": "yall-too-beaver"
+  },
+  {
+   "name": "C1. Wilbert is listed",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "C2. Wilbert selectable",
+   "pass": true,
+   "detail": {
+    "w": true,
+    "a1": "wilbert-dam-guide",
+    "b": true,
+    "a2": "yall-too-beaver",
+    "lionActive": false,
+    "buy": {
+     "ok": false,
+     "message": "✨ That's a DAM-ITE SURPRISE — it only drops in for cameos."
+    },
+    "ownershipSame": true
+   }
+  },
+  {
+   "name": "B2. Beaver selectable",
+   "pass": true,
+   "detail": {
+    "w": true,
+    "a1": "wilbert-dam-guide",
+    "b": true,
+    "a2": "yall-too-beaver",
+    "lionActive": false,
+    "buy": {
+     "ok": false,
+     "message": "✨ That's a DAM-ITE SURPRISE — it only drops in for cameos."
+    },
+    "ownershipSame": true
+   }
+  },
+  {
+   "name": "A7. a surprise can't be made active or bought",
+   "pass": true,
+   "detail": {
+    "w": true,
+    "a1": "wilbert-dam-guide",
+    "b": true,
+    "a2": "yall-too-beaver",
+    "lionActive": false,
+    "buy": {
+     "ok": false,
+     "message": "✨ That's a DAM-ITE SURPRISE — it only drops in for cameos."
+    },
+    "ownershipSame": true
+   }
+  },
+  {
+   "name": "A8. no new page errors (selection)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "A9. in-page command-center self-test: no new failures",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "J1. engine self-test (9 cameos, 14 effects, tiers=100, single layer, pointer-events none, aria-hidden, art from catalog, none selectable)",
+   "pass": true,
+   "detail": {
+    "version": "V2.1.92",
+    "cameos": 9,
+    "effects": 14,
+    "tiers": "normal:65,special:25,rare:8,ultra:2",
+    "tierWeightsSum": 100,
+    "singleLayer": true,
+    "boundedDom": true,
+    "pointerEventsNone": true,
+    "ariaHidden": true,
+    "artFromCatalog": true,
+    "noneSelectable": true,
+    "modes": [
+     "home",
+     "pregame",
+     "wheel",
+     "level",
+     "idle",
+     "map"
+    ],
+    "screen": "home",
+    "presentationOnly": true
+   }
+  },
+  {
+   "name": "J2. tier weights ≈ 65 / 25 / 8 / 2 %",
+   "pass": true,
+   "detail": {
+    "normal": 25998,
+    "special": 10109,
+    "rare": 3052,
+    "ultra": 841
+   }
+  },
+  {
+   "name": "A10. legacy save: active surprise → Beaver; purchased surprises stay owned; FL OZ/progress untouched",
+   "pass": true,
+   "detail": {
+    "active": "yall-too-beaver",
+    "owned": [
+     "wilbert-dam-guide",
+     "yall-too-beaver",
+     "character-6",
+     "lion"
+    ],
+    "fl": 777,
+    "level": 4,
+    "lfo": 222
+   }
+  },
+  {
+   "name": "D0. THE DAM BROKE card shows with music playing",
+   "pass": true,
+   "detail": {
+    "bt": {
+     "phase": "timeout",
+     "shown": true,
+     "at": 12220.5
+    },
+    "music0": true
+   }
+  },
+  {
+   "name": "D1. cameos appear (first after ~1.5–3.5 s)",
+   "pass": true,
+   "detail": {
+    "firstAt": 2046,
+    "seq": [
+     "character-1",
+     "character-7",
+     "character-8"
+    ]
+   }
+  },
+  {
+   "name": "D2. only one cameo visible at a time",
+   "pass": true,
+   "detail": {
+    "max": 1
+   }
+  },
+  {
+   "name": "D3. appearances are short (≈0.9–2.2 s)",
+   "pass": true,
+   "detail": [
+    1114,
+    1799,
+    81
+   ]
+  },
+  {
+   "name": "D4. no cameo twice in a row",
+   "pass": true,
+   "detail": [
+    "character-1",
+    "character-7",
+    "character-8"
+   ]
+  },
+  {
+   "name": "D5. music keeps playing through the idle show",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "D6. TRY DAY AGAIN never covered; layer pointer-events:none",
+   "pass": true,
+   "detail": {
+    "covered": 0
+   }
+  },
+  {
+   "name": "H1. no horizontal overflow; cameo stays on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "E1. one tap ends the show immediately and retries the day",
+   "pass": true,
+   "detail": {
+    "before": true,
+    "after": {
+     "vis": false,
+     "on": 0,
+     "mode": "",
+     "card": false,
+     "phase": "playing"
+    }
+   }
+  },
+  {
+   "name": "E2. no cameos after returning to gameplay",
+   "pass": true,
+   "detail": {
+    "shown": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "G1. FL OZ / XP / progression / ownership unchanged by cameos",
+   "pass": true,
+   "detail": {
+    "econ0": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"purchaseHistory\":[],\"processedReceipts\":[]}",
+    "econ1": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"purchaseHistory\":[],\"processedReceipts\":[]}"
+   }
+  },
+  {
+   "name": "G2. refresh: same gameplay state, no new saved keys from the engine",
+   "pass": true,
+   "detail": {
+    "newKeys": []
+   }
+  },
+  {
+   "name": "D7. no new page errors (idle)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "D8. no music playing → no idle cameos",
+   "pass": true,
+   "detail": {
+    "shown": 0
+   }
+  },
+  {
+   "name": "F1. cameos appear on the DAM Map on their own",
+   "pass": true,
+   "detail": {
+    "seen": 2,
+    "inScene": true
+   }
+  },
+  {
+   "name": "F2. map buttons (BACK, sound, region pills) never covered",
+   "pass": false,
+   "detail": {
+    "covered": 36,
+    "max": 1
+   }
+  },
+  {
+   "name": "F5. every map cameo is actually on screen (inside the visible map viewport)",
+   "pass": true,
+   "detail": {
+    "outside": 0,
+    "seq": [
+     "character-1",
+     "character-7",
+     "character-6",
+     "lion",
+     "character-3",
+     "character-4",
+     "character-5"
+    ]
+   }
+  },
+  {
+   "name": "F3. sound toggle + region pill respond to real clicks during a cameo",
+   "pass": true,
+   "detail": {
+    "sndBefore": "true",
+    "sndAfter": "false",
+    "cap": "🌊 MILLPOND · Stored water and dry-land edge · AHEAD · DAY 3"
+   }
+  },
+  {
+   "name": "F4. BACK closes the map and stops map cameos",
+   "pass": true,
+   "detail": {
+    "open": false,
+    "mode": "home",
+    "on": 0
+   }
+  },
+  {
+   "name": "H2. no horizontal page overflow on the map",
+   "pass": true,
+   "detail": {
+    "overflow": 0
+   }
+  },
+  {
+   "name": "I1. reduced motion: fade/scale only (no effect loops, no music sway, no particles, no flashing aura)",
+   "pass": true,
+   "detail": {
+    "c": {
+     "id": "character-7",
+     "label": "DAM Pool",
+     "tier": "ultra",
+     "effect": "float",
+     "entry": "fade",
+     "exit": "fade",
+     "ms": 1600
+    },
+    "cls": "dscCameo on t-ultra",
+    "parts": 0,
+    "figAnim": "none"
+   }
+  },
+  {
+   "name": "D0. [Pixel 7] THE DAM BROKE card shows with music playing",
+   "pass": true,
+   "detail": {
+    "bt": {
+     "phase": "timeout",
+     "shown": true,
+     "at": 12840.699999999255
+    },
+    "music0": true
+   }
+  },
+  {
+   "name": "D1. [Pixel 7] cameos appear (first after ~1.5–3.5 s)",
+   "pass": true,
+   "detail": {
+    "firstAt": 1684,
+    "seq": [
+     "character-6",
+     "character-5"
+    ]
+   }
+  },
+  {
+   "name": "D2. [Pixel 7] only one cameo visible at a time",
+   "pass": true,
+   "detail": {
+    "max": 1
+   }
+  },
+  {
+   "name": "D3. [Pixel 7] appearances are short (≈0.9–2.2 s)",
+   "pass": true,
+   "detail": [
+    1557,
+    1800
+   ]
+  },
+  {
+   "name": "D4. [Pixel 7] no cameo twice in a row",
+   "pass": true,
+   "detail": [
+    "character-6",
+    "character-5"
+   ]
+  },
+  {
+   "name": "D5. [Pixel 7] music keeps playing through the idle show",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "D6. [Pixel 7] TRY DAY AGAIN never covered; layer pointer-events:none",
+   "pass": true,
+   "detail": {
+    "covered": 0
+   }
+  },
+  {
+   "name": "H1. [Pixel 7] no horizontal overflow; cameo stays on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "E1. [Pixel 7] one tap ends the show immediately and retries the day",
+   "pass": true,
+   "detail": {
+    "before": true,
+    "after": {
+     "vis": false,
+     "on": 0,
+     "mode": "",
+     "card": false,
+     "phase": "playing"
+    }
+   }
+  },
+  {
+   "name": "E2. [Pixel 7] no cameos after returning to gameplay",
+   "pass": true,
+   "detail": {
+    "shown": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "G1. [Pixel 7] FL OZ / XP / progression / ownership unchanged by cameos",
+   "pass": true,
+   "detail": {
+    "econ0": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"purchaseHistory\":[],\"processedReceipts\":[]}",
+    "econ1": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"purchaseHistory\":[],\"processedReceipts\":[]}"
+   }
+  },
+  {
+   "name": "G2. [Pixel 7] refresh: same gameplay state, no new saved keys from the engine",
+   "pass": true,
+   "detail": {
+    "newKeys": []
+   }
+  },
+  {
+   "name": "F1. [Pixel 7] cameos appear on the DAM Map on their own",
+   "pass": true,
+   "detail": {
+    "seen": 2,
+    "inScene": true
+   }
+  },
+  {
+   "name": "F2. [Pixel 7] map buttons (BACK, sound, region pills) never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "max": 1
+   }
+  },
+  {
+   "name": "F5. [Pixel 7] every map cameo is actually on screen (inside the visible map viewport)",
+   "pass": true,
+   "detail": {
+    "outside": 0,
+    "seq": [
+     "character-5",
+     "character-7",
+     "character-6",
+     "lion",
+     "character-3",
+     "character-4",
+     "character-5"
+    ]
+   }
+  },
+  {
+   "name": "F3. [Pixel 7] sound toggle + region pill respond to real clicks during a cameo",
+   "pass": true,
+   "detail": {
+    "sndBefore": "true",
+    "sndAfter": "false",
+    "cap": "🌊 MILLPOND · Stored water and dry-land edge · AHEAD · DAY 3"
+   }
+  },
+  {
+   "name": "F4. [Pixel 7] BACK closes the map and stops map cameos",
+   "pass": true,
+   "detail": {
+    "open": false,
+    "mode": "home",
+    "on": 0
+   }
+  },
+  {
+   "name": "H2. [Pixel 7] no horizontal page overflow on the map",
+   "pass": true,
+   "detail": {
+    "overflow": 0
+   }
+  },
+  {
+   "name": "D0. [iPhone 13] THE DAM BROKE card shows with music playing",
+   "pass": true,
+   "detail": {
+    "bt": {
+     "phase": "timeout",
+     "shown": true,
+     "at": 12818.300000000745
+    },
+    "music0": true
+   }
+  },
+  {
+   "name": "D1. [iPhone 13] cameos appear (first after ~1.5–3.5 s)",
+   "pass": true,
+   "detail": {
+    "firstAt": 3481,
+    "seq": [
+     "character-4",
+     "character-2"
+    ]
+   }
+  },
+  {
+   "name": "D2. [iPhone 13] only one cameo visible at a time",
+   "pass": true,
+   "detail": {
+    "max": 1
+   }
+  },
+  {
+   "name": "D3. [iPhone 13] appearances are short (≈0.9–2.2 s)",
+   "pass": true,
+   "detail": [
+    999,
+    1280
+   ]
+  },
+  {
+   "name": "D4. [iPhone 13] no cameo twice in a row",
+   "pass": true,
+   "detail": [
+    "character-4",
+    "character-2"
+   ]
+  },
+  {
+   "name": "D5. [iPhone 13] music keeps playing through the idle show",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "D6. [iPhone 13] TRY DAY AGAIN never covered; layer pointer-events:none",
+   "pass": true,
+   "detail": {
+    "covered": 0
+   }
+  },
+  {
+   "name": "H1. [iPhone 13] no horizontal overflow; cameo stays on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "E1. [iPhone 13] one tap ends the show immediately and retries the day",
+   "pass": true,
+   "detail": {
+    "before": true,
+    "after": {
+     "vis": false,
+     "on": 0,
+     "mode": "",
+     "card": false,
+     "phase": "playing"
+    }
+   }
+  },
+  {
+   "name": "E2. [iPhone 13] no cameos after returning to gameplay",
+   "pass": true,
+   "detail": {
+    "shown": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "G1. [iPhone 13] FL OZ / XP / progression / ownership unchanged by cameos",
+   "pass": true,
+   "detail": {
+    "econ0": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"purchaseHistory\":[],\"processedReceipts\":[]}",
+    "econ1": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"millStage\":0,\"damMachineFreePlays\":0,\"unlockedCharacters\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"unlockedSongs\":[\"masters-build\"],\"unlockedSkins\":[],\"purchaseHistory\":[],\"processedReceipts\":[]}"
+   }
+  },
+  {
+   "name": "G2. [iPhone 13] refresh: same gameplay state, no new saved keys from the engine",
+   "pass": true,
+   "detail": {
+    "newKeys": []
+   }
+  },
+  {
+   "name": "F1. [iPhone 13] cameos appear on the DAM Map on their own",
+   "pass": true,
+   "detail": {
+    "seen": 2,
+    "inScene": true
+   }
+  },
+  {
+   "name": "F2. [iPhone 13] map buttons (BACK, sound, region pills) never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "max": 1
+   }
+  },
+  {
+   "name": "F5. [iPhone 13] every map cameo is actually on screen (inside the visible map viewport)",
+   "pass": true,
+   "detail": {
+    "outside": 0,
+    "seq": [
+     "character-1",
+     "character-3",
+     "character-7",
+     "character-6",
+     "lion",
+     "character-3",
+     "character-4",
+     "character-5"
+    ]
+   }
+  },
+  {
+   "name": "F3. [iPhone 13] sound toggle + region pill respond to real clicks during a cameo",
+   "pass": true,
+   "detail": {
+    "sndBefore": "true",
+    "sndAfter": "false",
+    "cap": "🌊 MILLPOND · Stored water and dry-land edge · AHEAD · DAY 3"
+   }
+  },
+  {
+   "name": "F4. [iPhone 13] BACK closes the map and stops map cameos",
+   "pass": true,
+   "detail": {
+    "open": false,
+    "mode": "home",
+    "on": 0
+   }
+  },
+  {
+   "name": "H2. [iPhone 13] no horizontal page overflow on the map",
+   "pass": true,
+   "detail": {
+    "overflow": 0
+   }
+  }
+ ]
+}
