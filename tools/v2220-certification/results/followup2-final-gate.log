@@ -1,0 +1,62 @@
+PASS   builder-svg                                    229 passed  224s
+PASS   builder-3d:loading                               7 passed  66s
+PASS   builder-3d:render                                7 passed  46s
+PASS   builder-3d:causality                            18 passed  91s
+PASS   builder-3d:picking                               7 passed  34s
+PASS   builder-3d:parity                                3 passed  30s
+PASS   builder-3d:fallbacks                             9 passed  72s
+PASS   builder-3d:motion                                6 passed  31s
+PASS   builder-3d:lifecycle                             3 passed  162s
+PASS   builder-3d:mobile                                8 passed  84s
+PASS   builder-3d:chain                                11 passed  313s
+PASS   e2e:chain                                       28 passed  86s
+PASS   e2e:routing                                      6 passed  23s
+PASS   e2e:cycle                                       20 passed  274s
+PASS   e2e:rewards                                     28 passed  391s
+PASS   e2e:fallback                                    15 passed  88s
+PASS   e2e:mobile                                      10 passed  688s
+PASS   golden-day5                                      0 passed  11s
+PASS   arcade:v2-adaptive-voice/v2198-adaptive-voice-regression  14 passed  0s
+FAIL   arcade:v2-ambient/ambient-regression             0 passed  265s
+        ✗ 1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–6 s)
+        !! failures NOT present on the baseline: ["✗ 1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–)"]
+PASS   arcade:v2-cameos/cameo-regression                0 passed  269s
+PASS   arcade:v2-chaos/economy-chaos                    0 passed  0s
+PASS   arcade:v2-chaos/regression-gate                  0 passed  0s
+PASS   arcade:v2-chaos/security-certification           0 passed  17s
+PASS   arcade:v2-contextual-voice/v2197-contextual-voice-regression  13 passed  0s
+PASS   arcade:v2-dam-map/dam-map-regression             0 passed  171s
+PASS   arcade:v2-dam-map/map-stem-navigation-regression  35 passed  52s
+PASS   arcade:v2-milestone-voice/milestone-voice-regression   5 passed  0s
+PASS   arcade:v2-quiet-tap/quiet-tap-regression         0 passed  86s
+FAIL   arcade:v2-soundtrack/soundtrack-regression       0 passed  56s
+        ✗ autoplay safety: nothing starts before a user gesture
+        ✗ idle lift respects ceiling (≤ 0.48) and calm band
+        ✗ very long idle settles back down
+        ✗ no console errors introduced (vs. baseline without V2.1.88)
+        !! failures NOT present on the baseline: ["✗ idle lift respects ceiling (≤ 0.48) and calm band","✗ very long idle settles back down"]
+PASS   arcade:v2-voice-behavior/voice-behavior-regression  15 passed  7s
+PASS   arcade:v2-voice-director/v2194-voice-director-regression  12 passed  0s
+PASS   arcade:v2-voice-discovery/v2201-voice-discovery-regression  15 passed  0s
+PASS   arcade:v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression  77 passed  50s
+PASS   arcade:v2-voice-memory/v2199-voice-memory-regression  14 passed  0s
+PASS   arcade:v2-voice-reactions/v2196-voice-reactions-regression  10 passed  0s
+PASS   arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression  10 passed  0s
+PASS   arcade:v2-voice-showcase/v2200-voice-showcase-regression  12 passed  0s
+PASS   arcade:v2-voice-ui/v2195-voice-ui-regression    10 passed  0s
+PASS   arcade:v2-welcome/welcome-regression             0 passed  56s
+PASS   arcade:v2178-reward-moments/reward-moments-regression  18 passed  26s
+PASS   arcade:v22-engineering-world/engineering-world-regression   0 passed  279s
+PASS   arcade:v2210-flow-moment/flow-moment-regression  57 passed  419s
+PASS   arcade:v2211-flow-voices/flow-voices-regression  57 passed  282s
+PASS   arcade:v2212-personality/personality-regression  57 passed  148s
+PASS   arcade:v2213-next-challenge/next-challenge-regression  45 passed  169s
+PASS   arcade:v2214-stem/stem-regression               60 passed  168s
+PASS   arcade:v2215-rare-wow/rare-wow-regression       51 passed  295s
+PASS   arcade:v2216-xp-reward/xp-reward-regression     83 passed  232s
+PASS   arcade:v223-personal-guide/personal-guide-regression   0 passed  76s
+PASS   arcade:v225-flow-welcome/flow-welcome-regression  80 passed  268s
+PASS   arcade:v226-victory-capsule/victory-capsule-regression  91 passed  161s
+PASS   arcade:v227-achievement-audio/achievement-audio-regression  29 passed  49s
+
+53 suites · 1285 assertions passed · genuine FAIL: 2 · unresolved INFRA: 0 · failing identically on the pre-Builder baseline: 0 · passed only after an infra re-run: 0

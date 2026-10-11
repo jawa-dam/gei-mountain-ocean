@@ -1,6 +1,210 @@
 {
- "when": "2026-10-11T04:34:17.286Z",
+ "when": "2026-10-11T16:15:50.964Z",
  "results": [
+  {
+   "name": "builder-svg",
+   "status": "PASS",
+   "passed": 229,
+   "failed": 0,
+   "secs": 224,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:loading",
+   "status": "PASS",
+   "passed": 7,
+   "failed": 0,
+   "secs": 66,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:render",
+   "status": "PASS",
+   "passed": 7,
+   "failed": 0,
+   "secs": 46,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:causality",
+   "status": "PASS",
+   "passed": 18,
+   "failed": 0,
+   "secs": 91,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:picking",
+   "status": "PASS",
+   "passed": 7,
+   "failed": 0,
+   "secs": 34,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:parity",
+   "status": "PASS",
+   "passed": 3,
+   "failed": 0,
+   "secs": 30,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:fallbacks",
+   "status": "PASS",
+   "passed": 9,
+   "failed": 0,
+   "secs": 72,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:motion",
+   "status": "PASS",
+   "passed": 6,
+   "failed": 0,
+   "secs": 31,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:lifecycle",
+   "status": "PASS",
+   "passed": 3,
+   "failed": 0,
+   "secs": 162,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:mobile",
+   "status": "PASS",
+   "passed": 8,
+   "failed": 0,
+   "secs": 84,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "builder-3d:chain",
+   "status": "PASS",
+   "passed": 11,
+   "failed": 0,
+   "secs": 313,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:chain",
+   "status": "PASS",
+   "passed": 28,
+   "failed": 0,
+   "secs": 86,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:routing",
+   "status": "PASS",
+   "passed": 6,
+   "failed": 0,
+   "secs": 23,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:cycle",
+   "status": "PASS",
+   "passed": 20,
+   "failed": 0,
+   "secs": 274,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:rewards",
+   "status": "PASS",
+   "passed": 28,
+   "failed": 0,
+   "secs": 391,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:fallback",
+   "status": "PASS",
+   "passed": 15,
+   "failed": 0,
+   "secs": 88,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "e2e:mobile",
+   "status": "PASS",
+   "passed": 10,
+   "failed": 0,
+   "secs": 688,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "golden-day5",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 11,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-adaptive-voice/v2198-adaptive-voice-regression",
+   "status": "PASS",
+   "passed": 14,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-ambient/ambient-regression",
+   "status": "FAIL",
+   "passed": 0,
+   "failed": null,
+   "secs": 265,
+   "bad": [
+    "✗ 1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–6 s)"
+   ],
+   "killed": false,
+   "baseline": {
+    "status": "FAIL",
+    "passed": 0,
+    "bad": [
+     "✗ P3. no new page errors (home)",
+     "✗ P4. no new page errors (level/wheel)",
+     "✗ 6a. TRY AGAIN: music keeps playing and the random cameo loop continues"
+    ]
+   },
+   "sameFailures": false,
+   "newFailures": [
+    "✗ 1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–)"
+   ]
+  },
+  {
+   "name": "arcade:v2-cameos/cameo-regression",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 269,
+   "bad": [],
+   "killed": false
+  },
   {
    "name": "arcade:v2-chaos/economy-chaos",
    "status": "PASS",
@@ -16,6 +220,96 @@
    "passed": 0,
    "failed": null,
    "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-chaos/security-certification",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 17,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-contextual-voice/v2197-contextual-voice-regression",
+   "status": "PASS",
+   "passed": 13,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-dam-map/dam-map-regression",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 171,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-dam-map/map-stem-navigation-regression",
+   "status": "PASS",
+   "passed": 35,
+   "failed": 0,
+   "secs": 52,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-milestone-voice/milestone-voice-regression",
+   "status": "PASS",
+   "passed": 5,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-quiet-tap/quiet-tap-regression",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 86,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-soundtrack/soundtrack-regression",
+   "status": "FAIL",
+   "passed": 0,
+   "failed": null,
+   "secs": 56,
+   "bad": [
+    "✗ autoplay safety: nothing starts before a user gesture",
+    "✗ idle lift respects ceiling (≤ 0.48) and calm band",
+    "✗ very long idle settles back down",
+    "✗ no console errors introduced (vs. baseline without V2.1.88)"
+   ],
+   "killed": false,
+   "baseline": {
+    "status": "FAIL",
+    "passed": 0,
+    "bad": [
+     "✗ autoplay safety: nothing starts before a user gesture",
+     "✗ no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   "sameFailures": false,
+   "newFailures": [
+    "✗ idle lift respects ceiling (≤ 0.48) and calm band",
+    "✗ very long idle settles back down"
+   ]
+  },
+  {
+   "name": "arcade:v2-voice-behavior/voice-behavior-regression",
+   "status": "PASS",
+   "passed": 15,
+   "failed": 0,
+   "secs": 7,
    "bad": [],
    "killed": false
   },
@@ -38,6 +332,15 @@
    "killed": false
   },
   {
+   "name": "arcade:v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression",
+   "status": "PASS",
+   "passed": 77,
+   "failed": null,
+   "secs": 50,
+   "bad": [],
+   "killed": false
+  },
+  {
    "name": "arcade:v2-voice-memory/v2199-voice-memory-regression",
    "status": "PASS",
    "passed": 14,
@@ -47,14 +350,57 @@
    "killed": false
   },
   {
-   "name": "arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression",
-   "status": "FAIL",
-   "passed": 8,
+   "name": "arcade:v2-voice-reactions/v2196-voice-reactions-regression",
+   "status": "PASS",
+   "passed": 10,
    "failed": null,
    "secs": 0,
-   "bad": [
-    "AssertionError [ERR_ASSERTION]: presentation-only boundary"
-   ],
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression",
+   "status": "PASS",
+   "passed": 10,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-showcase/v2200-voice-showcase-regression",
+   "status": "PASS",
+   "passed": 12,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-voice-ui/v2195-voice-ui-regression",
+   "status": "PASS",
+   "passed": 10,
+   "failed": null,
+   "secs": 0,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2-welcome/welcome-regression",
+   "status": "PASS",
+   "passed": 0,
+   "failed": null,
+   "secs": 56,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2178-reward-moments/reward-moments-regression",
+   "status": "PASS",
+   "passed": 18,
+   "failed": 0,
+   "secs": 26,
+   "bad": [],
    "killed": false
   },
   {
@@ -62,7 +408,16 @@
    "status": "PASS",
    "passed": 0,
    "failed": null,
-   "secs": 284,
+   "secs": 279,
+   "bad": [],
+   "killed": false
+  },
+  {
+   "name": "arcade:v2210-flow-moment/flow-moment-regression",
+   "status": "PASS",
+   "passed": 57,
+   "failed": 0,
+   "secs": 419,
    "bad": [],
    "killed": false
   },
@@ -71,7 +426,7 @@
    "status": "PASS",
    "passed": 57,
    "failed": 0,
-   "secs": 286,
+   "secs": 282,
    "bad": [],
    "killed": false
   },
@@ -80,7 +435,7 @@
    "status": "PASS",
    "passed": 57,
    "failed": 0,
-   "secs": 152,
+   "secs": 148,
    "bad": [],
    "killed": false
   },
@@ -89,7 +444,7 @@
    "status": "PASS",
    "passed": 45,
    "failed": 0,
-   "secs": 175,
+   "secs": 169,
    "bad": [],
    "killed": false
   },
@@ -98,7 +453,7 @@
    "status": "PASS",
    "passed": 60,
    "failed": 0,
-   "secs": 173,
+   "secs": 168,
    "bad": [],
    "killed": false
   },
@@ -107,7 +462,7 @@
    "status": "PASS",
    "passed": 51,
    "failed": 0,
-   "secs": 300,
+   "secs": 295,
    "bad": [],
    "killed": false
   },
@@ -116,7 +471,7 @@
    "status": "PASS",
    "passed": 83,
    "failed": 0,
-   "secs": 233,
+   "secs": 232,
    "bad": [],
    "killed": false
   },
@@ -125,7 +480,7 @@
    "status": "PASS",
    "passed": 0,
    "failed": null,
-   "secs": 77,
+   "secs": 76,
    "bad": [],
    "killed": false
   },
@@ -134,7 +489,7 @@
    "status": "PASS",
    "passed": 80,
    "failed": null,
-   "secs": 273,
+   "secs": 268,
    "bad": [],
    "killed": false
   },
@@ -143,7 +498,7 @@
    "status": "PASS",
    "passed": 91,
    "failed": null,
-   "secs": 167,
+   "secs": 161,
    "bad": [],
    "killed": false
   },
@@ -152,7 +507,7 @@
    "status": "PASS",
    "passed": 29,
    "failed": null,
-   "secs": 50,
+   "secs": 49,
    "bad": [],
    "killed": false
   }
