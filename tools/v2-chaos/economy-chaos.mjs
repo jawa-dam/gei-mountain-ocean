@@ -245,7 +245,9 @@ test("C17", "authoritative repair becomes recoverable without auto-credit", () =
   const ledger = simulateLedger(authoritativeRecord({ flOz: 1 }));
   ledger.claim(CAPTURE_ID, CLAIM_ID);
   ledger.mutate(record => {
-    const clean = authoritativeRecord(record);
+    // The authoritative repair must actually restore the pack's FL OZ. (Before V2.2.20 this spread the drifted record back over the clean one,
+    // so flOz stayed 1, FL_OZ_DRIFT remained and recover() correctly answered DRIFT_REMAINS — the repair step itself was a no-op.)
+    const clean = authoritativeRecord({ ...record, flOz: getPack(PACK_ID).flOz });
     Object.assign(record, clean);
   });
   const result = ledger.recover();

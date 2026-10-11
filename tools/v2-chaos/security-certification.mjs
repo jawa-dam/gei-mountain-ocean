@@ -29,10 +29,12 @@ if (gate.stdout) process.stdout.write(gate.stdout);
 if (gate.stderr) process.stderr.write(gate.stderr);
 if (gate.status !== 0) fail("V2.0.29 regression gate did not pass.");
 
-const lines = gate.stdout.trim().split("\n");
+// The gate prints the chaos report and then its own (pretty-printed) JSON object. The gate's object is the LAST top-level "{" … "}" block; parsing only the last
+// line (as before V2.2.20) could never succeed because that line is just the closing brace.
+const out = gate.stdout.trim(), start = out.lastIndexOf("\n{\n");
 let report;
 try {
-  report = JSON.parse(lines.at(-1));
+  report = JSON.parse(start >= 0 ? out.slice(start + 1) : out);
 } catch {
   fail("V2.0.29 did not emit a valid certification payload.");
 }
