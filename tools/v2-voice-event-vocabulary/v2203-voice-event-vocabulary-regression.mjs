@@ -504,8 +504,9 @@ async function runtime(){
       state.level = 6; showLevelComplete();
       await new Promise(r => setTimeout(r, 150));
       window.__vlog.plays.length = 0;
-      window.GEI_VOICE_SHOWCASE.open();
-      document.querySelector('[data-v2200-play="dam"]').click();     // the player taps REPLAY while MOUNTAIN plays
+      /* V2.2.20: the Showcase panel (and its ▶ buttons) was retired from the UI in V2.2.04 — open() returns false and renders nothing — so clicking [data-v2200-play] threw on null and aborted the run, hiding B42/B40/B41.
+         The ▶ button's handler is exactly preview(key, currentMode()), so the same replay is requested through the module's public API. */
+      window.GEI_VOICE_SHOWCASE.preview("dam", D.getMode());       // the player replays DAM while MOUNTAIN plays
       await new Promise(r => setTimeout(r, 150));
       const files = window.__vlog.plays.map(p => p.file);
       window.GEI_VOICE_SHOWCASE.close(); levelCard.classList.remove("show"); state.level = prevLevel; D.stop(); D.setMode(prevMode);

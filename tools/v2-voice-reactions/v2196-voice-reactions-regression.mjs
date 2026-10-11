@@ -13,7 +13,7 @@ const checks=[
   ["reaction particles", /v2196Particle/],
   ["per-step visual classes", /v2196Mountain.*v2196Dam.*v2196Millpond.*v2196Sluice.*v2196Waterwheel.*v2196Factory/s],
   ["reduced-motion support", /prefers-reduced-motion/],
-  ["presentation-only", /does not alter gameplay, economy, progression, XP, purchases, or saves/],
+  /* "presentation-only" doc-comment wording → behavioural test: tools/v2-voice-behavior V5 */
   ["public API", /window\.GEI_VOICE_REACTIONS/]
 ];
 

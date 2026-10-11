@@ -71,7 +71,7 @@ const results = [];
 function check(name, pass, detail){ results.push({ name, pass: !!pass, detail }); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const CAMEO_IDS = ["character-7","character-8","character-6","character-2","character-1","character-3","character-4","character-5","lion"];
-const KNOWN_PAGE_ERROR = /Unexpected string/;
+const KNOWN_PAGE_ERROR = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 const SAVE_KEY = "yalltooDamGame.v2";
 /* Level 5 finished on this refresh → the card waits for CONTINUE, the Israelite was saved this cycle. */
 const LEVEL5_SAVE = { version:2, level:5, levelFlOz:666, totalFlOz:4000, completedLevels:5, currentStep:5, unlockedSongs:["masters-build"], unlockedSkins:[],
@@ -337,7 +337,11 @@ async function suiteTryAgain(browser, base){
   const g = await open(browser, base);
   const w = await g.page.evaluate(() => { const r = document.getElementById("world").getBoundingClientRect(); return { x:r.left + r.width * .45, y:r.top + r.height * .55 }; });
   await tap(g, w.x, w.y); await sleep(150);
-  await g.page.evaluate(() => handleDayTimeout()); await sleep(300);
+  await g.page.evaluate(() => handleDayTimeout());
+  /* V2.2.20: the TRY AGAIN card now appears about 7.5 s after the timeout (the V2.2.x timeout sequence plays first), and the idle cameo director only enters "idle" once the card is up. The old fixed 300 ms
+     wait therefore read mode "" and the 12 s sampling window started long before the first cameo could appear. Wait for the card, then measure — assertions unchanged. */
+  await g.page.waitForFunction(() => document.getElementById("timeUpCard").classList.contains("show"), null, { timeout:20000 });
+  await sleep(300);
   const m = await g.page.evaluate(`({ mode:${E}.mode, music:DAMSoundtrack.playing })`);
   await g.page.evaluate(SAMPLER, ["#retryDayBtn", "#timeUpTitle"]);
   await sleep(12000);

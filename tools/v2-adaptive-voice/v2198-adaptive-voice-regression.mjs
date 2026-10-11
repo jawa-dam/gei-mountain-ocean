@@ -11,7 +11,7 @@ const checks=[
   ["off profile",/id:"off"/],
   ["persistent profile",/localStorage\.getItem\(SETTINGS_KEY\)/],
   ["session maturity",/function userMaturity/],
-  ["new-player pacing",/maturity==="new"/],
+  /* "new-player pacing" (a grep for the literal maturity==="new") is now a behavioural test: tools/v2-voice-behavior V4 — the source no longer contains that literal. */
   ["returning-player pacing",/maturity==="returning"/],
   ["context suppression",/contextCooldown/],
   ["cycle cooldown",/cycleCooldown/],

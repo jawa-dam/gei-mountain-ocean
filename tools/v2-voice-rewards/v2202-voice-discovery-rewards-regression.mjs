@@ -13,7 +13,7 @@ const checks=[
   ["reward burst",/v2202Burst/],
   ["showcase reward panel",/v2202Rewards/],
   ["reward reset",/function reset/],
-  ["presentation-only boundary",/No XP, currency, progression, purchases, scores, or account data/],
+  /* "presentation-only boundary" doc-comment wording → behavioural test: tools/v2-voice-behavior V5 */
   ["public rewards API",/window\.GEI_VOICE_REWARDS/]
 ];
 

@@ -13,7 +13,7 @@ const checks=[
   ["Voice Director integration",/GEI_VOICE_DIRECTOR/],
   ["Factory variants documented",/Normal \+ excited variants/],
   ["touch-friendly buttons",/min-height:42px/],
-  ["accessible dialog",/aria-label="DAM-ITE Voice Showcase"/],
+  /* "accessible dialog" (literal aria-label markup): the Showcase UI was retired in V2.2.04 (openPanel() returns false) → tools/v2-voice-behavior V3 pins the retired behaviour */
   ["accessible expanded state",/aria-expanded/],
   ["presentation-only",/No gameplay\/economy\/progression\/XP\/purchase\/save mutations/],
   ["public showcase API",/window\.GEI_VOICE_SHOWCASE/]
