@@ -24,7 +24,7 @@
 | 12 | dam-map | G2, G3, G4 | Pre-existing: feature absent / stale test | Expects a "DAM MAP MILESTONE 01 · GRISTMILL ONLINE" screen after level 6; that text exists nowhere in the repo. |
 | 13 | welcome | A12, C6 | **Pre-existing product defect (not fixed)** | `ReferenceError: addStyle is not defined` at load. |
 | 14 | cameos | A8, D7, F2, harness | Pre-existing product defect (addStyle → A8/D7) + overlay defect (not fixed) | F2/harness: the stem layer's `#stmClose` button intercepts clicks on the DAM MAP's `#geiMapBack` (17 covered controls). |
-| 15 | ambient | P3, P4, 6a | Pre-existing (P3/P4 = addStyle); 6a undiagnosed | 3/3 runs on both sides: 105 pass / 3 fail. **Flaky, both sides:** 1b (3 of 8 runs, base and current), **5b failed once on current (1 of 5 runs), 0 of 5 on baseline, 0 of 3 in the re-runs** — inconclusive, treated as timing flake (random cameo timer). |
+| 15 | ambient | P3, P4, 6a | Pre-existing (P3/P4 = addStyle); 6a undiagnosed | 3/3 runs on both sides: 105 pass / 3 fail. **Flaky, both sides:** 1b (3 of 10 runs: 2 baseline, 1 current), **5b failed once on current (1 of 5 runs), 0 of 5 on baseline, 0 of 3 in the re-runs** — inconclusive, treated as timing flake (random cameo timer). |
 | 16 | flow-moment | F3c | Pre-existing, undiagnosed | 56/1 on both sides in every run. |
 | 17 | soundtrack | 1–4 timing-dependent idle-audio checks | **Flaky test, both sides** | Same patterns (1f, 2f, 3f, 4f) on baseline and current across 10 runs each; the 4-failure outcome occurred on both. |
 
