@@ -392,7 +392,10 @@
           else { x = side === "left" ? ir.left + rnd(.05, .4) * size : ir.right - rnd(.05, .4) * size; y = rnd(ir.top + half, ir.bottom - half); }
         }
         x = Math.max(box.left + half*.7, Math.min(box.right - half*.7, x)); y = Math.max(box.top + half*.7, Math.min(box.bottom - half*.7, y));
-        var b = { left:x - half*.78, right:x + half*.78, top:y - half*.78, bottom:y + half*.78 };
+        /* V2.2.20: the footprint tested against the guards is the cameo as it is DRAWN, not as it is placed: tier scale up to 1.25 × a ±14° tilt (bounding box ×1.2) makes the art reach ≈ 1.05 × half the placed size.
+           It was 0.78 × half, so on a crowded Level Complete card the art could poke 4–9 px past the 10 px guard margin into the CONTINUE button / level headline (captured by the loaded ambient runs; pointer-events is none, so it was
+           a visual overlap, never a blocked tap). */
+        var fp = half*1.05, b = { left:x - fp, right:x + fp, top:y - fp, bottom:y + fp };
         if(!hits(b, o.guards)) return { left:(x - hr.left).toFixed(0) + "px", top:(y - hr.top).toFixed(0) + "px", size:size };
       }
     }
