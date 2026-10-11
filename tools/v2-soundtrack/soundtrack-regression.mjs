@@ -77,7 +77,7 @@ async function newPage(browser, base, opts = {}){
   const errors = [];
   page.on("pageerror", e => errors.push("pageerror: " + e.message));
   page.on("console", m => { if (m.type() === "error") errors.push("console: " + m.text()); });
-  const missing = []; page.on("response", r => { if (r.status() === 404) missing.push(new URL(r.url()).pathname); });
+  const missing = []; page.on("response", r => { if (r.status() === 404) missing.push(r.request().method() + " " + new URL(r.url()).pathname); });
   await page.route("**/*", route => {
     const u = route.request().url();
     if (!u.startsWith(base)) return route.abort();                        // offline: no CDN / PayPal / images
@@ -153,12 +153,13 @@ async function desktopSuite(browser, base){
   await page.waitForFunction(() => { try { return typeof GEI_TAP_PERFORMANCE === "undefined" || !GEI_TAP_PERFORMANCE.voices || GEI_TAP_PERFORMANCE.voices() === 0; } catch (e) { return true; } }, null, { timeout: 30000 }).catch(() => {});
   const idle = await ev(page, () => {
     const out = {};
+    const ctx = { voices: (typeof GEI_TAP_PERFORMANCE !== "undefined" && GEI_TAP_PERFORMANCE.voices) ? GEI_TAP_PERFORMANCE.voices() : null, gameState: DAMSoundtrack.gameState };   // failure signature
     for (const s of [0, 8, 25, 60, 120, 400]){ DAMSoundtrack.debug.simulateIdle(s); out[s] = +DAMSoundtrack.debug.settle().toFixed(3); }
     DAMSoundtrack.debug.simulateIdle(0);
-    return out;
+    return { ...out, ctx };
   });
   check("music rises during inactivity", idle[25] > idle[0] && idle[60] >= idle[25], idle);
-  check("idle lift respects ceiling (≤ 0.48) and calm band", Math.max(...Object.values(idle)) <= 0.48 && idle[60] >= 0.44 && idle[8] >= 0.30 && idle[8] <= 0.42, idle);
+  check("idle lift respects ceiling (≤ 0.48) and calm band", Math.max(...[0, 8, 25, 60, 120, 400].map(k => idle[k])) <= 0.48 && idle[60] >= 0.44 && idle[8] >= 0.30 && idle[8] <= 0.42, idle);
   check("very long idle settles back down", idle[400] < idle[120], idle);
 
   /* random selection */
@@ -302,9 +303,9 @@ try {
   const desk = await desktopSuite(browser, base);
   const baseSet = new Set(base0.map(e => e.replace(/\d+/g, "#")));
   /* V2.2.20: the achievement-audio engine (V2.2.7) requests /audio/achievements/** clips that are not in the repository yet, so the browser logs "Failed to load resource … 404" lines whenever a longer
-     session triggers more of them (this check failed 10/10 on the baseline and the current build alike). Those lines — and only those: every 404 URL must be under /audio/achievements/ — are a known missing-asset
+     session triggers more of them (this check failed 10/10 on the baseline and the current build alike). Those lines — and only those: every 404 must be a HEAD probe for an optional /audio/achievements/<category>/<name>-NN.mp3 clip (audio/achievements/README.md: "every MP3 is optional … a missing file is skipped silently"; the director discovers clips with HEAD requests, so an empty folder always logs one 404 per category) — are a known missing-asset
      gap, not an error the soundtrack introduced. Any other console error, or a 404 for any other URL, still fails. */
-  const known404 = list => list.length > 0 && list.every(u => /^\/audio\/achievements\//.test(u));
+  const known404 = list => list.length > 0 && list.every(u => /^HEAD \/audio\/achievements\/.+-\d\d\.mp3$/.test(u));
   const isMissingAsset = e => /Failed to load resource: the server responded with a status of 404/.test(e) && known404(desk.missing);
   const newErrors = desk.errors.filter(e => !isMissingAsset(e) && !baseSet.has(e.replace(/\d+/g, "#")));
   check("no console errors introduced (vs. baseline without V2.1.88)", desk.own.length === 0 && newErrors.length === 0, { own: desk.own, newErrors, baselineCount: base0.length, missing404: [...new Set(desk.missing)] });
