@@ -72,6 +72,23 @@ const SUPPLIED = [
   ["COLLECTION COMPLETE","COMPLETION","voice-collection-complete-R2qCaDdNwu5M4kzR.mp3"]
 ].map(([label, category, file]) => ({ label, category, url:B + file }));
 
+/* V2.2.04 (commit c723c97, "expand DAM-ITE event voice vocabulary") added 11 more recordings: 38 + 11 = 49, as the module header states ("Event vocabulary (49 hosted MP3s)").
+   The module is the only record of these 11 in the repo, so A3's "no invented assets" can only pin them to what V2.2.04 shipped — the owner should confirm them against the supplied files. */
+const SUPPLIED_V2204 = [
+  ["HERE WE GO","START","voice-here-we-go-jLjpnZ3MVNkIHjQR.mp3"],
+  ["THAT WAS CLOSE","WARNING","voice-that-was-close-KAIo9nVGvsnwFkN6.mp3"],
+  ["OH YEAH","SUCCESS","voice-oh-yeah-ro7dFI336tfsiZyg.mp3"],
+  ["NO WAY","SUCCESS","voice-no-way-ryDf90cjCKGwOJsg.mp3"],
+  ["WAIT","WARNING","voice-wait-Aa9VobX29CSQ82kB.mp3"],
+  ["HEY","SUCCESS","voice-hey-lEZtLNazjjUkflas.mp3"],
+  ["NEW DISCOVERY","COMPLETION","voice-new-discovery-kQQUHMvpJILfogVe.mp3"],
+  ["THE FLOW IS STRONG","HYDRAULIC","voice-the-flow-is-strong-h7q1oacx2jtWgvuh.mp3"],
+  ["THE WATER IS RISING","HYDRAULIC","voice-the-water-is-rising-gAo96BsjyvLJBJ1b.mp3"],
+  ["HYDRAULIC POWER","HYDRAULIC","voice-hydraulic-power-6UYqLPKzOpzw01z3.mp3"],
+  ["CHALLENGE COMPLETE","COMPLETION","voice-challenge-complete-78VFoXFLw6xr6GXO.mp3"]
+].map(([label, category, file]) => ({ label, category, url:B + file }));
+const ALL_SUPPLIED = SUPPLIED.concat(SUPPLIED_V2204), EXPECTED_EVENT_ASSETS = 49;
+
 const CORE = {
   female:{ mountain:"voice-mountain-6BTaNhF3ATrFV89G.mp3", dam:"voice-dam-lmREB3RHfdTkewgw.mp3", millpond:"voice-millpond-XUviwb2ePIOzlFMq.mp3",
     sluice:"voice-sluice-gate-hEQD902lm4KSCXhp.mp3", waterwheel:"voice-waterwheel-1tpyO8f2tYRXicgv.mp3", factory:"voice-factory-pap6mlywi8BjQhtD.mp3",
@@ -93,16 +110,16 @@ const html = await read("index.html");
 
 const wordRe = /\{id:"([a-z-]+)",label:"([^"]+)",category:"([A-Z_]+)"[^}]*?file:"([^"]+)"\}/g;
 const words = [...src.matchAll(wordRe)].map(m => ({ id:m[1], label:m[2], category:m[3], url:m[4] }));
-check("A1 vocabulary has exactly the 38 supplied recordings", words.length === SUPPLIED.length && SUPPLIED.length === 38, words.length);
+check("A1 vocabulary has exactly the 49 shipped recordings (38 original + 11 from V2.2.04)", words.length === ALL_SUPPLIED.length && ALL_SUPPLIED.length === EXPECTED_EVENT_ASSETS && SUPPLIED.length === 38 && SUPPLIED_V2204.length === 11, words.length);
 check("A2 every supplied label/URL/category is present verbatim",
-  SUPPLIED.every(s => words.some(w => w.label === s.label && w.url === s.url && w.category === s.category)),
-  SUPPLIED.filter(s => !words.some(w => w.label === s.label && w.url === s.url && w.category === s.category)).map(s => s.label));
-check("A3 no event URL outside the supplied list (no invented assets)", words.every(w => SUPPLIED.some(s => s.url === w.url)));
+  ALL_SUPPLIED.every(s => words.some(w => w.label === s.label && w.url === s.url && w.category === s.category)),
+  ALL_SUPPLIED.filter(s => !words.some(w => w.label === s.label && w.url === s.url && w.category === s.category)).map(s => s.label));
+check("A3 no event URL outside the shipped list (no invented assets)", words.every(w => ALL_SUPPLIED.some(s => s.url === w.url)));
 check("A4 each recording maps to exactly one category", new Set(words.map(w => w.url)).size === words.length && words.every(w => CATEGORIES.includes(w.category)));
 check("A5 all seven categories used", CATEGORIES.every(c => words.some(w => w.category === c)));
 check("A6 all 14 original core URLs still present in V2.1.93", CORE_URLS.every(u => v2193.includes(u)), CORE_URLS.filter(u => !v2193.includes(u)));
 check("A7 all 14 original core URLs still present in V2.1.94", CORE_URLS.every(u => v2194.includes(u)), CORE_URLS.filter(u => !v2194.includes(u)));
-check("A8 V2.2.03 core reference equals the original 14", CORE_URLS.every(u => src.includes(u)) && (src.match(/voice-[a-z-]+-[A-Za-z0-9]{16}\.mp3/g) || []).length === 38 + 14);
+check("A8 V2.2.03 core reference equals the original 14", CORE_URLS.every(u => src.includes(u)) && (src.match(/voice-[a-z-]+-[A-Za-z0-9]{16}\.mp3/g) || []).length === EXPECTED_EVENT_ASSETS + 14);
 check("A9 no event URL collides with a core URL", words.every(w => !CORE_URLS.includes(w.url)));
 check("A10 core pack mapping (female/male × 7 keys) unchanged in V2.1.93", Object.entries(CORE).every(([pack, keys]) =>
   Object.entries(keys).every(([k, f]) => new RegExp(k + ':"' + B.replace(/[./]/g, "\\$&") + f.replace(/\./g, "\\.") + '"').test(v2193))));
@@ -168,7 +185,7 @@ function serve(){
 
 const FAILING = new Set([B + "voice-cool-Y1FhS1clcJFAuDiM.mp3", B + "voice-mission-complete-awUmeWb3yUwqtYuN.mp3"]);
 const STUB = wav(1.2);
-const KNOWN_PAGE_ERROR = /Unexpected string/;   // pre-existing page error, also tolerated by the V2.1.92 harness
+const KNOWN_PAGE_ERROR = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 
 /* Init script: logs every voice play() with time + src, and the peak number of voice media
    elements audibly playing at once (core + event; the soundtrack is Web Audio, not media). */
@@ -230,8 +247,8 @@ async function runtime(){
     const { ctx, page } = await open();
     const econBefore = await page.evaluate(ECON);
     const st = await page.evaluate(() => window.GEI_VOICE_EVENT_V2203.selfTest());
-    check("B1 selfTest: 38 assets, unique hosted URLs, no core overlap, core matches reference",
-      st.eventAssets === 38 && st.uniqueEventUrls && st.hostedMp3Urls && st.noCoreOverlap && st.coreMatchesReference && st.everyWordOneCategory, st);
+    check("B1 selfTest: 49 assets, unique hosted URLs, no core overlap, core matches reference",
+      st.eventAssets === EXPECTED_EVENT_ASSETS && st.uniqueEventUrls && st.hostedMp3Urls && st.noCoreOverlap && st.coreMatchesReference && st.everyWordOneCategory, st);
     check("B2 priority order COMPLETION > SPECIAL_ACTION > HYDRAULIC > WARNING > ENCOURAGEMENT > SUCCESS > START",
       JSON.stringify(st.priorityOrder) === JSON.stringify(["COMPLETION","SPECIAL_ACTION","HYDRAULIC","WARNING","ENCOURAGEMENT","SUCCESS","START"]), st.priorityOrder);
 
@@ -375,7 +392,7 @@ async function runtime(){
       /* count V2.2.03 wrappers along each function's full wrapper chain (other layers wrap too) */
       hooks:["beginDay","spawnHydraulicBreakthrough","showDamIteComboFlash","handleDayTimeout","retryDay","spinBonusWheel","revealBonusResult","presentDamMachineWin","presentDamMachineNoFlow","showLevelComplete"]
         .map(n => { let f = window[n], mine = 0; for (let i = 0; f && i < 16; i++){ if (f.__v2203Wrapped) mine++;
-          const k = Object.keys(f).find(k => /^__v\d+Original$/.test(k)); f = k ? f[k] : null; } return mine === 1; }),
+          const k = Object.keys(f).find(k => /^(__v\d+Original|__orig)$/.test(k)); f = k ? f[k] : null; } return mine === 1; }),   // V2.2.20: the WOW layer (V2.1.88) links to its original through `__orig`; stopping there hid every wrapper beneath it
       styles:document.querySelectorAll("#v2203VoiceEventStyle").length, layers:document.querySelectorAll("#v2203VoiceFx").length
     }));
     check("B23 hooks/guards/styles installed exactly once (no duplicated listeners)", once.dir && once.hooks.every(Boolean) && once.styles === 1 && once.layers <= 1, once);

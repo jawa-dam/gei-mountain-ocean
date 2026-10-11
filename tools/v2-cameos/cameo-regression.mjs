@@ -53,7 +53,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const CAMEO_IDS = ["character-7","character-8","character-6","character-2","character-1","character-3","character-4","character-5","lion"];
 const CAMEO_NAMES = ["DAM Pool","DAM Double Burger","DAM Statue","DAM Lollipop","DAM Sundae","DAM Sundaes","DAM Water","DAM Unicorn","DAM Light","Lion"];
 /* Pre-existing on the base (not introduced here): 4 inline scripts fail to parse per load, one self-test row. */
-const KNOWN_PAGE_ERROR = /Unexpected string/;
+const KNOWN_PAGE_ERROR = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 const KNOWN_SELFTEST_FAILS = ["V2.1.8: every canonical character has a spotlight personality"];
 
 async function open(browser, base, opts){
@@ -281,6 +281,9 @@ async function suiteMap(browser, base, device, label){
   await pill.scrollIntoViewIfNeeded(); if (g.touch) await pill.tap(); else await pill.click({ timeout:3000 });
   const cap = await g.page.evaluate(() => document.getElementById("dmwCaption").textContent);
   check("F3. " + tag + "sound toggle + region pill respond to real clicks during a cameo", sndBefore !== sndAfter && /./.test(cap), { sndBefore, sndAfter, cap });
+  /* V2.2 contract: a region pill opens the Engineering World lab as a modal over the map; its ← (#stmClose) returns to the map, and only then is the map's BACK the control under the pointer.
+     (tools/v2-dam-map/map-stem-navigation-regression.mjs pins this down per viewport.) The assertions below are unchanged. */
+  if (await g.page.evaluate(() => { const l = document.getElementById("stmLab"); return !!l && l.classList.contains("show"); })) { if (g.touch) await g.page.tap("#stmClose"); else await g.page.click("#stmClose"); await sleep(300); }
   if (g.touch) await g.page.tap("#geiMapBack"); else await g.page.click("#geiMapBack");
   await sleep(300);
   const closed = await g.page.evaluate(() => ({ open:document.getElementById("geiDamMapPage").classList.contains("show"), mode:window.__GEI_DAM_SURPRISES__.mode, on:document.querySelectorAll(".dscCameo.on").length }));

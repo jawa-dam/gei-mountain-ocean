@@ -572,7 +572,11 @@
     var xPct = Math.max(lo, Math.min(hi, a.x / MAP_W * 100 + rnd(-4, 4)));
     /* hover above the landmark; never down in the region-pill row (top 88%+) */
     var halfH = size / 2 / h * 100;
-    var ylo = Math.max(12, view.t0 + halfH + 1), yhi = Math.min(74, view.t1 - halfH - 1);
+    /* V2.2.20: the pill row is no longer fixed at 88%+ — on wide screens the pills sit inside the scene from about 76% down. Measure where the first pill really starts and keep the DRAWN figure
+       (the cameo box minus its 15% transparent margin, i.e. centre + 0.7 × half-height) above it. On phones the pills are lower and the old 74% bound still rules. */
+    var pillTop = 100;
+    try{ var fp = document.querySelector("#geiMapRegions .dmwPill"), sr = scene.getBoundingClientRect(), fr = fp && fp.getBoundingClientRect(); if(fr && fr.width && sr.height) pillTop = Math.max(0, Math.min(100, (fr.top - sr.top) / sr.height * 100)); }catch(e){}
+    var ylo = Math.max(12, view.t0 + halfH + 1), yhi = Math.min(74, view.t1 - halfH - 1, pillTop - halfH * 0.7 - 4);
     if(yhi < ylo){ ylo = Math.max(view.t0 + halfH, 0); yhi = Math.max(ylo, Math.min(86, view.t1 - halfH)); }
     var yPct = Math.max(ylo, Math.min(yhi, (a.top / MAP_H * 100) - rnd(10, 22)));
     var place = { left:xPct.toFixed(1) + "%", top:yPct.toFixed(1) + "%", size:size };

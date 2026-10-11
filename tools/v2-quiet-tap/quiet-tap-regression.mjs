@@ -10,7 +10,7 @@
  *
  *   node tools/v2-quiet-tap/quiet-tap-regression.mjs
  *
- * Test 9 replays the same taps against BASE_REF (default: the V2.1.88 merge, b2e7691) by
+ * Test 9 replays the same taps against BASE_REF (default since V2.2.20: d467a61, the last pre-Builder commit; was the V2.1.88 merge b2e7691) by
  * serving that revision's files, and compares economy/progression state + saved storage.
  * Offline: every non-local request is blocked. Exits non-zero if any check fails.
  */
@@ -21,7 +21,9 @@ import { createRequire } from "node:module";
 import { execSync, execFileSync } from "node:child_process";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
-const BASE_REF = process.env.BASE_REF || "b2e7691";
+/* V2.2.20: the reference build is the last commit before the DAM BUILDER (d467a61). The original reference (V2.1.88, b2e7691) predates every save key added since (voice memory, XP store, STEM mastery …),
+   so test 9b could only ever report those legitimate later additions; against d467a61 it again answers the live question — does the current code add or remove any saved state on the Arcade tap path? */
+const BASE_REF = process.env.BASE_REF || "d467a61";
 
 async function loadPlaywright(){
   try { return await import("playwright"); } catch {}
@@ -65,7 +67,7 @@ const results = [];
 function check(name, pass, detail){ results.push({ name, pass: !!pass, detail }); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 /* Scripts that failed to parse before V2.1.89 and are intentionally left alone. */
-const KNOWN_BROKEN = 4;
+const KNOWN_BROKEN = 0;   // V2.2.20: was 4 (unparseable tap-lites modules, fixed in a9526bf) — nothing tolerated
 
 async function openGame(browser, base, device){
   const ctx = await browser.newContext(device || { viewport:{ width:1280, height:800 } });
@@ -126,7 +128,7 @@ const SNAP = () => {
   const s = (typeof state !== "undefined" && state) || window.state || {};
   const pick = {}; ["totalFlOz","level","levelFlOz","completedLevels","currentStep","tapCount","phase","millStage","damMachineFreePlays","xp","totalXp","unlocked","owned","characters","activeCharacter","songs"].forEach(k => { if (k in s) pick[k] = s[k]; });
   const ls = {}; for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i);
-    if (/dam(Music|Moment|MapSound)|tl21|gei2189|soundtrack|atmos|skin|mood|scene|intro|splash|bird/i.test(k)) continue;   // presentation-only keys
+    if (/dam(Music|Moment|MapSound)|tl21|gei2189|soundtrack|atmos|skin|mood|scene|intro|splash|bird|geiBeaverVoice|geiDamIte|geiMilestoneVoice|geiXPRewardV1|geiPersonalityHeard/i.test(k)) continue;   // presentation-only keys (V2.2.20: + the voice layer's own memory — geiBeaverVoice.v1 records visited stations, geiXPRewardV1 is the XP voice's phrase memory, written a few seconds after a Day clear (a race, absent in ~half the runs on BOTH baseline and current); tools/v2-voice-behavior V5 proves the voice APIs never touch balance/save). Do NOT wait for these: the 6 s Arcade clock keeps running and the Time-Up card would hide the map button.
     ls[k] = localStorage.getItem(k); }
   return { state:pick, storage:ls };
 };
@@ -216,7 +218,10 @@ async function desktopSuite(browser, base){
   await sleep(250);
   const after = await page.evaluate(SNAP);
   check("6c. DAM MAP opens the world map (24 factories rendered) and closes", mapOpen, {});
-  check("6d. opening the map changes no gameplay state", JSON.stringify(before) === JSON.stringify(after), {});
+  const diff = (a, b, p = "") => Object.keys(Object.assign({}, a, b)).flatMap(k => (a && typeof a[k] === "object" && b && typeof b[k] === "object") ? diff(a[k], b[k], p + k + ".") : (JSON.stringify(a ? a[k] : undefined) === JSON.stringify(b ? b[k] : undefined) ? [] : [p + k + ": " + String(JSON.stringify(a ? a[k] : undefined)).slice(0, 80) + " -> " + String(JSON.stringify(b ? b[k] : undefined)).slice(0, 80)]));
+  /* V2.2.20: compare the DATA, not the key order — localStorage.key(i) order is not stable, so the old string comparison failed (with an empty diff) whenever the order shifted */
+  const canon = v => JSON.stringify(v, (k, x) => (x && typeof x === "object" && !Array.isArray(x)) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a < b ? -1 : 1)) : x);
+  check("6d. opening the map changes no gameplay state", canon(before) === canon(after), diff(before, after));
   /* dock buttons still do their jobs */
   const jobs = {};
   await page.click("#dmStoreFloatBtn"); await sleep(250);
@@ -261,7 +266,7 @@ async function desktopSuite(browser, base){
 
   const selfTests = await page.evaluate(() => ({ director:window.__GEI_TAP_LITES_MOMENT_DIRECTOR__.selfTest(), tapLayer:window.__GEI_V2168_TAP_LAYER__.selfTest() }));
   check("V2.1.68 pointer layer intact + moment surfaces never take input", selfTests.tapLayer.ok && selfTests.director.momentSurfacesPointerSafe, selfTests);
-  check("no new script errors (only the 4 pre-existing unparseable modules)", g.errors.length <= KNOWN_BROKEN, g.errors);
+  check("no script errors (V2.2.20: the 4 formerly tolerated broken modules are fixed)", g.errors.length <= KNOWN_BROKEN, g.errors);
   await g.ctx.close();
 }
 
