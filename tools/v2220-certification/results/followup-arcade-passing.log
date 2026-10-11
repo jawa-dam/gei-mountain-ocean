@@ -1,0 +1,20 @@
+PASS   arcade:v2-chaos/economy-chaos                    0 passed  0s
+PASS   arcade:v2-chaos/regression-gate                  0 passed  0s
+PASS   arcade:v2-voice-director/v2194-voice-director-regression  12 passed  0s
+PASS   arcade:v2-voice-discovery/v2201-voice-discovery-regression  15 passed  0s
+PASS   arcade:v2-voice-memory/v2199-voice-memory-regression  14 passed  0s
+FAIL   arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only boundary
+PASS   arcade:v22-engineering-world/engineering-world-regression   0 passed  284s
+PASS   arcade:v2211-flow-voices/flow-voices-regression  57 passed  286s
+PASS   arcade:v2212-personality/personality-regression  57 passed  152s
+PASS   arcade:v2213-next-challenge/next-challenge-regression  45 passed  175s
+PASS   arcade:v2214-stem/stem-regression               60 passed  173s
+PASS   arcade:v2215-rare-wow/rare-wow-regression       51 passed  300s
+PASS   arcade:v2216-xp-reward/xp-reward-regression     83 passed  233s
+PASS   arcade:v223-personal-guide/personal-guide-regression   0 passed  77s
+PASS   arcade:v225-flow-welcome/flow-welcome-regression  80 passed  273s
+PASS   arcade:v226-victory-capsule/victory-capsule-regression  91 passed  167s
+PASS   arcade:v227-achievement-audio/achievement-audio-regression  29 passed  50s
+
+17 suites · 602 assertions passed · genuine FAIL: 1 · unresolved INFRA: 0 · failing identically on the pre-Builder baseline: 0 · passed only after an infra re-run: 0

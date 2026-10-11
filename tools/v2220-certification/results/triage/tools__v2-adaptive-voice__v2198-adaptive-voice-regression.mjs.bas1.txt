@@ -1,0 +1,254 @@
+PASS: adaptive profile
+PASS: social profile
+PASS: calm profile
+PASS: off profile
+PASS: persistent profile
+PASS: session maturity
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: new-player pacing
+    at file:///tmp/claude-0/-home-user/8f068817-439c-54b2-9d62-de6b75d70fb5/scratchpad/prewt/tools/v2-adaptive-voice/v2198-adaptive-voice-regression.mjs:24:39
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/* V2.1.98 — DAM-ITE ADAPTIVE VOICE FREQUENCY\n' +
+    ' * Presentation/audio-only pacing layer over GEI_CONTEXTUAL_VOICE + GEI_VOICE_DIRECTOR.\n' +
+    ' * Goal: richer personality for new players, calmer behavior for returning players.\n' +
+    ' * No gameplay/economy/progression/XP/purchase/save mutations.\n' +
+    ' */\n' +
+    '(function(){\n' +
+    '  "use strict";\n' +
+    '  if(window.__GEI_V2198_ADAPTIVE_VOICE__)return;\n' +
+    '\n' +
+    '  var VERSION="V2.1.98";\n' +
+    '  var SETTINGS_KEY="geiDamIteAdaptiveVoiceV2198";\n' +
+    '  var SESSION_KEY="geiDamIteAdaptiveVoiceSessionV2198";\n' +
+    '  var DEFAULT_PROFILE="adaptive";\n' +
+    '  var PROFILES=[\n' +
+    '    {id:"adaptive",label:"ADAPTIVE",sub:"Learns your pace"},\n' +
+    '    {id:"social",label:"SOCIAL",sub:"More voice moments"},\n' +
+    '    {id:"calm",label:"CALM",sub:"Fewer interruptions"},\n' +
+    '    {id:"off",label:"OFF",sub:"No contextual voice"}\n' +
+    '  ];\n' +
+    '\n' +
+    '  var PROFILE_CAPS={\n' +
+    '    adaptive:{welcomeCooldown:0,returnCooldown:21600000,contextCooldown:10000,cycleCooldown:120000,characterCooldown:45000},\n' +
+    '    social:{welcomeCooldown:0,returnCooldown:3600000,contextCooldown:6000,cycleCooldown:60000,characterCooldown:20000},\n' +
+    '    calm:{welcomeCooldown:0,returnCooldown:86400000,contextCooldown:30000,cycleCooldown:300000,characterCooldown:120000}\n' +
+    '  };\n' +
+    '\n' +
+    '  var telemetry={sessions:0,contextAttempts:0,contextPlayed:0,suppressed:0,lastEvent:"",profile:DEFAULT_PROFILE};\n' +
+    '\n' +
+    '  function director(){return window.GEI_VOICE_DIRECTOR||null;}\n' +
+    '  function contextual(){return window.GEI_CONTEXTUAL_VOICE||null;}\n' +
+    '\n' +
+    '  function readSettings(){\n' +
+    '    try{\n' +
+    '      var raw=localStorage.getItem(SETTINGS_KEY);\n' +
+    '      var obj=raw?JSON.parse(raw):{};\n' +
+    '      if(!obj||typeof obj!=="object")obj={};\n' +
+    '      if(!obj.profile)obj.profile=DEFAULT_PROFILE;\n' +
+    '      if(!PROFILE_CAPS[obj.profile]&&obj.profile!=="off")obj.profile=DEFAULT_PROFILE;\n' +
+    '      return obj;\n' +
+    '    }catch(e){return {profile:DEFAULT_PROFILE};}\n' +
+    '  }\n' +
+    '  function writeSettings(obj){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(obj));}catch(e){}}\n' +
+    '  function profile(){return readSettings().profile||DEFAULT_PROFILE;}\n' +
+    '\n' +
+    '  function setProfile(id){\n' +
+    '    id=String(id||"").toLowerCase();\n' +
+    '    if(!PROFILE_CAPS[id]&&id!=="off")id=DEFAULT_PROFILE;\n' +
+    '    var s=readSettings();s.profile=id;writeSettings(s);\n' +
+    '    telemetry.profile=id;\n' +
+    '    return id;\n' +
+    '  }\n' +
+    '\n' +
+    '  function now(){return Date.now();}\n' +
+    '\n' +
+    '  function readSession(){\n' +
+    '    try{\n' +
+    '      var raw=sessionStorage.getItem(SESSION_KEY);\n' +
+    '      return raw?JSON.parse(raw):{};\n' +
+    '    }catch(e){return {};}\n' +
+    '  }\n' +
+    '  function writeSession(o){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(o||{}));}catch(e){}}\n' +
+    '\n' +
+    '  function seenRecently(event,ms){\n' +
+    '    var s=readSession();\n' +
+    '    var last=Number(s[event]||0);\n' +
+    '    return last>0 && now()-last<ms;\n' +
+    '  }\n' +
+    '  function mark(event){\n' +
+    '    var s=readSession();s[event]=now();writeSession(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  function userMaturity(){\n' +
+    '    var s=readSession();\n' +
+    '    var starts=Number(s.sessions||0);\n' +
+    '    var hasHistory=false;\n' +
+    '    try{hasHistory=!!localStorage.getItem("geiDamIteContextVoiceV2197");}catch(e){}\n' +
+    '    return starts>=3||hasHistory?"returning":"new";\n' +
+    '  }\n' +
+    '\n' +
+    '  function permitted(event,force){\n' +
+    '    if(force)return true;\n' +
+    '    var p=profile();\n' +
+    '    if(p==="off")return false;\n' +
+    '    var cap=PROFILE_CAPS[p]||PROFILE_CAPS.adaptive;\n' +
+    '    if(seenRecently(event,cap[event+"Cooldown"]||cap.contextCooldown))return false;\n' +
+    '\n' +
+    '    /* Adaptive behavior: new players get more social moments; returning players\n' +
+    '       receive stronger cooldowns except important cycle completions. */\n' +
+    '    var maturity=userMaturity();\n' +
+    '    if(p==="adaptive"){\n' +
+    '      if(event==="context"&&maturity==="returning")return Math.random()<0.52;\n' +
+    '      if(event==="character"&&maturity==="returning")return Math.random()<0.68;\n' +
+    '      if(event==="cycle")return true;\n' +
+    '    }\n' +
+    '    return true;\n' +
+    '  }\n' +
+    '\n' +
+    '  function invoke(type,method,anchor,opts){\n' +
+    '    opts=opts||{};\n' +
+    '    telemetry.contextAttempts++;\n' +
+    '    if(!permitted(type,opts.force)){telemetry.suppressed++;return false;}\n' +
+    '    var c=contextual();\n' +
+    '    if(!c||typeof c[method]!=="function"){telemetry.suppressed++;return false;}\n' +
+    '    try{\n' +
+    '      var ok=c[method]({anchor:anchor,force:!!opts.force,cooldown:opts.cooldown||5000});\n' +
+    '      if(ok){\n' +
+    '        mark(type);\n' +
+    '        telemetry.contextPlayed++;\n' +
+    '        telemetry.lastEvent=type;\n' +
+    '      }\n' +
+    '      return !!ok;\n' +
+    '    }catch(e){telemetry.suppressed++;return false;}\n' +
+    '  }\n' +
+    '\n' +
+    '  function firstEntry(){\n' +
+    '    var p=profile();if(p==="off")return false;\n' +
+    '    var c=contextual();if(!c)return false;\n' +
+    '    if(seenRecently("entry",PROFILE_CAPS[p] ? PROFILE_CAPS[p].welcomeCooldown : 0))return false;\n' +
+    '    try{\n' +
+    '      var ok=userMaturity()==="new"&&typeof c.firstEntry==="function"?c.firstEntry():typeof c.returnEntry==="function"?c.returnEntry():false;\n' +
+    '      if(ok){mark("entry");telemetry.contextPlayed++;telemetry.lastEvent="entry";}\n' +
+    '      return !!ok;\n' +
+    '    }catch(e){return false;}\n' +
+    '  }\n' +
+    '\n' +
+    '  function cycleComplete(){return invoke("cycle","fullCycle","factory",{cooldown:PROFILE_CAPS[profile()]?.cycleCooldown||120000});}\n' +
+    '  function character(){return invoke("character","characterMoment","waterwheel",{cooldown:PROFILE_CAPS[profile()]?.characterCooldown||45000});}\n' +
+    '  function ambient(){return invoke("context","characterMoment","millpond",{cooldown:PROFILE_CAPS[profile()]?.contextCooldown||10000});}\n' +
+    '\n' +
+    '  function bindNamedHook(name,fn){\n' +
+    '    try{\n' +
+    '      var prior=window[name];\n' +
+    '      if(typeof prior!=="function"||prior.__v2198Wrapped)return false;\n' +
+    '      var wrapped=function(){\n' +
+    '        var out=prior.apply(this,arguments);\n' +
+    '        try{fn.apply(this,arguments);}catch(e){}\n' +
+    '        return out;\n' +
+    '      };\n' +
+    '      wrapped.__v2198Wrapped=true;\n' +
+    '      wrapped.__v2198Original=prior;\n' +
+    '      window[name]=wrapped;\n' +
+    '      return true;\n' +
+    '    }catch(e){return false;}\n' +
+    '  }\n' +
+    '\n' +
+    '  function installHooks(){\n' +
+    '    bindNamedHook("showWelcome",firstEntry);\n' +
+    '    bindNamedHook("openWelcome",firstEntry);\n' +
+    '    bindNamedHook("showLevelComplete",function(){\n' +
+    '      try{\n' +
+    '        var level=window.state&&Number(window.state.level);\n' +
+    '        if(isFinite(level)&&level>0&&level%6===0)cycleComplete();\n' +
+    '      }catch(e){}\n' +
+    '    });\n' +
+    '    bindNamedHook("showCharacterMoment",character);\n' +
+    '    bindNamedHook("playCharacterSignatureMoment",character);\n' +
+    '  }\n' +
+    '\n' +
+    '  function observeCard(){\n' +
+    '    var card=document.getElementById("levelCard");\n' +
+    '    if(!card||card.dataset.v2198Bound)return;\n' +
+    '    card.dataset.v2198Bound="1";\n' +
+    '    var was=card.classList.contains("show");\n' +
+    '    var observer=new MutationObserver(function(){\n' +
+    '      var shown=card.classList.contains("show");\n' +
+    '      if(shown&&!was){\n' +
+    '        var el=document.getElementById("lcLevel"),text=el?el.textContent:"";\n' +
+    '        var m=text.match(/LEVEL\\s+(\\d+)\\s+COMPLETE/i);\n' +
+    '        if(m&&Number(m[1])%6===0)cycleComplete();\n' +
+    '      }\n' +
+    '      was=shown;\n' +
+    '    });\n' +
+    '    observer.observe(card,{attributes:true,attributeFilter:["class"]});\n' +
+    '  }\n' +
+    '\n' +
+    '  function startSession(){\n' +
+    '    var s=readSession();\n' +
+    '    s.sessions=Number(s.sessions||0)+1;\n' +
+    '    writeSession(s);\n' +
+    '    telemetry.sessions=s.sessions;\n' +
+    '  }\n' +
+    '\n' +
+    '  function css(){\n' +
+    '    if(document.getElementById("v2198AdaptiveVoiceStyle"))return;\n' +
+    '    var s=document.createElement("style");\n' +
+    '    s.id="v2198AdaptiveVoiceStyle";\n' +
+    '    s.textContent=\n' +
+    '      ".v2198VoiceHint{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);transform:translateX(-50%) scale(1);z-index:8100;max-width:min(92vw,420px);padding:9px 13px;border-radius:15px;background:rgba(8,11,22,.90);border:1px solid rgba(255,255,255,.15);box-shadow:0 10px 28px rgba(0,0,0,.36);color:#fff;font:800 .78rem/1.15 Inter,system-ui,sans-serif;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;}" +\n' +
+    '      ".v2198VoiceHint.show{opacity:1;transform:translateX(-50%);}" +\n' +
+    '      "@media(prefers-reduced-motion:reduce){.v2198VoiceHint{transition:none}}";\n' +
+    '    document.head.appendChild(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  function announceProfileChange(){\n' +
+    '    var old=document.getElementById("v2198VoiceHint");\n' +
+    '    if(old)old.remove();\n' +
+    '    var el=document.createElement("div");\n' +
+    '    el.id="v2198VoiceHint";\n' +
+    '    el.className="v2198VoiceHint";\n' +
+    '    var p=profile();\n' +
+    '    el.textContent=p==="adaptive"?"Voice pacing: adaptive":p==="social"?"Voice pacing: social":p==="calm"?"Voice pacing: calm":"Contextual voice off";\n' +
+    '    document.body.appendChild(el);\n' +
+    '    requestAnimationFrame(function(){el.classList.add("show");});\n' +
+    '    setTimeout(function(){el.classList.remove("show");},1500);\n' +
+    '    setTimeout(function(){el.remove();},1800);\n' +
+    '  }\n' +
+    '\n' +
+    '  function install(){\n' +
+    '    css();\n' +
+    '    telemetry.profile=profile();\n' +
+    '    startSession();\n' +
+    '    installHooks();\n' +
+    '    observeCard();\n' +
+    '    window.addEventListener("load",function(){installHooks();observeCard();});\n' +
+    '    /* Gentle first-entry orchestration after the main UI settles. */\n' +
+    '    setTimeout(function(){firstEntry();},450);\n' +
+    '  }\n' +
+    '\n' +
+    '  var api={\n' +
+    '    version:VERSION,profiles:PROFILES,profile:profile,setProfile:setProfile,\n' +
+    '    firstEntry:firstEntry,cycleComplete:cycleComplete,character:character,ambient:ambient,\n' +
+    '    refresh:function(){telemetry.profile=profile();return JSON.parse(JSON.stringify(telemetry));},\n' +
+    '    announceProfileChange:announceProfileChange,\n' +
+    '    presentationOnly:true\n' +
+    '  };\n' +
+    '  window.__GEI_V2198_ADAPTIVE_VOICE__=api;\n' +
+    '  window.GEI_ADAPTIVE_VOICE=api;\n' +
+    '\n' +
+    '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});\n' +
+    '  else install();\n' +
+    '})();',
+  expected: /maturity==="new"/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v22.22.0

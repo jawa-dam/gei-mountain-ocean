@@ -1,0 +1,17 @@
+PASS: local memory key
+PASS: favorite storage
+PASS: favorite limit
+PASS: toggle favorite
+PASS: clear favorites
+PASS: clear memory
+PASS: voice mode memory
+PASS: director sync
+PASS: favorite UI
+PASS: accessible dialog
+PASS: aria pressed or expanded
+PASS: presentation-only
+PASS: public memory API
+PASS: index wiring
+
+V2.1.99 regression: PASS
+Checks: 14

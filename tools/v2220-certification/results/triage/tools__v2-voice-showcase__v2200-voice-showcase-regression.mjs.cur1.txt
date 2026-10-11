@@ -1,0 +1,199 @@
+PASS: six showcase steps
+PASS: voice mode controls
+PASS: replay buttons
+PASS: favorite buttons
+PASS: Voice Memory integration
+PASS: Voice Director integration
+PASS: Factory variants documented
+PASS: touch-friendly buttons
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: accessible dialog
+    at file:///home/user/gei-mountain-ocean/tools/v2-voice-showcase/v2200-voice-showcase-regression.mjs:22:39
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/* V2.2.00 — DAM-ITE VOICE SHOWCASE & REPLAY\n' +
+    ' * Presentation/audio-only showcase built on GEI_VOICE_DIRECTOR + GEI_VOICE_MEMORY.\n' +
+    ' * Players can browse, preview, replay, and favorite milestone voice moments.\n' +
+    ' * Supports Female, Male, and Random preview modes plus Factory excited variants.\n' +
+    ' * No gameplay/economy/progression/XP/purchase/save mutations.\n' +
+    ' */\n' +
+    '(function(){\n' +
+    '  "use strict";\n' +
+    '  if(window.__GEI_V2200_VOICE_SHOWCASE__)return;\n' +
+    '\n' +
+    '  var VERSION="V2.2.00";\n' +
+    '  var DIRECTOR=window.GEI_VOICE_DIRECTOR||null;\n' +
+    '  var MEMORY=window.GEI_VOICE_MEMORY||null;\n' +
+    '  var modes=["female","male","random"];\n' +
+    '  var steps=["mountain","dam","millpond","sluice","waterwheel","factory"];\n' +
+    '  var labels={\n' +
+    '    mountain:"MOUNTAIN",dam:"DAM",millpond:"MILL POND",\n' +
+    '    sluice:"SLUICE-GATE",waterwheel:"WATERWHEEL",factory:"FACTORY"\n' +
+    '  };\n' +
+    '  var icons={\n' +
+    '    mountain:"⛰️",dam:"🏗️",millpond:"🌊",sluice:"🚪",waterwheel:"⚙️",factory:"🏭"\n' +
+    '  };\n' +
+    '  var panelId="v2200VoiceShowcase";\n' +
+    '  var buttonId="v2200VoiceShowcaseButton";\n' +
+    '\n' +
+    '  function currentMode(){\n' +
+    '    try{return DIRECTOR&&DIRECTOR.getMode?DIRECTOR.getMode():"female";}catch(e){return"female";}\n' +
+    '  }\n' +
+    '  function setDirectorMode(mode){\n' +
+    '    try{if(DIRECTOR&&DIRECTOR.setMode)return DIRECTOR.setMode(mode);}catch(e){}\n' +
+    '    return mode;\n' +
+    '  }\n' +
+    '  function isFav(key){try{return !!(MEMORY&&MEMORY.isFavorite&&MEMORY.isFavorite(key));}catch(e){return false;}}\n' +
+    '  function toggleFav(key){try{return MEMORY&&MEMORY.toggleFavorite?MEMORY.toggleFavorite(key):false;}catch(e){return false;}}\n' +
+    '\n' +
+    '  function preview(key,mode,variant){\n' +
+    '    if(!DIRECTOR||typeof DIRECTOR.announce!=="function")return false;\n' +
+    '    if(mode&&mode!=="off")setDirectorMode(mode);\n' +
+    '    var opts={force:true};\n' +
+    '    if(variant==="factoryExcited"){\n' +
+    '      /* The Director owns variant selection. The showcase requests Factory replay;\n' +
+    "         excited selection remains part of the Director's normal Factory rules. */\n" +
+    '      return DIRECTOR.announce("factory",opts);\n' +
+    '    }\n' +
+    '    return DIRECTOR.announce(key,opts);\n' +
+    '  }\n' +
+    '\n' +
+    '  function renderCard(key){\n' +
+    '    var fav=isFav(key);\n' +
+    `    return '<div class="v2200Card" data-v2200-key="'+key+'">'+\n` +
+    `      '<div class="v2200Icon" aria-hidden="true">'+icons[key]+'</div>'+\n` +
+    `      '<div class="v2200Info"><div class="v2200Label">'+labels[key]+'</div>'+\n` +
+    `      '<div class="v2200Meta">'+(key==="factory"?"Normal + excited variants":"Milestone voice")+'</div></div>'+\n` +
+    `      '<button type="button" class="v2200Play" data-v2200-play="'+key+'" aria-label="Replay '+labels[key]+'">▶</button>'+\n` +
+    `      '<button type="button" class="v2200Fav '+(fav?"active":"")+'" data-v2200-fav="'+key+'" aria-label="'+(fav?"Remove ":"Add ")+' '+labels[key]+' favorite">★</button>'+\n` +
+    "      '</div>';\n" +
+    '  }\n' +
+    '\n' +
+    '  function build(){\n' +
+    '    /* V2.2.04 — Voice Showcase UI retired. Internal API remains available. */\n' +
+    '    return null;\n' +
+    '    if(document.getElementById(panelId))return;\n' +
+    '    var wrap=document.createElement("section");\n' +
+    '    wrap.id=panelId;\n' +
+    '    wrap.setAttribute("aria-label","DAM-ITE Voice Showcase");\n' +
+    '    wrap.innerHTML=\n' +
+    `      '<div class="v2200Header"><div><div class="v2200Title">🎙️ DAM-ITE VOICE SHOWCASE</div>'+\n` +
+    `      '<div class="v2200Subtitle">Replay your favorite milestone voices.</div></div>'+\n` +
+    `      '<button type="button" class="v2200Close" aria-label="Close voice showcase">✕</button></div>'+\n` +
+    `      '<div class="v2200ModeRow">'+\n` +
+    `      modes.map(function(m){return '<button type="button" class="v2200Mode" data-v2200-mode="'+m+'">'+\n` +
+    `        (m==="female"?"♀":m==="male"?"♂":"🎲")+" "+m.toUpperCase()+'</button>';}).join("")+\n` +
+    "      '</div>'+\n" +
+    `      '<div class="v2200Grid">'+steps.map(renderCard).join("")+'</div>'+\n` +
+    `      '<div class="v2200FactoryNote">🏭 FACTORY includes the normal and excited voice variants.</div>';\n` +
+    '\n' +
+    '    document.body.appendChild(wrap);\n' +
+    '\n' +
+    '    wrap.addEventListener("click",function(e){\n' +
+    '      var close=e.target.closest(".v2200Close");\n' +
+    '      if(close){closePanel();return;}\n' +
+    '      var mode=e.target.closest("[data-v2200-mode]");\n' +
+    '      if(mode){\n' +
+    '        setDirectorMode(mode.getAttribute("data-v2200-mode"));\n' +
+    '        refresh();\n' +
+    '        return;\n' +
+    '      }\n' +
+    '      var play=e.target.closest("[data-v2200-play]");\n' +
+    '      if(play){preview(play.getAttribute("data-v2200-play"),currentMode());return;}\n' +
+    '      var fav=e.target.closest("[data-v2200-fav]");\n' +
+    '      if(fav){toggleFav(fav.getAttribute("data-v2200-fav"));refresh();return;}\n' +
+    '    });\n' +
+    '  }\n' +
+    '\n' +
+    '  function refresh(){\n' +
+    '    var wrap=document.getElementById(panelId);if(!wrap)return;\n' +
+    '    var mode=currentMode();\n' +
+    '    wrap.querySelectorAll("[data-v2200-mode]").forEach(function(btn){\n' +
+    '      var active=btn.getAttribute("data-v2200-mode")===mode;\n' +
+    '      btn.classList.toggle("active",active);\n' +
+    '      btn.setAttribute("aria-pressed",String(active));\n' +
+    '    });\n' +
+    '    wrap.querySelectorAll("[data-v2200-fav]").forEach(function(btn){\n' +
+    '      var key=btn.getAttribute("data-v2200-fav");\n' +
+    '      var active=isFav(key);\n' +
+    '      btn.classList.toggle("active",active);\n' +
+    '      btn.setAttribute("aria-pressed",String(active));\n' +
+    '      btn.setAttribute("aria-label",(active?"Remove ":"Add ")+" "+labels[key]+" favorite");\n' +
+    '    });\n' +
+    '    var title=wrap.querySelector(".v2200Title");\n' +
+    '    if(title)title.textContent="🎙️ DAM-ITE VOICE SHOWCASE";\n' +
+    '  }\n' +
+    '\n' +
+    '  function openPanel(){ return false; }\n' +
+    '  function closePanel(){\n' +
+    '    removeVisibleUI();\n' +
+    '    var wrap=document.getElementById(panelId);if(!wrap)return;\n' +
+    '    wrap.classList.remove("show");\n' +
+    '  }\n' +
+    '\n' +
+    '  function buildLauncher(){\n' +
+    '    /* V2.2.04 — launcher retired from visible UI. */\n' +
+    '    return null;\n' +
+    '    if(document.getElementById(buttonId))return;\n' +
+    '    var btn=document.createElement("button");\n' +
+    '    btn.id=buttonId;btn.type="button";\n' +
+    '    btn.innerHTML="🎙️ VOICE SHOWCASE";\n' +
+    '    btn.setAttribute("aria-controls",panelId);btn.setAttribute("aria-expanded","false");\n' +
+    '    btn.addEventListener("click",function(){\n' +
+    '      var wrap=document.getElementById(panelId);\n' +
+    '      var open=!!wrap&&!wrap.classList.contains("show");\n' +
+    '      if(open){openPanel();btn.setAttribute("aria-expanded","true");}\n' +
+    '      else{closePanel();btn.setAttribute("aria-expanded","false");}\n' +
+    '    });\n' +
+    '    document.body.appendChild(btn);\n' +
+    '    document.addEventListener("click",function(e){\n' +
+    '      var wrap=document.getElementById(panelId);\n' +
+    '      if(wrap&&!wrap.contains(e.target)&&e.target!==btn){\n' +
+    '        closePanel();btn.setAttribute("aria-expanded","false");\n' +
+    '      }\n' +
+    '    });\n' +
+    '  }\n' +
+    '\n' +
+    '  function injectStyles(){\n' +
+    '    if(document.getElementById("v2200VoiceShowcaseStyle"))return;\n' +
+    '    var s=document.createElement("style");s.id="v2200VoiceShowcaseStyle";\n' +
+    '    s.textContent=\n' +
+    '      "#"+buttonId+"{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom) + 16px);z-index:8190;appearance:none;color:#fff;background:linear-gradient(135deg,rgba(47,210,255,.22),rgba(61,61,234,.22),rgba(243,16,186,.18));border:1px solid rgba(255,255,255,.20);border-radius:16px;min-height:46px;padding:11px 14px;font:950 .82rem/1 Inter,system-ui,sans-serif;box-shadow:0 10px 28px rgba(0,0,0,.34);touch-action:manipulation;}" +\n' +
+    '      "#"+panelId+"{position:fixed;inset:0;z-index:8180;display:none;padding:calc(env(safe-area-inset-top) + 14px) 12px calc(env(safe-area-inset-bottom) + 80px);background:rgba(4,7,14,.72);backdrop-filter:blur(10px);overflow:auto;font-family:inherit;}" +\n' +
+    '      "#"+panelId+".show{display:block;animation:v2200Fade .16s ease-out;}" +\n' +
+    '      "#"+panelId+" .v2200Header{max-width:520px;margin:0 auto 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-radius:20px;background:rgba(8,11,22,.96);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 42px rgba(0,0,0,.38);}" +\n' +
+    '      "#"+panelId+" .v2200Title{font-size:clamp(1rem,4.5vw,1.2rem);font-weight:950;letter-spacing:.04em;}" +\n' +
+    '      "#"+panelId+" .v2200Subtitle{font-size:.76rem;opacity:.70;margin-top:4px;}" +\n' +
+    '      "#"+panelId+" .v2200Close{min-width:44px;min-height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font-size:1.05rem;}" +\n' +
+    '      "#"+panelId+" .v2200ModeRow{max-width:520px;margin:0 auto 10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}" +\n' +
+    '      "#"+panelId+" .v2200Mode{min-height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);color:#fff;font:900 .76rem/1 Inter,system-ui,sans-serif;}" +\n' +
+    '      "#"+panelId+" .v2200Mode.active{border-color:rgba(47,210,255,.78);box-shadow:0 0 20px rgba(47,210,255,.10);background:rgba(47,210,255,.11);}" +\n' +
+    '      "#"+panelId+" .v2200Grid{max-width:520px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:9px;}" +\n' +
+    '      "#"+panelId+" .v2200Card{min-height:116px;padding:11px;border-radius:18px;background:rgba(8,11,22,.95);border:1px solid rgba(255,255,255,.14);display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:1fr auto;gap:8px;align-items:center;box-shadow:0 12px 30px rgba(0,0,0,.24);}" +\n' +
+    '      "#"+panelId+" .v2200Icon{font-size:1.65rem;grid-row:1/3;}" +\n' +
+    '      "#"+panelId+" .v2200Label{font-size:.84rem;font-weight:950;}" +\n' +
+    '      "#"+panelId+" .v2200Meta{font-size:.66rem;opacity:.62;margin-top:4px;}" +\n' +
+    '      "#"+panelId+" .v2200Play,#"+panelId+" .v2200Fav{min-width:42px;min-height:42px;border-radius:13px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.055);color:#fff;font-weight:950;}" +\n' +
+    '      "#"+panelId+" .v2200Fav.active{color:#ffd85a;border-color:rgba(255,216,90,.60);background:rgba(255,216,90,.08);}" +\n' +
+    '      "#"+panelId+" .v2200FactoryNote{max-width:520px;margin:10px auto 0;padding:10px 12px;border-radius:15px;background:rgba(243,16,186,.08);border:1px solid rgba(243,16,186,.18);font-size:.74rem;text-align:center;}" +\n' +
+    '      "@keyframes v2200Fade{from{opacity:0}to{opacity:1}}" +\n' +
+    '      "@media(max-width:390px){#"+panelId+" .v2200Grid{grid-template-columns:1fr}.v2200Mode{font-size:.70rem}}" +\n' +
+    '      "@media(prefers-reduced-motion:reduce){#"+panelId+".show{animation:none}}";\n' +
+    '    document.head.appendChild(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  function removeVisibleUI(){\n' +
+    '    var panel=document.getElementById(panelId);if(panel)panel.remove();\n' +
+    '    var button=document.getElementById(buttonId);if'... 499 more characters,
+  expected: /aria-label="DAM-ITE Voice Showcase"/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v22.22.0

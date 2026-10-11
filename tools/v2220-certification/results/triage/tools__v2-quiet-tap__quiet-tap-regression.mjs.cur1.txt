@@ -1,0 +1,549 @@
+{
+ "version": "V2.1.89",
+ "passed": 30,
+ "failed": 2,
+ "results": [
+  {
+   "name": "1. 20 rapid taps were delivered to the world",
+   "pass": true,
+   "detail": {
+    "taps": 20
+   }
+  },
+  {
+   "name": "2. no tap-driven text cards (toast / personality / chatter badges)",
+   "pass": true,
+   "detail": {
+    "tapDriven": [],
+    "chatter": {},
+    "seen": {
+     "celebCard": 61
+    }
+   }
+  },
+  {
+   "name": "2b. only event-driven day card may be large",
+   "pass": true,
+   "detail": {
+    "celebCard": 61
+   }
+  },
+  {
+   "name": "3. every tap produced hydraulic water feedback",
+   "pass": true,
+   "detail": {
+    "taps": 20,
+    "withFx": 20
+   }
+  },
+  {
+   "name": "5. never more than one visible moment",
+   "pass": true,
+   "detail": {
+    "maxSim": 1,
+    "sims": [
+     [
+      "celebCard"
+     ]
+    ],
+    "director": 1
+   }
+  },
+  {
+   "name": "6a. DAM MAP hit-test passed on every sample during taps",
+   "pass": true,
+   "detail": {
+    "samples": 77,
+    "blocked": 0
+   }
+  },
+  {
+   "name": "4. rapid tapping creates an occasional micro moment",
+   "pass": true,
+   "detail": {
+    "microCount": 8,
+    "runs": {
+     "celebCard": {
+      "cur": 0,
+      "max": 2360,
+      "count": 2
+     },
+     "tl2177Milestone": {
+      "cur": 0,
+      "max": 560,
+      "count": 1
+     }
+    }
+   }
+  },
+  {
+   "name": "4b. micro moments stay short (≤ ~900 ms; Flow Moment words ≤ 1.8 s)",
+   "pass": true,
+   "detail": {
+    "microMaxMs": 0,
+    "flow": {
+     "count": 8,
+     "maxMs": 1500
+    }
+   }
+  },
+  {
+   "name": "5b. one visible moment during a long rapid burst",
+   "pass": true,
+   "detail": {
+    "maxSim": 1,
+    "sims": [
+     [
+      "celebCard"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "5c. simultaneous requests → exactly one allowed and visible owner",
+   "pass": true,
+   "detail": {
+    "allowedMax": 1,
+    "visibleMax": 1,
+    "visibleEver": 10,
+    "samples": [
+     {
+      "allowed": [
+       "labelToast"
+      ],
+      "visible": []
+     },
+     {
+      "allowed": [
+       "labelToast"
+      ],
+      "visible": [
+       "labelToast"
+      ]
+     },
+     {
+      "allowed": [
+       "labelToast"
+      ],
+      "visible": [
+       "labelToast"
+      ]
+     }
+    ],
+    "owner": "labelToast"
+   }
+  },
+  {
+   "name": "7. BUY-ites / DAM MAP / SONG VAULT form one vertical dock (map in the middle)",
+   "pass": true,
+   "detail": {
+    "version": "V2.1.89",
+    "dock": true,
+    "order": [
+     "dmStoreFloatBtn",
+     "damMapLauncherBtn",
+     "songVaultFloatBtn"
+    ],
+    "orderOk": true,
+    "verticalStack": true,
+    "mapBelowStoreAboveVault": true,
+    "clickable": [
+     {
+      "id": "dmStoreFloatBtn",
+      "ok": true,
+      "hit": "dmStoreFloatTitle",
+      "rect": [
+       819,
+       450,
+       76,
+       76
+      ]
+     },
+     {
+      "id": "damMapLauncherBtn",
+      "ok": true,
+      "hit": "damMapLauncherIcon",
+      "rect": [
+       819,
+       536,
+       76,
+       76
+      ]
+     },
+     {
+      "id": "songVaultFloatBtn",
+      "ok": true,
+      "hit": "songVaultFloatIcon",
+      "rect": [
+       819,
+       622,
+       76,
+       76
+      ]
+     }
+    ],
+    "allClickable": true,
+    "underDialog": false,
+    "compact": false,
+    "dialog": null,
+    "mapEngine": true,
+    "duplicateHudMapHidden": true,
+    "presentationOnly": true,
+    "gameplayStateChanged": false
+   }
+  },
+  {
+   "name": "6b. all dock buttons receive taps",
+   "pass": true,
+   "detail": [
+    {
+     "id": "dmStoreFloatBtn",
+     "ok": true,
+     "hit": "dmStoreFloatTitle",
+     "rect": [
+      819,
+      450,
+      76,
+      76
+     ]
+    },
+    {
+     "id": "damMapLauncherBtn",
+     "ok": true,
+     "hit": "damMapLauncherIcon",
+     "rect": [
+      819,
+      536,
+      76,
+      76
+     ]
+    },
+    {
+     "id": "songVaultFloatBtn",
+     "ok": true,
+     "hit": "songVaultFloatIcon",
+     "rect": [
+      819,
+      622,
+      76,
+      76
+     ]
+    }
+   ]
+  },
+  {
+   "name": "6f. DAM MAP pin + level reflect live progress",
+   "pass": true,
+   "detail": {
+    "levelFlOz": 222,
+    "expected": "MILLPOND",
+    "shown": "MILLPOND",
+    "level": "LEVEL 1",
+    "stateLevel": 1
+   }
+  },
+  {
+   "name": "6c. DAM MAP opens the world map (24 factories rendered) and closes",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "6d. opening the map changes no gameplay state",
+   "pass": false,
+   "detail": {}
+  },
+  {
+   "name": "7b. BUY-ites opens the store, SONG VAULT opens the vault",
+   "pass": true,
+   "detail": {
+    "store": true,
+    "vault": true
+   }
+  },
+  {
+   "name": "6e. DAM MAP stays clickable while a side panel is open",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "8. fullscreen button is clickable and toggles fullscreen",
+   "pass": true,
+   "detail": {
+    "clickable": true,
+    "entered": true,
+    "exited": true
+   }
+  },
+  {
+   "name": "3b. a full level completes and shows the level card",
+   "pass": true,
+   "detail": {
+    "phase": "levelComplete",
+    "levelSamples": 55
+   }
+  },
+  {
+   "name": "3c. level card is exclusive (no other moment over it) and one moment at a time all level",
+   "pass": true,
+   "detail": {
+    "overlap": 0,
+    "with": null,
+    "maxSim": 1,
+    "sims": [
+     [
+      "celebCard"
+     ]
+    ],
+    "seen": {
+     "celebCard": 206,
+     "dayReward": 34
+    }
+   }
+  },
+  {
+   "name": "3d. whole level: no tap chatter, no tap toasts",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "V2.1.68 pointer layer intact + moment surfaces never take input",
+   "pass": true,
+   "detail": {
+    "director": {
+     "version": "V2.1.89",
+     "rule": "ONE_VISIBLE_MOMENT_AT_A_TIME",
+     "oneVisibleNow": true,
+     "visibleMoments": [],
+     "maxVisibleObserved": 1,
+     "tapChatterHidden": true,
+     "toastGuarded": true,
+     "personalityGuarded": true,
+     "spotlightGuarded": true,
+     "momentSurfacesPointerSafe": true,
+     "tapLayer": {
+      "version": "2.1.68",
+      "ok": true,
+      "pointerEvents": "none",
+      "position": "fixed",
+      "zIndex": 130,
+      "parent": "BODY"
+     },
+     "owner": null,
+     "modal": "levelCard",
+     "allowed": 13,
+     "suppressed": 218,
+     "hushed": 25,
+     "byTier": {
+      "hushed:modal": 5,
+      "quiet": 200,
+      "micro": 6,
+      "hushed:preempted": 5,
+      "event": 6,
+      "hushed:busy": 13,
+      "hushed:micro-cap": 1,
+      "hushed:micro-rate": 1,
+      "notice": 1
+     },
+     "presentationOnly": true,
+     "gameplayStateChanged": false
+    },
+    "tapLayer": {
+     "version": "2.1.68",
+     "ok": true,
+     "pointerEvents": "none",
+     "position": "fixed",
+     "zIndex": 130,
+     "parent": "BODY"
+    }
+   }
+  },
+  {
+   "name": "no new script errors (only the 4 pre-existing unparseable modules)",
+   "pass": true,
+   "detail": [
+    "addStyle is not defined"
+   ]
+  },
+  {
+   "name": "9. taps actually progressed the game (non-vacuous comparison)",
+   "pass": true,
+   "detail": {
+    "now": {
+     "totalFlOz": 111,
+     "level": 1,
+     "levelFlOz": 111,
+     "completedLevels": 0,
+     "currentStep": 1,
+     "tapCount": 0,
+     "phase": "playing",
+     "millStage": 0,
+     "damMachineFreePlays": 0,
+     "activeCharacter": "yall-too-beaver"
+    },
+    "keys": [
+     "geiDamIteVoiceDiscoveryV2201",
+     "geiStemMasteryV1",
+     "geiDamIteVoiceMemoryV2199",
+     "yalltooDamGame.v2",
+     "geiDamIteContextVoiceV2197",
+     "geiDamIteVoiceRewardsV2202"
+    ]
+   }
+  },
+  {
+   "name": "9. gameplay/economy state identical to b2e7691 after the same taps",
+   "pass": true,
+   "detail": {
+    "now": "{\"totalFlOz\":111,\"level\":1,\"levelFlOz\":111,\"completedLevels\":0,\"damMachineFreePlays\":0}",
+    "base": "{\"totalFlOz\":111,\"level\":1,\"levelFlOz\":111,\"completedLevels\":0,\"damMachineFreePlays\":0}"
+   }
+  },
+  {
+   "name": "9b. no new or removed saved-state keys",
+   "pass": false,
+   "detail": {
+    "now": [
+     "geiDamIteVoiceDiscoveryV2201",
+     "geiStemMasteryV1",
+     "geiDamIteVoiceMemoryV2199",
+     "yalltooDamGame.v2",
+     "geiDamIteContextVoiceV2197",
+     "geiDamIteVoiceRewardsV2202"
+    ],
+    "base": [
+     "yalltooDamGame.v2"
+    ]
+   }
+  },
+  {
+   "name": "10. [Pixel 7] one visible moment, no chatter, every tap has water fx",
+   "pass": true,
+   "detail": {
+    "maxSim": 1,
+    "chatter": {},
+    "taps": 20,
+    "fx": 20
+   }
+  },
+  {
+   "name": "10b. [Pixel 7] dock vertical, on-screen, all clickable; map never blocked",
+   "pass": true,
+   "detail": {
+    "dock": [
+     {
+      "id": "dmStoreFloatBtn",
+      "ok": true,
+      "hit": "dmStoreFloatTitle",
+      "rect": [
+       329,
+       489,
+       68,
+       68
+      ]
+     },
+     {
+      "id": "damMapLauncherBtn",
+      "ok": true,
+      "hit": "damMapLauncherIcon",
+      "rect": [
+       329,
+       565,
+       68,
+       68
+      ]
+     },
+     {
+      "id": "songVaultFloatBtn",
+      "ok": true,
+      "hit": "songVaultFloatIcon",
+      "rect": [
+       329,
+       641,
+       68,
+       68
+      ]
+     }
+    ],
+    "fit": {
+     "right": 397,
+     "vw": 412,
+     "top": 489,
+     "bottom": 709,
+     "vh": 839,
+     "noHScroll": true
+    },
+    "mapBlocked": 0
+   }
+  },
+  {
+   "name": "10c. [Pixel 7] DAM MAP opens by touch",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "10. [iPhone 13] one visible moment, no chatter, every tap has water fx",
+   "pass": true,
+   "detail": {
+    "maxSim": 1,
+    "chatter": {},
+    "taps": 20,
+    "fx": 20
+   }
+  },
+  {
+   "name": "10b. [iPhone 13] dock vertical, on-screen, all clickable; map never blocked",
+   "pass": true,
+   "detail": {
+    "dock": [
+     {
+      "id": "dmStoreFloatBtn",
+      "ok": true,
+      "hit": "dmStoreFloatTitle",
+      "rect": [
+       307,
+       401,
+       68,
+       68
+      ]
+     },
+     {
+      "id": "damMapLauncherBtn",
+      "ok": true,
+      "hit": "damMapLauncherIcon",
+      "rect": [
+       307,
+       477,
+       68,
+       68
+      ]
+     },
+     {
+      "id": "songVaultFloatBtn",
+      "ok": true,
+      "hit": "songVaultFloatIcon",
+      "rect": [
+       307,
+       553,
+       68,
+       68
+      ]
+     }
+    ],
+    "fit": {
+     "right": 375,
+     "vw": 390,
+     "top": 400.5,
+     "bottom": 620.5,
+     "vh": 664,
+     "noHScroll": true
+    },
+    "mapBlocked": 0
+   }
+  },
+  {
+   "name": "10c. [iPhone 13] DAM MAP opens by touch",
+   "pass": true,
+   "detail": {}
+  }
+ ]
+}

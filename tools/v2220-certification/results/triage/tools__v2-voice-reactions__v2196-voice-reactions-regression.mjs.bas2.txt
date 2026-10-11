@@ -1,0 +1,192 @@
+PASS: six personality profiles
+PASS: director integration
+PASS: context-aware reaction
+PASS: Factory finale
+PASS: animated personality badge
+PASS: reaction particles
+PASS: per-step visual classes
+PASS: reduced-motion support
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: presentation-only
+    at file:///tmp/claude-0/-home-user/8f068817-439c-54b2-9d62-de6b75d70fb5/scratchpad/prewt/tools/v2-voice-reactions/v2196-voice-reactions-regression.mjs:21:10
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/* V2.1.96 — DAM-ITE VOICE REACTIONS & PERSONALITY\n' +
+    ' * Presentation/audio-only personality layer.\n' +
+    ' * Adds context-aware visual reactions around the existing Voice Director and UI.\n' +
+    ' * Does not alter gameplay, economy, progression, XP, purchases, or saves.\n' +
+    ' */\n' +
+    '(function(){\n' +
+    '  "use strict";\n' +
+    '  if(window.__GEI_V2196_VOICE_REACTIONS__)return;\n' +
+    '\n' +
+    '  var VERSION="V2.1.96";\n' +
+    '  var DIRECTOR=window.GEI_VOICE_DIRECTOR;\n' +
+    '  var UI=window.GEI_VOICE_UI;\n' +
+    '  var lastContext="";\n' +
+    '  var timers=[];\n' +
+    '\n' +
+    '  var PROFILE={\n' +
+    '    mountain:{emoji:"⛰️",className:"v2196Mountain",burst:["💧","✨","⛰️"]},\n' +
+    '    dam:{emoji:"🏗️",className:"v2196Dam",burst:["💧","🧱","⚡"]},\n' +
+    '    millpond:{emoji:"🌊",className:"v2196Millpond",burst:["💧","🌊","✨"]},\n' +
+    '    sluice:{emoji:"🚪",className:"v2196Sluice",burst:["💧","➡️","✨"]},\n' +
+    '    waterwheel:{emoji:"⚙️",className:"v2196Waterwheel",burst:["💧","⚙️","🔄"]},\n' +
+    '    factory:{emoji:"🏭",className:"v2196Factory",burst:["💧","🏭","🎉","✨"]}\n' +
+    '  };\n' +
+    '\n' +
+    '  function clearTimers(){\n' +
+    '    timers.forEach(function(t){try{clearTimeout(t);}catch(e){}});\n' +
+    '    timers=[];\n' +
+    '  }\n' +
+    '\n' +
+    '  function card(){\n' +
+    '    return document.getElementById("levelCard");\n' +
+    '  }\n' +
+    '\n' +
+    '  function emitParticles(key,scale){\n' +
+    '    var root=card();if(!root||!document.body)return;\n' +
+    '    var cfg=PROFILE[key]||PROFILE.mountain;\n' +
+    '    var host=root.querySelector(".milestoneCelebration")||root;\n' +
+    '    var count=scale||1;\n' +
+    '    for(var i=0;i<cfg.burst.length*count;i++){\n' +
+    '      var el=document.createElement("span");\n' +
+    '      el.className="v2196Particle";\n' +
+    '      el.textContent=cfg.burst[i%cfg.burst.length];\n' +
+    '      el.style.setProperty("--v2196-x",(Math.random()*180-90)+"px");\n' +
+    '      el.style.setProperty("--v2196-y",(-35-Math.random()*85)+"px");\n' +
+    '      el.style.setProperty("--v2196-r",(Math.random()*40-20)+"deg");\n' +
+    '      host.appendChild(el);\n' +
+    '      (function(node){timers.push(setTimeout(function(){node.remove();},900));})(el);\n' +
+    '    }\n' +
+    '  }\n' +
+    '\n' +
+    '  function setReaction(key,mode,variant){\n' +
+    '    var root=card();if(!root)return;\n' +
+    '    var cfg=PROFILE[key]||PROFILE.mountain;\n' +
+    '    lastContext=key+":"+mode+":"+variant;\n' +
+    '    root.setAttribute("data-v2196-personality",key);\n' +
+    '    root.setAttribute("data-v2196-voice-mode",mode||"female");\n' +
+    '    root.setAttribute("data-v2196-voice-variant",variant||key);\n' +
+    '    root.classList.remove(\n' +
+    '      "v2196Reaction","v2196Mountain","v2196Dam","v2196Millpond",\n' +
+    '      "v2196Sluice","v2196Waterwheel","v2196Factory"\n' +
+    '    );\n' +
+    '    void root.offsetWidth;\n' +
+    '    root.classList.add("v2196Reaction",cfg.className);\n' +
+    '    var emoji=root.querySelector(".v2196PersonalityBadge");\n' +
+    '    if(!emoji){\n' +
+    '      emoji=document.createElement("div");\n' +
+    '      emoji.className="v2196PersonalityBadge";\n' +
+    '      emoji.setAttribute("aria-hidden","true");\n' +
+    '      (root.querySelector(".milestoneCelebration")||root).appendChild(emoji);\n' +
+    '    }\n' +
+    '    emoji.textContent=cfg.emoji;\n' +
+    '    emoji.classList.remove("v2196BadgePop");\n' +
+    '    void emoji.offsetWidth;\n' +
+    '    emoji.classList.add("v2196BadgePop");\n' +
+    '    emitParticles(key,key==="factory"?2:1);\n' +
+    '    timers.push(setTimeout(function(){\n' +
+    '      root.classList.remove("v2196Reaction",cfg.className);\n' +
+    '    },key==="factory"?1450:1000));\n' +
+    '  }\n' +
+    '\n' +
+    '  function enhanceFactory(){\n' +
+    '    var root=card();if(!root)return;\n' +
+    '    root.classList.add("v2196FactoryFinale");\n' +
+    '    var title=document.getElementById("lcLevel");\n' +
+    '    if(title){\n' +
+    '      title.setAttribute("data-v2196-final","1");\n' +
+    '    }\n' +
+    '    timers.push(setTimeout(function(){root.classList.remove("v2196FactoryFinale");},1500));\n' +
+    '  }\n' +
+    '\n' +
+    '  function reactFromState(){\n' +
+    '    if(!DIRECTOR)return;\n' +
+    '    try{\n' +
+    '      var s=DIRECTOR.state||{};\n' +
+    '      if(!s.active)return;\n' +
+    '      setReaction(s.active,s.resolvedMode,s.variant);\n' +
+    '      if(s.active==="factory")enhanceFactory();\n' +
+    '    }catch(e){}\n' +
+    '  }\n' +
+    '\n' +
+    '  function wrapDirector(){\n' +
+    '    if(!DIRECTOR||DIRECTOR.__v2196Wrapped)return;\n' +
+    '    var original=DIRECTOR.announce;\n' +
+    '    if(typeof original!=="function")return;\n' +
+    '    DIRECTOR.announce=function(key,opts){\n' +
+    '      var result=original.call(DIRECTOR,key,opts);\n' +
+    '      if(result){\n' +
+    '        var self=DIRECTOR;\n' +
+    '        timers.push(setTimeout(function(){\n' +
+    '          try{\n' +
+    '            var s=self.state||{};\n' +
+    '            setReaction(key,s.resolvedMode,s.variant);\n' +
+    '            if(key==="factory")enhanceFactory();\n' +
+    '          }catch(e){}\n' +
+    '        },25));\n' +
+    '      }\n' +
+    '      return result;\n' +
+    '    };\n' +
+    '    DIRECTOR.__v2196Wrapped=true;\n' +
+    '    DIRECTOR.__v2196Original=original;\n' +
+    '  }\n' +
+    '\n' +
+    '  function injectStyles(){\n' +
+    '    if(document.getElementById("v2196VoiceReactionStyle"))return;\n' +
+    '    var s=document.createElement("style");\n' +
+    '    s.id="v2196VoiceReactionStyle";\n' +
+    '    s.textContent=\n' +
+    '      ".v2196Reaction .milestoneCelebration{position:relative;overflow:visible;}" +\n' +
+    '      ".v2196PersonalityBadge{position:absolute;right:10px;top:8px;font-size:clamp(1.25rem,6vw,1.9rem);filter:drop-shadow(0 0 10px rgba(47,210,255,.45));pointer-events:none;}" +\n' +
+    '      ".v2196BadgePop{animation:v2196BadgePop .6s cubic-bezier(.18,.9,.18,1) 1;}" +\n' +
+    '      ".v2196Particle{position:absolute;left:50%;top:46%;font-size:clamp(.9rem,4.5vw,1.4rem);pointer-events:none;animation:v2196Particle .85s ease-out forwards;transform:translate(-50%,-50%) rotate(0);}" +\n' +
+    '      ".v2196Reaction.v2196Mountain .v2196PersonalityBadge{animation:v2196Float .95s ease-out 1;}" +\n' +
+    '      ".v2196Reaction.v2196Dam .v2196PersonalityBadge{animation:v2196Pressure .75s ease-out 1;}" +\n' +
+    '      ".v2196Reaction.v2196Millpond .v2196PersonalityBadge{animation:v2196Ripple 1s ease-out 1;}" +\n' +
+    '      ".v2196Reaction.v2196Sluice .v2196PersonalityBadge{animation:v2196Slide .75s ease-out 1;}" +\n' +
+    '      ".v2196Reaction.v2196Waterwheel .v2196PersonalityBadge{animation:v2196Spin .9s ease-out 1;}" +\n' +
+    '      ".v2196Reaction.v2196Factory .v2196PersonalityBadge{animation:v2196FactoryBadge 1.15s cubic-bezier(.15,.9,.15,1) 1;}" +\n' +
+    '      ".v2196FactoryFinale .milestoneCelebration{animation:v2196Finale .95s cubic-bezier(.16,.9,.18,1) 1;}" +\n' +
+    '      "@keyframes v2196BadgePop{0%{transform:scale(.45);opacity:0}45%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}" +\n' +
+    '      "@keyframes v2196Float{0%{transform:translateY(12px);opacity:0}100%{transform:none;opacity:1}}" +\n' +
+    '      "@keyframes v2196Pressure{0%{transform:scale(.7)}45%{transform:scale(1.18)}100%{transform:scale(1)}}" +\n' +
+    '      "@keyframes v2196Ripple{0%{transform:scale(.75)}55%{transform:scale(1.12)}100%{transform:scale(1)}}" +\n' +
+    '      "@keyframes v2196Slide{0%{transform:translateX(-18px);opacity:0}100%{transform:none;opacity:1}}" +\n' +
+    '      "@keyframes v2196Spin{0%{transform:rotate(-65deg) scale(.8)}100%{transform:rotate(0) scale(1)}}" +\n' +
+    '      "@keyframes v2196FactoryBadge{0%{transform:scale(.5);opacity:0}30%{transform:scale(1.28);opacity:1}62%{transform:scale(.96)}100%{transform:scale(1)}}" +\n' +
+    '      "@keyframes v2196Finale{0%{transform:scale(.985)}28%{transform:scale(1.045)}52%{transform:scale(1.01)}76%{transform:scale(1.028)}100%{transform:scale(1)}}" +\n' +
+    '      "@keyframes v2196Particle{0%{opacity:0;transform:translate(-50%,-50%) scale(.5) rotate(0)}12%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--v2196-x)),calc(-50% + var(--v2196-y))) rotate(var(--v2196-r)) scale(1.1)}}" +\n' +
+    '      "@media(prefers-reduced-motion:reduce){.v2196BadgePop,.v2196Particle,.v2196Reaction .v2196PersonalityBadge,.v2196FactoryFinale .milestoneCelebration{animation:none!important}}" ;\n' +
+    '    document.head.appendChild(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  function install(){\n' +
+    '    injectStyles();\n' +
+    '    if(DIRECTOR){wrapDirector();reactFromState();}\n' +
+    '    if(UI&&typeof UI.refresh==="function")UI.refresh();\n' +
+    '  }\n' +
+    '\n' +
+    '  var api={\n' +
+    '    version:VERSION,profiles:Object.keys(PROFILE),refresh:reactFromState,clear:clearTimers,\n' +
+    '    presentationOnly:true,get lastContext(){return lastContext;}\n' +
+    '  };\n' +
+    '  window.__GEI_V2196_VOICE_REACTIONS__=api;\n' +
+    '  window.GEI_VOICE_REACTIONS=api;\n' +
+    '\n' +
+    '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install,{once:true});\n' +
+    '  else install();\n' +
+    '})();',
+  expected: /does not alter gameplay, economy, progression, XP, purchases, or saves/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v22.22.0

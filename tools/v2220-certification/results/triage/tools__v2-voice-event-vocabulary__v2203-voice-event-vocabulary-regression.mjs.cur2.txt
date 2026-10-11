@@ -1,0 +1,85 @@
+FAIL A1 vocabulary has exactly the 38 supplied recordings  → 49
+PASS A2 every supplied label/URL/category is present verbatim
+FAIL A3 no event URL outside the supplied list (no invented assets)
+PASS A4 each recording maps to exactly one category
+PASS A5 all seven categories used
+PASS A6 all 14 original core URLs still present in V2.1.93
+PASS A7 all 14 original core URLs still present in V2.1.94
+FAIL A8 V2.2.03 core reference equals the original 14
+PASS A9 no event URL collides with a core URL
+PASS A10 core pack mapping (female/male × 7 keys) unchanged in V2.1.93
+PASS A11 core pack mapping unchanged in V2.1.94
+PASS A12 milestone schedule (every 6 levels, 6-step cycle) unchanged in V2.1.94
+PASS A13 every voice script tag appears exactly once
+PASS A14 V2.2.03 loads after every voice layer it depends on
+PASS A15 no duplicate script tags anywhere in index.html
+PASS A16 presentation-only: no economy/progression/purchase/save authority in V2.2.03
+PASS A17 public API surface
+PASS A18 diagnostics distinguish CONFIGURED / LOAD ATTEMPTED / LOADED / PLAYBACK SUCCESS / PLAYBACK FAILED / FALLBACK USED / BLOCKED
+PASS A19 V2.1.93 stands down when the Director owns core playback
+PASS A20 tone variants grouped (AMAZING/AMAZING CALM, UH-OH/UH-OH CALM)
+PASS A21 protected phrases
+PASS A22 reduced-motion rule present
+PASS A23 completion phrases never in SUCCESS pools
+FAIL B1 selfTest: 38 assets, unique hosted URLs, no core overlap, core matches reference  → {"version":"V2.2.03","eventAssets":49,"categories":{"START":4,"SUCCESS":15,"ENCOURAGEMENT":3,"WARNING":6,"COMPLETION":8,"HYDRAULIC":10,"SPECIAL_ACTION":3},"everyWordOneCategory":true,"uniqueEventUrls":true,"hostedMp3Urls":true,"noCoreOverlap":true,"coreReferenceAssets":14,"coreMatchesReference":true,"priorityOrder":["COMPLETION","SPECIAL_ACTION","HYDRAULIC","WARNING","ENCOURAGEMENT","SUCCESS","START"],"protectedWords":["NEW DISCOVERY","CHALLENGE COMPLETE","OPEN THE DAM","POWER THE FACTORY","LEVEL COMPLETE","MISSION COMPLETE","YOU DID IT","YOU UNLOCKED IT","COLLECTION COMPLETE"],"toneGroups":{"amazing":{"energetic":"amazing","calm":"amazing-calm"},"uh-oh":{"energetic":"uh-oh","calm":"uh-oh-calm"}},"mode":"female","presentationOnly":true,"gameplayStateChanged":false}
+PASS B2 priority order COMPLETION > SPECIAL_ACTION > HYDRAULIC > WARNING > ENCOURAGEMENT > SUCCESS > START
+PASS B3 diagnostics: 14 original core assets (7 female + 7 male), none missing or overwritten
+PASS B4 diagnostics do not claim playback before any attempt
+PASS B5 diagnostics expose mode, active voice, attempts, success, fallback, errors
+PASS B6 no event vocal before the first user gesture (autoplay-safe)
+PASS B7 playWord plays the exact hosted asset and records PLAYBACK SUCCESS only after play() resolves
+PASS B8 equal priority does not stack a second voice
+PASS B9 higher priority interrupts; lower priority never interrupts OPEN THE DAM
+PASS B10 COMPLETION outranks SPECIAL_ACTION; SPECIAL_ACTION waits behind a protected COMPLETION
+PASS B11 stop() clears current and deferred vocals
+PASS B12 SUCCESS cooldown suppresses rapid repeats
+PASS B13 random(category) stays in its category, varies, avoids back-to-back repeats
+PASS B14 calm/energetic deliveries resolve inside one reaction group
+PASS B15 a failed MP3 is reported LOAD FAILED + FALLBACK USED (never PLAYBACK SUCCESS) and frees the slot
+PASS B16 engine keeps working after a failure
+PASS B17 autoplay rejection is PLAYBACK BLOCKED, not a broken asset, and frees the slot
+PASS B18 Off mode suppresses every event vocal (even forced) and the core voice
+PASS B19 soundtrack ducks for event vocals; COMPLETION/SPECIAL use the stronger 'mission' duck
+PASS B20 ducking is temporary (music returns to full after the vocal)
+PASS B21 day completion fires its station vocal (Dam → OPEN THE DAM)
+PASS B22 40 rapid combo taps produce at most 2 vocals (never per tap)
+FAIL B23 hooks/guards/styles installed exactly once (no duplicated listeners)  → {"dir":true,"hooks":[true,true,true,true,true,true,true,true,true,false],"styles":1,"layers":1}
+PASS B24 visual reaction is non-blocking (pointer-events:none, single layer)
+PASS B25 Female mode resolves the 6 Female milestone assets
+PASS B26 Male mode resolves the 6 Male milestone assets
+PASS B27 Factory normal + excited variants both resolve (Female and Male)
+PASS B28 Random mode resolves both packs
+PASS B29 Voice Showcase replay still plays the same core asset
+PASS B30 Voice Discovery still sees the core voice moment
+PASS B31 Voice Rewards still sees discoveries
+PASS B32 no economy/progression/save mutation from event vocabulary use
+PASS B33 never more than one voice audible at once (engine section)
+PASS B34 Level 6 (female): exactly one core voice, the right one, first
+PASS B35 Level 6: no other milestone/cycle voice replaces it (protected 1)
+PASS B36 Level 6: core voice first, then one short follow-up (awesome)
+PASS B37 Level 6: never two voices at once
+PASS B34 Level 12 (male): exactly one core voice, the right one, first
+PASS B35 Level 12: no other milestone/cycle voice replaces it (protected 0)
+PASS B36 Level 12: core voice first, then one short follow-up (brilliant)
+PASS B37 Level 12: never two voices at once
+PASS B34 Level 30 (female): exactly one core voice, the right one, first
+PASS B35 Level 30: no other milestone/cycle voice replaces it (protected 1)
+PASS B36 Level 30: core voice first, then one short follow-up (awesome)
+PASS B37 Level 30: never two voices at once
+PASS B34 Level 36 (female): exactly one core voice, the right one, first
+PASS B35 Level 36: no other milestone/cycle voice replaces it (protected 0)
+PASS B36 Level 36: core voice first, then one short follow-up (mission complete)
+PASS B37 Level 36: never two voices at once
+PASS B38 non-milestone Level 7: LEVEL COMPLETE / YOU DID IT, no core voice
+PASS B39 core milestone stopped the in-flight event vocal
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Cannot read properties of null (reading 'click')
+    at eval (eval at evaluate (:290:30), <anonymous>:9:56)
+    at async <anonymous>:316:30
+    at runtime (/home/user/gei-mountain-ocean/tools/v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression.mjs:483:36)
+    at async file:///home/user/gei-mountain-ocean/tools/v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression.mjs:518:6
+
+Node.js v22.22.0
