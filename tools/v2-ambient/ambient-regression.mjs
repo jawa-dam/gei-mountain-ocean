@@ -170,7 +170,8 @@ async function suiteHome(browser, base, device, label){
   const tg = await g.page.evaluate(() => { const r = document.querySelector(".brandTag").getBoundingClientRect(); return { x:r.left + 8, y:r.top + r.height / 2 }; });
   await tap(g, tg.x, tg.y);
   await g.page.evaluate(SAMPLER, HOME_GUARDS);
-  await sleep(label ? 12000 : 16000);
+  /* worst case for TWO cameos: first 3–6 s, shown 1–2 s, next 3–6 s later ⇒ the second can start as late as 14 s after the tap, so the window must exceed that on every viewport (it was 12 s on phones) */
+  await sleep(label ? 15500 : 16000);
   const q = await g.page.evaluate(SAMPLE_READ);
   check("1a. " + tag + "MENU IDLE: the board waiting for its first tap is the home screensaver", st0.mode === "home" && st0.phase === "ready", st0);
   check("1b. " + tag + "MENU IDLE: cameos appear on their own (first after ~3–6 s)", q.seq.length >= 2 && q.firstAt >= 2900 && q.firstAt <= 6400 && q.modes.every(m => m === "home"), { firstAt:Math.round(q.firstAt), seq:q.seq });
@@ -267,8 +268,9 @@ async function suiteLevel(browser, base, device, label){
   /* 5 — large cameos, never over the headline, rescue card, FL OZ line or buttons */
   const LEVEL_GUARDS = ["#lcBtn", "#lcLevel", "#lcRescue", ".lcOz"];
   await g.page.evaluate(SAMPLER, LEVEL_GUARDS);
+  /* the level director rolls a 65 % chance every 7–12 s (first at 3.5–6 s): waiting for the first natural cameo needs several rolls, so allow ~60 s (it returns the moment one appears) */
   let natural = 0;
-  for (let i = 0; i < 140 && natural < 1; i++){ await sleep(100); natural = await g.page.evaluate(`(${E}.stats().byMode.level || 0)`); }
+  for (let i = 0; i < 600 && natural < 1; i++){ await sleep(100); natural = await g.page.evaluate(`(${E}.stats().byMode.level || 0)`); }
   for (let i = 0; i < 14; i++){ await g.page.evaluate(E + ".debug.show()"); await sleep(240); }
   const q = await g.page.evaluate(SAMPLE_READ);
   /* V2.2.6: on phone-width screens the capsule fills the screen, so the cameo system (which only uses free space around guarded elements) correctly finds none; wide screens still get them. */
