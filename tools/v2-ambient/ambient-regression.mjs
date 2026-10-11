@@ -274,13 +274,21 @@ async function suiteLevel(browser, base, device, label){
   /* the level director rolls a 65 % chance every 7–12 s (first at 3.5–6 s): waiting for the first natural cameo needs several rolls, so allow ~60 s (it returns the moment one appears) */
   let natural = 0;
   for (let i = 0; i < 600 && natural < 1; i++){ await sleep(100); natural = await g.page.evaluate(`(${E}.stats().byMode.level || 0)`); }
+  /* The forced placements below measure the guards at the instant they are placed, exactly like the real director (whose first level cameo is 3.5 s after the card appears). Wait until the card's controls have STOPPED MOVING
+     (three identical consecutive layout readings) — a fixed sleep was only a guess at that and under CPU load the victory-capsule entrance was still settling (captured failure: #lcBtn 14 px higher than when the cameo was placed). */
+  const settleT0 = Date.now(); let prev = "", same = 0;
+  for (let i = 0; i < 150 && same < 3; i++){
+    const sig = await g.page.evaluate(guards => guards.map(sel => { const e = document.querySelector(sel), r = e && e.getBoundingClientRect(); return r ? [r.left, r.top, r.width, r.height].map(v => Math.round(v * 10)).join(",") : "-"; }).join("|"), LEVEL_GUARDS);
+    same = sig === prev ? same + 1 : 0; prev = sig; await sleep(150);
+  }
+  const settleMs = Date.now() - settleT0;
   for (let i = 0; i < 14; i++){ await g.page.evaluate(E + ".debug.show()"); await sleep(240); }
   const q = await g.page.evaluate(SAMPLE_READ);
   /* V2.2.6: on phone-width screens the capsule fills the screen, so the cameo system (which only uses free space around guarded elements) correctly finds none; wide screens still get them. */
   const narrow = await g.page.evaluate(() => innerWidth < 700);
   check("5b. " + tag + "LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)", natural >= 1 || narrow, { natural, narrow });
   check("5c. " + tag + "LEVEL COMPLETE: large presentation (≥ 96 px), one at a time", Math.min(...q.sizes) >= 96 && q.max === 1, { min:Math.min(...q.sizes), max:Math.max(...q.sizes) });
-  check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
+  check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo, settleMs });
   check("12c. " + tag + "LEVEL COMPLETE: no overflow, cameo on screen", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
 
   /* 8 — collection popout */
