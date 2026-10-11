@@ -181,7 +181,7 @@
   function startup(){
     if(R.started)return;
     R.started=true;
-    addStyle();
+    css();
     ensure();
     document.addEventListener("pointerdown",onPointer,true);
     requestAnimationFrame(resetWatch);
