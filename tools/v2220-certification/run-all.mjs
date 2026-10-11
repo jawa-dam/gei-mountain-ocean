@@ -27,10 +27,19 @@ const builder = [
 ];
 const arcade = [];
 for (const d of readdirSync(T)) { const dir = join(T, d); if (!statSync(dir).isDirectory() || d === "v2217-dam-builder" || d === "v2220-certification") continue;
-  for (const f of readdirSync(dir)) if (/regression.*\.mjs$|economy-chaos\.mjs$|regression-gate\.mjs$/.test(f) && !/dam-builder/.test(f)) arcade.push(["arcade:" + d + "/" + f.replace(/\.mjs$/, ""), "tools/" + d + "/" + f, 600]); }
+  for (const f of readdirSync(dir)) if (/regression.*\.mjs$|economy-chaos\.mjs$|regression-gate\.mjs$|security-certification\.mjs$/.test(f) && !/dam-builder/.test(f)) arcade.push(["arcade:" + d + "/" + f.replace(/\.mjs$/, ""), "tools/" + d + "/" + f, 600]); }
 const all = (group === "builder" ? builder : group === "arcade" ? arcade : builder.concat(arcade)).filter(x => !only.length || only.some(o => x[0].includes(o)));
 
 const INFRA = /Target page, context or browser has been closed|Timeout \d+ms exceeded|browser has been closed|ECONNRESET|crashed: page\.waitForFunction|Protocol error|net::ERR/i;
+
+/* the NAMES of the failing checks, whatever the suite's output format: "✗ x" / "FAIL x" lines, JSON {name, pass:false}, {id, name, status:"FAIL"}, node:assert "AssertionError: x" */
+function failingNames(text) {
+  const s = new Set();
+  text.split("\n").forEach(l => { let m; if ((m = l.match(/^\s*✗\s*(.*)$/))) s.add(m[1].replace(/\s+/g, " ").slice(0, 110)); else if ((m = l.match(/^\s*FAIL[:\s]+(.*)$/))) s.add(m[1].replace(/\s+/g, " ").slice(0, 110)); else if ((m = l.match(/AssertionError[^:]*:\s*(.*)$/))) s.add("AssertionError: " + m[1].slice(0, 100)); else if (/GATE FAILED|CERTIFICATION (FAILED|INCOMPLETE)/.test(l)) s.add(l.trim().slice(0, 110)); });
+  for (const m of text.matchAll(/"name":\s*"([^"]+)",\s*"pass":\s*false/g)) s.add(m[1]);
+  for (const m of text.matchAll(/"id":\s*"([^"]+)",\s*"name":\s*"([^"]+)",\s*"status":\s*"FAIL"/g)) s.add(m[1] + " " + m[2]);
+  return [...s];
+}
 function runOne(name, cmd, limit, cwd = root) {
   return new Promise(ok => {
     const t0 = Date.now(), p = spawn("node", cmd.split(" "), { cwd, env: process.env }); let out = "", killed = false;
@@ -39,7 +48,7 @@ function runOne(name, cmd, limit, cwd = root) {
     p.on("close", code => { clearTimeout(to);
       const lines = out.split("\n").filter(l => !/^\[pid=/.test(l)), text = lines.join("\n");
       const m = [...text.matchAll(/(\d+) passed, (\d+) failed/g)].pop(), okLines = lines.filter(l => /^\s*(✓|PASS\b)/.test(l)).length, passed = m ? +m[1] : okLines, failedN = m ? +m[2] : null;
-      const bad = lines.filter(l => /^\s*(✗|FAIL\b)|GATE FAILED|AssertionError/.test(l)), infraBad = bad.filter(l => INFRA.test(l) || /suite .* crashed/.test(l)), realBad = bad.filter(l => !infraBad.includes(l));
+      const names = failingNames(text), bad = names.map(n => "✗ " + n), infraBad = bad.filter(l => INFRA.test(l) || /suite .* crashed/.test(l)), realBad = bad.filter(l => !infraBad.includes(l));
       let status = "PASS";
       if (killed) status = "INFRA";
       else if (realBad.length) status = "FAIL";
