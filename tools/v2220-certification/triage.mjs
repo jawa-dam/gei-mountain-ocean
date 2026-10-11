@@ -5,11 +5,11 @@
 import { spawn } from "node:child_process";
 import { readdirSync, statSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve, join } from "node:path";
-const root = resolve(new URL("../..", import.meta.url).pathname), base = resolve(process.argv[2]), reps = +(process.argv[3] || 2), only = (process.argv[4] || "").split(",").filter(Boolean);
+const root = resolve(new URL("../..", import.meta.url).pathname), NOBASE = process.argv[2] === "none", base = NOBASE ? root : resolve(process.argv[2]), reps = +(process.argv[3] || 2), only = (process.argv[4] || "").split(",").filter(Boolean);
 const out = join(root, "tools/v2220-certification/results", process.argv[5] || "triage"); mkdirSync(out, { recursive: true });
 const suites = [];
 for (const d of readdirSync(join(root, "tools"))) { const dir = join(root, "tools", d); if (!statSync(dir).isDirectory() || /dam-builder|v2220|v2217/.test(d)) continue;
-  for (const f of readdirSync(dir)) if (/regression.*\.mjs$|economy-chaos\.mjs$|regression-gate\.mjs$/.test(f)) suites.push("tools/" + d + "/" + f); }
+  for (const f of readdirSync(dir)) if (/regression.*\.mjs$|economy-chaos\.mjs$|regression-gate\.mjs$|security-certification\.mjs$/.test(f)) suites.push("tools/" + d + "/" + f); }
 const run = (cwd, f) => new Promise(ok => { const p = spawn("node", [f], { cwd }); let o = ""; const t = setTimeout(() => { p.kill("SIGKILL"); o += "\n[TRIAGE: killed after 900 s]"; }, 900000); p.stdout.on("data", d => o += d); p.stderr.on("data", d => o += d); p.on("close", code => { clearTimeout(t); ok({ code, text: o.split("\n").filter(l => !/^\[pid=/.test(l)).join("\n") }); }); });
 function failing(text) {
   const s = new Set(); const L = text.split("\n");
@@ -22,7 +22,7 @@ const passes = t => (t.match(/^\s*(✓|PASS\b)/gm) || []).length + ((t.match(/"p
 const rows = [];
 for (const f of suites) { if (only.length && !only.some(o => f.includes(o))) continue;
   const r = { suite: f, cur: [], bas: [] };
-  for (let i = 0; i < reps; i++) for (const [tag, cwd] of [["cur", root], ["bas", base]]) {
+  for (let i = 0; i < reps; i++) for (const [tag, cwd] of (NOBASE ? [["cur", root]] : [["cur", root], ["bas", base]])) {
     const x = await run(cwd, f); const fs = [...failing(x.text)]; r[tag].push({ code: x.code, passes: passes(x.text), fails: fs });
     writeFileSync(join(out, f.replace(/[\/]/g, "__") + "." + tag + (i + 1) + ".txt"), x.text);
   }
