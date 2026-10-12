@@ -103,16 +103,41 @@ The Android checklist has been updated for V2.3.0 at:
 
 Added checks for: premium module loading, texture counts, bloom consistency, premium visual quality, and fallback with network throttle.
 
-## 7. Acceptance Decision
+## 7. Builder Regression Results
 
-### **CONDITIONAL PASS**
+**18/18 suites PASS — 415 assertions — 0 genuine failures — 0 infra issues**
 
-**Conditions:**
-1. Builder regression suite must pass (running — results pending)
-2. Android validation remains UNVERIFIED — must be completed on a physical device before production deployment
+| Suite | Tests | Time |
+|-------|-------|------|
+| builder-svg | 229 | 207s |
+| builder-3d:loading | 7 | 79s |
+| builder-3d:render | 7 | 53s |
+| builder-3d:causality | 18 | 93s |
+| builder-3d:picking | 7 | 39s |
+| builder-3d:parity | 3 | 35s |
+| builder-3d:fallbacks | 9 | 83s |
+| builder-3d:motion | 6 | 38s |
+| builder-3d:lifecycle | 3 | 173s |
+| builder-3d:mobile | 8 | 90s |
+| builder-3d:chain | 11 | 347s |
+| e2e:chain | 28 | 85s |
+| e2e:routing | 6 | 26s |
+| e2e:cycle | 20 | 307s |
+| e2e:rewards | 28 | 441s |
+| e2e:fallback | 15 | 98s |
+| e2e:mobile | 10 | 757s |
+| golden-day5 | 0 | 12s |
+
+## 8. Acceptance Decision
+
+### **PASS**
+
+**Remaining condition:**
+- Android validation remains UNVERIFIED — must be completed on a physical device before production deployment
 
 **Rationale:**
 - Performance exceeds all targets even on software-rendered SwiftShader
+- Builder regression suite: 18/18 suites, 415 assertions, 0 failures
 - No per-frame allocations, proper visibility gating, graceful fallback
 - Two small optimizations applied (bloom mipmap, texture dispose)
 - No gameplay, reward, or simulation changes
