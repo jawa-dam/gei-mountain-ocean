@@ -37,7 +37,18 @@ async function clickEq(h, id){ const el = h.page.locator('[data-eq="' + id + '"]
 async function setSlider(h, idx, val){ await h.page.evaluate(([i, v]) => { const el = document.querySelectorAll("#dbCtl input[type=range]")[i]; el.value = v; el.dispatchEvent(new Event("input", { bubbles:true })); }, [idx, val]); }
 async function btnByText(h, re){ return h.page.evaluate(src => { const b = [...document.querySelectorAll("#dbRoot button")].find(x => new RegExp(src, "i").test(x.textContent) && !x.disabled && x.offsetParent !== null); if (b) { b.click(); return true; } return false; }, re); }
 async function portPoint(h, id){ return h.page.evaluate(i => { const g = document.querySelector('[data-port="' + i + '"]'), r = g.querySelectorAll("circle")[1].getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, id); }
-async function drag(h, a, b){ const p = await portPoint(h, a), q = await portPoint(h, b); await h.page.mouse.move(p[0], p[1]); await h.page.mouse.down(); await h.page.mouse.move((p[0] + q[0]) / 2, (p[1] + q[1]) / 2, { steps:4 }); await h.page.mouse.move(q[0], q[1], { steps:4 }); await h.page.mouse.up(); await sleep(40); }
+async function drag(h, a, b){
+  await h.page.evaluate(([a2, b2]) => {
+    function pt(id){ const g = document.querySelector('[data-port="' + id + '"]'), r = g.querySelectorAll("circle")[1].getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, el: g.querySelectorAll("circle")[1] }; }
+    const s = pt(a2), e = pt(b2), svg = document.querySelector("#dbStage svg");
+    function fire(type, x, y){ const el = document.elementFromPoint(x, y) || svg; el.dispatchEvent(new PointerEvent(type, { clientX:x, clientY:y, bubbles:true, pointerId:1, pointerType:"mouse", isPrimary:true, view:window, cancelable:true })); }
+    fire("pointerdown", s.x, s.y);
+    const steps = 8;
+    for (let i = 1; i <= steps; i++) fire("pointermove", s.x + (e.x - s.x) * i / steps, s.y + (e.y - s.y) * i / steps);
+    fire("pointerup", e.x, e.y);
+  }, [a, b]);
+  await sleep(40);
+}
 
 /* ------------------------------------------------------------------ per-Day solvers (real controls) */
 const SOLVE = {

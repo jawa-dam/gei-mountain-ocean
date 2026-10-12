@@ -29,16 +29,23 @@ Nothing in this folder adds a feature. It certifies the V2.2.17–V2.2.19 DAM BU
 ## Android quality gate — what can and cannot be claimed
 The build/test container has **no Android device** (software GL only). Therefore **no on-device number exists yet and none is claimed.** The 3D scene ships a passive recorder so the first real-phone run produces a complete, honest record.
 
-### Procedure (≈ 15 minutes on a phone)
-1. Phone: Chrome (stable), battery > 50 %, not in power-saver, screen on, 5 min since last reboot is fine. Note model, Android version, Chrome version, `chrome://gpu` WebGL2 line (must say *Hardware accelerated*).
-2. Cold load: clear site data, open `https://<preview>/?b3dperf=1`, open DAM BUILDER on Day 5 (3D). Record time from tapping the Day until the first frame (stopwatch or `DamBuilder3D.perfReport().buildMs` for scene build + the network time shown in `chrome://inspect` → Network).
-3. Frame rate: play Day 5 for 60 s with the gate at 60–100 % and the machines engaged. Tap **COPY REPORT** (top-left readout) and paste the JSON. Fields: `fps`, `p50ms/p95ms/p99ms/worstMs`, `over16`/`over33` (% of frames slower than 60/30 fps), `quality` tier chosen, `dpr` after adaptation, `draw`, `tris`, `jsHeapMB`, `gpu`, `contextLost`.
-4. Repeat for Day 1 (source shot), Day 2 (lab), Day 6 (factory, ocean view). `DamBuilder3D.perfReset()` between Days.
-5. Touch responsiveness: slider drag, ± gate buttons, tapping the glowing hotspots and the 3D objects (lever, gate wheel, forks, wall lifts) — note any dropped/late taps and any scroll/page-zoom hijack.
-6. Soak: 5 minutes continuous; note heat/throttling (fps trend in `perfReport()` every minute) and any tab reload.
-7. Context loss: with the phone attached (`chrome://inspect`), run in the console: `document.querySelector('canvas').getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()`. Expected: the Day falls back to the SVG version and stays completable; no reward change. Also background the tab for 30 s and return.
-8. Switch back to TAPLITES ARCADE; check the 6-second tap clock and tap response are normal, and that memory (`jsHeapMB`) has fallen after leaving the Builder.
-9. Fallback paths on the phone: `?b3d=off`, and the in-game SIMPLE VIEW toggle.
+### Procedure (≈ 20 minutes on a phone)
+
+**Preview URL:** `https://gei-mountain-ocean-git-claude-affectionate-john-8fadc5-god-9915.vercel.app/`
+(Vercel preview for branch `claude/affectionate-johnson-az0k8c`. Verify the deploy matches the tested commit before testing.)
+
+1. **Device setup.** Phone: Chrome (stable), battery > 50 %, not in power-saver, screen on, 5 min since last reboot is fine. Note model, Android version, Chrome version, `chrome://gpu` WebGL2 line (must say *Hardware accelerated*).
+2. **Cold load.** Clear site data, open `https://<preview>/?b3dperf=1`, open DAM BUILDER on Day 5 (3D). Record time from tapping the Day until the first frame (stopwatch or `DamBuilder3D.perfReport().buildMs` for scene build + the network time shown in `chrome://inspect` → Network).
+3. **Frame rate.** Play Day 5 for 60 s with the gate at 60–100 % and the machines engaged. Tap **COPY REPORT** (top-left readout) and paste the JSON. Fields: `fps`, `p50ms/p95ms/p99ms/worstMs`, `over16`/`over33` (% of frames slower than 60/30 fps), `quality` tier chosen, `dpr` after adaptation, `draw`, `tris`, `jsHeapMB`, `gpu`, `contextLost`.
+4. **All Days.** Repeat for Day 1 (source shot), Day 2 (lab), Day 6 (factory, ocean view). `DamBuilder3D.perfReset()` between Days.
+5. **Touch responsiveness.** Slider drag, ± gate buttons, tapping the glowing hotspots and the 3D objects (lever, gate wheel, forks, wall lifts) — note any dropped/late taps and any scroll/page-zoom hijack.
+6. **Short-screen layout.** On phones ≤ 640 px tall: verify the mode selector does not cover the Arcade tap area, no controls are clipped or unreachable, and the Builder HUD does not overflow.
+7. **Soak.** 5 minutes continuous; note heat/throttling (fps trend in `perfReport()` every minute) and any tab reload.
+8. **Context loss.** With the phone attached (`chrome://inspect`), run in the console: `document.querySelector('canvas').getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()`. Expected: the Day falls back to the SVG version and stays completable; no reward change. Also background the tab for 30 s and return.
+9. **Audio and soundtrack.** Verify: music starts only after a tap gesture, music ducks during voice events, soundtrack continues across Day transitions, no audio glitches during 3D scene changes. Check the music button toggles correctly.
+10. **Reward behavior.** Complete a Builder Day and verify: Builder Parts are awarded (not FL OZ), the level card shows correctly, the Bonus Waterwheel spins, and the reward ledger increments exactly once. Do NOT test with real payment credentials.
+11. **Switch to TAPLITES ARCADE.** Check the 6-second tap clock and tap response are normal, and that memory (`jsHeapMB`) has fallen after leaving the Builder. Verify existing Arcade rewards and FL OZ are unchanged.
+12. **Fallback paths.** `?b3d=off`, and the in-game SIMPLE VIEW toggle — verify the SVG fallback completes a Day.
 
 ### Targets (not results)
 60 fps on capable devices; on low-end devices the tier/DPR adaptation should hold ≥ 30 fps with `over33 < 10 %`. If a device misses this, record it — do not tune the numbers.
