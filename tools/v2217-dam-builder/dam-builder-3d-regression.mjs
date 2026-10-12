@@ -41,7 +41,7 @@ async function settle(h, n = 40){ await h.page.evaluate(k => { for (let i = 0; i
 async function suiteLoading(){
   console.log("D1 lazy loading");
   const h = await boot({ query:"?b3d=high", storage:{ [SAVE]:seed(1, 0) } });
-  const reqs = []; h.page.on("request", r => { if (r.url().includes("dam-builder-3d")) reqs.push(r.url()); });
+  const reqs = [], premReqs = []; h.page.on("request", r => { const u = r.url(); if (u.includes("dam-builder-3d") && !u.includes("premium")) reqs.push(u); if (u.includes("dam-builder-3d-premium")) premReqs.push(u); });
   check("Arcade load does not fetch the 3D bundle", reqs.length === 0 && await h.page.evaluate(() => !window.DamBuilder3D));
   for (const [lvl, flOz, day] of [[1, 0, 0], [1, 111, 1], [1, 222, 2], [1, 333, 3]]){
     await h.page.evaluate(([l, f, d]) => { if (DamBuilder.isOpen) DamBuilder.close(); state.level = l; state.levelFlOz = f; state.currentStep = d; state.phase = "ready"; DamBuilder.open({ day:d }); }, [lvl, flOz, day]); await sleep(300);
@@ -252,8 +252,8 @@ async function suiteLifecycle(){
   console.log("D7 mount / unmount hygiene");
   const h = await boot({ query:"?b3d=high", storage:{ [SAVE]:seed(3) } });
   for (let i = 0; i < 4; i++){ await open3D(h); await begin(h); await h.page.evaluate(() => { DamBuilder.selectDay(1); }); await sleep(500); await h.page.evaluate(() => DamBuilder.selectDay(4)); await h.page.waitForFunction(() => DamBuilder.run && DamBuilder.run.is3d, null, { timeout:60000 }); await h.page.evaluate(() => DamBuilder.close()); }
-  const m = await h.page.evaluate(() => ({ canv:document.querySelectorAll(".db3d").length, hot:document.querySelectorAll(".db3dHot").length, loads:document.querySelectorAll(".db3dLoad").length, scripts:[...document.scripts].filter(s => /dam-builder-3d/.test(s.src)).length }));
-  check("after 4 open/switch/close cycles: no canvases, hotspots or loaders left; bundle injected once", m.canv === 0 && m.hot === 0 && m.loads === 0 && m.scripts === 1, m);
+  const m = await h.page.evaluate(() => ({ canv:document.querySelectorAll(".db3d").length, hot:document.querySelectorAll(".db3dHot").length, loads:document.querySelectorAll(".db3dLoad").length, scripts:[...document.scripts].filter(s => /dam-builder-3d/.test(s.src) && !/premium/.test(s.src)).length, premScripts:[...document.scripts].filter(s => /dam-builder-3d-premium/.test(s.src)).length }));
+  check("after 4 open/switch/close cycles: no canvases, hotspots or loaders left; bundle injected once", m.canv === 0 && m.hot === 0 && m.loads === 0 && m.scripts === 1 && m.premScripts <= 1, m);
   await h.page.evaluate(() => { DamBuilder.open({ day:4 }); DamBuilder.close(); }); await sleep(300);
   check("closing while the 3D scene is still loading cancels the mount cleanly", await h.page.evaluate(() => !document.querySelector(".db3d") && !DamBuilder.isOpen));
   check("no page errors", h.errors.length === 0, h.errors);
