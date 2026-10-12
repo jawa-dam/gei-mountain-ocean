@@ -522,16 +522,24 @@
   function url3D(){ try{ var m = /[?&]b3d=(off|low|medium|high)/.exec(location.search); return m ? m[1] : ""; }catch(e){ return ""; } }
   function saveData(){ try{ return !!(navigator.connection && navigator.connection.saveData); }catch(e){ return false; } }
   function want3D(i){ return !!HAS3D[i] && store.r3d !== false && url3D() !== "off" && !saveData(); }
+  function loadScript(src, timeout){
+    return new Promise(function(ok, bad){
+      var sc = document.createElement("script"); sc.src = src; sc.async = true;
+      var to = setTimeout(function(){ bad(new Error(src + " timeout")); }, timeout || 20000);
+      sc.onload = function(){ clearTimeout(to); ok(); };
+      sc.onerror = function(){ clearTimeout(to); bad(new Error(src + " failed to load")); };
+      document.head.appendChild(sc);
+    });
+  }
   function load3D(){
     if(window.DamBuilder3D) return Promise.resolve(window.DamBuilder3D);
     if(load3DP) return load3DP;
-    load3DP = new Promise(function(ok, bad){
-      var sc = document.createElement("script"); sc.src = "/dam-builder-3d-v2218.js"; sc.async = true;
-      var to = setTimeout(function(){ bad(new Error("3D bundle timeout")); }, 20000);
-      sc.onload = function(){ clearTimeout(to); window.DamBuilder3D ? ok(window.DamBuilder3D) : bad(new Error("3D bundle missing API")); };
-      sc.onerror = function(){ clearTimeout(to); bad(new Error("3D bundle failed to load")); };
-      document.head.appendChild(sc);
-    }).catch(function(e){ load3DP = null; throw e; });
+    load3DP = loadScript("/dam-builder-3d-v2218.js", 20000).then(function(){
+      if(!window.DamBuilder3D) throw new Error("3D bundle missing API");
+      return loadScript("/dam-builder-3d-premium-v2300.js", 5000).catch(function(e){
+        if(typeof console !== "undefined") console.warn("Premium 3D module unavailable:", e);
+      });
+    }).then(function(){ return window.DamBuilder3D; }).catch(function(e){ load3DP = null; throw e; });
     return load3DP;
   }
   function syncViewChip(i){
