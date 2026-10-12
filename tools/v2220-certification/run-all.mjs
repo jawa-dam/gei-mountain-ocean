@@ -11,9 +11,10 @@
  *
  *   node tools/v2220-certification/run-all.mjs [--only name,name] [--group builder|arcade|all]
  */
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { readdirSync, writeFileSync, statSync } from "node:fs";
 import { resolve, join } from "node:path";
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 const root = resolve(new URL("../..", import.meta.url).pathname), T = join(root, "tools");
 const arg = k => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : null; };
 const only = (arg("--only") || "").split(",").filter(Boolean), group = arg("--group") || "all", baseline = arg("--baseline");   // --baseline <dir>: a checkout of the pre-Builder commit (d467a61); a failing Arcade suite is re-run there to tell a pre-existing failure from a regression
@@ -58,8 +59,13 @@ function runOne(name, cmd, limit, cwd = root) {
     });
   });
 }
+function cleanBetweenSuites() {
+  try { execSync('rm -rf /tmp/.org.chromium.* /tmp/Crashpad /tmp/mesa_shader_cache* /tmp/.font-unix/chromium* 2>/dev/null', { stdio: 'ignore' }); } catch {}
+}
 const results = [];
 for (const [name, cmd, limit] of all) {
+  cleanBetweenSuites();
+  await sleep(500);
   let r = await runOne(name, cmd, limit);
   if (r.status === "INFRA") { const first = r; r = await runOne(name, cmd, limit); r.retry = true; r.first = { status: first.status, passed: first.passed, failed: first.failed, bad: first.bad, killed: first.killed }; }
   if (r.status === "FAIL" && baseline && /^arcade:/.test(name)) { const b = await runOne(name, cmd, limit, baseline); r.baseline = { status: b.status, passed: b.passed, bad: b.bad };

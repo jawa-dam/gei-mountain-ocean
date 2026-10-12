@@ -150,10 +150,13 @@ async function desktopSuite(browser, base){
 
   /* idle lift + ceiling. The mixer deliberately caps the music while a game voice is speaking (gameAudioActive), so the calm/idle bands can only be read in a quiet moment — wait for one
      (the readings below are taken synchronously, so nothing can start in between). */
-  await page.waitForFunction(() => { try { return typeof GEI_TAP_PERFORMANCE === "undefined" || !GEI_TAP_PERFORMANCE.voices || GEI_TAP_PERFORMANCE.voices() === 0; } catch (e) { return true; } }, null, { timeout: 30000 }).catch(() => {});
+  let idleWaitOk = false;
+  for (let attempt = 0; attempt < 2 && !idleWaitOk; attempt++) {
+    idleWaitOk = await page.waitForFunction(() => { try { return typeof GEI_TAP_PERFORMANCE === "undefined" || !GEI_TAP_PERFORMANCE.voices || GEI_TAP_PERFORMANCE.voices() === 0; } catch (e) { return true; } }, null, { timeout: 30000 }).then(() => true).catch(() => false);
+  }
   const idle = await ev(page, () => {
     const out = {};
-    const ctx = { voices: (typeof GEI_TAP_PERFORMANCE !== "undefined" && GEI_TAP_PERFORMANCE.voices) ? GEI_TAP_PERFORMANCE.voices() : null, gameState: DAMSoundtrack.gameState };   // failure signature
+    const ctx = { voices: (typeof GEI_TAP_PERFORMANCE !== "undefined" && GEI_TAP_PERFORMANCE.voices) ? GEI_TAP_PERFORMANCE.voices() : null, gameState: DAMSoundtrack.gameState, idleWaitOk: !!window.__idleWaitOk };   // failure signature
     for (const s of [0, 8, 25, 60, 120, 400]){ DAMSoundtrack.debug.simulateIdle(s); out[s] = +DAMSoundtrack.debug.settle().toFixed(3); }
     DAMSoundtrack.debug.simulateIdle(0);
     return { ...out, ctx };
