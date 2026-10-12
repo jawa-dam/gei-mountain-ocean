@@ -69,6 +69,25 @@
 | Bloom overhead | none | 3 extra draws at reduced resolution (render info restored) |
 | Material compile | instant | +50–150ms first frame (shader recompile for maps) |
 
+## Phase 5 Optimizations (Performance Acceptance)
+
+1. **Bloom RT mipmaps disabled** — bloom render target had `generateMipmaps = true` (unnecessary since it's sampled at exact resolution); changed to `false` to save ~33% GPU memory on that target
+2. **Texture cache dispose path** — added `DamBuilder3DPremium.dispose()` method to properly release cached textures; prevents GPU memory leak when scene is torn down
+
+## Headless Performance Measurements (SwiftShader, 390×844)
+
+| Metric | Measured |
+|--------|----------|
+| fps | 79.2 |
+| p50 / p95 / p99 | 2.8 / 19.2 / 38.5 ms |
+| Draw calls | 101 |
+| Triangles | 168,930 |
+| Textures | 28 |
+| JS Heap | 20.4 MB |
+| Build time | 1,081 ms |
+| Context losses | 0 |
+| Console errors | 0 |
+
 ## Fallback Behavior
 
 - If `dam-builder-3d-premium-v2300.js` fails to load → 5-second timeout, warning logged, base 3D scene used unchanged

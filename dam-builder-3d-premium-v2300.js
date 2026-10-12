@@ -426,7 +426,7 @@
     if (bw < 64 || bh < 64) return null;
 
     var bloomRT = new T.WebGLRenderTarget(bw, bh);
-    bloomRT.texture.generateMipmaps = true;
+    bloomRT.texture.generateMipmaps = false;
 
     var fsQuadVert = [
       "varying vec2 vUv;",
@@ -646,5 +646,15 @@
     } catch (e) {}
   }
 
-  window.DamBuilder3DPremium = { version: PREMIUM_VERSION, applied: function () { return applied; } };
+  window.DamBuilder3DPremium = {
+    version: PREMIUM_VERSION,
+    applied: function () { return applied; },
+    dispose: function () {
+      for (var tier in texCache) {
+        var t = texCache[tier];
+        for (var k in t) { if (t[k] && t[k].dispose) t[k].dispose(); }
+      }
+      texCache = {};
+    }
+  };
 })();
