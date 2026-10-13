@@ -186,11 +186,21 @@ export default async function handler(req, res) {
             continue;
           }
 
-          if (purchase.orderId && purchase.orderId !== orderId) {
+          if (!purchase.orderId || purchase.orderId !== orderId) {
             results.push({
               orderId,
               ok: false,
               reason: "ORDER_ID_MISMATCH",
+              packId: record.packId
+            });
+            continue;
+          }
+
+          if (purchase.productId && purchase.productId !== tokenInfo.playProductId) {
+            results.push({
+              orderId,
+              ok: false,
+              reason: "GOOGLE_PRODUCT_ID_MISMATCH",
               packId: record.packId
             });
             continue;

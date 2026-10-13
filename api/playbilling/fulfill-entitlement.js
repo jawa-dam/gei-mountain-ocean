@@ -26,6 +26,9 @@ export default async function handler(req, res) {
       if (result.reason === "NOT_FOUND") {
         return res.status(404).json({ error: "Entitlement not found." });
       }
+      if (result.reason === "REVOKED") {
+        return res.status(409).json({ error: "This entitlement has been revoked.", reason: "REVOKED" });
+      }
       if (result.reason === "NOT_CLAIMED") {
         return res.status(409).json({ error: "Entitlement must be claimed before fulfillment." });
       }

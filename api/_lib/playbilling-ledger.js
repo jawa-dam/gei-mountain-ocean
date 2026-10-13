@@ -164,6 +164,7 @@ export async function claimPlayEntitlement(orderId, claimId) {
     local raw = redis.call("GET", KEYS[1])
     if not raw then return {0, "NOT_FOUND"} end
     local obj = cjson.decode(raw)
+    if obj.status == "REVOKED" then return {0, "REVOKED"} end
     if obj.claimedAt then
       if obj.claimId == ARGV[2] then return {2, raw} end
       return {0, "ALREADY_CLAIMED"}
@@ -218,6 +219,7 @@ export async function fulfillPlayEntitlement(orderId, fulfillmentId) {
     local raw = redis.call("GET", KEYS[1])
     if not raw then return {0, "NOT_FOUND"} end
     local obj = cjson.decode(raw)
+    if obj.status == "REVOKED" then return {0, "REVOKED"} end
     if not obj.claimedAt then return {0, "NOT_CLAIMED"} end
     if obj.fulfilledAt then
       if obj.fulfillmentId == ARGV[2] then return {2, raw} end
