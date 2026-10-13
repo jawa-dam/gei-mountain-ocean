@@ -244,17 +244,22 @@
         return { ok: true, restored: 0 };
       }
 
-      var orderIds = purchases
-        .filter(function(p) { return p.orderId && p.purchaseState === 0; })
-        .map(function(p) { return p.orderId; });
+      var validPurchases = purchases
+        .filter(function(p) { return p.orderId && p.purchaseState === 0; });
+
+      var orderIds = validPurchases.map(function(p) { return p.orderId; });
 
       if (orderIds.length === 0) return { ok: true, restored: 0 };
+
+      var purchaseTokens = validPurchases
+        .filter(function(p) { return p.purchaseToken && p.playProductId; })
+        .map(function(p) { return { orderId: p.orderId, purchaseToken: p.purchaseToken, playProductId: p.playProductId }; });
 
       onStatus("Checking entitlements…");
       var result = await fetchJson("/api/playbilling/restore-purchases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderIds: orderIds })
+        body: JSON.stringify({ orderIds: orderIds, purchaseTokens: purchaseTokens })
       });
 
       if (!result.response.ok || !result.data.ok) {
