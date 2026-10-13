@@ -1,7 +1,8 @@
 import {
   getPlayEntitlement,
   revokePlayEntitlement,
-  recordRtdnEvent
+  recordRtdnEvent,
+  completeRtdnEvent
 } from "../_lib/playbilling-ledger.js";
 import {
   ECONOMY_AUTHORITY_VERSION,
@@ -11,6 +12,7 @@ import {
   packIdFromPlayProductId,
   isConsumable
 } from "../_lib/billing-channel.js";
+import { timingSafeEqual } from "node:crypto";
 
 const SUPPORTED_NOTIFICATION_TYPES = Object.freeze({
   1: "ONE_TIME_PRODUCT_PURCHASED",
@@ -21,6 +23,14 @@ const SUPPORTED_NOTIFICATION_TYPES = Object.freeze({
 });
 
 const REVOCABLE_NOTIFICATION_TYPES = new Set([2, 3, 5, 12]);
+
+function safeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 function parseNotificationPayload(body) {
   if (!body || !body.message) return { ok: false, reason: "MISSING_MESSAGE" };
@@ -145,11 +155,16 @@ export default async function handler(req, res) {
 
   try {
     const rtdnSecret = process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
-    if (rtdnSecret) {
-      const providedToken = req.query?.token || req.headers?.["x-rtdn-token"];
-      if (providedToken !== rtdnSecret) {
-        return res.status(403).json({ error: "Unauthorized notification." });
-      }
+    if (!rtdnSecret) {
+      return res.status(503).json({
+        error: "RTDN endpoint is not configured.",
+        reason: "AUTHENTICATION_NOT_CONFIGURED"
+      });
+    }
+
+    const providedToken = req.headers?.["x-rtdn-token"] || req.query?.token;
+    if (!providedToken || !safeCompare(providedToken, rtdnSecret)) {
+      return res.status(403).json({ error: "Unauthorized notification." });
     }
 
     const parsed = parseNotificationPayload(req.body);
@@ -161,8 +176,15 @@ export default async function handler(req, res) {
       });
     }
 
-    const expectedPackage = process.env.GOOGLE_PLAY_PACKAGE_NAME || "com.yalltoo.taplites.gei";
-    if (parsed.packageName && parsed.packageName !== expectedPackage) {
+    const expectedPackage = process.env.GOOGLE_PLAY_PACKAGE_NAME;
+    if (!expectedPackage) {
+      return res.status(503).json({
+        error: "RTDN endpoint package identity is not configured.",
+        reason: "PACKAGE_NOT_CONFIGURED"
+      });
+    }
+
+    if (!parsed.packageName || parsed.packageName !== expectedPackage) {
       return res.status(200).json({
         ok: false,
         reason: "WRONG_PACKAGE",
@@ -197,7 +219,7 @@ export default async function handler(req, res) {
       eventTimeMillis: parsed.eventTimeMillis
     });
 
-    if (!eventResult.created) {
+    if (eventResult.status === "PROCESSED") {
       return res.status(200).json({
         ok: true,
         action: "DUPLICATE_IGNORED",
@@ -206,6 +228,12 @@ export default async function handler(req, res) {
     }
 
     if (parsed.notificationType === 1) {
+      await completeRtdnEvent({
+        messageId: parsed.messageId,
+        notificationType: parsed.notificationType,
+        purchaseToken: parsed.purchaseToken,
+        action: "PURCHASE_NOTED"
+      });
       return res.status(200).json({
         ok: true,
         action: "PURCHASE_NOTED",
@@ -214,6 +242,12 @@ export default async function handler(req, res) {
     }
 
     if (!REVOCABLE_NOTIFICATION_TYPES.has(parsed.notificationType)) {
+      await completeRtdnEvent({
+        messageId: parsed.messageId,
+        notificationType: parsed.notificationType,
+        purchaseToken: parsed.purchaseToken,
+        action: "NOTED"
+      });
       return res.status(200).json({
         ok: true,
         action: "NOTED",
@@ -228,17 +262,6 @@ export default async function handler(req, res) {
     );
 
     if (!verification.ok) {
-      await recordRtdnEvent({
-        messageId: (parsed.messageId || "unknown") + ":google-api-failed",
-        notificationType: parsed.notificationType,
-        notificationLabel: "GOOGLE_API_VERIFICATION_FAILED",
-        purchaseToken: parsed.purchaseToken,
-        sku: parsed.sku,
-        packId,
-        eventTimeMillis: parsed.eventTimeMillis,
-        googleApiError: verification.reason
-      });
-
       return res.status(200).json({
         ok: false,
         reason: "GOOGLE_VERIFICATION_FAILED",
@@ -251,6 +274,12 @@ export default async function handler(req, res) {
     const purchaseState = purchase.purchaseState;
 
     if (purchaseState === 0 && purchase.acknowledgementState === 1) {
+      await completeRtdnEvent({
+        messageId: parsed.messageId,
+        notificationType: parsed.notificationType,
+        purchaseToken: parsed.purchaseToken,
+        action: "PURCHASE_STILL_VALID"
+      });
       return res.status(200).json({
         ok: true,
         action: "PURCHASE_STILL_VALID",
@@ -267,6 +296,13 @@ export default async function handler(req, res) {
       notificationLabel: parsed.notificationLabel,
       googlePurchaseState: purchaseState,
       consumable
+    });
+
+    await completeRtdnEvent({
+      messageId: parsed.messageId,
+      notificationType: parsed.notificationType,
+      purchaseToken: parsed.purchaseToken,
+      action: revocationResult.action
     });
 
     return res.status(200).json({

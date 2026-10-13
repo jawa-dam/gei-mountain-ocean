@@ -261,8 +261,7 @@ export async function recordRtdnEvent({
   purchaseToken,
   sku,
   packId,
-  eventTimeMillis,
-  googleApiError
+  eventTimeMillis
 }) {
   const tokenHash = await hashToken(purchaseToken);
   const dedupKey = "gei:playbilling:rtdn:" + tokenHash + ":" + notificationType + ":" + (messageId || "no-id");
@@ -275,15 +274,20 @@ export async function recordRtdnEvent({
     sku,
     packId,
     eventTimeMillis: eventTimeMillis || null,
-    googleApiError: googleApiError || null,
-    processedAt: new Date().toISOString()
+    status: "RECEIVED",
+    receivedAt: new Date().toISOString()
   });
 
   const script = `
     local existing = redis.call("GET", KEYS[1])
-    if existing then return {0, existing} end
+    if existing then
+      local obj = cjson.decode(existing)
+      if obj.status == "PROCESSED" then return {0, "PROCESSED", existing} end
+      if obj.status == "RECEIVED" then return {0, "RECEIVED", existing} end
+      return {0, obj.status or "UNKNOWN", existing}
+    end
     redis.call("SET", KEYS[1], ARGV[1], "EX", ARGV[2])
-    return {1, ARGV[1]}
+    return {1, "RECEIVED", ARGV[1]}
   `;
 
   const result = await redisCommand([
@@ -297,7 +301,45 @@ export async function recordRtdnEvent({
 
   return {
     created: Number(result?.[0]) === 1,
-    record: JSON.parse(result?.[1] || record)
+    status: result?.[1] || "RECEIVED",
+    record: JSON.parse(result?.[2] || record)
+  };
+}
+
+export async function completeRtdnEvent({
+  messageId,
+  notificationType,
+  purchaseToken,
+  action
+}) {
+  const tokenHash = await hashToken(purchaseToken);
+  const dedupKey = "gei:playbilling:rtdn:" + tokenHash + ":" + notificationType + ":" + (messageId || "no-id");
+
+  const script = `
+    local existing = redis.call("GET", KEYS[1])
+    if not existing then return {0, "NOT_FOUND"} end
+    local obj = cjson.decode(existing)
+    obj.status = "PROCESSED"
+    obj.processedAt = ARGV[1]
+    obj.action = ARGV[2]
+    local updated = cjson.encode(obj)
+    redis.call("SET", KEYS[1], updated, "EX", ARGV[3])
+    return {1, "PROCESSED"}
+  `;
+
+  const result = await redisCommand([
+    "EVAL",
+    script,
+    1,
+    dedupKey,
+    new Date().toISOString(),
+    action || "COMPLETED",
+    String(LEDGER_TTL_SECONDS)
+  ]);
+
+  return {
+    completed: Number(result?.[0]) === 1,
+    status: result?.[1] || "UNKNOWN"
   };
 }
 
@@ -318,23 +360,20 @@ export async function revokePlayEntitlement({
   }
 
   const entitlementKey = "gei:playbilling:entitlement:" + orderId;
-  const raw = await redisCommand(["GET", entitlementKey]);
-  if (!raw) {
-    return { action: "ENTITLEMENT_EXPIRED", orderId };
-  }
-
-  let record;
-  try {
-    record = JSON.parse(raw);
-  } catch {
-    return { action: "CORRUPT_RECORD", orderId };
-  }
-
-  if (record.status === "REVOKED") {
-    return { action: "ALREADY_REVOKED", orderId };
-  }
-
+  const revocationKey = "gei:playbilling:revocation:" + orderId;
   const now = new Date().toISOString();
+  const debtPolicy = consumable ? "AUDIT_REVIEW" : "ACCESS_REVOKED";
+
+  const revocationAudit = JSON.stringify({
+    orderId,
+    packId,
+    consumable: !!consumable,
+    notificationType,
+    notificationLabel,
+    googlePurchaseState: googlePurchaseState ?? -1,
+    revokedAt: now,
+    debtPolicy
+  });
 
   const script = `
     local raw = redis.call("GET", KEYS[1])
@@ -349,19 +388,27 @@ export async function revokePlayEntitlement({
     obj.status = "REVOKED"
     local updated = cjson.encode(obj)
     redis.call("SET", KEYS[1], updated, "EX", ARGV[5])
+    local auditObj = cjson.decode(ARGV[6])
+    auditObj.previousStatus = obj.previousStatus
+    auditObj.flOz = obj.flOz
+    auditObj.productType = obj.productType or "fl-oz"
+    auditObj.characterId = obj.characterId
+    redis.call("SET", KEYS[2], cjson.encode(auditObj), "EX", ARGV[5])
     return {1, updated}
   `;
 
   const result = await redisCommand([
     "EVAL",
     script,
-    1,
+    2,
     entitlementKey,
+    revocationKey,
     now,
     notificationLabel,
     String(notificationType),
     String(googlePurchaseState ?? -1),
-    String(LEDGER_TTL_SECONDS)
+    String(LEDGER_TTL_SECONDS),
+    revocationAudit
   ]);
 
   if (Number(result?.[0]) === 2) {
@@ -370,24 +417,6 @@ export async function revokePlayEntitlement({
 
   if (Number(result?.[0]) === 1) {
     const revokedRecord = JSON.parse(result[1]);
-    const revocationKey = "gei:playbilling:revocation:" + orderId;
-    const revocationRecord = JSON.stringify({
-      orderId,
-      packId,
-      consumable,
-      previousStatus: revokedRecord.previousStatus,
-      notificationType,
-      notificationLabel,
-      googlePurchaseState,
-      revokedAt: now,
-      flOz: revokedRecord.flOz,
-      productType: revokedRecord.productType || "fl-oz",
-      characterId: revokedRecord.characterId || null,
-      debtPolicy: consumable ? "AUDIT_REVIEW" : "ACCESS_REVOKED"
-    });
-
-    await redisCommand(["SET", revocationKey, revocationRecord, "EX", String(LEDGER_TTL_SECONDS)]);
-
     return {
       action: consumable ? "CONSUMABLE_REVOKED_AUDIT_PENDING" : "NON_CONSUMABLE_ACCESS_REVOKED",
       orderId,

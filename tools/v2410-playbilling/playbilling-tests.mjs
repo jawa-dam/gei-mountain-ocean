@@ -68,11 +68,11 @@ class MockRedis {
     if (script.includes("KEYS[3]") && script.includes("KEYS[2]")) {
       return this._evalRecordWithTokenMapScript(script, keys, argv);
     }
-    if (script.includes("KEYS[2]")) {
-      return this._evalRecordScript(script, keys, argv);
-    }
     if (script.includes("revokedAt")) {
       return this._evalRevokeScript(script, keys, argv);
+    }
+    if (script.includes("KEYS[2]") && !script.includes("revokedAt")) {
+      return this._evalRecordScript(script, keys, argv);
     }
     if (script.includes("fulfilledAt")) {
       return this._evalFulfillScript(script, keys, argv);
@@ -80,8 +80,11 @@ class MockRedis {
     if (script.includes("claimedAt")) {
       return this._evalClaimScript(script, keys, argv);
     }
-    if (Number(numKeys) === 1 && !script.includes("claimedAt") && !script.includes("fulfilledAt") && !script.includes("revokedAt")) {
+    if (script.includes('"PROCESSED"') && script.includes('"RECEIVED"')) {
       return this._evalRtdnDedupScript(script, keys, argv);
+    }
+    if (script.includes('"PROCESSED"') && script.includes("processedAt")) {
+      return this._evalRtdnCompleteScript(script, keys, argv);
     }
 
     return [0, "UNKNOWN_SCRIPT"];
@@ -155,14 +158,38 @@ class MockRedis {
     obj.status = "REVOKED";
     const updated = JSON.stringify(obj);
     this.store.set(keys[0], updated);
+    if (keys[1] && argv[5]) {
+      const auditObj = JSON.parse(argv[5]);
+      auditObj.previousStatus = obj.previousStatus;
+      auditObj.flOz = obj.flOz;
+      auditObj.productType = obj.productType || "fl-oz";
+      auditObj.characterId = obj.characterId || null;
+      this.store.set(keys[1], JSON.stringify(auditObj));
+    }
     return [1, updated];
   }
 
   _evalRtdnDedupScript(script, keys, argv) {
     const existing = this.store.get(keys[0]);
-    if (existing) return [0, existing];
+    if (existing) {
+      const obj = JSON.parse(existing);
+      const status = obj.status || "UNKNOWN";
+      return [0, status, existing];
+    }
     this.store.set(keys[0], argv[0]);
-    return [1, argv[0]];
+    return [1, "RECEIVED", argv[0]];
+  }
+
+  _evalRtdnCompleteScript(script, keys, argv) {
+    const existing = this.store.get(keys[0]);
+    if (!existing) return [0, "NOT_FOUND"];
+    const obj = JSON.parse(existing);
+    obj.status = "PROCESSED";
+    obj.processedAt = argv[0];
+    obj.action = argv[1];
+    const updated = JSON.stringify(obj);
+    this.store.set(keys[0], updated);
+    return [1, "PROCESSED"];
   }
 
   reset() { this.store.clear(); this.commands = []; }
@@ -177,8 +204,8 @@ class MockResponse {
   setHeader(k, v) { this._headers[k] = v; return this; }
 }
 
-function makeReq(method, body, query) {
-  return { method, body, query: query || {} };
+function makeReq(method, body, query, headers) {
+  return { method, body, query: query || {}, headers: headers || {} };
 }
 
 // ─── Install global fetch interceptor for Redis ────────────────────
@@ -188,6 +215,7 @@ const UPSTASH_TOKEN = "mock-token";
 process.env.UPSTASH_REDIS_REST_URL = UPSTASH_URL;
 process.env.UPSTASH_REDIS_REST_TOKEN = UPSTASH_TOKEN;
 process.env.GOOGLE_PLAY_PACKAGE_NAME = "com.yalltoo.taplites.gei";
+process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = "test-rtdn-secret";
 
 let googleApiHandler = null;
 let googleOAuthHandler = null;
@@ -331,6 +359,10 @@ async function fullVerifyClaimFulfill(orderId, playProductId, purchaseToken) {
   const fRes = new MockResponse();
   await fulfillHandler(makeReq("POST", { claimToken: orderId, fulfillmentId: fid }), fRes);
   return { verify: vRes, claim: cRes, fulfill: fRes };
+}
+
+function rtdnReq(body) {
+  return makeReq("POST", body, {}, { "x-rtdn-token": process.env.GOOGLE_RTDN_VERIFICATION_TOKEN });
 }
 
 function makeRtdnBody(notificationType, sku, purchaseToken, messageId, packageName) {
@@ -977,7 +1009,7 @@ suite("restore-purchases returns NOT_FOUND for unknown orders", async () => {
   t("reason", res._json.restorations[0].reason === "NOT_FOUND");
 });
 
-suite("restore-purchases returns fulfilled non-consumable", async () => {
+suite("restore-purchases requires token for non-consumable (TOKEN_REQUIRED)", async () => {
   mockRedis.reset();
   await fullVerifyClaimFulfill(
     "GPA.RESTORE-CHAR-001",
@@ -989,12 +1021,44 @@ suite("restore-purchases returns fulfilled non-consumable", async () => {
   await restoreHandler(makeReq("POST", { orderIds: ["GPA.RESTORE-CHAR-001"] }), res);
   t("status 200", res._status === 200);
   const r = res._json.restorations[0];
+  t("ok false", r.ok === false);
+  t("reason TOKEN_REQUIRED", r.reason === "TOKEN_REQUIRED");
+  t("packId", r.packId === "special-jesus");
+});
+
+suite("restore-purchases returns fulfilled non-consumable with token", async () => {
+  mockRedis.reset();
+  await fullVerifyClaimFulfill(
+    "GPA.RESTORE-CHAR-002",
+    "com.yalltoo.taplites.gei.char_jesus",
+    "restore-char-token-2"
+  );
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: "GPA.RESTORE-CHAR-002",
+    productId: "com.yalltoo.taplites.gei.char_jesus",
+    purchaseState: 0,
+    acknowledgementState: 1
+  }));
+
+  const res = new MockResponse();
+  await restoreHandler(makeReq("POST", {
+    orderIds: ["GPA.RESTORE-CHAR-002"],
+    purchaseTokens: [{
+      orderId: "GPA.RESTORE-CHAR-002",
+      purchaseToken: "restore-char-token-2",
+      playProductId: "com.yalltoo.taplites.gei.char_jesus"
+    }]
+  }), res);
+  t("status 200", res._status === 200);
+  const r = res._json.restorations[0];
   t("ok true", r.ok === true);
   t("status FULFILLED", r.status === "FULFILLED");
   t("packId", r.packId === "special-jesus");
   t("productType", r.productType === "special-character");
   t("characterId", r.characterId === "jesus");
   t("has fulfillmentId", r.fulfillmentId.startsWith("GEI-PLAY-FULFILL-"));
+  t("google verified", r.googleVerified === true);
 });
 
 suite("restore-purchases skips non-string order IDs", async () => {
@@ -1241,7 +1305,7 @@ suite("RTDN rejects non-POST methods", async () => {
 suite("RTDN rejects missing message body", async () => {
   mockRedis.reset();
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", {}), res);
+  await rtdnHandler(rtdnReq({}), res);
   t("status 200 (ack)", res._status === 200);
   t("reason", res._json.reason === "MISSING_MESSAGE");
   t("ack true", res._json.ack === true);
@@ -1250,7 +1314,7 @@ suite("RTDN rejects missing message body", async () => {
 suite("RTDN rejects malformed base64 data", async () => {
   mockRedis.reset();
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", {
+  await rtdnHandler(rtdnReq({
     message: { data: "not-valid-base64!!!", messageId: "msg-bad" }
   }), res);
   t("status 200 (ack)", res._status === 200);
@@ -1261,7 +1325,7 @@ suite("RTDN rejects unsupported notification types (subscriptions)", async () =>
   mockRedis.reset();
   const data = { packageName: "com.yalltoo.taplites.gei", subscriptionNotification: { notificationType: 4 } };
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", {
+  await rtdnHandler(rtdnReq({
     message: {
       data: Buffer.from(JSON.stringify(data)).toString("base64"),
       messageId: "msg-sub"
@@ -1279,7 +1343,7 @@ suite("RTDN rejects wrong package name", async () => {
   body.message.data = Buffer.from(JSON.stringify(innerData)).toString("base64");
 
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200 (ack)", res._status === 200);
   t("reason WRONG_PACKAGE", res._json.reason === "WRONG_PACKAGE");
 });
@@ -1288,35 +1352,62 @@ suite("RTDN rejects unknown product SKU", async () => {
   mockRedis.reset();
   const body = makeRtdnBody(1, "com.fake.product.sku", "tok-fake", "msg-fake");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200 (ack)", res._status === 200);
   t("reason UNKNOWN_PRODUCT", res._json.reason === "UNKNOWN_PRODUCT");
 });
 
-suite("RTDN rejects unauthenticated notification when token is configured", async () => {
+suite("RTDN rejects when verification token is not configured (fail-closed)", async () => {
   mockRedis.reset();
-  process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = "secret-rtdn-token";
+  const savedToken = process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
+  delete process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
+
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "tok-noconfig", "msg-noconfig");
+  const res = new MockResponse();
+  await rtdnHandler(makeReq("POST", body, {}, {}), res);
+  t("status 503", res._status === 503);
+  t("reason", res._json.reason === "AUTHENTICATION_NOT_CONFIGURED");
+
+  process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = savedToken;
+});
+
+suite("RTDN rejects wrong verification token", async () => {
+  mockRedis.reset();
 
   const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "tok-noauth", "msg-noauth");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body, {}), res);
+  await rtdnHandler(makeReq("POST", body, {}, { "x-rtdn-token": "wrong-token" }), res);
   t("status 403", res._status === 403);
   t("error", res._json.error === "Unauthorized notification.");
-
-  delete process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
 });
 
-suite("RTDN accepts authenticated notification with correct token", async () => {
+suite("RTDN rejects missing token in request", async () => {
   mockRedis.reset();
-  process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = "secret-rtdn-token";
 
-  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "tok-auth", "msg-auth");
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "tok-missing", "msg-missing");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body, { token: "secret-rtdn-token" }), res);
+  await rtdnHandler(makeReq("POST", body, {}, {}), res);
+  t("status 403", res._status === 403);
+});
+
+suite("RTDN accepts authenticated notification via header", async () => {
+  mockRedis.reset();
+
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "tok-auth", "msg-auth-header");
+  const res = new MockResponse();
+  await rtdnHandler(makeReq("POST", body, {}, { "x-rtdn-token": "test-rtdn-secret" }), res);
   t("status 200", res._status === 200);
   t("ok true", res._json.ok === true);
+});
 
-  delete process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
+suite("RTDN accepts authenticated notification via query param fallback", async () => {
+  mockRedis.reset();
+
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "tok-auth-q", "msg-auth-query");
+  const res = new MockResponse();
+  await rtdnHandler(makeReq("POST", body, { token: "test-rtdn-secret" }, {}), res);
+  t("status 200", res._status === 200);
+  t("ok true", res._json.ok === true);
 });
 
 
@@ -1328,7 +1419,7 @@ suite("RTDN type 1 (PURCHASED) notes without action", async () => {
   mockRedis.reset();
   const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "purchased-tok", "msg-purchased");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
   t("ok true", res._json.ok === true);
   t("action", res._json.action === "PURCHASE_NOTED");
@@ -1345,13 +1436,13 @@ suite("RTDN duplicate message is idempotent", async () => {
   const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "dup-rtdn-tok", "msg-dup-001");
 
   const r1 = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), r1);
+  await rtdnHandler(rtdnReq(body), r1);
   t("first 200", r1._status === 200);
   t("first ok", r1._json.ok === true);
   t("first action", r1._json.action === "PURCHASE_NOTED");
 
   const r2 = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), r2);
+  await rtdnHandler(rtdnReq(body), r2);
   t("second 200", r2._status === 200);
   t("second ok", r2._json.ok === true);
   t("second action DUPLICATE", r2._json.action === "DUPLICATE_IGNORED");
@@ -1380,7 +1471,7 @@ suite("RTDN type 3 (REFUNDED) revokes non-consumable character", async () => {
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.char_jesus", token, "msg-refund-char");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
   t("ok true", res._json.ok === true);
   t("action revoked", res._json.action === "NON_CONSUMABLE_ACCESS_REVOKED");
@@ -1411,7 +1502,7 @@ suite("RTDN type 3 (REFUNDED) marks consumable for audit review", async () => {
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.single_song", token, "msg-refund-floz");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
   t("action", res._json.action === "CONSUMABLE_REVOKED_AUDIT_PENDING");
   t("consumable true", res._json.consumable === true);
@@ -1442,7 +1533,7 @@ suite("RTDN type 5 (REVOKED) revokes access", async () => {
 
   const body = makeRtdnBody(5, "com.yalltoo.taplites.gei.char_devil", token, "msg-revoke");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
   t("action", res._json.action === "NON_CONSUMABLE_ACCESS_REVOKED");
 
@@ -1474,7 +1565,7 @@ suite("RTDN does not revoke when Google says purchase is still valid", async () 
 
   const body = makeRtdnBody(2, "com.yalltoo.taplites.gei.char_jesus", token, "msg-still-valid");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
   t("action", res._json.action === "PURCHASE_STILL_VALID");
 
@@ -1506,12 +1597,12 @@ suite("RTDN double revocation is idempotent", async () => {
 
   const body1 = makeRtdnBody(3, "com.yalltoo.taplites.gei.char_jesus", token, "msg-double-1");
   const r1 = new MockResponse();
-  await rtdnHandler(makeReq("POST", body1), r1);
+  await rtdnHandler(rtdnReq(body1), r1);
   t("first revocation ok", r1._json.action === "NON_CONSUMABLE_ACCESS_REVOKED");
 
   const body2 = makeRtdnBody(3, "com.yalltoo.taplites.gei.char_jesus", token, "msg-double-2");
   const r2 = new MockResponse();
-  await rtdnHandler(makeReq("POST", body2), r2);
+  await rtdnHandler(rtdnReq(body2), r2);
   t("second revocation ok", r2._json.ok === true);
   t("second action already revoked", r2._json.action === "ALREADY_REVOKED" || r2._json.action === "NON_CONSUMABLE_ACCESS_REVOKED");
 });
@@ -1527,7 +1618,7 @@ suite("RTDN marks Google API failure as retryable", async () => {
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.single_song", "google-fail-rtdn-tok", "msg-google-fail");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200 (ack)", res._status === 200);
   t("not ok", res._json.ok === false);
   t("retryable", res._json.retryable === true);
@@ -1545,7 +1636,7 @@ suite("RTDN fails closed during Redis outage", async () => {
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.single_song", "redis-fail-rtdn", "msg-redis-fail");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 500", res._status === 500);
   t("retryable", res._json.retryable === true);
 
@@ -1575,7 +1666,7 @@ suite("RTDN processing does not create PayPal namespace keys", async () => {
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.single_song", token, "msg-paypal-iso");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("processed ok", res._status === 200);
 
   const keys = [...mockRedis.store.keys()];
@@ -1606,7 +1697,7 @@ suite("RTDN out-of-order: cancel then purchase, Google shows valid", async () =>
 
   const cancelBody = makeRtdnBody(2, "com.yalltoo.taplites.gei.char_jesus", token, "msg-ooo-cancel");
   const r1 = new MockResponse();
-  await rtdnHandler(makeReq("POST", cancelBody), r1);
+  await rtdnHandler(rtdnReq(cancelBody), r1);
   t("cancel ignored because Google says valid", r1._json.action === "PURCHASE_STILL_VALID");
 
   const entKey = "gei:playbilling:entitlement:GPA.OOO-001";
@@ -1691,7 +1782,7 @@ suite("Revocation creates auditable revocation record with debt policy", async (
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.ten_songs", token, "msg-audit-revoke");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
 
   const revKey = "gei:playbilling:revocation:GPA.AUDIT-REVOKE-001";
@@ -1761,7 +1852,7 @@ suite("RTDN does not store purchase token in plaintext", async () => {
 
   const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.single_song", token, "msg-rtdn-hash");
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("processed", res._status === 200);
 
   for (const [key, value] of mockRedis.store.entries()) {
@@ -1789,7 +1880,7 @@ suite("RTDN type 12 (PENDING_PURCHASE_CANCELED) handles gracefully", async () =>
   }));
 
   const res = new MockResponse();
-  await rtdnHandler(makeReq("POST", body), res);
+  await rtdnHandler(rtdnReq(body), res);
   t("status 200", res._status === 200);
   t("ok true", res._json.ok === true);
   t("ack true", res._json.ack === true);
@@ -1797,10 +1888,215 @@ suite("RTDN type 12 (PENDING_PURCHASE_CANCELED) handles gracefully", async () =>
 
 
 // ════════════════════════════════════════════════════════════════════
+// 31. V2.4.4 — FAIL-CLOSED AUTH GUARD REGRESSION TEST
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.4: RTDN fail-closed guard fails when secret removed", async () => {
+  mockRedis.reset();
+  const savedToken = process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
+  delete process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
+
+  const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.single_song", "guard-test-tok", "msg-guard-test");
+  const res = new MockResponse();
+  await rtdnHandler(makeReq("POST", body, {}, {}), res);
+  t("NOT 200 when secret missing", res._status !== 200);
+  t("status is 503", res._status === 503);
+
+  process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = savedToken;
+});
+
+suite("V2.4.4: RTDN rejects empty string verification token", async () => {
+  mockRedis.reset();
+  const savedToken = process.env.GOOGLE_RTDN_VERIFICATION_TOKEN;
+  process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = "";
+
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "empty-tok", "msg-empty-tok");
+  const res = new MockResponse();
+  await rtdnHandler(makeReq("POST", body, {}, { "x-rtdn-token": "" }), res);
+  t("rejects empty token", res._status === 503);
+
+  process.env.GOOGLE_RTDN_VERIFICATION_TOKEN = savedToken;
+});
+
+
+// ════════════════════════════════════════════════════════════════════
+// 32. V2.4.4 — RESTORE PRODUCT ID CROSS-VALIDATION
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.4: restore rejects product ID mismatch against stored entitlement", async () => {
+  mockRedis.reset();
+  await fullVerifyClaimFulfill(
+    "GPA.PRODUCT-XCHECK-001",
+    "com.yalltoo.taplites.gei.char_jesus",
+    "product-xcheck-token"
+  );
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: "GPA.PRODUCT-XCHECK-001",
+    productId: "com.yalltoo.taplites.gei.char_devil",
+    purchaseState: 0,
+    acknowledgementState: 1
+  }));
+
+  const res = new MockResponse();
+  await restoreHandler(makeReq("POST", {
+    orderIds: ["GPA.PRODUCT-XCHECK-001"],
+    purchaseTokens: [{
+      orderId: "GPA.PRODUCT-XCHECK-001",
+      purchaseToken: "product-xcheck-token",
+      playProductId: "com.yalltoo.taplites.gei.char_devil"
+    }]
+  }), res);
+
+  t("status 200", res._status === 200);
+  const r = res._json.restorations[0];
+  t("not ok", r.ok === false);
+  t("reason PRODUCT_ID_MISMATCH", r.reason === "PRODUCT_ID_MISMATCH");
+});
+
+
+// ════════════════════════════════════════════════════════════════════
+// 33. V2.4.4 — RTDN PROCESSING STATE TRANSITIONS
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.4: RTDN event transitions RECEIVED → PROCESSED", async () => {
+  mockRedis.reset();
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "state-tok", "msg-state-trans");
+  const res = new MockResponse();
+  await rtdnHandler(rtdnReq(body), res);
+  t("status 200", res._status === 200);
+  t("action PURCHASE_NOTED", res._json.action === "PURCHASE_NOTED");
+
+  const tokenHash = await hashToken("state-tok");
+  const dedupKey = "gei:playbilling:rtdn:" + tokenHash + ":1:msg-state-trans";
+  const record = JSON.parse(mockRedis.store.get(dedupKey));
+  t("status is PROCESSED", record.status === "PROCESSED");
+  t("has processedAt", typeof record.processedAt === "string");
+  t("action recorded", record.action === "PURCHASE_NOTED");
+});
+
+suite("V2.4.4: RTDN retry succeeds after Google API failure", async () => {
+  mockRedis.reset();
+  const token = "retry-tok-" + Date.now();
+  await fullVerifyClaimFulfill(
+    "GPA.RETRY-001",
+    "com.yalltoo.taplites.gei.char_jesus",
+    token
+  );
+
+  setGoogleApiError("Service unavailable", 503);
+  const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.char_jesus", token, "msg-retry-001");
+  const r1 = new MockResponse();
+  await rtdnHandler(rtdnReq(body), r1);
+  t("first attempt: not ok", r1._json.ok === false);
+  t("first attempt: retryable", r1._json.retryable === true);
+
+  const tokenHash = await hashToken(token);
+  const dedupKey = "gei:playbilling:rtdn:" + tokenHash + ":3:msg-retry-001";
+  const afterFail = JSON.parse(mockRedis.store.get(dedupKey));
+  t("after failure: status is RECEIVED (not PROCESSED)", afterFail.status === "RECEIVED");
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: "GPA.RETRY-001",
+    productId: "com.yalltoo.taplites.gei.char_jesus",
+    purchaseState: 1,
+    acknowledgementState: 1
+  }));
+
+  const body2 = makeRtdnBody(3, "com.yalltoo.taplites.gei.char_jesus", token, "msg-retry-001");
+  const r2 = new MockResponse();
+  await rtdnHandler(rtdnReq(body2), r2);
+  t("retry: ok true", r2._json.ok === true);
+  t("retry: action revoked", r2._json.action === "NON_CONSUMABLE_ACCESS_REVOKED");
+});
+
+
+// ════════════════════════════════════════════════════════════════════
+// 34. V2.4.4 — ATOMIC REVOCATION AUDIT TRAIL
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.4: revocation and audit record are written atomically", async () => {
+  mockRedis.reset();
+  const token = "atomic-revoke-tok-" + Date.now();
+  await fullVerifyClaimFulfill(
+    "GPA.ATOMIC-REVOKE-001",
+    "com.yalltoo.taplites.gei.char_devil",
+    token
+  );
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: "GPA.ATOMIC-REVOKE-001",
+    productId: "com.yalltoo.taplites.gei.char_devil",
+    purchaseState: 1,
+    acknowledgementState: 1
+  }));
+
+  const body = makeRtdnBody(3, "com.yalltoo.taplites.gei.char_devil", token, "msg-atomic-revoke");
+  const res = new MockResponse();
+  await rtdnHandler(rtdnReq(body), res);
+  t("status 200", res._status === 200);
+  t("action revoked", res._json.action === "NON_CONSUMABLE_ACCESS_REVOKED");
+
+  const entKey = "gei:playbilling:entitlement:GPA.ATOMIC-REVOKE-001";
+  const entRecord = JSON.parse(mockRedis.store.get(entKey));
+  t("entitlement REVOKED", entRecord.status === "REVOKED");
+
+  const revKey = "gei:playbilling:revocation:GPA.ATOMIC-REVOKE-001";
+  const revRecord = JSON.parse(mockRedis.store.get(revKey));
+  t("audit record exists", !!revRecord);
+  t("audit orderId", revRecord.orderId === "GPA.ATOMIC-REVOKE-001");
+  t("audit previousStatus", revRecord.previousStatus === "FULFILLED");
+  t("audit debtPolicy", revRecord.debtPolicy === "ACCESS_REVOKED");
+
+  const evalCmds = mockRedis.commands.filter(c => c[0] === "EVAL" && c[1].includes("revokedAt"));
+  const lastEval = evalCmds[evalCmds.length - 1];
+  t("revoke script uses 2 keys for atomicity", Number(lastEval[2]) === 2);
+});
+
+
+// ════════════════════════════════════════════════════════════════════
+// 35. V2.4.4 — TIMING-SAFE SECRET COMPARISON
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.4: timing-safe comparison rejects near-miss tokens", async () => {
+  mockRedis.reset();
+
+  const body = makeRtdnBody(1, "com.yalltoo.taplites.gei.single_song", "timing-tok", "msg-timing");
+  const nearMiss = process.env.GOOGLE_RTDN_VERIFICATION_TOKEN.slice(0, -1) + "X";
+  const res = new MockResponse();
+  await rtdnHandler(makeReq("POST", body, {}, { "x-rtdn-token": nearMiss }), res);
+  t("near-miss rejected", res._status === 403);
+});
+
+
+// ════════════════════════════════════════════════════════════════════
+// 36. V2.4.4 — RESTORE REJECTS googleVerified: false FOR NON-CONSUMABLE
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.4: restore never returns ok:true with googleVerified:false for non-consumable", async () => {
+  mockRedis.reset();
+  await fullVerifyClaimFulfill(
+    "GPA.NO-UNVERIFIED-001",
+    "com.yalltoo.taplites.gei.char_jesus",
+    "no-unverified-token"
+  );
+
+  const res = new MockResponse();
+  await restoreHandler(makeReq("POST", {
+    orderIds: ["GPA.NO-UNVERIFIED-001"]
+  }), res);
+  t("status 200", res._status === 200);
+  const r = res._json.restorations[0];
+  const isOkWithoutVerification = r.ok === true && r.googleVerified === false;
+  t("never ok:true with googleVerified:false", isOkWithoutVerification === false);
+});
+
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.4.3 — Google Play Billing Restore, Refund & Revocation Security\n");
+console.log("\nV2.4.4 — Google Play Purchase Lifecycle Hardening\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");

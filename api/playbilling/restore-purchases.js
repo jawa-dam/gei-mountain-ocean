@@ -145,7 +145,28 @@ export default async function handler(req, res) {
       }
 
       const tokenInfo = tokenMap[orderId];
-      if (tokenInfo && !consumable) {
+
+      if (!consumable && !tokenInfo) {
+        results.push({
+          orderId,
+          ok: false,
+          reason: "TOKEN_REQUIRED",
+          packId: record.packId
+        });
+        continue;
+      }
+
+      if (tokenInfo) {
+        if (record.playProductId && tokenInfo.playProductId !== record.playProductId) {
+          results.push({
+            orderId,
+            ok: false,
+            reason: "PRODUCT_ID_MISMATCH",
+            packId: record.packId
+          });
+          continue;
+        }
+
         const googleResult = await verifyPurchaseTokenWithGoogle(
           packageName,
           tokenInfo.playProductId,
@@ -203,17 +224,9 @@ export default async function handler(req, res) {
 
       results.push({
         orderId,
-        ok: true,
-        status: record.status,
-        packId: record.packId,
-        flOz: record.flOz,
-        productType: record.productType || "fl-oz",
-        characterId: record.characterId || null,
-        consumable,
-        claimedAt: record.claimedAt,
-        fulfilledAt: record.fulfilledAt,
-        fulfillmentId: record.fulfillmentId || null,
-        googleVerified: false
+        ok: false,
+        reason: "TOKEN_REQUIRED",
+        packId: record.packId
       });
     }
 
