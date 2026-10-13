@@ -1,12 +1,12 @@
 {
- "when": "2026-10-12T12:34:11.343Z",
+ "when": "2026-10-13T02:38:12.190Z",
  "results": [
   {
    "name": "builder-svg",
    "status": "PASS",
    "passed": 229,
    "failed": 0,
-   "secs": 203,
+   "secs": 209,
    "bad": [],
    "killed": false
   },
@@ -15,7 +15,7 @@
    "status": "PASS",
    "passed": 7,
    "failed": 0,
-   "secs": 83,
+   "secs": 82,
    "bad": [],
    "killed": false
   },
@@ -24,37 +24,25 @@
    "status": "PASS",
    "passed": 7,
    "failed": 0,
-   "secs": 55,
+   "secs": 52,
    "bad": [],
    "killed": false
   },
   {
    "name": "builder-3d:causality",
-   "status": "FAIL",
-   "passed": 17,
-   "failed": 1,
-   "secs": 106,
-   "bad": [
-    "✗ less water → power below demand → machines starve, hold resets"
-   ],
-   "killed": false,
-   "retry": true,
-   "first": {
-    "status": "INFRA",
-    "passed": 15,
-    "failed": 1,
-    "bad": [
-     "✗ suite causality crashed: page.waitForFunction: Timeout 15000ms exceeded."
-    ],
-    "killed": false
-   }
+   "status": "PASS",
+   "passed": 18,
+   "failed": 0,
+   "secs": 93,
+   "bad": [],
+   "killed": false
   },
   {
    "name": "builder-3d:picking",
    "status": "PASS",
    "passed": 7,
    "failed": 0,
-   "secs": 39,
+   "secs": 36,
    "bad": [],
    "killed": false
   },
@@ -72,7 +60,7 @@
    "status": "PASS",
    "passed": 9,
    "failed": 0,
-   "secs": 80,
+   "secs": 83,
    "bad": [],
    "killed": false
   },
@@ -81,7 +69,7 @@
    "status": "PASS",
    "passed": 6,
    "failed": 0,
-   "secs": 37,
+   "secs": 38,
    "bad": [],
    "killed": false
   },
@@ -90,7 +78,7 @@
    "status": "PASS",
    "passed": 3,
    "failed": 0,
-   "secs": 178,
+   "secs": 175,
    "bad": [],
    "killed": false
   },
@@ -99,7 +87,7 @@
    "status": "PASS",
    "passed": 8,
    "failed": 0,
-   "secs": 91,
+   "secs": 92,
    "bad": [],
    "killed": false
   },
@@ -108,7 +96,7 @@
    "status": "PASS",
    "passed": 11,
    "failed": 0,
-   "secs": 349,
+   "secs": 361,
    "bad": [],
    "killed": false
   },
@@ -117,7 +105,7 @@
    "status": "PASS",
    "passed": 28,
    "failed": 0,
-   "secs": 99,
+   "secs": 88,
    "bad": [],
    "killed": false
   },
@@ -144,7 +132,7 @@
    "status": "PASS",
    "passed": 28,
    "failed": 0,
-   "secs": 438,
+   "secs": 440,
    "bad": [],
    "killed": false
   },
@@ -153,7 +141,7 @@
    "status": "PASS",
    "passed": 15,
    "failed": 0,
-   "secs": 101,
+   "secs": 100,
    "bad": [],
    "killed": false
   },
@@ -162,7 +150,7 @@
    "status": "PASS",
    "passed": 10,
    "failed": 0,
-   "secs": 829,
+   "secs": 799,
    "bad": [],
    "killed": false
   },
@@ -172,323 +160,6 @@
    "passed": 0,
    "failed": null,
    "secs": 13,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-adaptive-voice/v2198-adaptive-voice-regression",
-   "status": "PASS",
-   "passed": 14,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-ambient/ambient-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 272,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-cameos/cameo-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 240,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-chaos/economy-chaos",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-chaos/regression-gate",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-chaos/security-certification",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 17,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-contextual-voice/v2197-contextual-voice-regression",
-   "status": "PASS",
-   "passed": 13,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-dam-map/dam-map-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 171,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-dam-map/map-stem-navigation-regression",
-   "status": "PASS",
-   "passed": 35,
-   "failed": 0,
-   "secs": 56,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-milestone-voice/milestone-voice-regression",
-   "status": "PASS",
-   "passed": 5,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-quiet-tap/quiet-tap-regression",
-   "status": "FAIL",
-   "passed": 0,
-   "failed": null,
-   "secs": 84,
-   "bad": [
-    "✗ 6d. opening the map changes no gameplay state"
-   ],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-soundtrack/soundtrack-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 56,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-behavior/voice-behavior-regression",
-   "status": "PASS",
-   "passed": 15,
-   "failed": 0,
-   "secs": 7,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-director/v2194-voice-director-regression",
-   "status": "PASS",
-   "passed": 12,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-discovery/v2201-voice-discovery-regression",
-   "status": "PASS",
-   "passed": 15,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression",
-   "status": "PASS",
-   "passed": 77,
-   "failed": null,
-   "secs": 50,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-memory/v2199-voice-memory-regression",
-   "status": "PASS",
-   "passed": 14,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-reactions/v2196-voice-reactions-regression",
-   "status": "PASS",
-   "passed": 10,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression",
-   "status": "PASS",
-   "passed": 10,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-showcase/v2200-voice-showcase-regression",
-   "status": "PASS",
-   "passed": 12,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-voice-ui/v2195-voice-ui-regression",
-   "status": "PASS",
-   "passed": 10,
-   "failed": null,
-   "secs": 0,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2-welcome/welcome-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 58,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2178-reward-moments/reward-moments-regression",
-   "status": "PASS",
-   "passed": 18,
-   "failed": 0,
-   "secs": 27,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v22-engineering-world/engineering-world-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 285,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2210-flow-moment/flow-moment-regression",
-   "status": "PASS",
-   "passed": 57,
-   "failed": 0,
-   "secs": 423,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2211-flow-voices/flow-voices-regression",
-   "status": "PASS",
-   "passed": 57,
-   "failed": 0,
-   "secs": 286,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2212-personality/personality-regression",
-   "status": "PASS",
-   "passed": 57,
-   "failed": 0,
-   "secs": 150,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2213-next-challenge/next-challenge-regression",
-   "status": "PASS",
-   "passed": 45,
-   "failed": 0,
-   "secs": 171,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2214-stem/stem-regression",
-   "status": "PASS",
-   "passed": 60,
-   "failed": 0,
-   "secs": 170,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2215-rare-wow/rare-wow-regression",
-   "status": "PASS",
-   "passed": 51,
-   "failed": 0,
-   "secs": 298,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v2216-xp-reward/xp-reward-regression",
-   "status": "PASS",
-   "passed": 83,
-   "failed": 0,
-   "secs": 232,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v223-personal-guide/personal-guide-regression",
-   "status": "PASS",
-   "passed": 0,
-   "failed": null,
-   "secs": 77,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v225-flow-welcome/flow-welcome-regression",
-   "status": "PASS",
-   "passed": 80,
-   "failed": null,
-   "secs": 270,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v226-victory-capsule/victory-capsule-regression",
-   "status": "PASS",
-   "passed": 91,
-   "failed": null,
-   "secs": 162,
-   "bad": [],
-   "killed": false
-  },
-  {
-   "name": "arcade:v227-achievement-audio/achievement-audio-regression",
-   "status": "PASS",
-   "passed": 29,
-   "failed": null,
-   "secs": 49,
    "bad": [],
    "killed": false
   }
