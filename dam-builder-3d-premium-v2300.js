@@ -1,6 +1,6 @@
-/* V2.3.0 — Premium 3D Enhancement Module
+/* V2.3.1 — Premium 3D Enhancement Module
    Adds procedural PBR textures, enhanced lighting, improved water,
-   and post-processing to the base 3D scene.
+   post-processing, and per-Day atmosphere to the base 3D scene.
    Hooks into the existing scene via DamBuilder3D without modifying the minified bundle.
    All enhancements are procedural — no external assets. MIT-compatible. */
 (function () {
@@ -9,7 +9,7 @@
   var T = window.__THREE_R186;
   if (!T) return;
 
-  var PREMIUM_VERSION = "V2.3.0";
+  var PREMIUM_VERSION = "V2.3.1";
   var applied = false;
 
   // ── Procedural Texture Generators ──────────────────────────────────
@@ -24,7 +24,6 @@
     return c;
   }
 
-  // simple value noise for texture generation
   function valNoise(x, y, seed) {
     var n = Math.sin(x * 127.1 + y * 311.7 + seed * 43758.5453) * 43758.5453;
     return n - Math.floor(n);
@@ -48,7 +47,7 @@
     return 256;
   }
 
-  // ── Stone / Concrete Texture (dam, channels) ──────────────────────
+  // ── Stone / Concrete Texture (dam, channels, masonry) ─────────────
 
   function genStoneAlbedo(sz) {
     return noiseCanvas(sz, sz, function (d, w, h) {
@@ -215,6 +214,53 @@
     });
   }
 
+  // ── Brick Texture (factory chimney) ──────────────────────────────
+
+  function brickHeight(nx, ny) {
+    var row = Math.floor(ny * 8), bx = nx * 4 + (row % 2) * 0.5;
+    bx -= Math.floor(bx);
+    var by = ny * 8 - row;
+    var groove = (bx < 0.05 || bx > 0.95 || by < 0.07 || by > 0.93) ? -0.4 : 0;
+    return groove + fbm(nx * 20, ny * 20, 55, 3) * 0.12;
+  }
+
+  function genBrickAlbedo(sz) {
+    return noiseCanvas(sz, sz, function (d, w, h) {
+      for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+        var nx = x / w, ny = y / h;
+        var row = Math.floor(ny * 8), col = nx * 4 + (row % 2) * 0.5;
+        var bx = col - Math.floor(col), by = ny * 8 - row;
+        var mortar = (bx < 0.05 || bx > 0.95 || by < 0.07 || by > 0.93) ? 1 : 0;
+        var seed = row * 37 + Math.floor(col) * 13;
+        var brickVar = valNoise(seed, seed * 2.3, 50);
+        var base = fbm(nx * 20, ny * 20, 55, 3);
+        var r2 = lerp(148, 178, brickVar) + base * 15 - mortar * 60;
+        var g2 = lerp(68, 88, brickVar) + base * 8 - mortar * 30;
+        var b2 = lerp(48, 68, brickVar) + base * 5 - mortar * 25;
+        var i = (y * w + x) * 4;
+        d[i] = clamp01(r2 / 255) * 255;
+        d[i + 1] = clamp01(g2 / 255) * 255;
+        d[i + 2] = clamp01(b2 / 255) * 255;
+        d[i + 3] = 255;
+      }
+    });
+  }
+
+  function genBrickNormal(sz) {
+    return noiseCanvas(sz, sz, function (d, w, h) {
+      for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+        var nx = x / w, ny = y / h, e = 1.0 / w;
+        var dx = (brickHeight(nx - e, ny) - brickHeight(nx + e, ny)) * 0.8;
+        var dy = (brickHeight(nx, ny - e) - brickHeight(nx, ny + e)) * 0.8;
+        var i = (y * w + x) * 4;
+        d[i] = clamp01(dx * 0.5 + 0.5) * 255;
+        d[i + 1] = clamp01(dy * 0.5 + 0.5) * 255;
+        d[i + 2] = 255;
+        d[i + 3] = 255;
+      }
+    });
+  }
+
   // ── Texture Factory ───────────────────────────────────────────────
 
   function makeTex(canvas) {
@@ -236,31 +282,32 @@
       woodNormal: makeTex(genWoodNormal(sz)),
       grassAlbedo: makeTex(genGrassAlbedo(sz)),
       grassNormal: makeTex(genGrassNormal(sz)),
-      metalAlbedo: makeTex(genMetalAlbedo(sz))
+      metalAlbedo: makeTex(genMetalAlbedo(sz)),
+      brickAlbedo: makeTex(genBrickAlbedo(sz)),
+      brickNormal: makeTex(genBrickNormal(sz))
     };
     return texCache[tier];
   }
 
   // ── Material Classification ───────────────────────────────────────
-  // Identify what each mesh represents by its material color and geometry
-
-  function colorKey(c) {
-    if (!c || !c.getHex) return "";
-    return c.getHex().toString(16).padStart(6, "0");
-  }
 
   function classifyMaterial(mat, mesh) {
     if (!mat || !mat.isMeshStandardMaterial) return null;
-    var hex = colorKey(mat.color);
-    var name = (mesh && mesh.name) || "";
     var r = mat.color.r, g = mat.color.g, b = mat.color.b;
+    var met = mat.metalness || 0;
 
-    // browns/tans → wood (waterwheel, mill timbers)
+    // high metalness → metal (iron white, steel, brass)
+    if (met > 0.5) return "metal";
+    // painted metal (red gate box) — keep original look
+    if (r > 0.6 && g < 0.3 && b < 0.25 && met > 0.1) return null;
+    // brick: reddish-brown with high roughness (chimney ~0x8b4a38)
+    if (r > 0.4 && r < 0.65 && g > 0.2 && g < 0.35 && b < 0.3 && mat.roughness > 0.7) return "brick";
+    // browns/tans → wood (waterwheel, mill timbers, roof shingles)
     if (r > 0.35 && g > 0.15 && g < 0.55 && b < 0.3 && r > g) return "wood";
     // dark brown → wet wood
     if (r > 0.2 && r < 0.4 && g > 0.1 && g < 0.3 && b < 0.15) return "wood";
-    // greys → stone/concrete (dam, channels)
-    if (Math.abs(r - g) < 0.08 && Math.abs(g - b) < 0.08 && r > 0.3 && r < 0.75) return "stone";
+    // greys → stone/concrete (dam, channels, masonry — widened range)
+    if (Math.abs(r - g) < 0.1 && Math.abs(g - b) < 0.1 && r > 0.25 && r < 0.95) return "stone";
     // dark greys → metal (gears, axle)
     if (Math.abs(r - g) < 0.06 && Math.abs(g - b) < 0.06 && r >= 0.15 && r < 0.35) return "metal";
     // greens → grass/terrain
@@ -314,6 +361,12 @@
           mat.roughness = 0.45;
           mat.metalness = 0.7;
           mat.envMapIntensity = 1.5;
+        } else if (cls === "brick") {
+          mat.map = tex.brickAlbedo;
+          mat.normalMap = tex.brickNormal;
+          mat.normalScale = new T.Vector2(0.7, 0.7);
+          mat.roughness = 0.92;
+          mat.metalness = 0.0;
         }
 
         mat.needsUpdate = true;
@@ -326,25 +379,21 @@
   // ── Enhanced Lighting ─────────────────────────────────────────────
 
   function enhanceLighting(scene, sun) {
-    // warm fill light from opposite side of sun
     var fill = new T.PointLight(0xFFE4B5, 0.6, 200, 1.5);
     fill.position.set(-30, 25, -20);
     fill.name = "_premFill";
     scene.add(fill);
 
-    // cool rim light from behind/below for depth
     var rim = new T.PointLight(0x8CB4D6, 0.4, 250, 1.8);
     rim.position.set(15, 8, -60);
     rim.name = "_premRim";
     scene.add(rim);
 
-    // warm accent on the waterwheel area
-    var wheelLight = new T.PointLight(0xFFD090, 0.5, 40, 1.6);
-    wheelLight.position.set(-5, 12, 5);
-    wheelLight.name = "_premWheel";
-    scene.add(wheelLight);
+    var accent = new T.PointLight(0xFFD090, 0.5, 40, 1.6);
+    accent.position.set(-5, 12, 5);
+    accent.name = "_premAccent";
+    scene.add(accent);
 
-    // boost sun shadow quality
     if (sun && sun.shadow) {
       if (sun.shadow.mapSize) {
         sun.shadow.mapSize.set(2048, 2048);
@@ -356,7 +405,6 @@
       }
     }
 
-    // slightly increase sun intensity for more dramatic lighting
     if (sun) {
       sun.intensity = Math.min(sun.intensity * 1.05, 3.5);
     }
@@ -375,7 +423,6 @@
       mat.userData = mat.userData || {};
       mat.userData._premWater = true;
 
-      // deepen water colors for more visual richness
       if (mat.uniforms.uDeep && mat.uniforms.uDeep.value) {
         var deep = mat.uniforms.uDeep.value;
         if (deep.isColor) {
@@ -389,12 +436,10 @@
         }
       }
 
-      // increase wave amplitude for more visible surface variation
       if (mat.uniforms.uAmp) {
         mat.uniforms.uAmp.value = Math.min(mat.uniforms.uAmp.value * 1.4, 1.2);
       }
 
-      // boost foam if present
       if (mat.uniforms.uFoam) {
         mat.uniforms.uFoam.value = Math.min((mat.uniforms.uFoam.value || 0) + 0.3, 2.0);
       }
@@ -406,16 +451,57 @@
   // ── Atmospheric Enhancements ──────────────────────────────────────
 
   function enhanceAtmosphere(scene) {
-    // richer fog color
     if (scene.fog && scene.fog.color) {
       scene.fog.color.setHex(0xC8D8E8);
       scene.fog.density = Math.max(scene.fog.density * 0.85, 0.001);
     }
   }
 
+  // ── Per-Day Atmosphere ────────────────────────────────────────────
+  // Day 5 (null) preserves the approved scene exactly.
+
+  var enhancedFog = null;
+  var ACCENT_DEFAULT = { pos: [-5, 12, 5], color: 0xFFD090, intensity: 0.5 };
+
+  var DAY_ATM = {
+    1: { fog: 0xB8CCE0, fogK: 0.75, accent: [45, 30, -50], accentColor: 0xFFF0D0, accentI: 0.6, accentRange: 60 },
+    2: { fog: 0xCCD8E4, fogK: 0.90, accent: [-1.5, 8, 15.5], accentColor: 0xFFE4B5, accentI: 0.55, accentRange: 30 },
+    3: { fog: 0xBED0E4, fogK: 1.15, accent: [0, 16, -42], accentColor: 0xC8E0F0, accentI: 0.45, accentRange: 70 },
+    4: { fog: 0xC8D8E8, fogK: 1.00, accent: [7, 14, -13], accentColor: 0xFFD8A0, accentI: 0.55, accentRange: 35 },
+    5: null,
+    6: { fog: 0xD0D0D4, fogK: 0.90, accent: [-12, 6, -2], accentColor: 0xFFBB70, accentI: 0.6, accentRange: 35 }
+  };
+
+  function applyDayAtmosphere(dayIndex, scene) {
+    var atm = DAY_ATM[dayIndex];
+
+    if (scene.fog && enhancedFog) {
+      if (atm) {
+        scene.fog.color.setHex(atm.fog);
+        scene.fog.density = enhancedFog.density * atm.fogK;
+      } else {
+        scene.fog.color.setHex(enhancedFog.color);
+        scene.fog.density = enhancedFog.density;
+      }
+    }
+
+    var accent = scene.getObjectByName("_premAccent");
+    if (accent) {
+      if (atm) {
+        accent.position.set(atm.accent[0], atm.accent[1], atm.accent[2]);
+        accent.color.setHex(atm.accentColor);
+        accent.intensity = atm.accentI;
+        accent.distance = atm.accentRange;
+      } else {
+        accent.position.set(ACCENT_DEFAULT.pos[0], ACCENT_DEFAULT.pos[1], ACCENT_DEFAULT.pos[2]);
+        accent.color.setHex(ACCENT_DEFAULT.color);
+        accent.intensity = ACCENT_DEFAULT.intensity;
+        accent.distance = 40;
+      }
+    }
+  }
+
   // ── Post-Processing (lightweight bloom via renderer patch) ────────
-  // Instead of a full EffectComposer, we use a selective glow overlay
-  // rendered to an offscreen target and composited via a fullscreen quad.
 
   function setupBloom(renderer, scene, camera, tier) {
     if (tier === "low") return null;
@@ -436,7 +522,6 @@
       "}"
     ].join("\n");
 
-    // threshold material — extracts bright regions
     var threshMat = new T.ShaderMaterial({
       uniforms: {
         tDiffuse: { value: null },
@@ -456,7 +541,6 @@
       depthTest: false, depthWrite: false
     });
 
-    // blur material — simple Gaussian-like blur
     var blurMat = new T.ShaderMaterial({
       uniforms: {
         tDiffuse: { value: null },
@@ -482,7 +566,6 @@
       depthTest: false, depthWrite: false
     });
 
-    // composite material — blends bloom with the scene
     var compMat = new T.ShaderMaterial({
       uniforms: {
         tScene: { value: null },
@@ -505,7 +588,6 @@
       transparent: false
     });
 
-    // fullscreen quad geometry
     var quadGeo = new T.BufferGeometry();
     var verts = new Float32Array([-1, -1, 0, 3, -1, 0, -1, 3, 0]);
     var uvs = new Float32Array([0, 0, 2, 0, 0, 2]);
@@ -522,13 +604,11 @@
 
     return {
       render: function (origRender) {
-        // 1. render scene to offscreen target
         renderer.setRenderTarget(sceneRT);
         origRender();
         var ri = renderer.info.render;
         var savedFrame = ri.frame, savedTris = ri.triangles, savedCalls = ri.calls, savedPoints = ri.points, savedLines = ri.lines;
 
-        // 2–5: bloom passes (save/restore render info so these don't count as scene renders)
         threshMat.uniforms.tDiffuse.value = sceneRT.texture;
         quadMesh.material = threshMat;
         renderer.setRenderTarget(bloomRT);
@@ -579,19 +659,16 @@
     var sun = stage.sun;
     var tier = stage.tierN >= 2 ? "high" : stage.tierN >= 1 ? "medium" : "low";
 
-    // 1. Apply procedural PBR textures
     var count = applyTextures(scene, tier);
-
-    // 2. Enhance lighting
     enhanceLighting(scene, sun);
-
-    // 3. Improve water shader
     enhanceWater(scene);
-
-    // 4. Atmospheric effects
     enhanceAtmosphere(scene);
 
-    // 5. Set up bloom post-processing (patches the render loop)
+    // save enhanced fog state for per-Day restoration
+    if (scene.fog) {
+      enhancedFog = { color: scene.fog.color.getHex(), density: scene.fog.density };
+    }
+
     var bloom = setupBloom(renderer, scene, camera, tier);
     if (bloom) {
       var origRender = renderer.render.bind(renderer);
@@ -604,7 +681,6 @@
         }
       };
 
-      // handle resize
       var origSetSize = renderer.setSize.bind(renderer);
       renderer.setSize = function (w, h, u) {
         origSetSize(w, h, u);
@@ -613,7 +689,7 @@
     }
 
     if (typeof console !== "undefined") {
-      console.log("[V2.3.0 Premium] Enhanced " + count + " materials, tier=" + tier + ", bloom=" + !!bloom);
+      console.log("[" + PREMIUM_VERSION + " Premium] Enhanced " + count + " materials, tier=" + tier + ", bloom=" + !!bloom);
     }
   }
 
@@ -627,22 +703,26 @@
     var result = origCreate.call(DB, i, e);
     if (result && e && e.holder && e.holder.stage) {
       try {
-        enhance(e.holder.stage);
+        var stage = e.holder.stage;
+        enhance(stage);
+        var tier = stage.tierN >= 2 ? "high" : stage.tierN >= 1 ? "medium" : "low";
+        var refreshed = applyTextures(stage.scene, tier);
+        enhanceWater(stage.scene);
+        applyDayAtmosphere(i, stage.scene);
+        if (refreshed > 0 && typeof console !== "undefined") {
+          console.log("[" + PREMIUM_VERSION + " Premium] Day " + i + ": refreshed " + refreshed + " materials");
+        }
       } catch (err) {
-        if (typeof console !== "undefined") console.warn("[V2.3.0 Premium] Enhancement failed:", err);
+        if (typeof console !== "undefined") console.warn("[" + PREMIUM_VERSION + " Premium] Enhancement failed:", err);
       }
     }
     return result;
   };
 
-  // if the stage already exists (hot reload), enhance it now
   if (DB.perfReport) {
     try {
       var rpt = DB.perfReport();
-      if (rpt) {
-        // stage exists — find it through the global
-        // (can't access directly, but the next create() will catch it)
-      }
+      if (rpt) {}
     } catch (e) {}
   }
 
