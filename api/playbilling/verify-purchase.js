@@ -69,19 +69,28 @@ function pemToArrayBuffer(pem) {
   return bytes.buffer;
 }
 
-async function verifyPurchaseWithGoogle({ packageName, playProductId, purchaseToken, consumable }) {
+async function verifyPurchaseWithGoogle({ packageName, playProductId, purchaseToken }) {
   const accessToken = await getGoogleAccessToken();
 
-  const endpoint = consumable
-    ? `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(playProductId)}/tokens/${encodeURIComponent(purchaseToken)}`
-    : `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(playProductId)}/tokens/${encodeURIComponent(purchaseToken)}`;
+  const endpoint = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(playProductId)}/tokens/${encodeURIComponent(purchaseToken)}`;
 
   const response = await fetch(endpoint, {
     headers: { Authorization: "Bearer " + accessToken },
     cache: "no-store"
   });
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    return {
+      ok: false,
+      reason: "GOOGLE_API_ERROR",
+      status: response.status,
+      message: "Google Play API returned a non-JSON response."
+    };
+  }
+
   if (!response.ok) {
     return {
       ok: false,
@@ -136,8 +145,7 @@ export default async function handler(req, res) {
     const verification = await verifyPurchaseWithGoogle({
       packageName,
       playProductId,
-      purchaseToken,
-      consumable
+      purchaseToken
     });
 
     if (!verification.ok) {
@@ -156,9 +164,15 @@ export default async function handler(req, res) {
       });
     }
 
-    if (purchase.orderId && purchase.orderId !== orderId) {
+    if (!purchase.orderId || purchase.orderId !== orderId) {
       return res.status(403).json({
-        error: "Order ID does not match the purchase."
+        error: "Order ID does not match the verified purchase."
+      });
+    }
+
+    if (purchase.productId && purchase.productId !== playProductId) {
+      return res.status(403).json({
+        error: "Product ID does not match the verified purchase."
       });
     }
 
@@ -225,7 +239,7 @@ export default async function handler(req, res) {
         reconciliation: err.reconciliation || null
       });
     }
-    return res.status(500).json({ error: err.message || "Unable to verify purchase." });
+    return res.status(500).json({ error: "Unable to verify purchase." });
   }
 }
 

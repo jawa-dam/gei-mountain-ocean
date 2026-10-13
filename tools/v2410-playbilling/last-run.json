@@ -1,10 +1,10 @@
 {
-  "suite": "V2.4.1 — Google Play Billing",
+  "suite": "V2.4.2 — Google Play Billing Security",
   "runDate": "2026-10-13",
-  "suites": 23,
-  "passed": 23,
+  "suites": 42,
+  "passed": 42,
   "failed": 0,
-  "assertions": 150,
-  "testType": "unit-with-doubles",
-  "note": "All tests use doubles (mock Redis, mock Google API). Manual tests requiring Play Console internal test track are documented but not run."
+  "assertions": 198,
+  "testType": "handler-level-with-doubles",
+  "note": "Tests exercise actual imported handlers with mock Redis and Google API doubles. Manual tests requiring Play Console internal test track are documented but not run."
 }

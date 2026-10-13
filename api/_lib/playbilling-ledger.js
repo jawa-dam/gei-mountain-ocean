@@ -66,11 +66,13 @@ export async function recordPlayEntitlement({
   const tokenHash = await hashToken(purchaseToken);
   const eventKey = "gei:playbilling:event:" + tokenHash;
   const entitlementKey = "gei:playbilling:entitlement:" + orderId;
+  const productType = getPack(packId)?.kind || "fl-oz";
+  const characterId = getPack(packId)?.characterId || null;
   const record = JSON.stringify({
     status: "FULFILLABLE",
     channel: "google_play",
     auditVersion: ECONOMY_AUTHORITY_VERSION,
-    audit: auditReceipt({ packId, flOz, amount, currency }),
+    audit: auditReceipt({ packId, flOz, amount, currency, productType, characterId }),
     orderId,
     purchaseTokenHash: tokenHash,
     playProductId,
@@ -78,8 +80,8 @@ export async function recordPlayEntitlement({
     flOz,
     amount,
     currency,
-    productType: getPack(packId)?.kind || "fl-oz",
-    characterId: getPack(packId)?.characterId || null,
+    productType,
+    characterId,
     claimedAt: null,
     createdAt: new Date().toISOString()
   });
