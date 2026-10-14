@@ -1,10 +1,10 @@
 {
-  "suite": "V2.4.9 — Android Build & Billing Release Gate",
+  "suite": "V2.5.0 — Android Build Reproducibility & Internal Test Preparation",
   "runDate": "2026-10-14",
-  "suites": 152,
-  "passed": 152,
+  "suites": 163,
+  "passed": 163,
   "failed": 0,
-  "assertions": 717,
+  "assertions": 777,
   "testType": "handler-level-with-doubles",
-  "note": "V2.4.9 adds 20 new suites on top of V2.4.8's 132: automatic purchase recovery trigger (initAutoRecovery with polling for bridge readiness, duplicate prevention guard, full server verification pipeline for auto-recovered purchases, consumable re-credit prevention), bridge contract verification (launchBillingFlow/queryPurchases/consumePurchase pending+callbackId pattern, Base64+evaluateJavascript callback resolution, JS shim Promise wrappers with timeout and error codes), WebView security (origin validation, PayPal external handling, mixed content blocking), lifecycle validation (destroy resets all state, BillingWebViewActivity cleanup order, every error path resets concurrency guard), AndroidManifest security (permissions, cleartext disabled, export flags, configChanges), build configuration consistency (applicationId, debug suffix, SDK versions, dependencies), play-billing-bridge.js contract (detection, server verification pipeline order, consume-after-fulfill, USER_CANCELED handling, restore filtering), token logging prevention, PendingPurchasesParams usage. Android build blocked by dl.google.com proxy restriction — documented as external prerequisite."
+  "note": "V2.5.0 adds 11 new suites on top of V2.4.9's 152: game bootstrap wiring verification (play-billing-bridge.js script tag, TWA detection gate, startCheckout override with PayPal fallback, initAutoRecovery called on window.load), product catalog consistency across billing-channel.js, economy-authority.js, and index.html (6 canonical products, prices, FL OZ amounts), documentation reconciliation (canonical product IDs replace placeholders in play-test-plan.md), AndroidManifest security gate (permissions, cleartext, export flags), creditPack server-authorization checks, recovery double-credit prevention via processedReceipts. Android build blocked by dl.google.com proxy restriction — documented as external prerequisite."
 }

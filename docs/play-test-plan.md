@@ -1,7 +1,7 @@
 # TapLites: GEI — Internal Play Store Test Plan
 
-**Version**: V2.4.9  
-**Status**: Auto-recovery trigger implemented, bridge contract verified via source inspection, lifecycle validated, prerequisites documented, not yet executed on device
+**Version**: V2.5.0  
+**Status**: Play Billing wired into game bootstrap, auto-recovery active on startup in TWA, product catalog reconciled, Android build blocked by dl.google.com — not yet executed on device
 
 ## External Prerequisites (Manual Setup Required)
 
@@ -11,13 +11,14 @@
 - [ ] Set application ID: `com.yalltoo.taplites.gei`
 
 ### 2. Play Console Product Configuration
-- [ ] Create in-app products matching `play-product-catalog.js` IDs:
-  - `gei_floz_100` (consumable, FL OZ pack)
-  - `gei_floz_500` (consumable, FL OZ pack)
-  - `gei_floz_1200` (consumable, FL OZ pack)
-  - `gei_character_mountaineer` (non-consumable, character unlock)
-  - `gei_character_oceanographer` (non-consumable, character unlock)
-- [ ] Set prices matching the existing PayPal catalog
+- [ ] Create in-app products matching `api/_lib/billing-channel.js` canonical IDs:
+  - `com.yalltoo.taplites.gei.single_song` (consumable, 1 Song / 6660 FL OZ, $6.00)
+  - `com.yalltoo.taplites.gei.ten_songs` (consumable, 10 Songs / 66600 FL OZ, $12.00)
+  - `com.yalltoo.taplites.gei.twentyfive_songs` (consumable, 25 Songs / 166500 FL OZ, $18.00)
+  - `com.yalltoo.taplites.gei.char_jesus` (non-consumable, Jesus character, $12.00)
+  - `com.yalltoo.taplites.gei.char_dam_black_jesus` (non-consumable, DAM Black Jesus character, $12.00)
+  - `com.yalltoo.taplites.gei.char_devil` (non-consumable, Devil character, $6.00)
+- [ ] Set prices matching the canonical economy authority (`api/_lib/economy-authority.js`)
 - [ ] Activate products for testing
 
 ### 3. Google Cloud Service Account
@@ -71,6 +72,35 @@
 curl: (56) Received HTTP code 403 from proxy after CONNECT (dl.google.com blocked)
 ```
 To resolve: allow `dl.google.com` in the cloud environment's Network access settings, or build on a local developer machine with Android SDK installed.
+
+## V2.5.0 Changes
+
+### Play Billing Wired Into Game Bootstrap
+Prior to V2.5.0, `play-billing-bridge.js` was defined but never loaded by `index.html` — no `<script>` tag existed, and no game code called any `GeiPlayBilling` method. V2.5.0 adds:
+
+- `<script src="/play-billing-bridge.js" defer></script>` in `index.html`
+- An inline integration block that:
+  - Detects the TWA environment via `GeiPlayBilling.detect()`
+  - Overrides `window.startCheckout` to route through `GeiPlayBilling.startCheckout` when the native bridge is available
+  - Falls back to the original PayPal `startCheckout` when not in TWA or bridge unavailable
+  - Calls `GeiPlayBilling.initAutoRecovery` on `window.load` with the game's `creditPack` handler
+- In a normal browser, the block exits immediately (no `GeiPlayBilling` global), so PayPal checkout is completely unaffected
+
+### Product Catalog Reconciled
+Canonical product IDs are defined in `api/_lib/billing-channel.js` (`GOOGLE_PLAY_PRODUCT_MAP`). V2.5.0 corrects `docs/play-test-plan.md` to use these canonical IDs instead of the placeholder IDs (`gei_floz_100`, etc.) that were previously documented.
+
+### Verified Product Matrix
+
+| Pack ID | Play Product ID | Label | Price | FL OZ | Type |
+|---------|----------------|-------|-------|-------|------|
+| `single` | `com.yalltoo.taplites.gei.single_song` | 1 Song | $6.00 | 6,660 | consumable |
+| `ten` | `com.yalltoo.taplites.gei.ten_songs` | 10 Songs | $12.00 | 66,600 | consumable |
+| `twentyfive` | `com.yalltoo.taplites.gei.twentyfive_songs` | 25 Songs | $18.00 | 166,500 | consumable |
+| `special-jesus` | `com.yalltoo.taplites.gei.char_jesus` | Jesus | $12.00 | 0 | non-consumable |
+| `special-dam-black-jesus` | `com.yalltoo.taplites.gei.char_dam_black_jesus` | DAM Black Jesus | $12.00 | 0 | non-consumable |
+| `special-devil` | `com.yalltoo.taplites.gei.char_devil` | Devil | $6.00 | 0 | non-consumable |
+
+Sources verified: `api/_lib/billing-channel.js`, `api/_lib/economy-authority.js`, `index.html` (STORE_PACKS + SPECIAL_CHARACTER_PRODUCTS), `play-billing-bridge.js`, `api/_handlers/playbilling/products.js`. `play-product-catalog.js` does not exist.
 
 ## V2.4.9 Changes
 
@@ -210,15 +240,15 @@ All native errors include structured `{error, code}` JSON:
 ### Phase B: License Testing (Sandbox)
 1. Add test accounts in Play Console → Settings → License testing
 2. On a test device, sign in with a license test account
-3. Attempt purchase of `gei_floz_100`:
+3. Attempt purchase of `com.yalltoo.taplites.gei.single_song` (pack: "single"):
    - Verify billing dialog appears
    - Complete sandbox purchase
    - Verify server receives purchase token
    - Verify `verify-purchase` handler validates with Google API
    - Verify `claim-entitlement` creates ledger entry
-   - Verify `fulfill-entitlement` credits FL OZ
+   - Verify `fulfill-entitlement` credits 6660 FL OZ
    - Verify `consumePurchase` acknowledges the consumable
-4. Attempt purchase of `gei_character_mountaineer`:
+4. Attempt purchase of `com.yalltoo.taplites.gei.char_jesus` (pack: "special-jesus"):
    - Verify non-consumable flow (no consumption step)
    - Verify character unlock persists across sessions
 5. Test cancellation:
@@ -280,18 +310,22 @@ All native errors include structured `{error, code}` JSON:
 
 | Check | Level | Notes |
 |-------|-------|-------|
-| Handler logic (verify, claim, fulfill, restore, RTDN) | **Mocked tests — 152 suites, 717 assertions** | All pass |
+| Handler logic (verify, claim, fulfill, restore, RTDN) | **Mocked tests — V2.5.0 suite** | All pass |
 | Bridge contract (error codes, callback lifecycle, JSON transport) | **Mocked tests — V2.4.7 + V2.4.8 + V2.4.9 suites** | Tests validate contract shapes, not native execution |
-| Automatic purchase recovery trigger | **Mocked tests — V2.4.9** | initAutoRecovery, polling, guard, server pipeline |
+| Game bootstrap wiring (startCheckout override, initAutoRecovery call) | **Mocked tests — V2.5.0** | Verifies script tag, TWA detection gate, fallback to PayPal |
+| Product catalog consistency | **Mocked tests — V2.5.0** | All 6 products match across billing-channel.js, economy-authority.js, index.html |
+| Automatic purchase recovery trigger | **Mocked tests — V2.4.9 + V2.5.0** | initAutoRecovery, polling, guard, server pipeline, game wiring |
+| Recovery double-credit prevention | **Mocked tests — V2.5.0** | processedReceipts guard, server idempotency via fulfillmentId |
 | Concurrent billing prevention | **Mocked tests — V2.4.8** | BILLING_IN_PROGRESS guard verified |
 | Purchase recovery via queryPurchases | **Mocked tests — V2.4.8 + V2.4.9** | Recovery path verified through server pipeline |
 | JS shim Promise wrappers and readiness flag | **Mocked tests — V2.4.8 + V2.4.9** | Shim injects PlayBillingBridge, sets __PlayBillingRecoveryReady |
 | Callback ID uniqueness (AtomicLong) | **Mocked tests — V2.4.8** | No nanoTime overflow risk |
 | Token logging prevention | **Mocked tests — V2.4.8 + V2.4.9** | Verified no token in any Log.* call |
 | Lifecycle validation (destroy, cleanup order) | **Source inspection — V2.4.9** | Every exit path resets concurrency guard |
-| AndroidManifest security | **Source inspection — V2.4.9** | Permissions, cleartext, export flags, configChanges |
+| AndroidManifest security | **Source inspection — V2.5.0** | INTERNET + BILLING only, cleartext disabled, BillingWebViewActivity not exported |
 | Build configuration consistency | **Source inspection — V2.4.9** | applicationId, SDK versions, dependencies, ProGuard |
-| WebView security (URL validation, intent validation) | **Mocked tests — V2.4.7** | Tests validate JS-equivalent logic |
+| WebView security (URL validation, intent validation) | **Mocked tests — V2.4.7 + code review V2.5.0** | Scheme+host origin, PayPal opens externally, mixed content blocked |
+| Server-authoritative recovery lifecycle | **Code review — V2.5.0** | Restored tokens re-verified, revoked stays revoked, fulfilled consumables not re-credited |
 | Vercel function consolidation | **Code review + structural** | Cannot verify Vercel deployment from CI |
 | Android project structure | **Code review** | Builds require Android SDK |
 | Kotlin compilation | **Not verified** | No Android SDK in CI environment (dl.google.com blocked) |

@@ -3813,10 +3813,197 @@ suite("V2.4.9: BillingClient uses PendingPurchasesParams correctly", async () =>
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.5.0 — GAME BOOTSTRAP WIRING & PRODUCT CATALOG CONSISTENCY
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.5.0: index.html loads play-billing-bridge.js", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+
+  t("script tag for play-billing-bridge.js exists",
+    html.includes('<script src="/play-billing-bridge.js" defer></script>'));
+  t("script tag appears after customer-purchase-recovery.js",
+    html.indexOf("play-billing-bridge.js") > html.indexOf("customer-purchase-recovery.js"));
+});
+
+suite("V2.5.0: integration block detects TWA before overriding startCheckout", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+
+  t("checks GeiPlayBilling is defined before proceeding",
+    html.includes('typeof window.GeiPlayBilling==="undefined"'));
+  t("calls GeiPlayBilling.detect()",
+    html.includes("window.GeiPlayBilling.detect()"));
+  t("overrides window.startCheckout",
+    html.includes("window.startCheckout=function(packId)"));
+  t("saves original startCheckout for fallback",
+    html.includes("var originalStartCheckout=window.startCheckout"));
+  t("falls back to original when bridge unavailable",
+    html.includes("originalStartCheckout(packId)"));
+});
+
+suite("V2.5.0: integration block calls initAutoRecovery on load", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+
+  t("calls GeiPlayBilling.initAutoRecovery",
+    html.includes("window.GeiPlayBilling.initAutoRecovery"));
+  t("passes onCredit callback that routes to creditPack",
+    html.includes('typeof window.creditPack==="function"') &&
+    html.includes("window.creditPack(packId, fulfillmentId, meta)"));
+  t("falls back to YalltooDamEconomy.creditPack",
+    html.includes("window.YalltooDamEconomy.creditPack"));
+  t("listens for window load event",
+    html.includes('window.addEventListener("load", tryAutoRecovery'));
+  t("handles already-complete document state",
+    html.includes('document.readyState==="complete"'));
+});
+
+suite("V2.5.0: integration block does not interfere with PayPal in non-TWA", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+  const integrationStart = html.indexOf("V2.5.0 — PLAY BILLING INTEGRATION");
+  const integrationEnd = html.indexOf("</script>", integrationStart);
+  const block = html.substring(integrationStart, integrationEnd);
+
+  t("block is an IIFE",
+    block.includes("(function(){") || html.substring(integrationStart - 30, integrationStart).includes("(function(){"));
+  t("returns immediately if GeiPlayBilling undefined",
+    block.includes('if(typeof window.GeiPlayBilling==="undefined") return'));
+  t("returns if detect() returns false",
+    block.includes("if(!detected) return"));
+  t("PayPal startCheckout function still defined elsewhere in index.html",
+    html.includes("function startCheckout(packId)") || html.includes("async function startCheckout("));
+});
+
+suite("V2.5.0: product catalog consistency — billing-channel.js", async () => {
+  const { readFileSync } = await import("node:fs");
+  const billingCode = readFileSync("api/_lib/billing-channel.js", "utf-8");
+
+  const expectedProducts = {
+    "single": "com.yalltoo.taplites.gei.single_song",
+    "ten": "com.yalltoo.taplites.gei.ten_songs",
+    "twentyfive": "com.yalltoo.taplites.gei.twentyfive_songs",
+    "special-jesus": "com.yalltoo.taplites.gei.char_jesus",
+    "special-dam-black-jesus": "com.yalltoo.taplites.gei.char_dam_black_jesus",
+    "special-devil": "com.yalltoo.taplites.gei.char_devil"
+  };
+
+  for (const [packId, playId] of Object.entries(expectedProducts)) {
+    t(`billing-channel maps "${packId}" → "${playId}"`,
+      billingCode.includes(`"${packId}"`) && billingCode.includes(`"${playId}"`));
+  }
+  t("exactly 6 product mappings (no extras)",
+    (billingCode.match(/com\.yalltoo\.taplites\.gei\./g) || []).length === 6);
+});
+
+suite("V2.5.0: product catalog consistency — economy-authority.js prices", async () => {
+  const { readFileSync } = await import("node:fs");
+  const econCode = readFileSync("api/_lib/economy-authority.js", "utf-8");
+
+  t('single pack price is $6.00', econCode.includes('single:') && econCode.includes('price:"6.00"'));
+  t('ten pack price is $12.00', econCode.includes('ten:') && econCode.includes('price:"12.00"'));
+  t('twentyfive pack price is $18.00', econCode.includes('twentyfive:') && econCode.includes('price:"18.00"'));
+  t('single FL OZ is 6660', econCode.includes('flOz:6660'));
+  t('ten FL OZ is 66600', econCode.includes('flOz:66600'));
+  t('twentyfive FL OZ is 166500', econCode.includes('flOz:166500'));
+  t('special-jesus is $12.00 character', econCode.includes('"special-jesus"') && econCode.includes('characterId:"jesus"'));
+  t('special-devil is $6.00 character', econCode.includes('"special-devil"') && econCode.includes('characterId:"devil"'));
+});
+
+suite("V2.5.0: product catalog consistency — index.html STORE_PACKS match economy", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+
+  t('STORE_PACKS defines single at $6', html.includes('id:"single"') && html.includes('priceUsd:6'));
+  t('STORE_PACKS defines ten at $12', html.includes('id:"ten"') && html.includes('priceUsd:12'));
+  t('STORE_PACKS defines twentyfive at $18', html.includes('id:"twentyfive"') && html.includes('priceUsd:18'));
+  t('SPECIAL_CHARACTER_PRODUCTS defines special-jesus at $12',
+    html.includes('id:"special-jesus"') && html.includes('characterId:"jesus"'));
+  t('SPECIAL_CHARACTER_PRODUCTS defines special-dam-black-jesus at $12',
+    html.includes('id:"special-dam-black-jesus"') && html.includes('characterId:"dam-black-jesus"'));
+  t('SPECIAL_CHARACTER_PRODUCTS defines special-devil at $6',
+    html.includes('id:"special-devil"') && html.includes('characterId:"devil"'));
+});
+
+suite("V2.5.0: play-billing-bridge.js exposes initAutoRecovery with guard", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+
+  t("AUTO_RECOVERY_RAN guard variable exists",
+    bridgeCode.includes("AUTO_RECOVERY_RAN"));
+  t("initAutoRecovery checks onCredit is a function",
+    bridgeCode.includes('typeof callbacks.onCredit !== "function"'));
+  t("runAutoRecovery sets guard to true",
+    bridgeCode.includes("AUTO_RECOVERY_RAN = true"));
+  t("runAutoRecovery exits if already ran",
+    bridgeCode.includes("if (AUTO_RECOVERY_RAN) return"));
+  t("initAutoRecovery exposed on window.GeiPlayBilling",
+    bridgeCode.includes("initAutoRecovery: initAutoRecovery"));
+});
+
+suite("V2.5.0: creditPack requires serverAuthorized and fulfillmentId", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+
+  t("creditPack checks meta.serverAuthorized === true",
+    html.includes("meta.serverAuthorized") || html.includes("serverAuthorized===true") || html.includes("serverAuthorized !== true"));
+  t("creditPack checks meta.fulfillmentId matches receiptId",
+    html.includes("meta.fulfillmentId") && html.includes("fulfillmentId"));
+  t("creditPack checks processedReceipts for duplicates",
+    html.includes("processedReceipts"));
+});
+
+suite("V2.5.0: docs/play-test-plan.md uses canonical product IDs", async () => {
+  const { readFileSync } = await import("node:fs");
+  const doc = readFileSync("docs/play-test-plan.md", "utf-8");
+
+  t("lists com.yalltoo.taplites.gei.single_song",
+    doc.includes("com.yalltoo.taplites.gei.single_song"));
+  t("lists com.yalltoo.taplites.gei.ten_songs",
+    doc.includes("com.yalltoo.taplites.gei.ten_songs"));
+  t("lists com.yalltoo.taplites.gei.twentyfive_songs",
+    doc.includes("com.yalltoo.taplites.gei.twentyfive_songs"));
+  t("lists com.yalltoo.taplites.gei.char_jesus",
+    doc.includes("com.yalltoo.taplites.gei.char_jesus"));
+  t("lists com.yalltoo.taplites.gei.char_dam_black_jesus",
+    doc.includes("com.yalltoo.taplites.gei.char_dam_black_jesus"));
+  t("lists com.yalltoo.taplites.gei.char_devil",
+    doc.includes("com.yalltoo.taplites.gei.char_devil"));
+  const productConfigSection = doc.substring(doc.indexOf("Play Console Product Configuration"), doc.indexOf("### 3."));
+  t("product config section does NOT use old placeholder gei_floz_100",
+    !productConfigSection.includes("gei_floz_100"));
+  t("product config section does NOT use old placeholder gei_character_mountaineer",
+    !productConfigSection.includes("gei_character_mountaineer"));
+});
+
+suite("V2.5.0: AndroidManifest security gate", async () => {
+  const { readFileSync } = await import("node:fs");
+  const manifest = readFileSync("android/app/src/main/AndroidManifest.xml", "utf-8");
+
+  t("INTERNET permission declared",
+    manifest.includes("android.permission.INTERNET"));
+  t("BILLING permission declared",
+    manifest.includes("com.android.vending.BILLING"));
+  t("cleartext traffic disabled",
+    manifest.includes('android:usesCleartextTraffic="false"'));
+  t("allowBackup disabled",
+    manifest.includes('android:allowBackup="false"'));
+  t("BillingWebViewActivity is NOT exported",
+    manifest.includes('android:name=".BillingWebViewActivity"') &&
+    manifest.includes('android:exported="false"'));
+  t("TwaActivity IS exported (launcher)",
+    manifest.includes('android:name=".TwaActivity"') &&
+    manifest.includes('android:exported="true"'));
+  t("only two permissions declared (no excess)",
+    (manifest.match(/uses-permission/g) || []).length === 2);
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.4.9 — Android Build & Billing Release Gate\n");
+console.log("\nV2.5.0 — Android Build Reproducibility & Internal Test Preparation\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");

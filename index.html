@@ -12764,6 +12764,48 @@ function restoreVisualProgress(){
   };})();
 </script>
 <script src="/customer-purchase-recovery.js" defer></script>
+<script src="/play-billing-bridge.js" defer></script>
+<script>
+/* V2.5.0 — PLAY BILLING INTEGRATION
+   When running inside the Android TWA, routes purchases through Google Play
+   Billing instead of PayPal, and triggers automatic purchase recovery on startup.
+   In a normal browser, this does nothing — PayPal checkout remains unchanged. */
+(function(){
+  "use strict";
+  if(typeof window.GeiPlayBilling==="undefined") return;
+  var detected=window.GeiPlayBilling.detect();
+  if(!detected) return;
+
+  var originalStartCheckout=window.startCheckout;
+  window.startCheckout=function(packId){
+    if(!window.GeiPlayBilling.isAvailable()){
+      if(typeof originalStartCheckout==="function") return originalStartCheckout(packId);
+      return;
+    }
+    window.GeiPlayBilling.startCheckout(packId, {
+      onStatus: function(msg){ var s=document.getElementById("paypalCheckoutStatus"); if(s) s.textContent=msg; },
+      onCredit: function(packId, fulfillmentId, meta){
+        if(typeof window.creditPack==="function") return window.creditPack(packId, fulfillmentId, meta);
+        if(window.YalltooDamEconomy && typeof window.YalltooDamEconomy.creditPack==="function") return window.YalltooDamEconomy.creditPack(packId, fulfillmentId, meta);
+        return {ok:false, message:"Game wallet not ready."};
+      },
+      onError: function(msg){ var s=document.getElementById("paypalCheckoutStatus"); if(s) s.textContent=msg; }
+    });
+  };
+
+  function tryAutoRecovery(){
+    var credit=function(packId, fulfillmentId, meta){
+      if(typeof window.creditPack==="function") return window.creditPack(packId, fulfillmentId, meta);
+      if(window.YalltooDamEconomy && typeof window.YalltooDamEconomy.creditPack==="function") return window.YalltooDamEconomy.creditPack(packId, fulfillmentId, meta);
+      return {ok:false, message:"Game wallet not ready."};
+    };
+    window.GeiPlayBilling.initAutoRecovery({onCredit: credit});
+  }
+
+  if(document.readyState==="complete") tryAutoRecovery();
+  else window.addEventListener("load", tryAutoRecovery, {once:true});
+})();
+</script>
 
 <script>
 (function(){
