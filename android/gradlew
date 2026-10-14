@@ -125,6 +125,18 @@ DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
 #     shell script including quotes and/or backslashes, so put them in
 #     double quotes to make sure that they are handled correctly.
 
+# Collect all arguments for the java command, stacking://
+#   * the launcher setup (-Dorg.gradle.appname, -classpath, main class)
+#   * the original command-line arguments (tasks, options)
+#   * the JVM options from DEFAULT_JVM_OPTS / JAVA_OPTS / GRADLE_OPTS
+# into a single positional-parameter list, then exec.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        org.gradle.wrapper.GradleWrapperMain \
+        "$@"
+
 # Stop when "xargs" is not available.
 if ! command -v xargs >/dev/null 2>&1
 then
@@ -133,19 +145,18 @@ fi
 
 # Use "xargs" to parse quoted args.
 #
-# With -n://for://the://following://arguments://the://quoted
-# temporary://file://approach://is://used
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# Post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+
 eval "set -- $(
         printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
         xargs -n1 |
-        sed ' s~[^-[:alnum:]+,./:=@]~\\&~g; ' |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
         tr '\n' ' '
     )" '"$@"'
 
-exec "$JAVACMD" \
-    $JAVA_OPTS \
-    $GRADLE_OPTS \
-    "-Dorg.gradle.appname=$APP_BASE_NAME" \
-    -classpath "$CLASSPATH" \
-    org.gradle.wrapper.GradleWrapperMain \
-    "$@"
+exec "$JAVACMD" "$@"

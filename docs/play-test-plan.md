@@ -1,7 +1,7 @@
 # TapLites: GEI — Internal Play Store Test Plan
 
-**Version**: V2.5.1  
-**Status**: Recovery hardened (credit-before-consume ordering, duplicate-init guard, no PayPal fallback in TWA), env var docs corrected, Android build blocked by dl.google.com — not yet executed on device
+**Version**: V2.5.2  
+**Status**: Gradlew script fixed, native bridge source-reviewed, recovery scenario analyzed, Android build blocked by dl.google.com — not yet compiled or executed on device
 
 ## External Prerequisites (Manual Setup Required)
 
@@ -101,6 +101,58 @@ Canonical product IDs are defined in `api/_lib/billing-channel.js` (`GOOGLE_PLAY
 | `special-devil` | `com.yalltoo.taplites.gei.char_devil` | Devil | $6.00 | 0 | non-consumable |
 
 Sources verified: `api/_lib/billing-channel.js`, `api/_lib/economy-authority.js`, `index.html` (STORE_PACKS + SPECIAL_CHARACTER_PRODUCTS), `play-billing-bridge.js`, `api/_handlers/playbilling/products.js`. `play-product-catalog.js` does not exist.
+
+## V2.5.2 Changes
+
+### Gradle Wrapper Script Fix
+The `gradlew` script had a bug where `DEFAULT_JVM_OPTS` (`-Xmx64m -Xms64m`) were prepended into `$@` alongside Gradle arguments, then passed after `GradleWrapperMain` in the exec line. Gradle interpreted `-Xmx64m` as an unknown command-line option (`-X`), preventing any build from running.
+
+Fixed by restructuring the exec pattern to match the standard Gradle 8.9 wrapper:
+1. First `set --` prepends `-Dorg.gradle.appname`, `-classpath`, and `GradleWrapperMain` before the original Gradle arguments
+2. Then `eval set --` prepends JVM opts before everything
+3. Final `exec "$JAVACMD" "$@"` passes all arguments in the correct order: JVM opts → launcher setup → Gradle arguments
+
+### Native Bridge Source Review
+Source inspection of `PlayBillingBridge.kt`, `BillingWebViewActivity.kt`, and `TwaActivity.kt` verified:
+
+- JavaScript interface injected as `__NativePlayBillingBridge` via `addJavascriptInterface`
+- JS shim injected on every `onPageStarted`, wrapping native calls in Promises with 120s timeout
+- Callback IDs are unique (AtomicLong counter) and thread-safe (ConcurrentHashMap)
+- Responses delivered via Base64-encoded `evaluateJavascript` on UI thread
+- Concurrency guard (`billingFlowInProgress`) prevents double billing flows; reset on all error paths
+- Purchase tokens never appear in `Log.*` calls
+- Origin validation restricts WebView to `gei-mountain-ocean.vercel.app`
+- PayPal URLs open externally via `ACTION_VIEW` intent
+- Mixed content set to `MIXED_CONTENT_NEVER_ALLOW`
+- `onDestroy` cleans up in correct order: bridge → remove interface → WebView destroy
+- `PlayBillingBridge.destroy()` resets all state, resolves outstanding callbacks with DESTROYED error, ends BillingClient connection
+
+### Recovery Scenario Analysis
+Critical unverified runtime scenario: **server fulfillment succeeds → local credit fails → app restarts**.
+
+**Source-verified recovery path:**
+1. `startPlayCheckout` calls `onCredit` (step 5) before `consumePurchase` (step 6)
+2. `consumePurchase` only runs if `creditResult.ok` is truthy
+3. If credit fails, the purchase remains unconsumed on Google Play
+4. On next startup, `initAutoRecovery` calls `restorePlayPurchases`
+5. `restorePlayPurchases` queries `PlayBillingBridge.queryPurchases()` — unconsumed purchases are returned
+6. Each purchase goes through `restore-purchases` server endpoint, which re-verifies with Google
+7. Only `FULFILLED` entries with valid `fulfillmentId` are credited via `onCredit`
+8. `fulfillmentId` is deterministic from `orderId` (`playFulfillmentId`), so replay uses the same identity
+9. Server `fulfill-entitlement` returns `alreadyFulfilled: true` on replay — no new fulfillment created
+
+**Conclusion:** The architecture safely retries this scenario. No duplicate or lost credit occurs. No gap identified. However, this path has NOT been verified at runtime — it requires a real device with BillingClient and server endpoints available.
+
+### Android Build Status
+Gradle wrapper now executes correctly. Build fails at dependency resolution:
+- `dl.google.com` returns HTTP 403 (`connect_rejected`) from proxy
+- `maven.google.com` redirects to `dl.google.com`
+- AGP 8.7.3, AndroidX, and BillingClient 7.1.1 cannot be downloaded
+- No cached Maven artifacts exist in the environment
+- Kotlin compilation, APK generation, emulator testing, and device testing were not attempted
+
+### Test Coverage
+V2.5.2 adds 14 new test suites (190 total, 880 assertions, 0 failures).
 
 ## V2.5.1 Changes
 

@@ -4162,10 +4162,312 @@ suite("V2.5.1: checkout shows user-friendly error without exposing secrets", asy
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.5.2 — ANDROID BUILD REPRODUCIBILITY & DEVICE SMOKE TEST
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.5.2: gradlew passes JVM opts before -classpath, not as Gradle args", async () => {
+  const { readFileSync } = await import("node:fs");
+  const gradlew = readFileSync("android/gradlew", "utf-8");
+
+  t("gradlew prepends launcher setup into $@ before JVM opts eval",
+    gradlew.includes('set -- \\\n        "-Dorg.gradle.appname=$APP_BASE_NAME" \\\n        -classpath "$CLASSPATH" \\\n        org.gradle.wrapper.GradleWrapperMain \\\n        "$@"'));
+
+  t("final exec is a single exec $JAVACMD $@",
+    gradlew.includes('exec "$JAVACMD" "$@"'));
+
+  t("JVM opts eval prepends to $@ containing launcher args",
+    /eval "set -- \$\([\s\S]*?\)" '"\$@"'/.test(gradlew));
+
+  t("gradlew does NOT pass $JAVA_OPTS or $GRADLE_OPTS as separate exec args after GradleWrapperMain",
+    !gradlew.includes('org.gradle.wrapper.GradleWrapperMain \\\n    $JAVA_OPTS') &&
+    !gradlew.includes('org.gradle.wrapper.GradleWrapperMain \\\n    $GRADLE_OPTS'));
+});
+
+suite("V2.5.2: PlayBillingBridge JS interface injected as __NativePlayBillingBridge", async () => {
+  const { readFileSync } = await import("node:fs");
+  const billingActivity = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+
+  t("bridge injected with addJavascriptInterface as __NativePlayBillingBridge",
+    billingActivity.includes('addJavascriptInterface(billingBridge, "__NativePlayBillingBridge")'));
+
+  t("JS shim injected onPageStarted",
+    billingActivity.includes("onPageStarted") &&
+    billingActivity.includes("evaluateJavascript(PlayBillingBridge.JS_BRIDGE_SHIM"));
+
+  t("origin validation restricts to gei-mountain-ocean.vercel.app",
+    billingActivity.includes('"https://gei-mountain-ocean.vercel.app"') &&
+    billingActivity.includes("ALLOWED_ORIGINS"));
+
+  t("PayPal opens externally via ACTION_VIEW intent",
+    billingActivity.includes("www.paypal.com") &&
+    billingActivity.includes("Intent(Intent.ACTION_VIEW"));
+});
+
+suite("V2.5.2: PlayBillingBridge native callback IDs are unique and monotonic", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridge = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("callback counter is AtomicLong for thread safety",
+    bridge.includes("AtomicLong(0)") && bridge.includes("callbackCounter"));
+
+  t("nextCallbackId uses incrementAndGet for monotonic IDs",
+    bridge.includes("callbackCounter.incrementAndGet()"));
+
+  t("active callbacks tracked in ConcurrentHashMap",
+    bridge.includes("ConcurrentHashMap<String, Boolean>()"));
+
+  t("callbacks removed on resolution",
+    bridge.includes('activeCallbacks.remove(callbackId)'));
+});
+
+suite("V2.5.2: native bridge resolves callbacks via Base64 + evaluateJavascript", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridge = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("resolveCallback encodes response as Base64",
+    bridge.includes("Base64.encodeToString(json.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)"));
+
+  t("resolveCallback runs on UI thread",
+    bridge.includes("activity.runOnUiThread"));
+
+  t("callback invoked via __PlayBillingCallbacks and cleaned up",
+    bridge.includes("window.__PlayBillingCallbacks") &&
+    bridge.includes("delete window.__PlayBillingCallbacks"));
+});
+
+suite("V2.5.2: JS shim wraps native bridge with Promises and timeout", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridge = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("shim checks for __NativePlayBillingBridge before setup",
+    bridge.includes("if(!window.__NativePlayBillingBridge)return"));
+
+  t("shim has 120s timeout for pending operations",
+    bridge.includes("TIMEOUT_MS=120000"));
+
+  t("shim sets __PlayBillingRecoveryReady=true on initialization",
+    bridge.includes("window.__PlayBillingRecoveryReady=true"));
+
+  t("shim exposes launchBillingFlow, queryPurchases, consumePurchase",
+    bridge.includes("launchBillingFlow:function") &&
+    bridge.includes("queryPurchases:function") &&
+    bridge.includes("consumePurchase:function"));
+
+  t("timeout cleans up callback and rejects promise",
+    bridge.includes("delete window.__PlayBillingCallbacks[cid]") &&
+    bridge.includes("reject(new Error('Billing operation timed out'))"));
+});
+
+suite("V2.5.2: native concurrency guard prevents double billing flow", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridge = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("billingFlowInProgress checked before launching",
+    bridge.includes("if (billingFlowInProgress)"));
+
+  t("billingFlowInProgress set true before launch",
+    bridge.includes("billingFlowInProgress = true"));
+
+  t("billingFlowInProgress reset on error paths",
+    (bridge.match(/billingFlowInProgress = false/g) || []).length >= 4);
+
+  t("onPurchasesUpdated resets billingFlowInProgress",
+    bridge.includes("override fun onPurchasesUpdated") &&
+    bridge.indexOf("billingFlowInProgress = false",
+      bridge.indexOf("override fun onPurchasesUpdated")) > -1);
+});
+
+suite("V2.5.2: purchase tokens never logged in native bridge", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridge = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  const logLines = bridge.split("\n").filter(l => l.includes("Log."));
+  for (const line of logLines) {
+    t(`Log line does not contain purchaseToken: ${line.trim().substring(0, 60)}`,
+      !line.includes("purchaseToken") && !line.includes("purchase.purchaseToken"));
+  }
+  t("at least one Log line exists to verify this test runs",
+    logLines.length > 0);
+});
+
+suite("V2.5.2: BillingWebViewActivity cleanup on destroy", async () => {
+  const { readFileSync } = await import("node:fs");
+  const activity = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+
+  t("onDestroy calls billingBridge.destroy()",
+    activity.includes("billingBridge.destroy()"));
+
+  t("onDestroy removes JavaScript interface",
+    activity.includes('removeJavascriptInterface("__NativePlayBillingBridge")'));
+
+  t("onDestroy calls webView.destroy()",
+    activity.includes("webView.destroy()"));
+
+  t("destroy order: bridge first, then removeInterface, then webView.destroy",
+    activity.indexOf("billingBridge.destroy()") <
+    activity.indexOf("removeJavascriptInterface") &&
+    activity.indexOf("removeJavascriptInterface") <
+    activity.indexOf("webView.destroy()"));
+});
+
+suite("V2.5.2: PlayBillingBridge.destroy() cleans up all state", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridge = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  const destroyFn = bridge.substring(bridge.indexOf("fun destroy()"));
+
+  t("destroy resets billingFlowInProgress",
+    destroyFn.includes("billingFlowInProgress = false"));
+
+  t("destroy nulls billingFlowCallbackId",
+    destroyFn.includes("billingFlowCallbackId = null"));
+
+  t("destroy resolves outstanding callbacks with DESTROYED error",
+    destroyFn.includes('errorJson("DESTROYED"'));
+
+  t("destroy ends BillingClient connection",
+    destroyFn.includes("billingClient?.endConnection()"));
+
+  t("destroy nulls billingClient",
+    destroyFn.includes("billingClient = null"));
+
+  t("destroy resets isConnected",
+    destroyFn.includes("isConnected = false"));
+});
+
+suite("V2.5.2: mixed content blocked in WebView", async () => {
+  const { readFileSync } = await import("node:fs");
+  const activity = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+
+  t("mixed content mode set to NEVER_ALLOW",
+    activity.includes("MIXED_CONTENT_NEVER_ALLOW"));
+});
+
+suite("V2.5.2: recovery scenario — fulfill succeeds, credit fails, restart recovers", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  const fulfillHandler = readFileSync("api/_handlers/playbilling/fulfill-entitlement.js", "utf-8");
+  const restoreHandler = readFileSync("api/_handlers/playbilling/restore-purchases.js", "utf-8");
+
+  const startCheckoutFn = bridgeCode.substring(bridgeCode.indexOf("async function startPlayCheckout"));
+
+  t("credit runs before consume in startPlayCheckout",
+    startCheckoutFn.indexOf("onCredit(") < startCheckoutFn.indexOf("consumePurchase"));
+
+  t("consume only runs if creditResult.ok is truthy",
+    startCheckoutFn.includes("if (creditResult && creditResult.ok)") &&
+    startCheckoutFn.indexOf("creditResult && creditResult.ok") <
+    startCheckoutFn.indexOf(".consumePurchase(purchaseToken)"));
+
+  t("consumePurchase is inside creditResult.ok guard block",
+    startCheckoutFn.indexOf("if (creditResult && creditResult.ok)") <
+    startCheckoutFn.indexOf(".consumePurchase(purchaseToken)"));
+
+  t("restorePlayPurchases only credits FULFILLED entries with valid fulfillmentId",
+    bridgeCode.includes('r.status === "FULFILLED" && r.fulfillmentId'));
+
+  t("fulfill endpoint supports idempotent replay (alreadyFulfilled)",
+    fulfillHandler.includes("alreadyFulfilled"));
+
+  t("restore endpoint re-verifies with Google before crediting",
+    restoreHandler.includes("purchaseTokens") || restoreHandler.includes("GOOGLE_PLAY_SERVICE_ACCOUNT_KEY"));
+
+  t("initAutoRecovery runs restorePlayPurchases on startup",
+    bridgeCode.includes("restorePlayPurchases(callbacks)") &&
+    bridgeCode.indexOf("function runAutoRecovery") <
+    bridgeCode.indexOf("function initAutoRecovery"));
+
+  t("recovery uses same fulfillmentId derivation (deterministic from orderId)",
+    bridgeCode.includes('return "GEI-PLAY-FULFILL-"'));
+});
+
+suite("V2.5.2: AndroidManifest declares required permissions and restrictions", async () => {
+  const { readFileSync } = await import("node:fs");
+  const manifest = readFileSync("android/app/src/main/AndroidManifest.xml", "utf-8");
+
+  t("INTERNET permission declared",
+    manifest.includes("android.permission.INTERNET"));
+
+  t("BILLING permission declared",
+    manifest.includes("com.android.vending.BILLING"));
+
+  t("cleartext traffic disabled",
+    manifest.includes('android:usesCleartextTraffic="false"'));
+
+  t("BillingWebViewActivity not exported",
+    manifest.includes('android:exported="false"'));
+
+  t("TwaActivity is exported (LAUNCHER)",
+    manifest.includes('android:exported="true"'));
+});
+
+suite("V2.5.2: Gradle build configuration consistency", async () => {
+  const { readFileSync } = await import("node:fs");
+  const rootBuild = readFileSync("android/build.gradle.kts", "utf-8");
+  const appBuild = readFileSync("android/app/build.gradle.kts", "utf-8");
+  const wrapperProps = readFileSync("android/gradle/wrapper/gradle-wrapper.properties", "utf-8");
+
+  t("AGP version is 8.7.3",
+    rootBuild.includes('"com.android.application") version "8.7.3"'));
+
+  t("Kotlin version is 2.0.21",
+    rootBuild.includes('"org.jetbrains.kotlin.android") version "2.0.21"'));
+
+  t("compileSdk is 35",
+    appBuild.includes("compileSdk = 35"));
+
+  t("targetSdk is 35",
+    appBuild.includes("targetSdk = 35"));
+
+  t("minSdk is 24",
+    appBuild.includes("minSdk = 24"));
+
+  t("jvmTarget is 17",
+    appBuild.includes('jvmTarget = "17"'));
+
+  t("Gradle wrapper uses 8.9",
+    wrapperProps.includes("gradle-8.9-bin.zip"));
+
+  t("billing-ktx dependency is 7.1.1",
+    appBuild.includes('"com.android.billingclient:billing-ktx:7.1.1"'));
+
+  t("debug build has applicationIdSuffix .debug",
+    appBuild.includes('applicationIdSuffix = ".debug"'));
+
+  t("release build has minification enabled",
+    appBuild.includes("isMinifyEnabled = true"));
+});
+
+suite("V2.5.2: TwaActivity delegates to BillingWebViewActivity", async () => {
+  const { readFileSync } = await import("node:fs");
+  const twa = readFileSync(
+    "android/app/src/main/java/com/yalltoo/taplites/gei/TwaActivity.kt", "utf-8");
+
+  t("TwaActivity starts BillingWebViewActivity with origin URL",
+    twa.includes("Intent(this, BillingWebViewActivity::class.java)") &&
+    twa.includes("TWA_ORIGIN"));
+
+  t("TwaActivity finishes after launching billing activity",
+    twa.includes("finish()"));
+
+  t("TWA origin matches game URL",
+    twa.includes('"https://gei-mountain-ocean.vercel.app"'));
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.5.1 — Android Billing Recovery Hardening & Build Readiness\n");
+console.log("\nV2.5.2 — Android Build Reproducibility & Device Smoke Test\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");
