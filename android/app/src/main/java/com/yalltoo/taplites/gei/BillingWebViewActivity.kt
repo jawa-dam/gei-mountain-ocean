@@ -1,6 +1,9 @@
 package com.yalltoo.taplites.gei
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -13,8 +16,10 @@ class BillingWebViewActivity : FragmentActivity() {
 
     companion object {
         private const val ORIGIN = "https://gei-mountain-ocean.vercel.app"
-        private val ALLOWED_HOSTS = setOf(
-            "gei-mountain-ocean.vercel.app",
+        private val ALLOWED_ORIGINS = setOf(
+            "https://gei-mountain-ocean.vercel.app"
+        )
+        private val EXTERNAL_ALLOWED_HOSTS = setOf(
             "www.paypal.com",
             "www.paypalobjects.com"
         )
@@ -40,24 +45,50 @@ class BillingWebViewActivity : FragmentActivity() {
             setSupportZoom(false)
         }
 
-        webView.addJavascriptInterface(billingBridge, "PlayBillingBridge")
+        webView.addJavascriptInterface(billingBridge, "__NativePlayBillingBridge")
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                view?.evaluateJavascript(PlayBillingBridge.JS_BRIDGE_SHIM, null)
+            }
+
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?
             ): Boolean {
-                val host = request?.url?.host ?: return true
-                return host !in ALLOWED_HOSTS
+                val url = request?.url ?: return true
+                val scheme = url.scheme ?: return true
+                val host = url.host ?: return true
+                val origin = "$scheme://$host"
+
+                if (origin in ALLOWED_ORIGINS) return false
+
+                if (host in EXTERNAL_ALLOWED_HOSTS && scheme == "https") {
+                    startActivity(Intent(Intent.ACTION_VIEW, url))
+                    return true
+                }
+
+                return true
             }
         }
 
-        webView.loadUrl(intent?.data?.toString() ?: ORIGIN)
+        val loadUrl = validateIntentUrl(intent) ?: ORIGIN
+        webView.loadUrl(loadUrl)
+    }
+
+    private fun validateIntentUrl(intent: Intent?): String? {
+        val data = intent?.data ?: return null
+        val scheme = data.scheme ?: return null
+        val host = data.host ?: return null
+        val origin = "$scheme://$host"
+        if (origin !in ALLOWED_ORIGINS) return null
+        return data.toString()
     }
 
     override fun onDestroy() {
         billingBridge.destroy()
-        webView.removeJavascriptInterface("PlayBillingBridge")
+        webView.removeJavascriptInterface("__NativePlayBillingBridge")
         webView.destroy()
         super.onDestroy()
     }

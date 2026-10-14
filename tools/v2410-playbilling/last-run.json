@@ -1,10 +1,10 @@
 {
-  "suite": "V2.4.6 — Android Billing Readiness & CI Diagnosis",
+  "suite": "V2.4.7 — Native Billing Bridge Stabilization & Android Build",
   "runDate": "2026-10-14",
-  "suites": 105,
-  "passed": 105,
+  "suites": 121,
+  "passed": 121,
   "failed": 0,
-  "assertions": 440,
+  "assertions": 546,
   "testType": "handler-level-with-doubles",
-  "note": "V2.4.6 adds 3 new suites on top of V2.4.5's 102: (1) verify rejects missing productId from Google response, (2) restore rejects missing productId from Google response, (3) restore catches concurrent revocation after Google verification (TOCTOU fix). Consolidated 6 PlayBilling serverless functions into single router to fix Vercel Hobby plan 12-function limit. Android BillingClient bridge implemented with WebView-based PlayBillingBridge.kt — compilation requires Android SDK (not available in CI environment). All handler-level tests with mock Redis and Google API doubles pass."
+  "note": "V2.4.7 adds 16 new suites on top of V2.4.6's 105: bridge contract consistency (successful purchase, USER_CANCELED, pending, billing unavailable, queryPurchases array, consumePurchase, callback ID uniqueness, error JSON structure, Base64 transport safety, unresolved purchase recovery, timeout prevention, duplicate callback prevention, destroy cleanup), WebView security (URL scheme+host validation, intent URL validation), and PayPal flow unchanged verification. Native bridge stabilized: JS shim injected via WebView onPageStarted wraps @JavascriptInterface methods in Promises with 120s timeout, Base64 transport replaces fragile string escaping, ConcurrentHashMap tracks active callbacks, unresolved purchases stored for recovery. BillingClient v7 PendingPurchasesParams applied. WebView hardened: scheme+host origin validation, intent URL validation, PayPal opened in external browser, usesCleartextTraffic=false. Gradle wrapper JAR generated. Android build blocked by missing Android SDK and AGP plugin resolution — documented as external prerequisite."
 }

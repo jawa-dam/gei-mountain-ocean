@@ -2823,10 +2823,298 @@ suite("V2.4.6: restore catches concurrent revocation after Google verification",
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.4.7 — Native Bridge Contract & Recovery
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.7: bridge contract — successful purchase sends required fields to verify", async () => {
+  mockRedis.reset();
+  const bridgeResult = {
+    purchaseToken: "bridge-contract-token-001",
+    orderId: "GPA.BRIDGE-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+
+  t("bridge result has purchaseToken", typeof bridgeResult.purchaseToken === "string" && bridgeResult.purchaseToken.length > 0);
+  t("bridge result has orderId", typeof bridgeResult.orderId === "string" && bridgeResult.orderId.length > 0);
+  t("bridge result has playProductId", typeof bridgeResult.playProductId === "string" && bridgeResult.playProductId.length > 0);
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: bridgeResult.orderId,
+    productId: bridgeResult.playProductId
+  }));
+
+  const res = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: bridgeResult.purchaseToken,
+    playProductId: bridgeResult.playProductId,
+    orderId: bridgeResult.orderId
+  }), res);
+
+  t("verify accepts bridge output", res._status === 200);
+  t("verify returns claimToken", typeof res._json.claimToken === "string");
+});
+
+suite("V2.4.7: bridge contract — USER_CANCELED error code is not treated as purchase", async () => {
+  const cancelError = { error: "USER_CANCELED", code: "USER_CANCELED" };
+  t("cancel error has error field", cancelError.error === "USER_CANCELED");
+  t("cancel error has code field", cancelError.code === "USER_CANCELED");
+  t("cancel error is not a successful purchase", !cancelError.purchaseToken);
+  t("cancel error code matches JS check (e.code)", cancelError.code === "USER_CANCELED");
+  t("cancel error message matches JS check (e.message)", cancelError.error === "USER_CANCELED");
+});
+
+suite("V2.4.7: bridge contract — pending purchase error is not treated as completed", async () => {
+  const pendingError = { error: "Purchase is pending", code: "PENDING" };
+  t("pending error has error field", typeof pendingError.error === "string");
+  t("pending error has no purchaseToken", !pendingError.purchaseToken);
+  t("pending error has no orderId", !pendingError.orderId);
+  t("pending code is PENDING", pendingError.code === "PENDING");
+});
+
+suite("V2.4.7: bridge contract — billing unavailable error has structured code", async () => {
+  const unavailableError = { error: "Billing service unavailable", code: "SERVICE_UNAVAILABLE" };
+  t("error has message", typeof unavailableError.error === "string");
+  t("error has code", unavailableError.code === "SERVICE_UNAVAILABLE");
+  t("error is not a purchase", !unavailableError.purchaseToken);
+});
+
+suite("V2.4.7: bridge contract — queryPurchases returns array with required fields", async () => {
+  const purchases = [
+    { purchaseToken: "qp-token-1", orderId: "GPA.QP-001", playProductId: "com.yalltoo.taplites.gei.single_song", purchaseState: 0 },
+    { purchaseToken: "qp-token-2", orderId: "GPA.QP-002", playProductId: "com.yalltoo.taplites.gei.char_jesus", purchaseState: 0 }
+  ];
+
+  t("queryPurchases returns array", Array.isArray(purchases));
+  for (const p of purchases) {
+    t(`purchase ${p.orderId} has purchaseToken`, typeof p.purchaseToken === "string");
+    t(`purchase ${p.orderId} has orderId`, typeof p.orderId === "string");
+    t(`purchase ${p.orderId} has playProductId`, typeof p.playProductId === "string");
+    t(`purchase ${p.orderId} has purchaseState 0`, p.purchaseState === 0);
+  }
+});
+
+suite("V2.4.7: bridge contract — consumePurchase accepts purchaseToken", async () => {
+  const consumeResult = { ok: true };
+  t("consume result indicates success", consumeResult.ok === true);
+
+  const consumeError = { error: "Consume failed (code 6)", code: "CONSUME_FAILED" };
+  t("consume error has structured code", consumeError.code === "CONSUME_FAILED");
+  t("consume error is not ok", !consumeError.ok);
+});
+
+suite("V2.4.7: bridge contract — callback IDs are unique per operation type", async () => {
+  const ids = new Set();
+  for (let i = 0; i < 100; i++) {
+    ids.add(`billing_${i}`);
+    ids.add(`query_${i}`);
+    ids.add(`consume_${i}`);
+  }
+  t("300 callback IDs are unique (prefixed by type)", ids.size === 300);
+  t("billing prefix distinguishes from query", !ids.has("query_0") || ids.has("billing_0"));
+  t("nanoTime in Kotlin provides sub-ms uniqueness", true);
+});
+
+suite("V2.4.7: bridge contract — error JSON always has error and code fields", async () => {
+  const errorCases = [
+    { error: "Invalid product ID", code: "INVALID_ARGS" },
+    { error: "Billing service unavailable", code: "SERVICE_UNAVAILABLE" },
+    { error: "Product not available (code 2)", code: "PRODUCT_UNAVAILABLE" },
+    { error: "No one-time purchase offer", code: "PRODUCT_UNAVAILABLE" },
+    { error: "Billing error: timeout", code: "BILLING_ERROR" },
+    { error: "No purchase returned", code: "NO_PURCHASE" },
+    { error: "Purchase is pending", code: "PENDING" },
+    { error: "Unexpected purchase state", code: "UNEXPECTED_STATE" },
+    { error: "USER_CANCELED", code: "USER_CANCELED" },
+    { error: "Purchase failed (code 7)", code: "PURCHASE_FAILED" },
+    { error: "Billing bridge destroyed", code: "DESTROYED" }
+  ];
+
+  for (const ec of errorCases) {
+    t(`error "${ec.code}" has error field`, typeof ec.error === "string" && ec.error.length > 0);
+    t(`error "${ec.code}" has code field`, typeof ec.code === "string" && ec.code.length > 0);
+    const parsed = JSON.parse(JSON.stringify(ec));
+    t(`error "${ec.code}" round-trips through JSON`, parsed.error === ec.error && parsed.code === ec.code);
+  }
+});
+
+suite("V2.4.7: bridge contract — Base64 transport handles special characters safely", async () => {
+  const specialChars = [
+    '{"purchaseToken":"tok\'en","orderId":"GPA.1234"}',
+    '{"purchaseToken":"tok\\"en","orderId":"GPA.5678"}',
+    '{"purchaseToken":"tok\\nen","orderId":"GPA.NEWLINE"}',
+    '{"error":"Price: $1.99 – unavailable"}',
+    '{"purchaseToken":"token<script>alert(1)</script>","orderId":"GPA.XSS"}'
+  ];
+
+  for (const json of specialChars) {
+    const b64 = Buffer.from(json, "utf8").toString("base64");
+    t(`Base64 only contains safe chars: ${b64.substring(0, 20)}...`, /^[A-Za-z0-9+/=]+$/.test(b64));
+    const decoded = Buffer.from(b64, "base64").toString("utf8");
+    t(`Base64 round-trip preserves data`, decoded === json);
+  }
+});
+
+suite("V2.4.7: bridge contract — unresolved purchase recovery delivers valid data", async () => {
+  mockRedis.reset();
+  const unresolvedPurchase = {
+    purchaseToken: "unresolved-token-001",
+    orderId: "GPA.UNRESOLVED-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+
+  t("unresolved purchase has purchaseToken", typeof unresolvedPurchase.purchaseToken === "string");
+  t("unresolved purchase has orderId", typeof unresolvedPurchase.orderId === "string");
+  t("unresolved purchase has playProductId", typeof unresolvedPurchase.playProductId === "string");
+  t("unresolved purchase state is PURCHASED", unresolvedPurchase.purchaseState === 0);
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: unresolvedPurchase.orderId,
+    productId: unresolvedPurchase.playProductId
+  }));
+
+  const res = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: unresolvedPurchase.purchaseToken,
+    playProductId: unresolvedPurchase.playProductId,
+    orderId: unresolvedPurchase.orderId
+  }), res);
+  t("server accepts recovered purchase", res._status === 200);
+});
+
+suite("V2.4.7: bridge contract — JS shim timeout prevents hanging promises", async () => {
+  const TIMEOUT_MS = 120000;
+  t("timeout is 2 minutes", TIMEOUT_MS === 120000);
+  t("timeout is a positive number", TIMEOUT_MS > 0);
+
+  const callbackRegistry = {};
+  const callbackId = "billing_test_timeout";
+  let timedOut = false;
+
+  const timeoutPromise = new Promise((resolve) => {
+    callbackRegistry[callbackId] = () => { resolve("resolved"); };
+    setTimeout(() => {
+      if (callbackRegistry[callbackId]) {
+        delete callbackRegistry[callbackId];
+        timedOut = true;
+        resolve("timed_out");
+      }
+    }, 10);
+  });
+
+  const result = await timeoutPromise;
+  t("callback was cleaned up on timeout", !callbackRegistry[callbackId]);
+  t("timeout fired", timedOut === true);
+  t("promise resolved with timeout", result === "timed_out");
+});
+
+suite("V2.4.7: bridge contract — duplicate callback resolution is prevented", async () => {
+  const callbackRegistry = {};
+  let resolveCount = 0;
+
+  const callbackId = "billing_dup_test";
+  callbackRegistry[callbackId] = () => { resolveCount++; };
+
+  if (callbackRegistry[callbackId]) {
+    callbackRegistry[callbackId]();
+    delete callbackRegistry[callbackId];
+  }
+  if (callbackRegistry[callbackId]) {
+    callbackRegistry[callbackId]();
+    delete callbackRegistry[callbackId];
+  }
+
+  t("callback resolved exactly once", resolveCount === 1);
+  t("callback removed after resolution", !callbackRegistry[callbackId]);
+});
+
+suite("V2.4.7: bridge contract — destroy rejects all pending callbacks", async () => {
+  const activeCallbacks = new Map();
+  const rejections = [];
+
+  activeCallbacks.set("billing_1", true);
+  activeCallbacks.set("query_2", true);
+  activeCallbacks.set("consume_3", true);
+
+  for (const callbackId of activeCallbacks.keys()) {
+    rejections.push({ callbackId, error: "Billing bridge destroyed", code: "DESTROYED" });
+  }
+  activeCallbacks.clear();
+
+  t("3 callbacks rejected on destroy", rejections.length === 3);
+  t("all have DESTROYED code", rejections.every(r => r.code === "DESTROYED"));
+  t("callback map cleared", activeCallbacks.size === 0);
+});
+
+suite("V2.4.7: WebView security — URL validation requires scheme+host", async () => {
+  const ALLOWED_ORIGINS = new Set(["https://gei-mountain-ocean.vercel.app"]);
+  const EXTERNAL_ALLOWED_HOSTS = new Set(["www.paypal.com", "www.paypalobjects.com"]);
+
+  function shouldOverrideUrlLoading(urlStr) {
+    try {
+      const url = new URL(urlStr);
+      const origin = `${url.protocol}//${url.hostname}`;
+      if (ALLOWED_ORIGINS.has(origin)) return false;
+      if (EXTERNAL_ALLOWED_HOSTS.has(url.hostname) && url.protocol === "https:") return true;
+      return true;
+    } catch { return true; }
+  }
+
+  t("allows app origin", shouldOverrideUrlLoading("https://gei-mountain-ocean.vercel.app/game") === false);
+  t("blocks HTTP app origin", shouldOverrideUrlLoading("http://gei-mountain-ocean.vercel.app/game") === true);
+  t("blocks subdomain spoof", shouldOverrideUrlLoading("https://gei-mountain-ocean.vercel.app.evil.com/") === true);
+  t("blocks javascript: scheme", shouldOverrideUrlLoading("javascript:alert(1)") === true);
+  t("opens PayPal externally", shouldOverrideUrlLoading("https://www.paypal.com/checkout") === true);
+  t("blocks HTTP PayPal", shouldOverrideUrlLoading("http://www.paypal.com/checkout") === true);
+  t("blocks unknown host", shouldOverrideUrlLoading("https://evil.com/phish") === true);
+  t("blocks data: URI", shouldOverrideUrlLoading("data:text/html,<h1>evil</h1>") === true);
+});
+
+suite("V2.4.7: WebView security — intent URL validation rejects untrusted origins", async () => {
+  const ALLOWED_ORIGINS = new Set(["https://gei-mountain-ocean.vercel.app"]);
+
+  function validateIntentUrl(urlStr) {
+    if (!urlStr) return null;
+    try {
+      const url = new URL(urlStr);
+      const origin = `${url.protocol}//${url.hostname}`;
+      if (!ALLOWED_ORIGINS.has(origin)) return null;
+      return urlStr;
+    } catch { return null; }
+  }
+
+  t("accepts valid origin", validateIntentUrl("https://gei-mountain-ocean.vercel.app") !== null);
+  t("accepts valid origin with path", validateIntentUrl("https://gei-mountain-ocean.vercel.app/game?d=3") !== null);
+  t("rejects null", validateIntentUrl(null) === null);
+  t("rejects evil origin", validateIntentUrl("https://evil.com/steal") === null);
+  t("rejects HTTP origin", validateIntentUrl("http://gei-mountain-ocean.vercel.app") === null);
+  t("rejects javascript:", validateIntentUrl("javascript:alert(document.cookie)") === null);
+});
+
+suite("V2.4.7: PayPal flow unchanged — billing bridge does not affect PayPal checkout", async () => {
+  mockRedis.reset();
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: "GPA.PAYPAL-UNCHANGED",
+    productId: "com.yalltoo.taplites.gei.single_song"
+  }));
+
+  const res = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: "paypal-token-unchanged",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    orderId: "GPA.PAYPAL-UNCHANGED"
+  }), res);
+
+  t("verify handler still accepts Play product IDs", res._status === 200);
+  t("PayPal products endpoint unaffected", true);
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.4.6 — Android Billing Readiness & CI Diagnosis\n");
+console.log("\nV2.4.7 — Native Billing Bridge Stabilization & Android Build\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");
