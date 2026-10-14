@@ -1,0 +1,1040 @@
+{
+ "total": 80,
+ "failed": 0,
+ "results": [
+  {
+   "name": "A1. reservoir, dam face (runs + cracks), spillway lip, pool and caustic layers mount around the existing card",
+   "pass": true,
+   "detail": {
+    "api": "V2.2.5",
+    "shown": true,
+    "res": true,
+    "face": true,
+    "stage": true,
+    "lip": true,
+    "caus": 4,
+    "cardInWrap": true,
+    "title": "HEY, DAM-ITE! WELCOME TO THE FLOW! 🦫💧",
+    "begin": true,
+    "choose": true,
+    "x": true,
+    "tone": "clear-blue",
+    "variation": "C",
+    "personality": "one thin stream"
+   }
+  },
+  {
+   "name": "A2. welcome copy + BEGIN / CHOOSE / ✕ unchanged",
+   "pass": true,
+   "detail": "HEY, DAM-ITE! WELCOME TO THE FLOW! 🦫💧"
+  },
+  {
+   "name": "A3. a personality (A–H) and a named water tone were chosen for this load",
+   "pass": true,
+   "detail": {
+    "api": "V2.2.5",
+    "shown": true,
+    "res": true,
+    "face": true,
+    "stage": true,
+    "lip": true,
+    "caus": 4,
+    "cardInWrap": true,
+    "title": "HEY, DAM-ITE! WELCOME TO THE FLOW! 🦫💧",
+    "begin": true,
+    "choose": true,
+    "x": true,
+    "tone": "clear-blue",
+    "variation": "C",
+    "personality": "one thin stream"
+   }
+  },
+  {
+   "name": "A4. the card carries a concrete/block texture (layered, readable)",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "A5. the Engineer's Note never opens automatically",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "K1. DOM stays bounded (≤ 200 nodes in the welcome) and does not grow over time",
+   "pass": true,
+   "detail": {
+    "n1": 167,
+    "n2": {
+     "n": 118,
+     "active": 1
+    }
+   }
+  },
+  {
+   "name": "K2. closing cleans up every FX node, timer-driven state and the journey layer",
+   "pass": true,
+   "detail": {
+    "fx": 0,
+    "rings": 0,
+    "beads": 0,
+    "running": false,
+    "journey": false
+   }
+  },
+  {
+   "name": "K3. FL OZ / progression / ownership untouched",
+   "pass": true,
+   "detail": {
+    "econ0": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"unlocked\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"active\":\"yall-too-beaver\"}",
+    "econ1": "{\"totalFlOz\":0,\"level\":1,\"levelFlOz\":0,\"completedLevels\":0,\"currentStep\":0,\"unlocked\":[\"wilbert-dam-guide\",\"yall-too-beaver\"],\"active\":\"yall-too-beaver\"}"
+   }
+  },
+  {
+   "name": "K4. no new storage keys written by the effect",
+   "pass": true,
+   "detail": {
+    "keys0": "damMusicLastTheme,damMusicThemeBag,geiDamIteContextVoiceV2197,geiDamIteVoiceDiscoveryV2201,geiDamIteVoiceRewardsV2202,yalltooDamGame.v2",
+    "keys1": "damMusicLastTheme,damMusicThemeBag,geiDamIteContextVoiceV2197,geiDamIteVoiceDiscoveryV2201,geiDamIteVoiceRewardsV2202,yalltooDamGame.v2"
+   }
+  },
+  {
+   "name": "A9. no new page errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "name": "B.A personality A (slow seepage): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>reset>calm>splash>ripple>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "Hmm… a leak! 💧"
+    }
+   }
+  },
+  {
+   "name": "B.B personality B (several small drips): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>reset>calm>splash>ripple>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "The water is moving!"
+    }
+   }
+  },
+  {
+   "name": "B.C personality C (one thin stream): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>reset>calm>splash>ripple>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "Look at that!"
+    }
+   }
+  },
+  {
+   "name": "B.D personality D (multiple leaks): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>reset>splash>calm>ripple>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "Hmm… a leak! 💧"
+    }
+   }
+  },
+  {
+   "name": "B.E personality E (slow reservoir rise): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>reset>calm>splash>ripple>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "Look at that!"
+    }
+   }
+  },
+  {
+   "name": "B.F personality F (rare larger release): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>hold>release>splash>reset>splash>ripple>ripple>splash>ripple>calm>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "The water is moving!"
+    }
+   }
+  },
+  {
+   "name": "B.F rare-release personality holds, then releases",
+   "pass": true,
+   "detail": "calm>rising>pressure>seepage>leak>hold>release>splash>reset>splash>ripple>ripple>splash>ripple>calm>rising>pressure>seepage>leak>release>reset"
+  },
+  {
+   "name": "B.G personality G (character notices first): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>reset>calm>splash>ripple>rising>pressure>seepage>leak>release>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "Is that a drip? 💧"
+    }
+   }
+  },
+  {
+   "name": "B.G the character notices first (short chip, no screen cover)",
+   "pass": true,
+   "detail": {
+    "water": true,
+    "splash": true,
+    "ring": true,
+    "wet": true,
+    "damp": true,
+    "chip": "Is that a drip? 💧"
+   }
+  },
+  {
+   "name": "B.H personality H (large ripple event): full pressure cycle, water + splash + ripple + wet run",
+   "pass": true,
+   "detail": {
+    "log": "calm>rising>pressure>seepage>leak>release>splash>ripple>reset",
+    "seen": {
+     "water": true,
+     "splash": true,
+     "ring": true,
+     "wet": true,
+     "damp": true,
+     "chip": "Hmm… a leak! 💧"
+    }
+   }
+  },
+  {
+   "name": "C. leak type micro: visible water + splash on landing",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "splash": true
+   }
+  },
+  {
+   "name": "C. leak type drip: visible water + splash on landing",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "splash": true
+   }
+  },
+  {
+   "name": "C. leak type thin: visible water + splash on landing",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "splash": true
+   }
+  },
+  {
+   "name": "C. leak type split: visible water + splash on landing",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "splash": true
+   }
+  },
+  {
+   "name": "C. leak type heavy: visible water + splash on landing",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "splash": true
+   }
+  },
+  {
+   "name": "C. leak type overflow: visible water + splash on landing",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "splash": true
+   }
+  },
+  {
+   "name": "D1. wet runs + damp zones appear where water passed",
+   "pass": true,
+   "detail": {
+    "runs": 4,
+    "damp": 0.94,
+    "op": 0.875298
+   }
+  },
+  {
+   "name": "D2. the damp level is released again (surface dries back)",
+   "pass": true,
+   "detail": {
+    "wet": 0.94,
+    "dry": 0
+   }
+  },
+  {
+   "name": "E1. WOW release: sheet + three streams + character chip",
+   "pass": true,
+   "detail": {
+    "streams": 3,
+    "sheet": true,
+    "chip": "WHOA!",
+    "phase": "ripple"
+   }
+  },
+  {
+   "name": "E2. WOW release creates a large multi-ring ripple",
+   "pass": true,
+   "detail": 7
+  },
+  {
+   "name": "E3. even the WOW release stays within the FX budget",
+   "pass": true,
+   "detail": {
+    "n": 124,
+    "active": 7
+   }
+  },
+  {
+   "name": "F1. tap 1 → small drop falls at the tapped spot",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F2. tap 3 → larger multi-ring ripple",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F3. tap 5 → special controlled release + FLOW ACTIVATED! 🚀",
+   "pass": true,
+   "detail": "FLOW ACTIVATED! 🚀"
+  },
+  {
+   "name": "F4. taps count 1…5 and are optional (no gate)",
+   "pass": true,
+   "detail": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ]
+  },
+  {
+   "name": "F5. tapping the card does not close it or press a button",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F6. tapping the reservoir ripples the water surface",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F7. tapping the pool splashes and the welcome stays open",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "F8. BEGIN still closes the welcome; the wave journeys into the game",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "G1. tapping the info indicator opens a compact 💡 ENGINEER'S NOTE",
+   "pass": true,
+   "detail": {
+    "on": true,
+    "exp": "true",
+    "text": "Water pushes against the walls of a dam. Engineers design dams to safely manage that force.",
+    "hdr": "ENGINEER'S NOTE"
+   }
+  },
+  {
+   "name": "G2. the info indicator is a ≥44px touch target",
+   "pass": true,
+   "detail": {
+    "w": 44,
+    "h": 44
+   }
+  },
+  {
+   "name": "G3. Esc closes only the note — the welcome stays open and is not dismissed",
+   "pass": true,
+   "detail": {
+    "note": false,
+    "open": true,
+    "key": null
+   }
+  },
+  {
+   "name": "G4. tapping the note shows the next fact",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "H. small Android 320x568 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 320,
+    "vh": 568,
+    "scrollW": 320,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. small Android 320x568 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 320,
+    "vh": 568,
+    "scrollW": 320,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": false,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. Moto G Play 360x640 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 360,
+    "vh": 640,
+    "scrollW": 360,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. Moto G Play 360x640: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 360,
+    "vh": 640,
+    "scrollW": 360,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. Moto G Play 360x640 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 360,
+    "vh": 640,
+    "scrollW": 360,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": false,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. iPhone 390x844 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 390,
+    "vh": 844,
+    "scrollW": 390,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. iPhone 390x844: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 390,
+    "vh": 844,
+    "scrollW": 390,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. iPhone 390x844 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 390,
+    "vh": 844,
+    "scrollW": 390,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": false,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. large Android 412x915 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 412,
+    "vh": 915,
+    "scrollW": 412,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. large Android 412x915: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 412,
+    "vh": 915,
+    "scrollW": 412,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. large Android 412x915 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 412,
+    "vh": 915,
+    "scrollW": 412,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. tablet 820x1180 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 820,
+    "vh": 1180,
+    "scrollW": 820,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. tablet 820x1180: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 820,
+    "vh": 1180,
+    "scrollW": 820,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. tablet 820x1180 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 820,
+    "vh": 1180,
+    "scrollW": 820,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. phone landscape 844x390 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 844,
+    "vh": 390,
+    "scrollW": 844,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. phone landscape 844x390 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 844,
+    "vh": 390,
+    "scrollW": 844,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": false,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. mobile Desktop-site 980x1400 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 980,
+    "vh": 1400,
+    "scrollW": 980,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. mobile Desktop-site 980x1400: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 980,
+    "vh": 1400,
+    "scrollW": 980,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. mobile Desktop-site 980x1400 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 980,
+    "vh": 1400,
+    "scrollW": 980,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. laptop 1366x768 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 1366,
+    "vh": 768,
+    "scrollW": 1366,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. laptop 1366x768: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 1366,
+    "vh": 768,
+    "scrollW": 1366,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. laptop 1366x768 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 1366,
+    "vh": 768,
+    "scrollW": 1366,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": false,
+    "cardScrolls": true,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H. desktop 1920x1080 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable",
+   "pass": true,
+   "detail": {
+    "vw": 1920,
+    "vh": 1080,
+    "scrollW": 1920,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H2. desktop 1920x1080: the first-impression card needs no inner scroll (nothing hidden)",
+   "pass": true,
+   "detail": {
+    "vw": 1920,
+    "vh": 1080,
+    "scrollW": 1920,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "H3. desktop 1920x1080 (review/tall, mid-cycle): no overflow, stacked, title not covered",
+   "pass": true,
+   "detail": {
+    "vw": 1920,
+    "vh": 1080,
+    "scrollW": 1920,
+    "ownOverflow": 0,
+    "resIn": true,
+    "cardIn": true,
+    "stageIn": true,
+    "beginIn": true,
+    "cardScrolls": false,
+    "stacked": true,
+    "titleClear": true,
+    "titleFits": true
+   }
+  },
+  {
+   "name": "I1. reduced motion: static wet surface + one still drop, no automatic water movement, no cycle",
+   "pass": true,
+   "detail": {
+    "moving": 0,
+    "still": true,
+    "ring": 0.6,
+    "cap": "WELCOME TO THE FLOW.",
+    "damp": 0.55,
+    "anim": 0,
+    "log": 0,
+    "reduced": true
+   }
+  },
+  {
+   "name": "I2. reduced motion: minimal ripple + caption keep it understandable",
+   "pass": true,
+   "detail": {
+    "moving": 0,
+    "still": true,
+    "ring": 0.6,
+    "cap": "WELCOME TO THE FLOW.",
+    "damp": 0.55,
+    "anim": 0,
+    "log": 0,
+    "reduced": true
+   }
+  },
+  {
+   "name": "I3. reduced motion: nothing animates continuously (waves, caustics, reflections all static)",
+   "pass": true,
+   "detail": {
+    "moving": 0,
+    "still": true,
+    "ring": 0.6,
+    "cap": "WELCOME TO THE FLOW.",
+    "damp": 0.55,
+    "anim": 0,
+    "log": 0,
+    "reduced": true
+   }
+  },
+  {
+   "name": "I4. reduced motion: taps still respond (ripple + FLOW ACTIVATED! 🚀), no large release",
+   "pass": true,
+   "detail": "FLOW ACTIVATED! 🚀"
+  },
+  {
+   "name": "J1. master mute: the effect makes no synth calls (damVoice/damNoise)",
+   "pass": true,
+   "detail": 0
+  },
+  {
+   "name": "J2. visuals run identically with sound muted",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "J3. unmuted tap uses the game's own audio voices",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "J4. sounds are throttled — a burst of 12 drops does not produce 12+ sounds",
+   "pass": true,
+   "detail": 4
+  },
+  {
+   "name": "L1. natural tones outnumber WOW tones; the chosen tone is one of them",
+   "pass": true,
+   "detail": {
+    "tones": {
+     "natural": [
+      "cyan",
+      "clear-blue",
+      "aqua",
+      "deep-blue"
+     ],
+     "wow": [
+      "blue-violet",
+      "luminous"
+     ]
+    },
+    "got": "cyan"
+   }
+  },
+  {
+   "name": "L2. tone luminous applies",
+   "pass": true,
+   "detail": "luminous"
+  },
+  {
+   "name": "L2. tone blue-violet applies",
+   "pass": true,
+   "detail": "blue-violet"
+  },
+  {
+   "name": "L2. tone aqua applies",
+   "pass": true,
+   "detail": "aqua"
+  }
+ ]
+}
+PASS A1. reservoir, dam face (runs + cracks), spillway lip, pool and caustic layers mount around the existing card
+PASS A2. welcome copy + BEGIN / CHOOSE / ✕ unchanged
+PASS A3. a personality (A–H) and a named water tone were chosen for this load
+PASS A4. the card carries a concrete/block texture (layered, readable)
+PASS A5. the Engineer's Note never opens automatically
+PASS K1. DOM stays bounded (≤ 200 nodes in the welcome) and does not grow over time
+PASS K2. closing cleans up every FX node, timer-driven state and the journey layer
+PASS K3. FL OZ / progression / ownership untouched
+PASS K4. no new storage keys written by the effect
+PASS A9. no new page errors
+PASS B.A personality A (slow seepage): full pressure cycle, water + splash + ripple + wet run
+PASS B.B personality B (several small drips): full pressure cycle, water + splash + ripple + wet run
+PASS B.C personality C (one thin stream): full pressure cycle, water + splash + ripple + wet run
+PASS B.D personality D (multiple leaks): full pressure cycle, water + splash + ripple + wet run
+PASS B.E personality E (slow reservoir rise): full pressure cycle, water + splash + ripple + wet run
+PASS B.F personality F (rare larger release): full pressure cycle, water + splash + ripple + wet run
+PASS B.F rare-release personality holds, then releases
+PASS B.G personality G (character notices first): full pressure cycle, water + splash + ripple + wet run
+PASS B.G the character notices first (short chip, no screen cover)
+PASS B.H personality H (large ripple event): full pressure cycle, water + splash + ripple + wet run
+PASS C. leak type micro: visible water + splash on landing
+PASS C. leak type drip: visible water + splash on landing
+PASS C. leak type thin: visible water + splash on landing
+PASS C. leak type split: visible water + splash on landing
+PASS C. leak type heavy: visible water + splash on landing
+PASS C. leak type overflow: visible water + splash on landing
+PASS D1. wet runs + damp zones appear where water passed
+PASS D2. the damp level is released again (surface dries back)
+PASS E1. WOW release: sheet + three streams + character chip
+PASS E2. WOW release creates a large multi-ring ripple
+PASS E3. even the WOW release stays within the FX budget
+PASS F1. tap 1 → small drop falls at the tapped spot
+PASS F2. tap 3 → larger multi-ring ripple
+PASS F3. tap 5 → special controlled release + FLOW ACTIVATED! 🚀
+PASS F4. taps count 1…5 and are optional (no gate)
+PASS F5. tapping the card does not close it or press a button
+PASS F6. tapping the reservoir ripples the water surface
+PASS F7. tapping the pool splashes and the welcome stays open
+PASS F8. BEGIN still closes the welcome; the wave journeys into the game
+PASS G1. tapping the info indicator opens a compact 💡 ENGINEER'S NOTE
+PASS G2. the info indicator is a ≥44px touch target
+PASS G3. Esc closes only the note — the welcome stays open and is not dismissed
+PASS G4. tapping the note shows the next fact
+PASS H. small Android 320x568 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H3. small Android 320x568 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. Moto G Play 360x640 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. Moto G Play 360x640: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. Moto G Play 360x640 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. iPhone 390x844 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. iPhone 390x844: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. iPhone 390x844 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. large Android 412x915 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. large Android 412x915: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. large Android 412x915 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. tablet 820x1180 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. tablet 820x1180: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. tablet 820x1180 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. phone landscape 844x390 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H3. phone landscape 844x390 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. mobile Desktop-site 980x1400 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. mobile Desktop-site 980x1400: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. mobile Desktop-site 980x1400 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. laptop 1366x768 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. laptop 1366x768: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. laptop 1366x768 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS H. desktop 1920x1080 (first-impression): no overflow, reservoir/card/pool stacked inside the viewport, BEGIN + title reachable
+PASS H2. desktop 1920x1080: the first-impression card needs no inner scroll (nothing hidden)
+PASS H3. desktop 1920x1080 (review/tall, mid-cycle): no overflow, stacked, title not covered
+PASS I1. reduced motion: static wet surface + one still drop, no automatic water movement, no cycle
+PASS I2. reduced motion: minimal ripple + caption keep it understandable
+PASS I3. reduced motion: nothing animates continuously (waves, caustics, reflections all static)
+PASS I4. reduced motion: taps still respond (ripple + FLOW ACTIVATED! 🚀), no large release
+PASS J1. master mute: the effect makes no synth calls (damVoice/damNoise)
+PASS J2. visuals run identically with sound muted
+PASS J3. unmuted tap uses the game's own audio voices
+PASS J4. sounds are throttled — a burst of 12 drops does not produce 12+ sounds
+PASS L1. natural tones outnumber WOW tones; the chosen tone is one of them
+PASS L2. tone luminous applies
+PASS L2. tone blue-violet applies
+PASS L2. tone aqua applies

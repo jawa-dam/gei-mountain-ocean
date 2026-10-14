@@ -37,7 +37,7 @@ const MATRIX = [[320, 568, "phone"], [360, 640, "phone"], [375, 667, "phone"], [
 async function openGame(browser, base, o){
   const ctx = await browser.newContext({ viewport: { width: o.w, height: o.h }, screen: o.screen, deviceScaleFactor: o.dpr || 1, isMobile: !!o.mobile, hasTouch: !!o.touch, reducedMotion: "reduce" });
   const page = await ctx.newPage(); const errors = [];
-  page.on("pageerror", e => { if (!/addStyle is not defined/.test(e.message)) errors.push(e.message); });
+  page.on("pageerror", e => errors.push(e.message));   // V2.2.20: unfiltered — the former "addStyle is not defined" (tap-lites-reward-moments-v2178.js) is fixed and must not return
   await page.route("**/*", r => r.request().url().startsWith(base) ? r.continue() : r.abort());
   await page.goto(base + "/", { waitUntil: "load" }); await sleep(700);
   await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });

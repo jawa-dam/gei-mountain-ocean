@@ -1,0 +1,40 @@
+[
+ {
+  "suite": "tools/v2-ambient/ambient-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 106,
+    "fails": [
+     "5d. LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE",
+     "6a. TRY AGAIN: music keeps playing and the random cameo loop continues"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "5d. LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE",
+   "6a. TRY AGAIN: music keeps playing and the random cameo loop continues"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ },
+ {
+  "suite": "tools/v2-cameos/cameo-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 72,
+    "fails": [
+     "F2. map buttons (BACK, sound, region pills) never covered"
+    ]
+   }
+  ],
+  "bas": [],
+  "onlyCurrent": [
+   "F2. map buttons (BACK, sound, region pills) never covered"
+  ],
+  "onlyBaseline": [],
+  "stable": true
+ }
+]

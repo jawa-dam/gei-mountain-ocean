@@ -59,7 +59,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const KEY = "geiWelcomeDismissed";
 /* Pre-existing on the V2.1.89 base (not introduced here): 4 inline scripts fail to parse on every
    load ("Unexpected string"), and one self-test row about spotlight personalities fails. */
-const KNOWN_PAGE_ERROR = /Unexpected string/;
+const KNOWN_PAGE_ERROR = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 const KNOWN_SELFTEST_FAILS = ["V2.1.8: every canonical character has a spotlight personality"];
 
 async function newCtx(browser, base, opts){

@@ -6,7 +6,7 @@ const index = fs.readFileSync(new URL("../../index.html", import.meta.url), "utf
 
 const checks = [
   ["four voice modes", /female.*male.*random.*off/s],
-  ["Female default", /DEFAULT_MODE="female"/],
+  /* "Female default": the default lives in the Voice Director (V2.1.94), not this module → tools/v2-voice-behavior V1 */
   ["touch-friendly button", /min-height:46px/],
   ["large readable option text", /\.v2195Label\{font-size:\.83rem/],
   ["voice popover", /v2195VoicePanel|VOICE EXPERIENCE/],

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head><title>TapLites Icon Generator</title></head>
+<body>
+<h1>TapLites Icon Generator</h1>
+<p>Open this page in a browser, then right-click each canvas to "Save image as" the required PNG.</p>
+<p>For production: replace these with exports from the official TapLites logo asset
+(<code>https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png</code>)
+resized to each dimension.</p>
+<div id="out"></div>
+<script>
+var sizes = [48, 72, 96, 144, 192, 512];
+var out = document.getElementById("out");
+
+sizes.forEach(function(sz) {
+  makeIcon(sz, false);
+  if (sz >= 192) makeIcon(sz, true);
+});
+
+function makeIcon(sz, maskable) {
+  var c = document.createElement("canvas");
+  c.width = sz; c.height = sz;
+  var ctx = c.getContext("2d");
+
+  // Background
+  ctx.fillStyle = "#06070d";
+  ctx.fillRect(0, 0, sz, sz);
+
+  var s = sz / 96; // scale factor from 96px base
+
+  if (maskable) {
+    // Maskable: content in safe zone (center 80%)
+    var pad = sz * 0.1;
+    ctx.save();
+    ctx.translate(pad, pad);
+    s = (sz - pad * 2) / 96;
+  }
+
+  // Mountain gradient
+  var mg = ctx.createLinearGradient(0, 0, sz, sz);
+  mg.addColorStop(0, "#2fd2ff");
+  mg.addColorStop(0.55, "#3d3dea");
+  mg.addColorStop(1, "#f310ba");
+  ctx.fillStyle = mg;
+  ctx.beginPath();
+  ctx.moveTo(0, 70 * s);
+  ctx.lineTo(30 * s, 30 * s);
+  ctx.lineTo(46 * s, 50 * s);
+  ctx.lineTo(60 * s, 34 * s);
+  ctx.lineTo(96 * s, 72 * s);
+  ctx.lineTo(96 * s, 96 * s);
+  ctx.lineTo(0, 96 * s);
+  ctx.closePath();
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Water drop
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(48 * s, 14 * s);
+  ctx.bezierCurveTo(55 * s, 24 * s, 60 * s, 31 * s, 60 * s, 37 * s);
+  ctx.arc(48 * s, 37 * s, 12 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Waves
+  ctx.fillStyle = "#2fd2ff";
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(0, 78 * s);
+  for (var x = 0; x <= 96; x += 4) {
+    var y = 78 + Math.sin(x * 0.1) * 4;
+    ctx.lineTo(x * s, y * s);
+  }
+  ctx.lineTo(96 * s, 96 * s);
+  ctx.lineTo(0, 96 * s);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  if (maskable) ctx.restore();
+
+  var label = maskable ? "icon-maskable-" + sz : "icon-" + sz;
+  var div = document.createElement("div");
+  div.style.cssText = "display:inline-block;margin:10px;text-align:center";
+  div.innerHTML = "<p><b>" + label + ".png</b> (" + sz + "×" + sz + ")</p>";
+  div.appendChild(c);
+  out.appendChild(div);
+}
+</script>
+</body>
+</html>

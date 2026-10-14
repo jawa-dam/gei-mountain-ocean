@@ -1,0 +1,8 @@
+INFRA  arcade:v2-cameos/cameo-regression                0 passed  136s  (re-run after infra timeout; first attempt: INFRA)
+PRE    arcade:v2210-flow-moment/flow-moment-regression  56 passed, 1 failed  429s
+        ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops
+PASS   arcade:v2211-flow-voices/flow-voices-regression  57 passed  290s
+
+3 suites · 113 assertions passed · genuine FAIL: 0 · unresolved INFRA: 1 · failing identically on the pre-Builder baseline: 1 · passed only after an infra re-run: 0
+
+[exited with code 0]

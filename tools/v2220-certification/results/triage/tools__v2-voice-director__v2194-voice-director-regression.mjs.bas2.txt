@@ -1,0 +1,15 @@
+PASS: dual voice packs
+PASS: all six milestone keys
+PASS: voice modes
+PASS: persistent mode
+PASS: smart random alternation
+PASS: factory excited variant
+PASS: asset preloading
+PASS: overlap protection token
+PASS: soundtrack ducking
+PASS: level-card binding
+PASS: presentation-only guard
+PASS: public director API
+
+V2.1.94 regression: PASS
+Checks: 12

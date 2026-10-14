@@ -1,0 +1,111 @@
+{
+  "engine": "GEI Economy Security Verification & Chaos Test Engine",
+  "version": "2.0.28",
+  "mode": "deterministic-safe-chaos",
+  "productionDataTouched": false,
+  "productionMoneyTouched": false,
+  "testCount": 18,
+  "passed": 17,
+  "failed": 1,
+  "chain": [
+    "ATTACK",
+    "DETECT",
+    "BLOCK",
+    "PRESERVE",
+    "RECOVER",
+    "VERIFY"
+  ],
+  "tests": [
+    {
+      "id": "C01",
+      "name": "canonical baseline is authoritative",
+      "status": "PASS"
+    },
+    {
+      "id": "C02",
+      "name": "altered FL OZ is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C03",
+      "name": "altered price is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C04",
+      "name": "altered pack ID is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C05",
+      "name": "altered currency is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C06",
+      "name": "stale authority version is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C07",
+      "name": "corrupted audit metadata is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C08",
+      "name": "audit record drift is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C09",
+      "name": "capture-bound fulfillment ID drift is blocked",
+      "status": "PASS"
+    },
+    {
+      "id": "C10",
+      "name": "wrong capture cannot claim",
+      "status": "PASS"
+    },
+    {
+      "id": "C11",
+      "name": "duplicate claim is idempotent only for the same claim ID",
+      "status": "PASS"
+    },
+    {
+      "id": "C12",
+      "name": "fulfillment requires claim",
+      "status": "PASS"
+    },
+    {
+      "id": "C13",
+      "name": "duplicate fulfillment is idempotent only for the same fulfillment ID",
+      "status": "PASS"
+    },
+    {
+      "id": "C14",
+      "name": "drift during claim freezes the entitlement",
+      "status": "PASS"
+    },
+    {
+      "id": "C15",
+      "name": "drift during fulfillment freezes the entitlement",
+      "status": "PASS"
+    },
+    {
+      "id": "C16",
+      "name": "recovery remains frozen while drift exists",
+      "status": "PASS"
+    },
+    {
+      "id": "C17",
+      "name": "authoritative repair becomes recoverable without auto-credit",
+      "status": "FAIL",
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+    },
+    {
+      "id": "C18",
+      "name": "wallet-credit bypass is represented as an invalid client-only path",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+F1 wiring
+  ✓ F1a. index.html loads the engine after the achievement director
+  ✓ F1b. all twelve supplied clip files are referenced exactly
+  ✓ F1c. the malformed 'too much flow' URL from the brief is NOT used
+  ✓ F1d. engine mounted inside the board, self-test green
+  ✓ F1e. no uncaught errors at startup
+F2 callouts
+  ✓ F2a. ×2 → FLOW COMBO, ×3 → HYDRAULIC SURGE, ×5 → MAXIMUM FLOW appear in order
+  ✓ F2b. intelligent throttling: the fast ×4 'FLOW STREAK' never stacks onto a bigger word
+  ✓ F2c. callouts are LARGE (≥ 30 px type) and never wider than the viewport
+  ✓ F2d. the old small combo flash / momentum badge are hidden (one source of big feedback)
+  ✓ F2e. escalation: PRESSURE BOOST ×7 → DAM-ITE OVERDRIVE ×10 → SUPER SURGE → FLOW / HYDRAULIC MASTER → DAM-ITE LEGEND
+  ✓ F2f. a same-tier word right behind another is dropped, a higher tier interrupts, same word has a cooldown, ≤1 word on screen
+  ✓ F2g. modular: register() + trigger() adds a new Flow Moment without engine changes
+  ✓ F2h. no uncaught errors
+F3 pressure state
+  ✓ F3a. ≤5 s: board vibrates (fmePressure) and the timer turns urgent
+  ✓ F3b. warnings play once each in order: Pressure Critical (4 s) → Hold the Dam (3 s) → Too Much Flow (2 s) → The Dam Is Cracking (1 s)
+  ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops
+      {"on":false,"off":false}
+  ✓ F3d. resuming late (1.5 s left) fires only the tightest missed warning, not a burst of three
+  ✓ F3e. saving the dam clears the pressure state
+  ✓ F3f. no uncaught errors
+F4 voice lane
+  ✓ F4a. a higher-priority voice interrupts a lower one (reaction → warning)
+  ✓ F4b. a lower-priority voice never talks over a higher one (dropped, not mixed)
+  ✓ F4c. music ducks while a Flow Moment voice speaks; the narrator is held back; both restore afterwards
+  ✓ F4d. mute is respected (no voice starts, nothing waits)
+  ✓ F4e. the achievement director sees the lane as busy; stopVoice() frees it immediately
+  ✓ F4f. no uncaught errors
+F5 failure cinematic
+  ✓ F5a. at 0 the game stops and the cinematic starts — 'Try Day Again' is NOT shown immediately
+  ✓ F5b. PHASE 1 freeze (≈250–400 ms of silence) precedes the first voice
+  ✓ F5c. voices play in the specified order: UH-OH → PRESSURE CRITICAL → HOLD THE DAM → TOO MUCH FLOW → THE DAM IS CRACKING → WE HAVE A BREAK → THE DAM BROKE → RUN → WHOA → THAT WAS A FLOOD
+  ✓ F5d. the matching big phrases are shown, in order
+  ✓ F5e. the whole failure (≈ 8 clips) stays under ~12 s with 0.35 s clips
+  ✓ F5f. educational card: 🌊 THE DAM BROKE!, 'You ran out of time…', DAM GUIDE TIP (3 lines), 🔄 TRY DAY AGAIN
+  ✓ F5g. no page scroll was created by the cinematic (scroll position + document size unchanged)
+  ✓ F5h. the encouraging 'Try again, Dam-ite' voice plays with the card
+  ✓ F5i. the timeout rules are unchanged: no FL OZ added/removed, same level and day, taps reset
+  ✓ F5j. Try Day Again restores everything: day playing, flood drained, no leftover classes / timers / particles / voices, dock back
+  ✓ F5k. the new day's clock is fresh
+  ✓ F5l. 320×568: card inside the viewport, TRY DAY AGAIN visible without scrolling, tip not covered by the button, nothing clipped
+  ✓ F5l. 360×640: card inside the viewport, TRY DAY AGAIN visible without scrolling, tip not covered by the button, nothing clipped
+  ✓ F5l. 375×667: card inside the viewport, TRY DAY AGAIN visible without scrolling, tip not covered by the button, nothing clipped
+  ✓ F5l. 390×844: card inside the viewport, TRY DAY AGAIN visible without scrolling, tip not covered by the button, nothing clipped
+  ✓ F5l. 430×932: card inside the viewport, TRY DAY AGAIN visible without scrolling, tip not covered by the button, nothing clipped
+F6 randomisation + rare events
+  ✓ F6a. WHO TURNED THAT WATER ON?! (comedy) plays in 10–20 % of failures
+  ✓ F6b. rare events stay rare (each < 8 %, together < 25 %) and normal failures stay the majority
+  ✓ F6c. reactions, flood direction, weather, shake and water intensity all vary
+  ✓ F6d. plans generate without error
+  ✓ F6e. MEGA FLOOD, BEAVER FLOOD, WATERWHEEL CHAOS, HYDRANT FLOOD, RESCUE MOMENT, COMEDY FAILURE (+ every character reaction) run through to the card with their tag / voice, no errors
+F7 safety
+  ✓ F7a. prefers-reduced-motion: no camera shake, no particles, cinematic still completes into the card
+  ✓ F7b. reduced motion: no uncaught errors
+  ✓ F7c. muted: no voice is requested, visuals still complete
+  ✓ F7d. tap-to-skip after the break goes straight to the card
+  ✓ F7e. frantic taps at the moment the clock hits 0 cannot skip the cinematic (skip only arms after the break)
+  ✓ F7f. after a failure + retry the same day still pays out normally (+111 FL OZ)
+  ✓ F7g. no uncaught errors
+F8 success
+  ✓ F8a. GATE OPEN! (day 4) and WATERWHEEL POWER! (day 5) celebrate the right days
+  ✓ F8b. the finale runs DAM STABILIZED → CONTROLLED RELEASE → POWER ON! → LEVEL COMPLETE!
+  ✓ F8c. progress and economy are exactly as before: 6 × 111 = 666 FL OZ, one level completed
+  ✓ F8d. success never triggers the failure cinematic; no uncaught errors
+
+56 passed, 1 failed

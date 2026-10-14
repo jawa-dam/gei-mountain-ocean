@@ -384,7 +384,7 @@ async function suite(browser, base, name, device){
   /* E — layout */
   const bad = layouts.filter(([, l]) => !l.inside || l.pageHScroll || l.bodyHScroll || l.small.length || !l.footerVisible);
   check(`E3 [${name}]: every STEM screen fits the frame, no horizontal scroll, tap targets ≥44px, button on screen`, bad.length === 0, bad.map(([t, l]) => [t, l]));
-  const fresh = g.errors.filter(e => !/addStyle is not defined/.test(e));      // pre-existing: the 4 unparseable tap-lites modules (see v2-dam-map harness KNOWN_BROKEN)
+  const fresh = g.errors.slice();      // pre-existing: the 4 unparseable tap-lites modules (see v2-dam-map harness KNOWN_BROKEN)
   check(`F [${name}]: no new uncaught page errors`, fresh.length === 0, fresh.slice(0, 3));
   await g.ctx.close();
 }

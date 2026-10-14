@@ -1,0 +1,18 @@
+PASS: six milestone discovery keys
+PASS: local discovery memory
+PASS: new voice marker
+PASS: seen registry
+PASS: recent discoveries
+PASS: showcase integration
+PASS: director integration
+PASS: new badge UI
+PASS: discovery toast
+PASS: discovery summary
+PASS: clear discovery memory
+PASS: reduced-motion support
+PASS: presentation-only
+PASS: public discovery API
+PASS: index wiring
+
+V2.2.01 regression: PASS
+Checks: 15

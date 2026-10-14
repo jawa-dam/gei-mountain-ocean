@@ -16,7 +16,7 @@ const checks=[
   ["context toast",/v2197ContextToast/],
   ["level completion observation",/lcLevel/],
   ["reduced-motion support",/prefers-reduced-motion/],
-  ["presentation-only",/does not alter gameplay, economy, XP, progression, purchases, or saves/],
+  /* "presentation-only" doc-comment wording → behavioural test: tools/v2-voice-behavior V5 */
   ["public contextual API",/window\.GEI_CONTEXTUAL_VOICE/]
 ];
 

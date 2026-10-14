@@ -1,0 +1,6 @@
+PASS voice script wired
+PASS six milestone keys
+FAIL female voice fallback
+PASS audio sting exists
+PASS level-complete binding exists
+PASS no gameplay authority calls

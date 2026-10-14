@@ -58,7 +58,7 @@ async function boot(opts = {}){
     return r.abort();
   });
   const page = await ctx.newPage();
-  page.on("pageerror", e => { if (!/addStyle is not defined/.test(e.message)) errors.push(e.message); });   // addStyle: pre-existing, unrelated (tap-lites-reward-moments-v2178.js)
+  page.on("pageerror", e => errors.push(e.message));   // V2.2.20: unfiltered — the former "addStyle is not defined" (tap-lites-reward-moments-v2178.js) is fixed and must not return
   await page.goto(base + "/", { waitUntil:"load" }); await sleep(500);
   await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });
   await sleep(1800);
@@ -146,10 +146,9 @@ async function suitePressure(){
   await h.untilCard(); await h.page.click("#retryDayBtn"); await sleep(400);
   await h.tap(); await sleep(300);   // day restarts
   /* pause: a panel open must stop the vibration */
-  await page.evaluate(() => { FlowMomentEngine.sync(3500, true); });
-  const on = await page.evaluate(() => document.getElementById("world").classList.contains("fmePressure"));
-  await page.evaluate(() => { FlowMomentEngine.sync(3500, false); });
-  const off = await page.evaluate(() => document.getElementById("world").classList.contains("fmePressure"));
+  /* V2.2.20: sync → read → sync → read in ONE synchronous evaluate. The game's own timer loop calls sync(realRemaining, true) every ~100 ms (remaining > 5 s here → pressure off), so reading the class in a
+     separate round-trip raced it and F3c failed on the baseline and the current build alike. The assertion is unchanged. */
+  const { on, off } = await page.evaluate(() => { const w = document.getElementById("world"); FlowMomentEngine.sync(3500, true); const on = w.classList.contains("fmePressure"); FlowMomentEngine.sync(3500, false); return { on, off: w.classList.contains("fmePressure") }; });
   check("F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops", on && !off, { on, off });
   const jump = await page.evaluate(() => { const E = FlowMomentEngine; E.reset(); E.sync(1500, true); return E.state().pressure.fired; });
   check("F3d. resuming late (1.5 s left) fires only the tightest missed warning, not a burst of three", jump.length === 3, jump);
