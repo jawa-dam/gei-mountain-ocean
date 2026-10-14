@@ -1,7 +1,7 @@
 # TapLites: GEI — Internal Play Store Test Plan
 
-**Version**: V2.4.8  
-**Status**: Bridge hardened (concurrency, recovery via queryPurchases), prerequisites documented, not yet executed on device
+**Version**: V2.4.9  
+**Status**: Auto-recovery trigger implemented, bridge contract verified via source inspection, lifecycle validated, prerequisites documented, not yet executed on device
 
 ## External Prerequisites (Manual Setup Required)
 
@@ -71,6 +71,55 @@
 curl: (56) Received HTTP code 403 from proxy after CONNECT (dl.google.com blocked)
 ```
 To resolve: allow `dl.google.com` in the cloud environment's Network access settings, or build on a local developer machine with Android SDK installed.
+
+## V2.4.9 Changes
+
+### Automatic Purchase Recovery on Startup
+V2.4.8 replaced `unresolvedPurchaseJson` with `queryPurchasesAsync` but recovery still required the user to manually invoke `restorePurchases()`. V2.4.9 adds:
+- `GeiPlayBilling.initAutoRecovery(callbacks)` — the game calls this once during initialization with its `onCredit` handler
+- If the native billing bridge is already available (shim injected, `__PlayBillingRecoveryReady === true`), recovery runs immediately
+- If the bridge is not yet available, recovery polls every 200ms (up to 50 checks / 10 seconds) for bridge readiness
+- `AUTO_RECOVERY_RAN` guard prevents duplicate auto-recovery attempts
+- Recovery goes through the full server verification pipeline: `queryPurchases → verify → claim → fulfill → credit → consume`
+- Already-fulfilled consumables are not re-credited (server-side idempotency)
+- Non-consumable entitlements are restored if still valid
+
+### Debug Build Application ID
+The debug build type configures `applicationIdSuffix = ".debug"`, so:
+- **Debug APK**: `com.yalltoo.taplites.gei.debug`
+- **Release APK**: `com.yalltoo.taplites.gei`
+
+Play Console products and license testing use the release application ID. Debug builds will show billing UI but sandbox purchases use a different package name. For internal testing with real billing flows, use a release-signed build or remove the debug suffix.
+
+### Bridge Contract Verification (Source Inspection)
+V2.4.9 adds 20 test suites verifying:
+- `launchBillingFlow`, `queryPurchases`, `consumePurchase` return `{pending: true, callbackId}` pattern
+- Base64 + `evaluateJavascript` callback resolution path
+- JS shim Promise wrappers with 120s timeout, error code propagation, `__PlayBillingRecoveryReady` flag
+- WebView origin validation, PayPal external browser handling, mixed content blocking
+- `destroy()` resets all state (billingFlowInProgress, callbacks, BillingClient)
+- Every error path in `launchBillingFlow` resets the concurrency guard
+- No purchase tokens appear in any `Log.*` call
+- AndroidManifest permissions, cleartext disabled, export flags, configChanges
+- Build configuration consistency (applicationId, SDK versions, dependencies, ProGuard)
+
+### Build Blocker
+Android compilation remains blocked by `dl.google.com` proxy restriction in the cloud environment. The `google()` Gradle repository resolves to `https://dl.google.com/dl/android/maven2/` and all Google Maven artifacts require this domain. No alternative mirror exists.
+
+**To build locally**:
+```bash
+# Requires: Android SDK (API 35), JDK 17+, ANDROID_HOME set
+cd android && ./gradlew assembleDebug --no-daemon
+# Expected output: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+**Gradlew wrapper note**: If `JAVA_TOOL_OPTIONS` is set in the environment (e.g., proxy settings), the wrapper script may fail with "Unknown command-line option '-X'". Workaround:
+```bash
+cd android && java -Xmx64m -Xms64m \
+  -Dorg.gradle.appname=gradlew \
+  -classpath gradle/wrapper/gradle-wrapper.jar \
+  org.gradle.wrapper.GradleWrapperMain assembleDebug --no-daemon
+```
 
 ## V2.4.8 Bridge Changes
 
@@ -152,8 +201,11 @@ All native errors include structured `{error, code}` JSON:
 4. Verify `window.PlayBillingBridge` is detected by `play-billing-bridge.js`
 5. Verify the JS shim is injected (check `typeof window.PlayBillingBridge.launchBillingFlow === "function"`)
 6. Verify `window.__PlayBillingRecoveryReady === true` is set after shim injection
-7. Verify PayPal buttons remain functional (opens in external browser, not in WebView)
-8. Verify HTTP URLs are blocked (`usesCleartextTraffic="false"`)
+7. Call `GeiPlayBilling.initAutoRecovery({ onCredit: ... })` and verify auto-recovery runs
+8. Verify auto-recovery does not re-run on subsequent calls
+9. Verify PayPal buttons remain functional (opens in external browser, not in WebView)
+10. Verify HTTP URLs are blocked (`usesCleartextTraffic="false"`)
+11. Verify debug APK uses application ID `com.yalltoo.taplites.gei.debug` (not `com.yalltoo.taplites.gei`)
 
 ### Phase B: License Testing (Sandbox)
 1. Add test accounts in Play Console → Settings → License testing
@@ -228,13 +280,17 @@ All native errors include structured `{error, code}` JSON:
 
 | Check | Level | Notes |
 |-------|-------|-------|
-| Handler logic (verify, claim, fulfill, restore, RTDN) | **Mocked tests — 132 suites, 603 assertions** | All pass |
-| Bridge contract (error codes, callback lifecycle, JSON transport) | **Mocked tests — V2.4.7 suites + V2.4.8 suites** | Tests validate contract shapes, not native execution |
+| Handler logic (verify, claim, fulfill, restore, RTDN) | **Mocked tests — 152 suites, 717 assertions** | All pass |
+| Bridge contract (error codes, callback lifecycle, JSON transport) | **Mocked tests — V2.4.7 + V2.4.8 + V2.4.9 suites** | Tests validate contract shapes, not native execution |
+| Automatic purchase recovery trigger | **Mocked tests — V2.4.9** | initAutoRecovery, polling, guard, server pipeline |
 | Concurrent billing prevention | **Mocked tests — V2.4.8** | BILLING_IN_PROGRESS guard verified |
-| Purchase recovery via queryPurchases | **Mocked tests — V2.4.8** | Recovery path verified through server pipeline |
-| JS shim getUnresolvedPurchase removal | **Mocked tests — V2.4.8** | Shim code verified to not reference removed method |
+| Purchase recovery via queryPurchases | **Mocked tests — V2.4.8 + V2.4.9** | Recovery path verified through server pipeline |
+| JS shim Promise wrappers and readiness flag | **Mocked tests — V2.4.8 + V2.4.9** | Shim injects PlayBillingBridge, sets __PlayBillingRecoveryReady |
 | Callback ID uniqueness (AtomicLong) | **Mocked tests — V2.4.8** | No nanoTime overflow risk |
-| Token logging prevention | **Mocked tests — V2.4.8** | Verified no token in console output |
+| Token logging prevention | **Mocked tests — V2.4.8 + V2.4.9** | Verified no token in any Log.* call |
+| Lifecycle validation (destroy, cleanup order) | **Source inspection — V2.4.9** | Every exit path resets concurrency guard |
+| AndroidManifest security | **Source inspection — V2.4.9** | Permissions, cleartext, export flags, configChanges |
+| Build configuration consistency | **Source inspection — V2.4.9** | applicationId, SDK versions, dependencies, ProGuard |
 | WebView security (URL validation, intent validation) | **Mocked tests — V2.4.7** | Tests validate JS-equivalent logic |
 | Vercel function consolidation | **Code review + structural** | Cannot verify Vercel deployment from CI |
 | Android project structure | **Code review** | Builds require Android SDK |
@@ -250,7 +306,7 @@ All native errors include structured `{error, code}` JSON:
 ## Reproducible Commands
 
 ```bash
-# Run all handler-level tests (132 suites, 603 assertions)
+# Run all handler-level tests (152 suites, 717 assertions)
 node tools/v2410-playbilling/playbilling-tests.mjs
 
 # Generate Gradle wrapper (if JAR missing)
@@ -270,6 +326,7 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 - [ ] Refund/revocation delivery via RTDN is verified end-to-end
 - [ ] Internal sandbox testing is completed with license test accounts
 - [ ] Purchase recovery via `queryPurchases` is verified on a real device after process restart
+- [ ] Automatic recovery on startup (`initAutoRecovery`) is verified on device
 - [ ] Concurrent billing flow prevention is verified on device
 - [ ] The JS shim ↔ native bridge contract is verified via emulator testing
 - [ ] Security review of WebView navigation is confirmed on device

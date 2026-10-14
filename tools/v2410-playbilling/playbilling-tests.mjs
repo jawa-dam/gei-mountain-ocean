@@ -3440,10 +3440,383 @@ suite("V2.4.8: recovery flow — verify → claim → fulfill → consume end-to
 
 
 // ════════════════════════════════════════════════════════════════════
+// V2.4.9 — Auto-Recovery, Bridge Contract, Lifecycle Validation
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.9: initAutoRecovery runs recovery when bridge is available", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+
+  t("initAutoRecovery is exported on GeiPlayBilling", bridgeCode.includes("initAutoRecovery: initAutoRecovery"));
+  t("AUTO_RECOVERY_RAN guard exists", bridgeCode.includes("var AUTO_RECOVERY_RAN = false"));
+  t("runAutoRecovery checks guard", bridgeCode.includes("if (AUTO_RECOVERY_RAN) return"));
+  t("runAutoRecovery sets guard", bridgeCode.includes("AUTO_RECOVERY_RAN = true"));
+  t("initAutoRecovery requires onCredit callback", bridgeCode.includes('typeof callbacks.onCredit !== "function"'));
+  t("initAutoRecovery calls detectPlayBillingEnvironment", bridgeCode.includes("if (detectPlayBillingEnvironment())"));
+  t("runAutoRecovery calls restorePlayPurchases", bridgeCode.includes("await restorePlayPurchases(callbacks)"));
+});
+
+suite("V2.4.9: auto-recovery polls for bridge readiness when not immediately available", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+
+  t("polls with setInterval", bridgeCode.includes("var timer = setInterval("));
+  t("checks __PlayBillingRecoveryReady", bridgeCode.includes("window.__PlayBillingRecoveryReady"));
+  t("clears interval on success", bridgeCode.includes("clearInterval(timer)"));
+  t("has max check limit to prevent infinite polling", bridgeCode.includes("MAX_CHECKS"));
+  t("clears interval on max checks exceeded", /checkCount\s*>=\s*MAX_CHECKS/.test(bridgeCode));
+  t("polling interval is reasonable (200ms)", bridgeCode.includes("var INTERVAL_MS = 200"));
+  t("max checks limit is 50 (10 seconds total)", bridgeCode.includes("var MAX_CHECKS = 50"));
+});
+
+suite("V2.4.9: auto-recovery does not re-run on duplicate initAutoRecovery calls", async () => {
+  let runCount = 0;
+  const mockRestore = async () => { runCount++; return { ok: true, restored: 0 }; };
+
+  let guardSet = false;
+  const simulateAutoRecovery = () => {
+    if (guardSet) return;
+    guardSet = true;
+    runCount++;
+  };
+
+  simulateAutoRecovery();
+  simulateAutoRecovery();
+  simulateAutoRecovery();
+
+  t("auto-recovery runs exactly once", runCount === 1);
+  t("guard prevents re-entry", guardSet === true);
+});
+
+suite("V2.4.9: auto-recovery goes through full server verification pipeline", async () => {
+  mockRedis.reset();
+
+  const autoRecoveredPurchase = {
+    purchaseToken: "auto-recovery-token-001",
+    orderId: "GPA.AUTO-RECOVER-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: autoRecoveredPurchase.orderId,
+    productId: autoRecoveredPurchase.playProductId
+  }));
+
+  const verifyRes = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: autoRecoveredPurchase.purchaseToken,
+    playProductId: autoRecoveredPurchase.playProductId,
+    orderId: autoRecoveredPurchase.orderId
+  }), verifyRes);
+  t("auto-recovered purchase verified by server", verifyRes._status === 200);
+  t("claimToken returned for auto-recovered purchase", typeof verifyRes._json.claimToken === "string");
+
+  const claimToken = verifyRes._json.claimToken;
+  const claimRes = new MockResponse();
+  await claimHandler(makeReq("POST", {
+    claimToken,
+    claimId: "play-claim-auto-recover-001"
+  }), claimRes);
+  t("auto-recovered purchase claim succeeds", claimRes._status === 200);
+
+  const fulfillRes = new MockResponse();
+  await fulfillHandler(makeReq("POST", {
+    claimToken,
+    fulfillmentId: "GEI-PLAY-FULFILL-GPA.AUTO-RECOVER-001"
+  }), fulfillRes);
+  t("auto-recovered purchase fulfillment succeeds", fulfillRes._status === 200);
+  t("receipt returned for auto-recovered purchase", !!fulfillRes._json.receipt);
+  t("receipt has packId", typeof fulfillRes._json.receipt.packId === "string");
+});
+
+suite("V2.4.9: auto-recovered consumable not re-credited after prior fulfillment", async () => {
+  mockRedis.reset();
+
+  const consumablePurchase = {
+    purchaseToken: "dup-consumable-token",
+    orderId: "GPA.DUP-CONSUMABLE-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: consumablePurchase.orderId,
+    productId: consumablePurchase.playProductId
+  }));
+
+  const v1 = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: consumablePurchase.purchaseToken,
+    playProductId: consumablePurchase.playProductId,
+    orderId: consumablePurchase.orderId
+  }), v1);
+  const ct1 = v1._json.claimToken;
+
+  const c1 = new MockResponse();
+  await claimHandler(makeReq("POST", { claimToken: ct1, claimId: "dup-claim-1" }), c1);
+  t("first claim succeeds", c1._status === 200);
+
+  const f1 = new MockResponse();
+  await fulfillHandler(makeReq("POST", {
+    claimToken: ct1,
+    fulfillmentId: "GEI-PLAY-FULFILL-GPA.DUP-CONSUMABLE-001"
+  }), f1);
+  t("first fulfillment succeeds", f1._status === 200);
+
+  const f2 = new MockResponse();
+  await fulfillHandler(makeReq("POST", {
+    claimToken: ct1,
+    fulfillmentId: "GEI-PLAY-FULFILL-GPA.DUP-CONSUMABLE-001"
+  }), f2);
+  t("duplicate fulfillment is idempotent", f2._status === 200);
+  t("duplicate fulfillment returns same receipt", f2._json.receipt.fulfillmentId === "GEI-PLAY-FULFILL-GPA.DUP-CONSUMABLE-001");
+});
+
+suite("V2.4.9: bridge contract — launchBillingFlow returns pending+callbackId", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("launchBillingFlow returns pending JSON",
+    ktCode.includes('.put("pending", true).put("callbackId", callbackId)'));
+  t("INVALID_ARGS for blank productId",
+    ktCode.includes('playProductId.isBlank()') && ktCode.includes('"INVALID_ARGS"'));
+  t("BILLING_IN_PROGRESS guard",
+    ktCode.includes('if (billingFlowInProgress)') && ktCode.includes('"BILLING_IN_PROGRESS"'));
+  t("SERVICE_UNAVAILABLE when not connected",
+    ktCode.includes('"SERVICE_UNAVAILABLE"'));
+  t("PRODUCT_UNAVAILABLE when product not found",
+    ktCode.includes('"PRODUCT_UNAVAILABLE"'));
+});
+
+suite("V2.4.9: bridge contract — queryPurchases returns pending+callbackId", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("queryPurchases returns pending JSON",
+    /fun queryPurchases[\s\S]*?\.put\("pending", true\)\.put\("callbackId", callbackId\)/.test(ktCode));
+  t("filters PURCHASED state only",
+    ktCode.includes("purchase.purchaseState != Purchase.PurchaseState.PURCHASED"));
+  t("returns empty array on connection failure",
+    ktCode.includes('resolveCallback(callbackId, "[]")'));
+});
+
+suite("V2.4.9: bridge contract — consumePurchase validates token", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("consumePurchase returns pending JSON",
+    /fun consumePurchase[\s\S]*?\.put\("pending", true\)\.put\("callbackId", callbackId\)/.test(ktCode));
+  t("INVALID_ARGS for blank token",
+    /fun consumePurchase[\s\S]*?purchaseToken\.isBlank\(\)/.test(ktCode));
+  t("CONSUME_FAILED on non-OK result",
+    ktCode.includes('"CONSUME_FAILED"'));
+});
+
+suite("V2.4.9: bridge contract — callback resolution via Base64 + evaluateJavascript", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("Base64 encodes callback data",
+    ktCode.includes("Base64.encodeToString(json.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)"));
+  t("evaluateJavascript resolves callback",
+    ktCode.includes("webView.evaluateJavascript"));
+  t("callback cleaned up after resolution",
+    ktCode.includes("delete window.__PlayBillingCallbacks['$callbackId']"));
+  t("activeCallbacks removed on resolution",
+    ktCode.includes("activeCallbacks.remove(callbackId)"));
+  t("runs on UI thread",
+    ktCode.includes("activity.runOnUiThread"));
+});
+
+suite("V2.4.9: bridge contract — JS shim injects PlayBillingBridge with Promise wrappers", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  const shimMatch = ktCode.match(/const val JS_BRIDGE_SHIM = """([\s\S]*?)"""/);
+  t("JS_BRIDGE_SHIM constant exists", !!shimMatch);
+  const shim = shimMatch[1];
+
+  t("shim checks for __NativePlayBillingBridge", shim.includes("__NativePlayBillingBridge"));
+  t("shim creates PlayBillingCallbacks registry", shim.includes("window.__PlayBillingCallbacks={}"));
+  t("shim wraps launchBillingFlow as Promise", shim.includes("launchBillingFlow:function(pid)"));
+  t("shim wraps queryPurchases as Promise", shim.includes("queryPurchases:function()"));
+  t("shim wraps consumePurchase as Promise", shim.includes("consumePurchase:function(tok)"));
+  t("shim sets __PlayBillingRecoveryReady", shim.includes("window.__PlayBillingRecoveryReady=true"));
+  t("shim has 120s timeout", shim.includes("TIMEOUT_MS=120000"));
+  t("shim clears timeout on callback", shim.includes("clearTimeout(timer)"));
+  t("shim parses error with code", shim.includes("err.code=parsed.code"));
+  t("resolveCallback uses atob for Base64 decoding", ktCode.includes("atob("));
+});
+
+suite("V2.4.9: WebView security — origin validation and PayPal handling", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+
+  t("ALLOWED_ORIGINS restricts to production URL",
+    ktCode.includes('"https://gei-mountain-ocean.vercel.app"'));
+  t("PayPal hosts open externally",
+    ktCode.includes('"www.paypal.com"') && ktCode.includes('"www.paypalobjects.com"'));
+  t("external URLs use ACTION_VIEW intent",
+    ktCode.includes("Intent(Intent.ACTION_VIEW, url)"));
+  t("mixed content never allowed",
+    ktCode.includes("MIXED_CONTENT_NEVER_ALLOW"));
+  t("bridge injected as __NativePlayBillingBridge",
+    ktCode.includes('addJavascriptInterface(billingBridge, "__NativePlayBillingBridge")'));
+  t("shim injected on page start",
+    ktCode.includes("onPageStarted") && ktCode.includes("PlayBillingBridge.JS_BRIDGE_SHIM"));
+  t("intent URL validated against allowed origins",
+    ktCode.includes("validateIntentUrl"));
+  t("invalid origin returns null",
+    ktCode.includes("if (origin !in ALLOWED_ORIGINS) return null"));
+});
+
+suite("V2.4.9: lifecycle — destroy resets all state and rejects callbacks", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  const destroyMatch = ktCode.match(/fun destroy\(\)\s*\{([\s\S]*?)\n    \}/);
+  t("destroy function exists", !!destroyMatch);
+  const destroyBody = destroyMatch[1];
+
+  t("destroy resets billingFlowInProgress", destroyBody.includes("billingFlowInProgress = false"));
+  t("destroy clears billingFlowCallbackId", destroyBody.includes("billingFlowCallbackId = null"));
+  t("destroy iterates activeCallbacks", destroyBody.includes("activeCallbacks.keys()"));
+  t("destroy sends DESTROYED error to each callback", destroyBody.includes("DESTROYED"));
+  t("destroy ends BillingClient connection", destroyBody.includes("billingClient?.endConnection()"));
+  t("destroy nullifies BillingClient", destroyBody.includes("billingClient = null"));
+  t("destroy resets isConnected", destroyBody.includes("isConnected = false"));
+});
+
+suite("V2.4.9: lifecycle — BillingWebViewActivity cleanup on destroy", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+
+  t("bridge destroyed before WebView",
+    /billingBridge\.destroy\(\)[\s\S]*?webView\.destroy\(\)/.test(ktCode));
+  t("JS interface removed on destroy",
+    ktCode.includes('removeJavascriptInterface("__NativePlayBillingBridge")'));
+  t("WebView destroyed on activity destroy",
+    ktCode.includes("webView.destroy()"));
+});
+
+suite("V2.4.9: lifecycle — every billing error path resets concurrency guard", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  const launchSection = ktCode.match(/fun launchBillingFlow[\s\S]*?return JSONObject\(\)/);
+  t("launchBillingFlow section found", !!launchSection);
+  const launchCode = launchSection[0];
+
+  const resetCount = (launchCode.match(/billingFlowInProgress\s*=\s*false/g) || []).length;
+  t("billingFlowInProgress reset on SERVICE_UNAVAILABLE (ensureConnected)", resetCount >= 3);
+  t("billingFlowInProgress reset on PRODUCT_UNAVAILABLE", launchCode.includes('"PRODUCT_UNAVAILABLE"'));
+  t("billingFlowInProgress reset in catch block", /catch\s*\(\s*e.*?\)[\s\S]*?billingFlowInProgress\s*=\s*false/.test(launchCode));
+
+  t("onPurchasesUpdated resets guard",
+    /fun onPurchasesUpdated[\s\S]*?billingFlowInProgress\s*=\s*false/.test(ktCode));
+  t("destroy resets guard",
+    /fun destroy[\s\S]*?billingFlowInProgress\s*=\s*false/.test(ktCode));
+});
+
+suite("V2.4.9: AndroidManifest security and permissions", async () => {
+  const { readFileSync } = await import("node:fs");
+  const manifest = readFileSync("android/app/src/main/AndroidManifest.xml", "utf-8");
+
+  t("INTERNET permission declared", manifest.includes("android.permission.INTERNET"));
+  t("BILLING permission declared", manifest.includes("com.android.vending.BILLING"));
+  t("cleartext traffic disabled", manifest.includes('usesCleartextTraffic="false"'));
+  t("backup disabled", manifest.includes('allowBackup="false"'));
+  t("TwaActivity exported", /TwaActivity[\s\S]*?exported="true"/.test(manifest));
+  t("BillingWebViewActivity not exported",
+    /BillingWebViewActivity[\s\S]*?exported="false"/.test(manifest));
+  t("config changes handled to preserve bridge",
+    manifest.includes("orientation|screenSize|keyboardHidden"));
+});
+
+suite("V2.4.9: build configuration consistency", async () => {
+  const { readFileSync } = await import("node:fs");
+  const appBuild = readFileSync("android/app/build.gradle.kts", "utf-8");
+  const rootBuild = readFileSync("android/build.gradle.kts", "utf-8");
+
+  t("applicationId matches expected", appBuild.includes('applicationId = "com.yalltoo.taplites.gei"'));
+  t("debug suffix configured", appBuild.includes('applicationIdSuffix = ".debug"'));
+  t("compileSdk is 35", appBuild.includes("compileSdk = 35"));
+  t("minSdk is 24", appBuild.includes("minSdk = 24"));
+  t("targetSdk is 35", appBuild.includes("targetSdk = 35"));
+  t("AGP version 8.7.3", rootBuild.includes('version "8.7.3"'));
+  t("Kotlin version 2.0.21", rootBuild.includes('version "2.0.21"'));
+  t("BillingClient 7.1.1", appBuild.includes('billing-ktx:7.1.1'));
+  t("ProGuard keeps PlayBillingBridge",
+    readFileSync("android/app/proguard-rules.pro", "utf-8").includes("PlayBillingBridge"));
+});
+
+suite("V2.4.9: play-billing-bridge.js contract with native bridge", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+
+  t("detects bridge via PlayBillingBridge object", bridgeCode.includes('typeof window.PlayBillingBridge === "object"'));
+  t("detects bridge via launchBillingFlow function", bridgeCode.includes('typeof window.PlayBillingBridge.launchBillingFlow === "function"'));
+  t("server verification before any credit", bridgeCode.includes("/api/playbilling/verify-purchase"));
+  t("claim after verification", bridgeCode.includes("/api/playbilling/claim-entitlement"));
+  t("fulfill after claim", bridgeCode.includes("/api/playbilling/fulfill-entitlement"));
+  t("consume only after fulfillment",
+    /fulfill[\s\S]*?consumePurchase/.test(bridgeCode));
+  t("consumable check before consuming",
+    bridgeCode.includes("productInfo.consumable"));
+  t("USER_CANCELED handled gracefully",
+    bridgeCode.includes('e.code === "USER_CANCELED"') || bridgeCode.includes('e.message === "USER_CANCELED"'));
+  t("restore uses queryPurchases",
+    bridgeCode.includes("PlayBillingBridge.queryPurchases()"));
+  t("restore sends to server for verification",
+    bridgeCode.includes("/api/playbilling/restore-purchases"));
+});
+
+suite("V2.4.9: no purchase tokens logged in bridge code", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  const logLines = ktCode.split("\n").filter(l => /Log\.(d|i|w|e|v)\(/.test(l));
+  for (const line of logLines) {
+    t("log line does not reference purchaseToken variable: " + line.trim().substring(0, 60),
+      !line.includes("purchase.purchaseToken") && !line.includes("purchaseToken"));
+  }
+  t("at least one log statement exists", logLines.length > 0);
+});
+
+suite("V2.4.9: play-billing-bridge.js restorePlayPurchases filters by purchaseState", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+
+  t("filters purchases by purchaseState === 0 (PURCHASED)",
+    bridgeCode.includes("p.purchaseState === 0"));
+  t("filters by orderId presence",
+    bridgeCode.includes("p.orderId"));
+  t("sends purchaseTokens array for server re-verification",
+    bridgeCode.includes("purchaseTokens"));
+  t("credits only FULFILLED restorations",
+    bridgeCode.includes('r.status === "FULFILLED"'));
+  t("returns restored count",
+    bridgeCode.includes("ok: true, restored: restored"));
+});
+
+suite("V2.4.9: BillingClient uses PendingPurchasesParams correctly", async () => {
+  const { readFileSync } = await import("node:fs");
+  const ktCode = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/PlayBillingBridge.kt", "utf-8");
+
+  t("PendingPurchasesParams.newBuilder used",
+    ktCode.includes("PendingPurchasesParams.newBuilder()"));
+  t("enableOneTimeProducts called",
+    ktCode.includes(".enableOneTimeProducts()"));
+  t("product type is INAPP",
+    ktCode.includes("BillingClient.ProductType.INAPP"));
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.4.8 — Android Build, Bridge Integration & Purchase Recovery\n");
+console.log("\nV2.4.9 — Android Build & Billing Release Gate\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");

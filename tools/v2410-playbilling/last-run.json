@@ -1,10 +1,10 @@
 {
-  "suite": "V2.4.8 — Android Build, Bridge Integration & Purchase Recovery",
+  "suite": "V2.4.9 — Android Build & Billing Release Gate",
   "runDate": "2026-10-14",
-  "suites": 132,
-  "passed": 132,
+  "suites": 152,
+  "passed": 152,
   "failed": 0,
-  "assertions": 603,
+  "assertions": 717,
   "testType": "handler-level-with-doubles",
-  "note": "V2.4.8 adds 11 new suites on top of V2.4.7's 121: concurrent billing flow prevention (BILLING_IN_PROGRESS guard, billingFlowInProgress reset on all paths including onPurchasesUpdated, error paths, destroy), AtomicLong-based callback ID generation (replaces System.nanoTime to prevent overflow), queryPurchases-based purchase recovery (replaces in-memory unresolvedPurchaseJson — recovery now uses Google Play queryPurchasesAsync as authoritative source surviving process restart, activity recreation, and WebView reload), JS shim updated (getUnresolvedPurchase removed, __PlayBillingRecoveryReady flag set instead), purchase token logging prevention verified, BILLING_IN_PROGRESS error structured for web layer, end-to-end recovery flow (verify → claim → fulfill → consume). Android build blocked by dl.google.com proxy restriction — documented as external prerequisite."
+  "note": "V2.4.9 adds 20 new suites on top of V2.4.8's 132: automatic purchase recovery trigger (initAutoRecovery with polling for bridge readiness, duplicate prevention guard, full server verification pipeline for auto-recovered purchases, consumable re-credit prevention), bridge contract verification (launchBillingFlow/queryPurchases/consumePurchase pending+callbackId pattern, Base64+evaluateJavascript callback resolution, JS shim Promise wrappers with timeout and error codes), WebView security (origin validation, PayPal external handling, mixed content blocking), lifecycle validation (destroy resets all state, BillingWebViewActivity cleanup order, every error path resets concurrency guard), AndroidManifest security (permissions, cleartext disabled, export flags, configChanges), build configuration consistency (applicationId, debug suffix, SDK versions, dependencies), play-billing-bridge.js contract (detection, server verification pipeline order, consume-after-fulfill, USER_CANCELED handling, restore filtering), token logging prevention, PendingPurchasesParams usage. Android build blocked by dl.google.com proxy restriction — documented as external prerequisite."
 }

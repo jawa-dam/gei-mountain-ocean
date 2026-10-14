@@ -20,6 +20,8 @@
 
   var PLAY_BILLING_AVAILABLE = false;
   var PLAY_BILLING_PRODUCTS = null;
+  var AUTO_RECOVERY_RAN = false;
+  var AUTO_RECOVERY_CALLBACKS = null;
 
   function isPlayBillingAvailable() {
     return PLAY_BILLING_AVAILABLE &&
@@ -289,6 +291,62 @@
     }
   }
 
+  /**
+   * Run automatic purchase recovery if the native bridge is available.
+   * Called internally — not meant for direct game use.
+   */
+  async function runAutoRecovery(callbacks) {
+    if (AUTO_RECOVERY_RAN) return;
+    AUTO_RECOVERY_RAN = true;
+
+    if (!isPlayBillingAvailable()) return;
+
+    try {
+      var result = await restorePlayPurchases(callbacks);
+      if (result.ok && result.restored > 0) {
+        console.log("[PlayBilling] Auto-recovery restored " + result.restored + " purchase(s).");
+      }
+    } catch(e) {
+      console.error("[PlayBilling] Auto-recovery failed:", e);
+    }
+  }
+
+  /**
+   * Register callbacks and enable automatic purchase recovery on startup.
+   *
+   * The game calls this once during initialization with its onCredit handler.
+   * If the native billing bridge is already available, recovery runs immediately.
+   * If not yet available, recovery runs as soon as the bridge becomes ready
+   * (signaled by window.__PlayBillingRecoveryReady).
+   *
+   * This ensures interrupted purchases are recovered without requiring the
+   * user to discover and tap a restore button.
+   *
+   * @param {object} callbacks - { onCredit, onStatus? }
+   */
+  function initAutoRecovery(callbacks) {
+    if (!callbacks || typeof callbacks.onCredit !== "function") return;
+    AUTO_RECOVERY_CALLBACKS = callbacks;
+
+    if (detectPlayBillingEnvironment()) {
+      runAutoRecovery(callbacks);
+      return;
+    }
+
+    var checkCount = 0;
+    var MAX_CHECKS = 50;
+    var INTERVAL_MS = 200;
+    var timer = setInterval(function() {
+      checkCount++;
+      if (window.__PlayBillingRecoveryReady && detectPlayBillingEnvironment()) {
+        clearInterval(timer);
+        runAutoRecovery(callbacks);
+      } else if (checkCount >= MAX_CHECKS) {
+        clearInterval(timer);
+      }
+    }, INTERVAL_MS);
+  }
+
   // Expose to global scope for game integration
   window.GeiPlayBilling = {
     detect: detectPlayBillingEnvironment,
@@ -296,6 +354,7 @@
     startCheckout: startPlayCheckout,
     restorePurchases: restorePlayPurchases,
     fetchProducts: fetchPlayProducts,
+    initAutoRecovery: initAutoRecovery,
     _fulfillmentId: playFulfillmentId
   };
 })();
