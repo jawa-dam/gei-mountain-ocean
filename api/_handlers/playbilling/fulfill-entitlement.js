@@ -1,8 +1,8 @@
-import { fulfillPlayEntitlement } from "../_lib/playbilling-ledger.js";
+import { fulfillPlayEntitlement } from "../../_lib/playbilling-ledger.js";
 import {
   ECONOMY_AUTHORITY_VERSION,
   auditReceipt
-} from "../_lib/economy-authority.js";
+} from "../../_lib/economy-authority.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

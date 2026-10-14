@@ -1,4 +1,4 @@
-import { claimPlayEntitlement } from "../_lib/playbilling-ledger.js";
+import { claimPlayEntitlement } from "../../_lib/playbilling-ledger.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

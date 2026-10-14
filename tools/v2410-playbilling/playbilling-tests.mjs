@@ -289,12 +289,12 @@ const {
 } = await import("../../api/_lib/economy-authority.js");
 
 // Import handlers
-const verifyPurchaseModule = await import("../../api/playbilling/verify-purchase.js");
-const claimEntitlementModule = await import("../../api/playbilling/claim-entitlement.js");
-const fulfillEntitlementModule = await import("../../api/playbilling/fulfill-entitlement.js");
-const productsModule = await import("../../api/playbilling/products.js");
-const restorePurchasesModule = await import("../../api/playbilling/restore-purchases.js");
-const rtdnModule = await import("../../api/playbilling/rtdn-notification.js");
+const verifyPurchaseModule = await import("../../api/_handlers/playbilling/verify-purchase.js");
+const claimEntitlementModule = await import("../../api/_handlers/playbilling/claim-entitlement.js");
+const fulfillEntitlementModule = await import("../../api/_handlers/playbilling/fulfill-entitlement.js");
+const productsModule = await import("../../api/_handlers/playbilling/products.js");
+const restorePurchasesModule = await import("../../api/_handlers/playbilling/restore-purchases.js");
+const rtdnModule = await import("../../api/_handlers/playbilling/rtdn-notification.js");
 
 const verifyHandler = verifyPurchaseModule.default;
 const claimHandler = claimEntitlementModule.default;
@@ -2714,11 +2714,119 @@ suite("V2.4.5: restore accepts matching Google product ID", async () => {
 });
 
 
+// ── V2.4.6 — Vercel consolidation + identity hardening ──────────────
+
+suite("V2.4.6: verify rejects missing productId from Google response", async () => {
+  mockRedis.reset();
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: "GPA.NO-PID-001",
+    productId: undefined,
+    purchaseState: 0
+  }));
+  // Remove productId from response
+  const origHandler = googleApiHandler;
+  googleApiHandler = (url, opts) => {
+    if (opts?.method === "POST" && url.endsWith(":acknowledge"))
+      return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
+    const purchase = { purchaseState: 0, consumptionState: 0, acknowledgementState: 0, orderId: "GPA.NO-PID-001", purchaseTimeMillis: String(Date.now()) };
+    return new Response(JSON.stringify(purchase), { status: 200, headers: { "Content-Type": "application/json" } });
+  };
+
+  const res = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: "no-pid-token",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    orderId: "GPA.NO-PID-001"
+  }), res);
+
+  t("status 403", res._status === 403);
+  googleApiHandler = origHandler;
+});
+
+suite("V2.4.6: restore rejects missing productId from Google response", async () => {
+  mockRedis.reset();
+  await fullVerifyClaimFulfill(
+    "GPA.NO-PID-RESTORE",
+    "com.yalltoo.taplites.gei.char_jesus",
+    "no-pid-restore-token"
+  );
+
+  googleApiHandler = (url, opts) => {
+    if (opts?.method === "POST" && url.endsWith(":acknowledge"))
+      return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
+    const purchase = { purchaseState: 0, consumptionState: 0, acknowledgementState: 1, orderId: "GPA.NO-PID-RESTORE", purchaseTimeMillis: String(Date.now()) };
+    return new Response(JSON.stringify(purchase), { status: 200, headers: { "Content-Type": "application/json" } });
+  };
+
+  const res = new MockResponse();
+  await restoreHandler(makeReq("POST", {
+    orderIds: ["GPA.NO-PID-RESTORE"],
+    purchaseTokens: [{
+      orderId: "GPA.NO-PID-RESTORE",
+      purchaseToken: "no-pid-restore-token",
+      playProductId: "com.yalltoo.taplites.gei.char_jesus"
+    }]
+  }), res);
+
+  t("status 200", res._status === 200);
+  const r = res._json.restorations[0];
+  t("not ok", r.ok === false);
+  t("reason GOOGLE_PRODUCT_ID_MISMATCH", r.reason === "GOOGLE_PRODUCT_ID_MISMATCH");
+});
+
+suite("V2.4.6: restore catches concurrent revocation after Google verification", async () => {
+  mockRedis.reset();
+  await fullVerifyClaimFulfill(
+    "GPA.RACE-RESTORE",
+    "com.yalltoo.taplites.gei.char_jesus",
+    "race-restore-token"
+  );
+
+  const origHandler2 = googleApiHandler;
+  googleApiHandler = async (url, opts) => {
+    if (opts?.method === "POST" && url.endsWith(":acknowledge"))
+      return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
+    // Simulate revocation happening during Google API call
+    const key = "gei:playbilling:entitlement:GPA.RACE-RESTORE";
+    const raw = mockRedis.store.get(key);
+    if (raw) {
+      const obj = JSON.parse(raw);
+      obj.status = "REVOKED";
+      obj.revokedAt = new Date().toISOString();
+      obj.revocationReason = "REFUND";
+      mockRedis.store.set(key, JSON.stringify(obj));
+    }
+    const purchase = validGooglePurchase({
+      orderId: "GPA.RACE-RESTORE",
+      productId: "com.yalltoo.taplites.gei.char_jesus",
+      purchaseState: 0,
+      acknowledgementState: 1
+    });
+    return new Response(JSON.stringify(purchase), { status: 200, headers: { "Content-Type": "application/json" } });
+  };
+
+  const res = new MockResponse();
+  await restoreHandler(makeReq("POST", {
+    orderIds: ["GPA.RACE-RESTORE"],
+    purchaseTokens: [{
+      orderId: "GPA.RACE-RESTORE",
+      purchaseToken: "race-restore-token",
+      playProductId: "com.yalltoo.taplites.gei.char_jesus"
+    }]
+  }), res);
+
+  t("status 200", res._status === 200);
+  const r = res._json.restorations[0];
+  t("not ok — revocation caught", r.ok === false);
+  t("reason REVOKED", r.reason === "REVOKED");
+  googleApiHandler = origHandler2;
+});
+
 // ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.4.5 — Final Entitlement Consistency Gate\n");
+console.log("\nV2.4.6 — Android Billing Readiness & CI Diagnosis\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");

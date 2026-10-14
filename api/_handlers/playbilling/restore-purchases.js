@@ -1,6 +1,6 @@
-import { getPlayEntitlement } from "../_lib/playbilling-ledger.js";
-import { ECONOMY_AUTHORITY_VERSION, getPack } from "../_lib/economy-authority.js";
-import { packIdFromPlayProductId, isConsumable } from "../_lib/billing-channel.js";
+import { getPlayEntitlement } from "../../_lib/playbilling-ledger.js";
+import { ECONOMY_AUTHORITY_VERSION, getPack } from "../../_lib/economy-authority.js";
+import { packIdFromPlayProductId, isConsumable } from "../../_lib/billing-channel.js";
 
 async function verifyPurchaseTokenWithGoogle(packageName, playProductId, purchaseToken) {
   const keyJson = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY;
@@ -196,7 +196,7 @@ export default async function handler(req, res) {
             continue;
           }
 
-          if (purchase.productId && purchase.productId !== tokenInfo.playProductId) {
+          if (!purchase.productId || purchase.productId !== tokenInfo.playProductId) {
             results.push({
               orderId,
               ok: false,
@@ -206,18 +206,31 @@ export default async function handler(req, res) {
             continue;
           }
 
+          const freshEntitlement = await getPlayEntitlement(orderId);
+          if (freshEntitlement.ok && freshEntitlement.record.status === "REVOKED") {
+            results.push({
+              orderId,
+              ok: false,
+              reason: "REVOKED",
+              packId: record.packId,
+              revokedAt: freshEntitlement.record.revokedAt || null
+            });
+            continue;
+          }
+
+          const current = freshEntitlement.ok ? freshEntitlement.record : record;
           results.push({
             orderId,
             ok: true,
-            status: record.status,
-            packId: record.packId,
-            flOz: record.flOz,
-            productType: record.productType || "fl-oz",
-            characterId: record.characterId || null,
+            status: current.status,
+            packId: current.packId,
+            flOz: current.flOz,
+            productType: current.productType || "fl-oz",
+            characterId: current.characterId || null,
             consumable,
-            claimedAt: record.claimedAt,
-            fulfilledAt: record.fulfilledAt,
-            fulfillmentId: record.fulfillmentId || null,
+            claimedAt: current.claimedAt,
+            fulfilledAt: current.fulfilledAt,
+            fulfillmentId: current.fulfillmentId || null,
             googleVerified: true
           });
         } else {

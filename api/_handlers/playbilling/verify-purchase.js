@@ -1,14 +1,14 @@
-import { recordPlayEntitlement } from "../_lib/playbilling-ledger.js";
+import { recordPlayEntitlement } from "../../_lib/playbilling-ledger.js";
 import {
   PACKS,
   ECONOMY_AUTHORITY_VERSION,
   validateEntitlementAuthority
-} from "../_lib/economy-authority.js";
+} from "../../_lib/economy-authority.js";
 import {
   packIdFromPlayProductId,
   validatePlayProductMapping,
   isConsumable
-} from "../_lib/billing-channel.js";
+} from "../../_lib/billing-channel.js";
 
 async function getGoogleAccessToken() {
   const keyJson = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY;
@@ -170,7 +170,7 @@ export default async function handler(req, res) {
       });
     }
 
-    if (purchase.productId && purchase.productId !== playProductId) {
+    if (!purchase.productId || purchase.productId !== playProductId) {
       return res.status(403).json({
         error: "Product ID does not match the verified purchase."
       });
@@ -179,7 +179,7 @@ export default async function handler(req, res) {
     if (consumable && purchase.consumptionState === 1) {
       const existing = await (async () => {
         try {
-          const { getPlayEntitlement } = await import("../_lib/playbilling-ledger.js");
+          const { getPlayEntitlement } = await import("../../_lib/playbilling-ledger.js");
           return await getPlayEntitlement(orderId);
         } catch { return { ok: false }; }
       })();

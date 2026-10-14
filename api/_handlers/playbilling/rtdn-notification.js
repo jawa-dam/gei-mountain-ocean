@@ -3,15 +3,15 @@ import {
   revokePlayEntitlement,
   recordRtdnEvent,
   completeRtdnEvent
-} from "../_lib/playbilling-ledger.js";
+} from "../../_lib/playbilling-ledger.js";
 import {
   ECONOMY_AUTHORITY_VERSION,
   getPack
-} from "../_lib/economy-authority.js";
+} from "../../_lib/economy-authority.js";
 import {
   packIdFromPlayProductId,
   isConsumable
-} from "../_lib/billing-channel.js";
+} from "../../_lib/billing-channel.js";
 import { timingSafeEqual } from "node:crypto";
 
 const SUPPORTED_NOTIFICATION_TYPES = Object.freeze({

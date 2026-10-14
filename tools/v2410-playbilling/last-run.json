@@ -1,10 +1,10 @@
 {
-  "suite": "V2.4.5 — Final Entitlement Consistency Gate",
-  "runDate": "2026-10-13",
-  "suites": 102,
-  "passed": 102,
+  "suite": "V2.4.6 — Android Billing Readiness & CI Diagnosis",
+  "runDate": "2026-10-14",
+  "suites": 105,
+  "passed": 105,
   "failed": 0,
-  "assertions": 433,
+  "assertions": 440,
   "testType": "handler-level-with-doubles",
-  "note": "Tests exercise actual imported handlers with mock Redis and Google API doubles. V2.4.5 adds 18 new suites (37-47 plus sub-suites) covering: atomic REVOKED state guard in claim/fulfill Lua scripts preventing late claims and fulfillments from overwriting revoked entitlements, concurrent duplicate RTDN deduplication, Redis failure at each lifecycle transition (fulfill, RTDN revocation, restore) failing closed, partial RTDN retry re-processing, strict Google identity validation (missing order ID, wrong order ID, substituted product ID, invalid purchase state, Google API failure), revocation audit consistency after retries, exactly-once fulfillment for consumables (no re-credit), strict lifecycle transition enforcement (FULFILLABLE→FULFILLED→REVOKED with REVOKED terminal), and restore with matching Google product ID cross-validation. Manual tests requiring Play Console, Cloud Pub/Sub, and RTDN configuration are documented but not run."
+  "note": "V2.4.6 adds 3 new suites on top of V2.4.5's 102: (1) verify rejects missing productId from Google response, (2) restore rejects missing productId from Google response, (3) restore catches concurrent revocation after Google verification (TOCTOU fix). Consolidated 6 PlayBilling serverless functions into single router to fix Vercel Hobby plan 12-function limit. Android BillingClient bridge implemented with WebView-based PlayBillingBridge.kt — compilation requires Android SDK (not available in CI environment). All handler-level tests with mock Redis and Google API doubles pass."
 }
