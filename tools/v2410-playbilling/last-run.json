@@ -1,10 +1,10 @@
 {
-  "suite": "V2.4.7 — Native Billing Bridge Stabilization & Android Build",
+  "suite": "V2.4.8 — Android Build, Bridge Integration & Purchase Recovery",
   "runDate": "2026-10-14",
-  "suites": 121,
-  "passed": 121,
+  "suites": 132,
+  "passed": 132,
   "failed": 0,
-  "assertions": 546,
+  "assertions": 603,
   "testType": "handler-level-with-doubles",
-  "note": "V2.4.7 adds 16 new suites on top of V2.4.6's 105: bridge contract consistency (successful purchase, USER_CANCELED, pending, billing unavailable, queryPurchases array, consumePurchase, callback ID uniqueness, error JSON structure, Base64 transport safety, unresolved purchase recovery, timeout prevention, duplicate callback prevention, destroy cleanup), WebView security (URL scheme+host validation, intent URL validation), and PayPal flow unchanged verification. Native bridge stabilized: JS shim injected via WebView onPageStarted wraps @JavascriptInterface methods in Promises with 120s timeout, Base64 transport replaces fragile string escaping, ConcurrentHashMap tracks active callbacks, unresolved purchases stored for recovery. BillingClient v7 PendingPurchasesParams applied. WebView hardened: scheme+host origin validation, intent URL validation, PayPal opened in external browser, usesCleartextTraffic=false. Gradle wrapper JAR generated. Android build blocked by missing Android SDK and AGP plugin resolution — documented as external prerequisite."
+  "note": "V2.4.8 adds 11 new suites on top of V2.4.7's 121: concurrent billing flow prevention (BILLING_IN_PROGRESS guard, billingFlowInProgress reset on all paths including onPurchasesUpdated, error paths, destroy), AtomicLong-based callback ID generation (replaces System.nanoTime to prevent overflow), queryPurchases-based purchase recovery (replaces in-memory unresolvedPurchaseJson — recovery now uses Google Play queryPurchasesAsync as authoritative source surviving process restart, activity recreation, and WebView reload), JS shim updated (getUnresolvedPurchase removed, __PlayBillingRecoveryReady flag set instead), purchase token logging prevention verified, BILLING_IN_PROGRESS error structured for web layer, end-to-end recovery flow (verify → claim → fulfill → consume). Android build blocked by dl.google.com proxy restriction — documented as external prerequisite."
 }

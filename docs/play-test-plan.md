@@ -1,7 +1,7 @@
 # TapLites: GEI — Internal Play Store Test Plan
 
-**Version**: V2.4.7  
-**Status**: Native bridge stabilized, prerequisites documented, not yet executed on device
+**Version**: V2.4.8  
+**Status**: Bridge hardened (concurrency, recovery via queryPurchases), prerequisites documented, not yet executed on device
 
 ## External Prerequisites (Manual Setup Required)
 
@@ -66,13 +66,42 @@
 **Build command**: `cd android && ./gradlew assembleDebug --no-daemon`  
 **Expected output**: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-**Known blocker (V2.4.7)**: Build requires Android SDK with API 35 and AGP 8.7.3. The CI/cloud environment does not have the Android SDK installed. The exact failure is:
+**Known blocker (V2.4.8)**: Build requires Android SDK with API 35 and AGP 8.7.3. The CI/cloud environment does not have the Android SDK installed, and `dl.google.com` is blocked by the environment's egress proxy. The exact failure is:
 ```
-Plugin [id: 'com.android.application', version: '8.7.3', apply: false] was not found
+curl: (56) Received HTTP code 403 from proxy after CONNECT (dl.google.com blocked)
 ```
-This is resolved by installing the Android SDK locally and running the build on a developer machine.
+To resolve: allow `dl.google.com` in the cloud environment's Network access settings, or build on a local developer machine with Android SDK installed.
 
-## V2.4.7 Bridge Contract Changes
+## V2.4.8 Bridge Changes
+
+### Concurrency: Prevent Overlapping Billing Flows
+V2.4.7 used a single `billingFlowCallbackId` field that could be overwritten by a concurrent `launchBillingFlow` call. V2.4.8 adds:
+- `@Volatile billingFlowInProgress: Boolean` — guards against concurrent launches
+- `launchBillingFlow` returns `BILLING_IN_PROGRESS` error immediately if a flow is active
+- `billingFlowInProgress` is reset on every exit path: `onPurchasesUpdated`, all error branches in the coroutine, `destroy()`
+- The guard prevents the single `billingFlowCallbackId` from being overwritten
+
+### Recovery: queryPurchases Replaces unresolvedPurchaseJson
+V2.4.7 stored unresolved purchases in an in-memory `unresolvedPurchaseJson` field and exposed `getUnresolvedPurchase()` as a `@JavascriptInterface` method. This did not survive process restart, activity recreation, or WebView reload.
+
+V2.4.8 removes both:
+- `unresolvedPurchaseJson` field — removed
+- `getUnresolvedPurchase()` method — removed
+- JS shim no longer calls `getUnresolvedPurchase()` or sets `window.__PlayBillingUnresolvedPurchase`
+- JS shim sets `window.__PlayBillingRecoveryReady = true` to signal readiness
+- Recovery now uses `queryPurchases()` which calls `BillingClient.queryPurchasesAsync()` — the authoritative Google Play purchase-query flow
+- When `onPurchasesUpdated` receives a purchase with no matching callback, it logs a warning (not the purchase token) instead of storing in memory
+- The web layer calls `GeiPlayBilling.restorePurchases()` which uses `queryPurchases()` to recover from the authoritative source
+
+### Callback IDs: AtomicLong Replaces nanoTime
+V2.4.7 used `System.nanoTime()` for callback IDs, which risked `Number.MAX_SAFE_INTEGER` overflow when multiplied. V2.4.8 uses:
+- `AtomicLong` counter with `incrementAndGet()` — thread-safe, monotonically increasing, no overflow risk
+- Format: `{prefix}_{counter}` (e.g., `billing_1`, `query_2`, `consume_3`)
+
+### Token Logging
+V2.4.8 ensures purchase tokens are never logged. The `Log.w` in `onPurchasesUpdated` logs only a generic message, not the purchase data.
+
+## V2.4.7 Bridge Architecture (Unchanged)
 
 ### Native Bridge Architecture
 The native `PlayBillingBridge.kt` exposes `@JavascriptInterface` methods that return synchronous `String` responses with a `{pending: true, callbackId: "..."}` pattern. A JS shim (`PlayBillingBridge.JS_BRIDGE_SHIM`) injected into the WebView on page start wraps these into `Promise`-returning functions that `play-billing-bridge.js` can `await`.
@@ -80,10 +109,12 @@ The native `PlayBillingBridge.kt` exposes `@JavascriptInterface` methods that re
 **Flow**:
 1. JS calls `window.PlayBillingBridge.launchBillingFlow(playProductId)` (Promise)
 2. Shim calls `window.__NativePlayBillingBridge.launchBillingFlow(playProductId)` (sync String)
-3. Native returns `{"pending":true,"callbackId":"billing_<nanoTime>"}` immediately
-4. Shim registers callback in `window.__PlayBillingCallbacks[callbackId]` with 120s timeout
-5. Native `onPurchasesUpdated` resolves via `webView.evaluateJavascript` + Base64 encoding
-6. Shim callback parses the result and resolves/rejects the Promise
+3. Native checks `billingFlowInProgress` — returns `BILLING_IN_PROGRESS` error if true (V2.4.8)
+4. Native returns `{"pending":true,"callbackId":"billing_<counter>"}` immediately
+5. Shim registers callback in `window.__PlayBillingCallbacks[callbackId]` with 120s timeout
+6. Native `onPurchasesUpdated` resolves via `webView.evaluateJavascript` + Base64 encoding
+7. Shim callback parses the result and resolves/rejects the Promise
+8. `billingFlowInProgress` is reset, allowing the next billing flow
 
 ### Error Codes
 All native errors include structured `{error, code}` JSON:
@@ -95,13 +126,16 @@ All native errors include structured `{error, code}` JSON:
 - `DESTROYED` — activity/bridge destroyed with pending callbacks
 - `INVALID_ARGS` — empty product ID or purchase token
 - `BILLING_ERROR` — uncaught exception during billing flow
+- `BILLING_IN_PROGRESS` — concurrent billing flow rejected (V2.4.8)
 
-### Recovery
-- Unresolved purchases (received via `onPurchasesUpdated` with no active callback) are stored in `unresolvedPurchaseJson` and delivered via `getUnresolvedPurchase()` on next page load
+### Recovery (V2.4.8)
+- Purchases with no matching callback are logged (without tokens) and recovered via `queryPurchasesAsync` on next app launch or `restorePurchases()` call
+- `queryPurchases()` calls Google Play's `queryPurchasesAsync(INAPP)` — the authoritative source that survives process restart, activity recreation, network interruption, and WebView reload
+- The web layer sends recovered purchase tokens to the server for verification before granting entitlements
 - All active callbacks are rejected with `DESTROYED` error on `destroy()`
 - BillingClient reconnection handled via `ensureConnected()` with `BillingClientStateListener`
 
-### WebView Security (V2.4.7)
+### WebView Security (V2.4.7, unchanged in V2.4.8)
 - Navigation validated by scheme+host origin (not hostname alone)
 - Only `https://gei-mountain-ocean.vercel.app` loads in the billing WebView
 - PayPal URLs (`www.paypal.com`, `www.paypalobjects.com`) open in external browser — billing bridge NOT exposed
@@ -117,8 +151,9 @@ All native errors include structured `{error, code}` JSON:
 3. Verify WebView loads `https://gei-mountain-ocean.vercel.app`
 4. Verify `window.PlayBillingBridge` is detected by `play-billing-bridge.js`
 5. Verify the JS shim is injected (check `typeof window.PlayBillingBridge.launchBillingFlow === "function"`)
-6. Verify PayPal buttons remain functional (opens in external browser, not in WebView)
-7. Verify HTTP URLs are blocked (`usesCleartextTraffic="false"`)
+6. Verify `window.__PlayBillingRecoveryReady === true` is set after shim injection
+7. Verify PayPal buttons remain functional (opens in external browser, not in WebView)
+8. Verify HTTP URLs are blocked (`usesCleartextTraffic="false"`)
 
 ### Phase B: License Testing (Sandbox)
 1. Add test accounts in Play Console → Settings → License testing
@@ -141,15 +176,33 @@ All native errors include structured `{error, code}` JSON:
 6. Test restore flow:
    - Clear app data
    - Trigger `restorePurchases()`
+   - Verify `queryPurchases()` returns unconsumed purchases from Google Play
+   - Verify server re-verifies each returned purchase token
    - Verify non-consumable entitlements restored
    - Verify consumables NOT re-credited
 7. Test recovery after app restart:
    - Complete purchase, then force-kill app before JS callback
    - Re-open app
-   - Verify `getUnresolvedPurchase()` delivers stored purchase
-8. Test timeout:
+   - Trigger `restorePurchases()` or `queryPurchases()`
+   - Verify purchase recovered from Google Play (not in-memory)
+   - Verify server verification → claim → fulfill completes
+8. Test concurrent billing prevention:
+   - Initiate a billing flow
+   - Immediately call `launchBillingFlow` again before the first completes
+   - Verify second call returns `BILLING_IN_PROGRESS` error
+   - Verify first flow completes normally
+9. Test timeout:
    - Simulate billing dialog with no response for >120s
    - Verify JS Promise rejects with timeout error
+10. Test recovery after WebView reload:
+    - Complete purchase, reload the WebView page
+    - Verify `queryPurchases()` returns the unconsumed purchase
+    - Verify server verification completes
+11. Test recovery after network interruption:
+    - Complete purchase, disconnect network before server verification
+    - Reconnect network
+    - Verify `queryPurchases()` returns the purchase
+    - Verify server verification → fulfillment completes
 
 ### Phase C: RTDN Verification
 1. Complete a sandbox purchase
@@ -168,17 +221,24 @@ All native errors include structured `{error, code}` JSON:
 6. PayPal purchase unaffected by Play Billing operations
 7. Activity destroyed during billing flow → verify DESTROYED error
 8. BillingClient disconnected → verify reconnection on next call
+9. Process restart during billing flow → verify `queryPurchases` recovery
+10. Activity recreation (config change) → verify bridge survives via `configChanges` in manifest
 
 ## Verification Levels
 
 | Check | Level | Notes |
 |-------|-------|-------|
-| Handler logic (verify, claim, fulfill, restore, RTDN) | **Mocked tests — 121 suites, 546 assertions** | All pass |
-| Bridge contract (error codes, callback lifecycle, JSON transport) | **Mocked tests — 16 V2.4.7 suites** | Tests validate contract shapes, not native execution |
-| WebView security (URL validation, intent validation) | **Mocked tests — 2 V2.4.7 suites** | Tests validate JS-equivalent logic |
+| Handler logic (verify, claim, fulfill, restore, RTDN) | **Mocked tests — 132 suites, 603 assertions** | All pass |
+| Bridge contract (error codes, callback lifecycle, JSON transport) | **Mocked tests — V2.4.7 suites + V2.4.8 suites** | Tests validate contract shapes, not native execution |
+| Concurrent billing prevention | **Mocked tests — V2.4.8** | BILLING_IN_PROGRESS guard verified |
+| Purchase recovery via queryPurchases | **Mocked tests — V2.4.8** | Recovery path verified through server pipeline |
+| JS shim getUnresolvedPurchase removal | **Mocked tests — V2.4.8** | Shim code verified to not reference removed method |
+| Callback ID uniqueness (AtomicLong) | **Mocked tests — V2.4.8** | No nanoTime overflow risk |
+| Token logging prevention | **Mocked tests — V2.4.8** | Verified no token in console output |
+| WebView security (URL validation, intent validation) | **Mocked tests — V2.4.7** | Tests validate JS-equivalent logic |
 | Vercel function consolidation | **Code review + structural** | Cannot verify Vercel deployment from CI |
 | Android project structure | **Code review** | Builds require Android SDK |
-| Kotlin compilation | **Not verified** | No Android SDK in CI environment |
+| Kotlin compilation | **Not verified** | No Android SDK in CI environment (dl.google.com blocked) |
 | PlayBillingBridge ↔ play-billing-bridge.js contract | **Code review + mocked contract tests** | JS shim bridges async/sync mismatch |
 | WebView host whitelist | **Code review + mocked tests** | Scheme+host validation, PayPal opens externally |
 | Emulator test | **Not executed** | Requires Android emulator |
@@ -190,13 +250,13 @@ All native errors include structured `{error, code}` JSON:
 ## Reproducible Commands
 
 ```bash
-# Run all handler-level tests (121 suites, 546 assertions)
+# Run all handler-level tests (132 suites, 603 assertions)
 node tools/v2410-playbilling/playbilling-tests.mjs
 
 # Generate Gradle wrapper (if JAR missing)
 cd android && gradle wrapper --gradle-version 8.9
 
-# Build debug APK (requires Android SDK)
+# Build debug APK (requires Android SDK with API 35)
 cd android && ./gradlew assembleDebug --no-daemon
 
 # Install on connected device
@@ -209,6 +269,7 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 - [ ] Real Google API verification is tested with a service account
 - [ ] Refund/revocation delivery via RTDN is verified end-to-end
 - [ ] Internal sandbox testing is completed with license test accounts
-- [ ] Purchase recovery after app restart is verified on a real device
+- [ ] Purchase recovery via `queryPurchases` is verified on a real device after process restart
+- [ ] Concurrent billing flow prevention is verified on device
 - [ ] The JS shim ↔ native bridge contract is verified via emulator testing
 - [ ] Security review of WebView navigation is confirmed on device

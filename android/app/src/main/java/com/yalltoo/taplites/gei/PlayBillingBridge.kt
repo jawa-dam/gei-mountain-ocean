@@ -1,6 +1,7 @@
 package com.yalltoo.taplites.gei
 
 import android.util.Base64
+import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.fragment.app.FragmentActivity
@@ -13,6 +14,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
 
 class PlayBillingBridge(
@@ -22,11 +24,14 @@ class PlayBillingBridge(
 ) : PurchasesUpdatedListener {
 
     private var billingClient: BillingClient? = null
-    private var billingFlowCallbackId: String? = null
     private var isConnected = false
     private val activeCallbacks = ConcurrentHashMap<String, Boolean>()
+    private val callbackCounter = AtomicLong(0)
+
     @Volatile
-    private var unresolvedPurchaseJson: String? = null
+    private var billingFlowCallbackId: String? = null
+    @Volatile
+    private var billingFlowInProgress = false
 
     init {
         billingClient = BillingClient.newBuilder(activity)
@@ -37,6 +42,10 @@ class PlayBillingBridge(
                     .build()
             )
             .build()
+    }
+
+    private fun nextCallbackId(prefix: String): String {
+        return "${prefix}_${callbackCounter.incrementAndGet()}"
     }
 
     private suspend fun ensureConnected(): Boolean {
@@ -62,18 +71,25 @@ class PlayBillingBridge(
             return errorJson("INVALID_ARGS", "Invalid product ID")
         }
 
-        val callbackId = "billing_${System.nanoTime()}"
+        if (billingFlowInProgress) {
+            return errorJson("BILLING_IN_PROGRESS", "A billing flow is already in progress")
+        }
+
+        val callbackId = nextCallbackId("billing")
+        billingFlowInProgress = true
         billingFlowCallbackId = callbackId
         activeCallbacks[callbackId] = true
 
         scope.launch {
             try {
                 if (!ensureConnected()) {
+                    billingFlowInProgress = false
                     resolveCallback(callbackId, errorJson("SERVICE_UNAVAILABLE", "Billing service unavailable"))
                     return@launch
                 }
 
                 val client = billingClient ?: run {
+                    billingFlowInProgress = false
                     resolveCallback(callbackId, errorJson("SERVICE_UNAVAILABLE", "Billing client not initialized"))
                     return@launch
                 }
@@ -98,6 +114,7 @@ class PlayBillingBridge(
 
                 if (detailsResult.first.responseCode != BillingClient.BillingResponseCode.OK
                     || detailsResult.second.isEmpty()) {
+                    billingFlowInProgress = false
                     resolveCallback(callbackId, errorJson(
                         "PRODUCT_UNAVAILABLE",
                         "Product not available (code ${detailsResult.first.responseCode})"
@@ -107,6 +124,7 @@ class PlayBillingBridge(
 
                 val productDetails = detailsResult.second[0]
                 if (productDetails.oneTimePurchaseOfferDetails == null) {
+                    billingFlowInProgress = false
                     resolveCallback(callbackId, errorJson("PRODUCT_UNAVAILABLE", "No one-time purchase offer"))
                     return@launch
                 }
@@ -125,6 +143,7 @@ class PlayBillingBridge(
                     client.launchBillingFlow(activity, flowParams)
                 }
             } catch (e: Exception) {
+                billingFlowInProgress = false
                 resolveCallback(callbackId, errorJson("BILLING_ERROR", "Billing error: ${e.message}"))
             }
         }
@@ -135,6 +154,7 @@ class PlayBillingBridge(
     override fun onPurchasesUpdated(result: BillingResult, purchases: List<Purchase>?) {
         val callbackId = billingFlowCallbackId
         billingFlowCallbackId = null
+        billingFlowInProgress = false
 
         when (result.responseCode) {
             BillingClient.BillingResponseCode.OK -> {
@@ -164,7 +184,7 @@ class PlayBillingBridge(
                 if (callbackId != null) {
                     resolveCallback(callbackId, json)
                 } else {
-                    unresolvedPurchaseJson = json
+                    Log.w("PlayBillingBridge", "Purchase received with no active callback — will be recovered via queryPurchases")
                 }
             }
             BillingClient.BillingResponseCode.USER_CANCELED -> {
@@ -193,15 +213,8 @@ class PlayBillingBridge(
     }
 
     @JavascriptInterface
-    fun getUnresolvedPurchase(): String {
-        val json = unresolvedPurchaseJson ?: return ""
-        unresolvedPurchaseJson = null
-        return json
-    }
-
-    @JavascriptInterface
     fun queryPurchases(): String {
-        val callbackId = "query_${System.nanoTime()}"
+        val callbackId = nextCallbackId("query")
         activeCallbacks[callbackId] = true
 
         scope.launch {
@@ -260,7 +273,7 @@ class PlayBillingBridge(
             return errorJson("INVALID_ARGS", "Invalid purchase token")
         }
 
-        val callbackId = "consume_${System.nanoTime()}"
+        val callbackId = nextCallbackId("consume")
         activeCallbacks[callbackId] = true
 
         scope.launch {
@@ -326,13 +339,14 @@ class PlayBillingBridge(
     }
 
     fun destroy() {
+        billingFlowInProgress = false
+        billingFlowCallbackId = null
         for (callbackId in activeCallbacks.keys()) {
             resolveCallback(callbackId, errorJson("DESTROYED", "Billing bridge destroyed"))
         }
         billingClient?.endConnection()
         billingClient = null
         isConnected = false
-        billingFlowCallbackId = null
     }
 
     private data class PurchasesResult(
@@ -388,13 +402,7 @@ class PlayBillingBridge(
     queryPurchases:function(){return wrapNative('queryPurchases',[]);},
     consumePurchase:function(tok){return wrapNative('consumePurchase',[tok]);}
   };
-  var pending=window.__NativePlayBillingBridge.getUnresolvedPurchase();
-  if(pending&&pending!==''){
-    try{
-      var p=JSON.parse(pending);
-      if(p.purchaseToken)window.__PlayBillingUnresolvedPurchase=p;
-    }catch(e){}
-  }
+  window.__PlayBillingRecoveryReady=true;
 })();"""
     }
 }

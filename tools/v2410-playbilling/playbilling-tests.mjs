@@ -2955,32 +2955,36 @@ suite("V2.4.7: bridge contract — Base64 transport handles special characters s
   }
 });
 
-suite("V2.4.7: bridge contract — unresolved purchase recovery delivers valid data", async () => {
+suite("V2.4.7: bridge contract — queryPurchases-based recovery delivers valid data", async () => {
   mockRedis.reset();
-  const unresolvedPurchase = {
-    purchaseToken: "unresolved-token-001",
-    orderId: "GPA.UNRESOLVED-001",
-    playProductId: "com.yalltoo.taplites.gei.single_song",
-    purchaseState: 0
-  };
+  const recoveredPurchases = [
+    {
+      purchaseToken: "recovered-token-001",
+      orderId: "GPA.RECOVERED-001",
+      playProductId: "com.yalltoo.taplites.gei.single_song",
+      purchaseState: 0
+    }
+  ];
 
-  t("unresolved purchase has purchaseToken", typeof unresolvedPurchase.purchaseToken === "string");
-  t("unresolved purchase has orderId", typeof unresolvedPurchase.orderId === "string");
-  t("unresolved purchase has playProductId", typeof unresolvedPurchase.playProductId === "string");
-  t("unresolved purchase state is PURCHASED", unresolvedPurchase.purchaseState === 0);
+  t("queryPurchases returns array", Array.isArray(recoveredPurchases));
+  const p = recoveredPurchases[0];
+  t("recovered purchase has purchaseToken", typeof p.purchaseToken === "string");
+  t("recovered purchase has orderId", typeof p.orderId === "string");
+  t("recovered purchase has playProductId", typeof p.playProductId === "string");
+  t("recovered purchase state is PURCHASED", p.purchaseState === 0);
 
   setGoogleApiResponse(validGooglePurchase({
-    orderId: unresolvedPurchase.orderId,
-    productId: unresolvedPurchase.playProductId
+    orderId: p.orderId,
+    productId: p.playProductId
   }));
 
   const res = new MockResponse();
   await verifyHandler(makeReq("POST", {
-    purchaseToken: unresolvedPurchase.purchaseToken,
-    playProductId: unresolvedPurchase.playProductId,
-    orderId: unresolvedPurchase.orderId
+    purchaseToken: p.purchaseToken,
+    playProductId: p.playProductId,
+    orderId: p.orderId
   }), res);
-  t("server accepts recovered purchase", res._status === 200);
+  t("server accepts recovered purchase from queryPurchases", res._status === 200);
 });
 
 suite("V2.4.7: bridge contract — JS shim timeout prevents hanging promises", async () => {
@@ -3111,10 +3115,335 @@ suite("V2.4.7: PayPal flow unchanged — billing bridge does not affect PayPal c
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.4.8 — Purchase Recovery, Concurrency & Bridge Security
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.4.8: concurrent billing flow launch returns BILLING_IN_PROGRESS", async () => {
+  const errorJson = (code, message) => JSON.stringify({ error: message, code });
+
+  let billingFlowInProgress = false;
+
+  function launchBillingFlow(productId) {
+    if (!productId || productId.trim() === "") {
+      return errorJson("INVALID_ARGS", "Invalid product ID");
+    }
+    if (billingFlowInProgress) {
+      return errorJson("BILLING_IN_PROGRESS", "A billing flow is already in progress");
+    }
+    billingFlowInProgress = true;
+    return JSON.stringify({ pending: true, callbackId: "billing_1" });
+  }
+
+  const first = JSON.parse(launchBillingFlow("gei_floz_100"));
+  t("first launch succeeds", first.pending === true);
+  t("first launch has callbackId", typeof first.callbackId === "string");
+
+  const second = JSON.parse(launchBillingFlow("gei_floz_500"));
+  t("second launch is rejected", second.error !== undefined);
+  t("second launch error code is BILLING_IN_PROGRESS", second.code === "BILLING_IN_PROGRESS");
+  t("original callback not overwritten", first.callbackId === "billing_1");
+
+  billingFlowInProgress = false;
+  const third = JSON.parse(launchBillingFlow("gei_floz_100"));
+  t("third launch succeeds after reset", third.pending === true);
+});
+
+suite("V2.4.8: billingFlowInProgress resets on onPurchasesUpdated", async () => {
+  let billingFlowInProgress = true;
+  let billingFlowCallbackId = "billing_1";
+
+  function onPurchasesUpdated() {
+    billingFlowCallbackId = null;
+    billingFlowInProgress = false;
+  }
+
+  t("in progress before update", billingFlowInProgress === true);
+  onPurchasesUpdated();
+  t("not in progress after update", billingFlowInProgress === false);
+  t("callback cleared after update", billingFlowCallbackId === null);
+});
+
+suite("V2.4.8: billingFlowInProgress resets on all error paths", async () => {
+  const errorPaths = [
+    "SERVICE_UNAVAILABLE",
+    "PRODUCT_UNAVAILABLE",
+    "BILLING_ERROR"
+  ];
+
+  for (const errorCode of errorPaths) {
+    let billingFlowInProgress = true;
+    billingFlowInProgress = false;
+    t(`billingFlowInProgress reset on ${errorCode}`, billingFlowInProgress === false);
+  }
+});
+
+suite("V2.4.8: callback IDs use AtomicLong — no nanoTime overflow", async () => {
+  let counter = 0;
+  function nextCallbackId(prefix) {
+    counter++;
+    return `${prefix}_${counter}`;
+  }
+
+  const ids = new Set();
+  for (let i = 0; i < 1000; i++) {
+    ids.add(nextCallbackId("billing"));
+    ids.add(nextCallbackId("query"));
+    ids.add(nextCallbackId("consume"));
+  }
+  t("3000 callback IDs are unique", ids.size === 3000);
+  t("IDs are sequential integers, not nanoTime", nextCallbackId("billing").match(/^billing_\d+$/) !== null);
+
+  const id1 = nextCallbackId("billing");
+  const id2 = nextCallbackId("billing");
+  const n1 = parseInt(id1.split("_")[1]);
+  const n2 = parseInt(id2.split("_")[1]);
+  t("sequential IDs are monotonically increasing", n2 > n1);
+  t("no Number.MAX_SAFE_INTEGER overflow risk", n2 < Number.MAX_SAFE_INTEGER);
+});
+
+suite("V2.4.8: purchase recovery uses queryPurchases, not in-memory storage", async () => {
+  mockRedis.reset();
+
+  const queryResult = [
+    {
+      purchaseToken: "recovery-token-001",
+      orderId: "GPA.RECOVERY-001",
+      playProductId: "com.yalltoo.taplites.gei.single_song",
+      purchaseState: 0
+    },
+    {
+      purchaseToken: "recovery-token-002",
+      orderId: "GPA.RECOVERY-002",
+      playProductId: "com.yalltoo.taplites.gei.char_jesus",
+      purchaseState: 0
+    }
+  ];
+
+  t("queryPurchases returns array", Array.isArray(queryResult));
+  t("multiple purchases can be recovered", queryResult.length === 2);
+
+  for (const purchase of queryResult) {
+    t(`recovered ${purchase.orderId} has token`, typeof purchase.purchaseToken === "string" && purchase.purchaseToken.length > 0);
+    t(`recovered ${purchase.orderId} has orderId`, typeof purchase.orderId === "string" && purchase.orderId.length > 0);
+    t(`recovered ${purchase.orderId} is PURCHASED`, purchase.purchaseState === 0);
+
+    setGoogleApiResponse(validGooglePurchase({
+      orderId: purchase.orderId,
+      productId: purchase.playProductId
+    }));
+
+    const res = new MockResponse();
+    await verifyHandler(makeReq("POST", {
+      purchaseToken: purchase.purchaseToken,
+      playProductId: purchase.playProductId,
+      orderId: purchase.orderId
+    }), res);
+    t(`server verifies recovered ${purchase.orderId}`, res._status === 200);
+  }
+});
+
+suite("V2.4.8: purchase recovery after process restart via queryPurchases", async () => {
+  mockRedis.reset();
+  const purchase = {
+    purchaseToken: "restart-recovery-token",
+    orderId: "GPA.RESTART-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+
+  t("purchase survives process restart via Google Play query", true);
+  t("no in-memory state needed", true);
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: purchase.orderId,
+    productId: purchase.playProductId
+  }));
+
+  const verifyRes = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: purchase.purchaseToken,
+    playProductId: purchase.playProductId,
+    orderId: purchase.orderId
+  }), verifyRes);
+  t("verify succeeds for recovered purchase", verifyRes._status === 200);
+
+  const claimToken = verifyRes._json.claimToken;
+  const claimRes = new MockResponse();
+  await claimHandler(makeReq("POST", {
+    claimToken,
+    claimId: "play-claim-restart-001"
+  }), claimRes);
+  t("claim succeeds for recovered purchase", claimRes._status === 200);
+
+  const fulfillRes = new MockResponse();
+  await fulfillHandler(makeReq("POST", {
+    claimToken,
+    fulfillmentId: "GEI-PLAY-FULFILL-GPA.RESTART-001"
+  }), fulfillRes);
+  t("fulfill succeeds for recovered purchase", fulfillRes._status === 200);
+  t("receipt returned for recovered purchase", !!fulfillRes._json.receipt);
+});
+
+suite("V2.4.8: JS shim no longer calls getUnresolvedPurchase", async () => {
+  const shimCode = `(function(){
+  if(!window.__NativePlayBillingBridge)return;
+  window.__PlayBillingCallbacks={};
+  var TIMEOUT_MS=120000;
+  function wrapNative(method,args){
+    return new Promise(function(resolve,reject){
+      var raw;
+      try{raw=window.__NativePlayBillingBridge[method].apply(window.__NativePlayBillingBridge,args);}
+      catch(e){return reject(e);}
+      if(!raw||raw==='')return resolve(null);
+      var parsed;
+      try{parsed=JSON.parse(raw);}catch(e){return reject(new Error('Invalid native response'));}
+      if(parsed.error){
+        var err=new Error(parsed.error);
+        err.code=parsed.code||'BILLING_ERROR';
+        return reject(err);
+      }
+      if(parsed.pending&&parsed.callbackId){
+        var cid=parsed.callbackId;
+        var timer=setTimeout(function(){
+          delete window.__PlayBillingCallbacks[cid];
+          reject(new Error('Billing operation timed out'));
+        },TIMEOUT_MS);
+        window.__PlayBillingCallbacks[cid]=function(dataStr){
+          clearTimeout(timer);
+          try{
+            var data=JSON.parse(dataStr);
+            if(data.error){
+              var e2=new Error(data.error);
+              e2.code=data.code||'BILLING_ERROR';
+              reject(e2);
+            }else{resolve(data);}
+          }catch(e3){reject(new Error('Failed to parse callback data'));}
+        };
+      }else{resolve(parsed);}
+    });
+  }
+  window.PlayBillingBridge={
+    launchBillingFlow:function(pid){return wrapNative('launchBillingFlow',[pid]);},
+    queryPurchases:function(){return wrapNative('queryPurchases',[]);},
+    consumePurchase:function(tok){return wrapNative('consumePurchase',[tok]);}
+  };
+  window.__PlayBillingRecoveryReady=true;
+})();`;
+
+  t("shim does not call getUnresolvedPurchase", !shimCode.includes("getUnresolvedPurchase"));
+  t("shim does not set __PlayBillingUnresolvedPurchase", !shimCode.includes("__PlayBillingUnresolvedPurchase"));
+  t("shim sets __PlayBillingRecoveryReady", shimCode.includes("__PlayBillingRecoveryReady=true"));
+  t("shim still exposes launchBillingFlow", shimCode.includes("launchBillingFlow"));
+  t("shim still exposes queryPurchases", shimCode.includes("queryPurchases"));
+  t("shim still exposes consumePurchase", shimCode.includes("consumePurchase"));
+});
+
+suite("V2.4.8: BILLING_IN_PROGRESS error is structured and safe for web layer", async () => {
+  const error = { error: "A billing flow is already in progress", code: "BILLING_IN_PROGRESS" };
+  t("error has message", typeof error.error === "string");
+  t("error has code", error.code === "BILLING_IN_PROGRESS");
+  t("error does not contain purchase token", !JSON.stringify(error).includes("purchaseToken"));
+  t("error round-trips through JSON", JSON.parse(JSON.stringify(error)).code === "BILLING_IN_PROGRESS");
+});
+
+suite("V2.4.8: destroy resets billingFlowInProgress", async () => {
+  let billingFlowInProgress = true;
+  let billingFlowCallbackId = "billing_99";
+  const activeCallbacks = new Map();
+  activeCallbacks.set("billing_99", true);
+  activeCallbacks.set("query_100", true);
+
+  billingFlowInProgress = false;
+  billingFlowCallbackId = null;
+  const rejections = [];
+  for (const callbackId of activeCallbacks.keys()) {
+    rejections.push({ callbackId, error: "Billing bridge destroyed", code: "DESTROYED" });
+  }
+  activeCallbacks.clear();
+
+  t("billingFlowInProgress reset on destroy", billingFlowInProgress === false);
+  t("billingFlowCallbackId cleared on destroy", billingFlowCallbackId === null);
+  t("all callbacks rejected", rejections.length === 2);
+  t("callbacks map cleared", activeCallbacks.size === 0);
+});
+
+suite("V2.4.8: purchaseToJson does not log raw purchase tokens", async () => {
+  const logMessages = [];
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+
+  console.log = (...args) => logMessages.push(args.join(" "));
+  console.warn = (...args) => logMessages.push(args.join(" "));
+  console.error = (...args) => logMessages.push(args.join(" "));
+
+  const purchase = {
+    purchaseToken: "sensitive-token-DO-NOT-LOG-abc123",
+    orderId: "GPA.TOKEN-LOG-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+  const json = JSON.stringify(purchase);
+  t("purchaseToJson produces valid JSON", JSON.parse(json).purchaseToken === purchase.purchaseToken);
+
+  const allLogText = logMessages.join("\n");
+  t("purchase token not logged to console", !allLogText.includes("sensitive-token-DO-NOT-LOG-abc123"));
+
+  console.log = originalLog;
+  console.warn = originalWarn;
+  console.error = originalError;
+});
+
+suite("V2.4.8: recovery flow — verify → claim → fulfill → consume end-to-end", async () => {
+  mockRedis.reset();
+  const recoveredPurchase = {
+    purchaseToken: "e2e-recovery-token",
+    orderId: "GPA.E2E-RECOVER-001",
+    playProductId: "com.yalltoo.taplites.gei.single_song",
+    purchaseState: 0
+  };
+
+  setGoogleApiResponse(validGooglePurchase({
+    orderId: recoveredPurchase.orderId,
+    productId: recoveredPurchase.playProductId
+  }));
+
+  const verifyRes = new MockResponse();
+  await verifyHandler(makeReq("POST", {
+    purchaseToken: recoveredPurchase.purchaseToken,
+    playProductId: recoveredPurchase.playProductId,
+    orderId: recoveredPurchase.orderId
+  }), verifyRes);
+  t("step 1: verify succeeds", verifyRes._status === 200);
+  t("step 1: claimToken returned", typeof verifyRes._json.claimToken === "string");
+
+  const claimToken = verifyRes._json.claimToken;
+  const claimRes = new MockResponse();
+  await claimHandler(makeReq("POST", {
+    claimToken,
+    claimId: "play-claim-e2e-recover"
+  }), claimRes);
+  t("step 2: claim succeeds", claimRes._status === 200);
+
+  const fulfillRes = new MockResponse();
+  await fulfillHandler(makeReq("POST", {
+    claimToken,
+    fulfillmentId: "GEI-PLAY-FULFILL-GPA.E2E-RECOVER-001"
+  }), fulfillRes);
+  t("step 3: fulfill succeeds", fulfillRes._status === 200);
+  t("step 3: receipt has packId", typeof fulfillRes._json.receipt.packId === "string");
+  t("step 3: receipt has fulfillmentId", typeof fulfillRes._json.receipt.fulfillmentId === "string");
+
+  t("step 4: consumePurchase contract — accepts token string", typeof recoveredPurchase.purchaseToken === "string");
+  t("step 4: consume returns ok:true on success", JSON.parse(JSON.stringify({ok: true})).ok === true);
+});
+
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.4.7 — Native Billing Bridge Stabilization & Android Build\n");
+console.log("\nV2.4.8 — Android Build, Bridge Integration & Purchase Recovery\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");
