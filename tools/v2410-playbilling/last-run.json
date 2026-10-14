@@ -1,10 +1,10 @@
 {
-  "suite": "V2.5.0 — Android Build Reproducibility & Internal Test Preparation",
+  "suite": "V2.5.1 — Android Billing Recovery Hardening & Build Readiness",
   "runDate": "2026-10-14",
-  "suites": 163,
-  "passed": 163,
+  "suites": 176,
+  "passed": 176,
   "failed": 0,
-  "assertions": 777,
+  "assertions": 817,
   "testType": "handler-level-with-doubles",
-  "note": "V2.5.0 adds 11 new suites on top of V2.4.9's 152: game bootstrap wiring verification (play-billing-bridge.js script tag, TWA detection gate, startCheckout override with PayPal fallback, initAutoRecovery called on window.load), product catalog consistency across billing-channel.js, economy-authority.js, and index.html (6 canonical products, prices, FL OZ amounts), documentation reconciliation (canonical product IDs replace placeholders in play-test-plan.md), AndroidManifest security gate (permissions, cleartext, export flags), creditPack server-authorization checks, recovery double-credit prevention via processedReceipts. Android build blocked by dl.google.com proxy restriction — documented as external prerequisite."
+  "note": "V2.5.1 adds 13 new suites on top of V2.5.0's 163: consume-after-credit ordering (consumePurchase moved after creditPack to preserve queryPurchases recovery path), creditResult.ok gate on consumption, initAutoRecovery duplicate-init guard (AUTO_RECOVERY_INIT), polling bounds and cleanup, TWA checkout does not fall back to PayPal, restore credits only FULFILLED entries, server claim/fulfill idempotent replay verification, creditPack rejection of unverified attempts, deterministic fulfillmentId from orderId, env var name consistency (GOOGLE_PLAY_SERVICE_ACCOUNT_KEY), non-consumable never consumed, no secrets in error messages. Android build blocked by dl.google.com proxy restriction."
 }

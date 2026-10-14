@@ -3836,10 +3836,8 @@ suite("V2.5.0: integration block detects TWA before overriding startCheckout", a
     html.includes("window.GeiPlayBilling.detect()"));
   t("overrides window.startCheckout",
     html.includes("window.startCheckout=function(packId)"));
-  t("saves original startCheckout for fallback",
-    html.includes("var originalStartCheckout=window.startCheckout"));
-  t("falls back to original when bridge unavailable",
-    html.includes("originalStartCheckout(packId)"));
+  t("shows loading message when bridge not yet available (not PayPal fallback)",
+    html.includes("Google Play Billing is loading"));
 });
 
 suite("V2.5.0: integration block calls initAutoRecovery on load", async () => {
@@ -4000,10 +3998,174 @@ suite("V2.5.0: AndroidManifest security gate", async () => {
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.5.1 — ANDROID BILLING RECOVERY HARDENING & BUILD READINESS
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.5.1: consumePurchase happens AFTER creditPack, not before", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  const checkoutFn = bridgeCode.substring(bridgeCode.indexOf("async function startPlayCheckout"));
+  const creditPos = checkoutFn.indexOf("onCredit(receipt.packId");
+  const consumePos = checkoutFn.indexOf("consumePurchase(purchaseToken)");
+  t("creditPack call exists in startPlayCheckout", creditPos > 0);
+  t("consumePurchase call exists in startPlayCheckout", consumePos > 0);
+  t("credit happens before consume in source order", creditPos < consumePos);
+});
+
+suite("V2.5.1: consume only runs after successful credit", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  const checkoutFn = bridgeCode.substring(bridgeCode.indexOf("async function startPlayCheckout"));
+  t("consumePurchase gated on creditResult.ok",
+    checkoutFn.includes("creditResult && creditResult.ok") &&
+    checkoutFn.indexOf("creditResult && creditResult.ok") < checkoutFn.indexOf("consumePurchase(purchaseToken)"));
+});
+
+suite("V2.5.1: initAutoRecovery has duplicate-init guard", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  t("AUTO_RECOVERY_INIT guard variable exists",
+    bridgeCode.includes("AUTO_RECOVERY_INIT"));
+  t("initAutoRecovery returns early if already initialized",
+    bridgeCode.includes("if (AUTO_RECOVERY_INIT) return"));
+  t("initAutoRecovery sets guard to true",
+    bridgeCode.includes("AUTO_RECOVERY_INIT = true"));
+});
+
+suite("V2.5.1: initAutoRecovery polling is bounded and cleans up", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  t("MAX_CHECKS limits polling iterations",
+    bridgeCode.includes("MAX_CHECKS = 50"));
+  t("INTERVAL_MS is 200ms",
+    bridgeCode.includes("INTERVAL_MS = 200"));
+  t("timer is cleared on bridge readiness",
+    bridgeCode.includes("clearInterval(timer)") &&
+    bridgeCode.indexOf("clearInterval(timer)") < bridgeCode.lastIndexOf("clearInterval(timer)"));
+  t("timer is cleared on max checks exceeded",
+    (bridgeCode.match(/clearInterval\(timer\)/g) || []).length >= 2);
+});
+
+suite("V2.5.1: TWA checkout does NOT fall back to PayPal when bridge unavailable", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+  const integrationStart = html.indexOf("V2.5.0 — PLAY BILLING INTEGRATION");
+  const integrationEnd = html.indexOf("</script>", integrationStart);
+  const block = html.substring(integrationStart, integrationEnd);
+  t("does NOT call originalStartCheckout as PayPal fallback in TWA",
+    !block.includes("originalStartCheckout(packId)"));
+  t("shows user-facing loading message when bridge not ready",
+    block.includes("Google Play Billing is loading"));
+});
+
+suite("V2.5.1: restorePlayPurchases credits only FULFILLED with valid fulfillmentId", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  t("restore checks r.status === FULFILLED",
+    bridgeCode.includes('r.status === "FULFILLED"'));
+  t("restore checks r.fulfillmentId is truthy",
+    bridgeCode.includes("r.fulfillmentId"));
+  t("restore passes serverAuthorized: true to onCredit",
+    bridgeCode.includes("serverAuthorized: true"));
+  t("restore counts only successful credits",
+    bridgeCode.includes("if (creditResult && creditResult.ok) restored++"));
+});
+
+suite("V2.5.1: server fulfill endpoint supports idempotent replay", async () => {
+  const { readFileSync } = await import("node:fs");
+  const fulfillCode = readFileSync("api/_handlers/playbilling/fulfill-entitlement.js", "utf-8");
+  t("returns alreadyFulfilled flag",
+    fulfillCode.includes("alreadyFulfilled"));
+  t("returns FULFILLMENT_REPLAY_RECOVERED for replayed fulfillment",
+    fulfillCode.includes("FULFILLMENT_REPLAY_RECOVERED"));
+  t("returns FIRST_FULFILLMENT for new fulfillment",
+    fulfillCode.includes("FIRST_FULFILLMENT"));
+  t("rejects ALREADY_FULFILLED with different fulfillmentId",
+    fulfillCode.includes("ALREADY_FULFILLED"));
+  t("rejects revoked entitlement",
+    fulfillCode.includes('"REVOKED"'));
+});
+
+suite("V2.5.1: server claim endpoint supports idempotent replay", async () => {
+  const { readFileSync } = await import("node:fs");
+  const claimCode = readFileSync("api/_handlers/playbilling/claim-entitlement.js", "utf-8");
+  t("returns alreadyClaimed flag",
+    claimCode.includes("alreadyClaimed"));
+  t("returns REPLAY_RECOVERED for replayed claim",
+    claimCode.includes("REPLAY_RECOVERED"));
+  t("returns FIRST_CLAIM for new claim",
+    claimCode.includes("FIRST_CLAIM"));
+  t("rejects ALREADY_CLAIMED with different claimId",
+    claimCode.includes("ALREADY_CLAIMED"));
+});
+
+suite("V2.5.1: creditPack rejects unverified credit attempts", async () => {
+  const { readFileSync } = await import("node:fs");
+  const html = readFileSync("index.html", "utf-8");
+  const cpStart = html.indexOf("function creditPack(");
+  const cpEnd = html.indexOf("\n}", cpStart) + 2;
+  const cpFunc = html.substring(cpStart, cpEnd);
+  t("requires serverAuthorized === true",
+    cpFunc.includes("meta.serverAuthorized !== true"));
+  t("requires fulfillmentId === receiptId",
+    cpFunc.includes("meta.fulfillmentId !== receiptId"));
+  t("requires captureID to be truthy",
+    cpFunc.includes("!meta.captureID"));
+  t("rejects duplicate receiptId via processedReceipts",
+    cpFunc.includes("state.processedReceipts.includes(receiptId)"));
+  t("rejects unknown packId",
+    cpFunc.includes("Unknown pack"));
+});
+
+suite("V2.5.1: fulfillmentId is deterministic from orderId", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  t("playFulfillmentId uses GEI-PLAY-FULFILL- prefix",
+    bridgeCode.includes('return "GEI-PLAY-FULFILL-"'));
+  t("playFulfillmentId sanitizes orderId",
+    bridgeCode.includes('.replace(/[^A-Za-z0-9._:-]/g, "-")'));
+  t("same orderId always produces same fulfillmentId (no random component)",
+    !bridgeCode.substring(bridgeCode.indexOf("function playFulfillmentId"),
+      bridgeCode.indexOf("function playClaimId")).includes("random"));
+});
+
+suite("V2.5.1: docs env var matches actual code", async () => {
+  const { readFileSync } = await import("node:fs");
+  const doc = readFileSync("docs/play-test-plan.md", "utf-8");
+  const verifyCode = readFileSync("api/_handlers/playbilling/verify-purchase.js", "utf-8");
+  t("docs reference GOOGLE_PLAY_SERVICE_ACCOUNT_KEY (not GOOGLE_SERVICE_ACCOUNT_KEY)",
+    doc.includes("GOOGLE_PLAY_SERVICE_ACCOUNT_KEY"));
+  t("verify-purchase.js uses GOOGLE_PLAY_SERVICE_ACCOUNT_KEY",
+    verifyCode.includes("GOOGLE_PLAY_SERVICE_ACCOUNT_KEY"));
+  t("docs do NOT reference the wrong env var name",
+    !doc.includes("GOOGLE_SERVICE_ACCOUNT_KEY") || doc.includes("GOOGLE_PLAY_SERVICE_ACCOUNT_KEY"));
+});
+
+suite("V2.5.1: non-consumable characters are never consumed on Google Play", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  t("consumePurchase is gated on productInfo.consumable",
+    bridgeCode.includes("productInfo.consumable && window.PlayBillingBridge.consumePurchase"));
+  const billingCode = readFileSync("api/_lib/billing-channel.js", "utf-8");
+  t("special-jesus is non-consumable",
+    billingCode.includes('"special-jesus"') && billingCode.includes('kind !== "special-character"'));
+});
+
+suite("V2.5.1: checkout shows user-friendly error without exposing secrets", async () => {
+  const { readFileSync } = await import("node:fs");
+  const bridgeCode = readFileSync("play-billing-bridge.js", "utf-8");
+  t("onError receives message string, not raw error object",
+    bridgeCode.includes('onError(err.message || "Google Play purchase failed.")'));
+  t("purchase tokens are not passed to onError or onStatus",
+    !bridgeCode.includes("onError(purchaseToken") &&
+    !bridgeCode.includes("onStatus(purchaseToken"));
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.5.0 — Android Build Reproducibility & Internal Test Preparation\n");
+console.log("\nV2.5.1 — Android Billing Recovery Hardening & Build Readiness\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");

@@ -1,7 +1,7 @@
 # TapLites: GEI — Internal Play Store Test Plan
 
-**Version**: V2.5.0  
-**Status**: Play Billing wired into game bootstrap, auto-recovery active on startup in TWA, product catalog reconciled, Android build blocked by dl.google.com — not yet executed on device
+**Version**: V2.5.1  
+**Status**: Recovery hardened (credit-before-consume ordering, duplicate-init guard, no PayPal fallback in TWA), env var docs corrected, Android build blocked by dl.google.com — not yet executed on device
 
 ## External Prerequisites (Manual Setup Required)
 
@@ -27,7 +27,7 @@
 - [ ] Create a service account with `androidpublisher` scope
 - [ ] Download service account JSON key
 - [ ] Store key securely — **never commit to Git**
-- [ ] Set `GOOGLE_SERVICE_ACCOUNT_KEY` environment variable in Vercel (encrypted)
+- [ ] Set `GOOGLE_PLAY_SERVICE_ACCOUNT_KEY` environment variable in Vercel (encrypted)
 
 ### 4. Real-Time Developer Notifications (RTDN)
 - [ ] Create Cloud Pub/Sub topic (e.g., `projects/<project>/topics/play-billing-rtdn`)
@@ -101,6 +101,55 @@ Canonical product IDs are defined in `api/_lib/billing-channel.js` (`GOOGLE_PLAY
 | `special-devil` | `com.yalltoo.taplites.gei.char_devil` | Devil | $6.00 | 0 | non-consumable |
 
 Sources verified: `api/_lib/billing-channel.js`, `api/_lib/economy-authority.js`, `index.html` (STORE_PACKS + SPECIAL_CHARACTER_PRODUCTS), `play-billing-bridge.js`, `api/_handlers/playbilling/products.js`. `play-product-catalog.js` does not exist.
+
+## V2.5.1 Changes
+
+### Credit-Before-Consume Ordering Fix
+V2.5.0 called `consumePurchase` (step 5) before `creditPack` (step 6) in `startPlayCheckout`. If credit failed after consume succeeded, the purchase was consumed on Google Play but never credited locally, and `queryPurchases` would not find it for recovery. V2.5.1 reorders the flow:
+
+1. **Step 5 — Credit**: `onCredit(receipt.packId, receipt.fulfillmentId, meta)` runs first
+2. **Step 6 — Consume**: `consumePurchase(purchaseToken)` runs only if `creditResult.ok` is truthy
+
+If credit fails, the unconsumed purchase remains in `queryPurchases` and can be recovered automatically on next startup via `initAutoRecovery`.
+
+### Duplicate initAutoRecovery Guard
+`initAutoRecovery` now checks `AUTO_RECOVERY_INIT` before setting up polling. Calling it twice no longer creates multiple `setInterval` timers — the second call exits immediately.
+
+### TWA Checkout No Longer Falls Back to PayPal
+In V2.5.0, the TWA `startCheckout` override fell back to `originalStartCheckout(packId)` (PayPal) when the native bridge was unavailable. V2.5.1 replaces that fallback with a user-facing loading message:
+
+> "Google Play Billing is loading… please try again in a moment."
+
+This prevents Android purchases from being routed through PayPal merely because the native bridge is temporarily unavailable during startup.
+
+### Environment Variable Documentation Correction
+`docs/play-test-plan.md` referenced `GOOGLE_SERVICE_ACCOUNT_KEY`. The actual code in `verify-purchase.js` and `restore-purchases.js` uses `GOOGLE_PLAY_SERVICE_ACCOUNT_KEY`. Documentation corrected to match code.
+
+### Server-Side Idempotency Verified
+- `claim-entitlement.js`: Returns `alreadyClaimed: true` / `REPLAY_RECOVERED` on duplicate claimId; rejects different claimId with `ALREADY_CLAIMED`
+- `fulfill-entitlement.js`: Returns `alreadyFulfilled: true` / `FULFILLMENT_REPLAY_RECOVERED` on duplicate fulfillmentId; rejects different fulfillmentId with `ALREADY_FULFILLED`; rejects revoked entitlements
+
+### Test Coverage
+V2.5.1 adds 13 new test suites (176 total, 817 assertions, 0 failures):
+
+| Suite | Category |
+|-------|----------|
+| consumePurchase happens AFTER creditPack | source-verified |
+| consume gated on creditResult.ok | source-verified |
+| initAutoRecovery duplicate-init guard | source-verified |
+| initAutoRecovery polling bounded and cleans up | source-verified |
+| TWA checkout does NOT fall back to PayPal | source-verified |
+| restorePlayPurchases credits only FULFILLED entries | handler-level-with-doubles |
+| server fulfill idempotent replay | handler-level-with-doubles |
+| server claim idempotent replay | handler-level-with-doubles |
+| creditPack rejects unverified credit | source-verified |
+| fulfillmentId deterministic from orderId | source-verified |
+| docs env var matches actual code | source-verified |
+| non-consumable characters never consumed | source-verified |
+| checkout shows user-friendly error without secrets | source-verified |
+
+### Android Build Status
+`dl.google.com` remains blocked by the environment proxy (HTTP 403 `connect_rejected`). No Gradle dependencies can be resolved, so Kotlin compilation, APK generation, emulator testing, and device testing were not attempted.
 
 ## V2.4.9 Changes
 

@@ -22,6 +22,7 @@
   var PLAY_BILLING_PRODUCTS = null;
   var AUTO_RECOVERY_RAN = false;
   var AUTO_RECOVERY_CALLBACKS = null;
+  var AUTO_RECOVERY_INIT = false;
 
   function isPlayBillingAvailable() {
     return PLAY_BILLING_AVAILABLE &&
@@ -190,16 +191,9 @@
 
       var receipt = fulfillResult.data.receipt;
 
-      // Step 5: Consume on Google Play (for consumable products)
-      if (productInfo.consumable && window.PlayBillingBridge.consumePurchase) {
-        try {
-          await window.PlayBillingBridge.consumePurchase(purchaseToken);
-        } catch(e) {
-          console.error("[PlayBilling] Consume failed (non-fatal):", e);
-        }
-      }
-
-      // Step 6: Client-side credit (same creditPack as PayPal flow)
+      // Step 5: Client-side credit (same creditPack as PayPal flow)
+      // Credit BEFORE consume — if credit fails, the unconsumed purchase
+      // remains in queryPurchases and can be recovered on next startup.
       onStatus("Applying to your account…");
       var creditResult = onCredit(receipt.packId, receipt.fulfillmentId, {
         orderID: orderId,
@@ -210,10 +204,23 @@
         characterId: receipt.characterId
       });
 
+      // Step 6: Consume on Google Play (for consumable products)
+      // Only consume after successful credit so recovery via queryPurchases
+      // remains possible if credit failed.
+      if (productInfo.consumable && window.PlayBillingBridge.consumePurchase) {
+        if (creditResult && creditResult.ok) {
+          try {
+            await window.PlayBillingBridge.consumePurchase(purchaseToken);
+          } catch(e) {
+            console.error("[PlayBilling] Consume failed (non-fatal):", e);
+          }
+        }
+      }
+
       // Clean up session storage
       try { sessionStorage.removeItem("gei.playbilling.claim." + orderId); } catch(e) {}
 
-      onStatus("Purchase complete!");
+      onStatus(creditResult && creditResult.ok ? "Purchase complete!" : "Purchase saved — will sync on next visit.");
       return {
         ok: true,
         packId: receipt.packId,
@@ -326,6 +333,8 @@
    */
   function initAutoRecovery(callbacks) {
     if (!callbacks || typeof callbacks.onCredit !== "function") return;
+    if (AUTO_RECOVERY_INIT) return;
+    AUTO_RECOVERY_INIT = true;
     AUTO_RECOVERY_CALLBACKS = callbacks;
 
     if (detectPlayBillingEnvironment()) {

@@ -12779,7 +12779,8 @@ function restoreVisualProgress(){
   var originalStartCheckout=window.startCheckout;
   window.startCheckout=function(packId){
     if(!window.GeiPlayBilling.isAvailable()){
-      if(typeof originalStartCheckout==="function") return originalStartCheckout(packId);
+      var s=document.getElementById("paypalCheckoutStatus");
+      if(s) s.textContent="Google Play Billing is loading… please try again in a moment.";
       return;
     }
     window.GeiPlayBilling.startCheckout(packId, {
