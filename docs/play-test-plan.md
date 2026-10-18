@@ -154,6 +154,59 @@ Gradle wrapper now executes correctly. Build fails at dependency resolution:
 ### Test Coverage
 V2.5.2 adds 14 new test suites (190 total, 880 assertions, 0 failures).
 
+## V2.5.3 Changes
+
+### Performance Diagnosis and Fixes
+
+**Root Cause**: Gameplay choppiness on Android phones was caused by bloom post-processing running on devices that can't handle it. The tier detection function relied on `navigator.deviceMemory`, which is unavailable in Android WebView (returns `undefined`, defaults to 4GB). Mid-range phones with 4+ cores were classified as "medium" tier, enabling:
+- 4 extra GPU render passes per frame for bloom (threshold → h-blur → v-blur → composite)
+- 1024×1024 shadow maps
+- DPR capped at 1.5
+
+The existing adaptive quality system could drop DPR and disable shadows under sustained jank, but **never disabled bloom** — the most expensive addition from the premium module.
+
+### Adaptive Quality Ladder (New)
+Modified `dam-builder-3d-v2218.js` to add bloom to the degradation ladder. When frames exceed 34ms for >1.2s cumulative:
+1. **First**: Disable bloom (`renderer._bloomOff = true`) — removes 4 GPU passes
+2. **Second**: Reduce DPR by 20% (floor 0.7) — reduces pixel fill
+3. **Third**: Disable shadow maps — removes shadow render pass
+
+Previously, only steps 2–3 existed. Bloom was the most expensive effect but was never shed.
+
+### Bloom Flag Protocol
+- `dam-builder-3d-v2218.js`: Sets `s._bloomOff = true` on the renderer when slow frames accumulate
+- `dam-builder-3d-premium-v2300.js`: Checks `!renderer._bloomOff` before running bloom passes; falls through to direct `origRender(s, c)` when bloom is disabled
+
+### Android WebView Tier Detection (New)
+Modified the `ah()` tier function in `dam-builder-3d-v2218.js`:
+- Detects Android WebView via `window.__NativePlayBillingBridge` presence
+- When `navigator.deviceMemory` is unavailable (WebView doesn't expose it):
+  - Phones with ≤6 hardware threads → "low" tier (no bloom, no shadows, DPR=1)
+  - Phones with >6 hardware threads → "medium" tier (bloom at 0.25x, shadows at 1024)
+- Previously, all WebView devices defaulted to "medium" (deviceMemory fallback was 4GB)
+
+### SIMPLE VIEW Button Mobile Enhancement
+Modified `dam-builder-v2217.js` CSS:
+- `@media(max-width:600px)`: Button grows to 40px min-height, 12px font, 2px border, with a subtle glow (`box-shadow: 0 0 8px rgba(47,210,255,.4)`)
+- Makes the "SIMPLE VIEW" / "3D VIEW" toggle more discoverable on phone screens
+
+### SIMPLE VIEW Accessibility Clarification
+The SIMPLE VIEW toggle IS implemented and functional:
+- `#dbView` button in DAM BUILDER mode, visible when a Day challenge is mounted
+- Shows "SIMPLE VIEW" when in 3D mode, "3D VIEW" when in SVG mode
+- Available for all 6 Days (`HAS3D` is `true` for Days 0–5)
+- Click toggles `store.r3d` and remounts the Day with `force2d: true/false`
+- The user may not have noticed it because it only appears inside the builder stage view (not ARCADE mode)
+
+### Performance Instrumentation
+The 3D bundle includes built-in performance reporting:
+- `?b3dperf=1` URL parameter: Shows real-time FPS overlay with COPY REPORT button
+- `DamBuilder3D.perfReport()`: Returns comprehensive metrics (FPS, p50/p95/p99 frame times, DPR, quality tier, draw calls, triangles, GPU info, JS heap, context losses, device memory, core count)
+- `DamBuilder3D.perfReset()`: Resets frame time history
+
+### Test Coverage
+V2.5.3 adds 12 new test suites (202 total, 914 assertions, 0 failures).
+
 ## V2.5.1 Changes
 
 ### Credit-Before-Consume Ordering Fix

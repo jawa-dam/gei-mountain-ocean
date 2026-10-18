@@ -1,10 +1,10 @@
 {
-  "suite": "V2.5.2 — Android Build Reproducibility & Device Smoke Test",
-  "runDate": "2026-10-14",
-  "suites": 190,
-  "passed": 190,
+  "suite": "V2.5.3 — Android Performance Diagnosis",
+  "runDate": "2026-10-18",
+  "suites": 202,
+  "passed": 202,
   "failed": 0,
-  "assertions": 880,
+  "assertions": 914,
   "testType": "handler-level-with-doubles",
-  "note": "V2.5.2 adds 14 new suites on top of V2.5.1's 176: gradlew JVM opts fix (args were passed as Gradle arguments instead of JVM arguments, preventing any build), PlayBillingBridge JS interface injection and origin validation, native callback ID uniqueness (AtomicLong + ConcurrentHashMap), Base64 + evaluateJavascript callback resolution, JS shim Promise wrapping with 120s timeout, native concurrency guard for billing flows, purchase tokens never logged, BillingWebViewActivity cleanup on destroy, PlayBillingBridge.destroy() state reset, mixed content blocking, recovery scenario analysis (fulfill succeeds → credit fails → unconsumed purchase recovered on restart), AndroidManifest permissions and restrictions, Gradle build configuration consistency, TwaActivity delegation. Android build blocked by dl.google.com proxy restriction (HTTP 403). Gradlew script fixed but AGP/AndroidX/BillingClient cannot be downloaded."
+  "note": "V2.5.3 adds 12 new suites on top of V2.5.2's 190: adaptive quality now disables bloom before dropping DPR or shadows (3-tier degradation ladder: bloom → DPR → shadows), premium bloom module respects renderer._bloomOff flag, tier detection accounts for Android WebView missing navigator.deviceMemory (phones with <=6 cores in WebView get low tier), SIMPLE VIEW button has enhanced mobile styling (larger tap target, glow effect on screens <=600px), SIMPLE VIEW toggle verified accessible for all 6 Days, bloom skipped on low tier, adaptive quality ladder ordering verified, bloom resolution scaling verified (0.25x medium, 0.5x high), perfReport includes full quality diagnostics, 3D render loop verified as single outer-driven chain (no duplicate rAF), WebGL context loss fallback verified, heavy-frame throttle for sheet overlay verified."
 }

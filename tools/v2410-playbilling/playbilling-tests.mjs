@@ -4464,10 +4464,171 @@ suite("V2.5.2: TwaActivity delegates to BillingWebViewActivity", async () => {
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.5.3 — Android Performance Diagnosis
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.5.3: Adaptive quality disables bloom before dropping DPR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-v2218.js", "utf-8");
+  const adaptiveCode = src.match(/We>1\.2[^}]+castShadow[^)]+\)/);
+  t("adaptive quality code exists", !!adaptiveCode);
+
+  const code = adaptiveCode ? adaptiveCode[0] : "";
+  t("bloom disable comes before DPR reduction",
+    code.indexOf("_bloomOff") < code.indexOf("Ve*.8"));
+
+  t("bloom disable comes before shadow disable",
+    code.indexOf("_bloomOff") < code.indexOf("castShadow"));
+
+  t("bloom flag is set on the renderer (s._bloomOff)",
+    code.includes("s._bloomOff=!0"));
+});
+
+suite("V2.5.3: Premium bloom respects _bloomOff flag", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-premium-v2300.js", "utf-8");
+  t("bloom render checks _bloomOff before running",
+    src.includes("!renderer._bloomOff"));
+
+  t("bloom bypass is in the render intercept",
+    src.includes("s === mainScene && c === mainCam && !renderer.getRenderTarget() && !renderer._bloomOff"));
+});
+
+suite("V2.5.3: Tier detection accounts for Android WebView missing deviceMemory", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-v2218.js", "utf-8");
+  const tierFn = src.match(/function ah\(\)\{[^}]+\}/);
+  t("tier function exists", !!tierFn);
+
+  const fn = tierFn ? tierFn[0] : "";
+  t("checks for __NativePlayBillingBridge presence",
+    fn.includes("__NativePlayBillingBridge"));
+
+  t("detects missing deviceMemory in WebView context",
+    fn.includes("!e"));
+
+  t("returns low for WebView with <=6 cores",
+    fn.includes("t<=6"));
+});
+
+suite("V2.5.3: SIMPLE VIEW button has enhanced mobile styling", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-v2217.js", "utf-8");
+  t("mobile media query exists for dbView",
+    src.includes("@media(max-width:600px){.dbView{"));
+
+  t("increased min-height on mobile",
+    src.includes("min-height:40px"));
+
+  t("increased font-size on mobile",
+    src.includes("font-size:12px"));
+
+  t("glow shadow for visibility",
+    src.includes("box-shadow:0 0 8px"));
+});
+
+suite("V2.5.3: SIMPLE VIEW toggle is accessible for all 6 Days", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-v2217.js", "utf-8");
+  t("HAS3D covers all 6 Days",
+    src.includes("HAS3D") &&
+    !!src.match(/HAS3D\s*=\s*\{[^}]*0\s*:\s*true[^}]*1\s*:\s*true[^}]*2\s*:\s*true[^}]*3\s*:\s*true[^}]*4\s*:\s*true[^}]*5\s*:\s*true/));
+
+  t("dbView button exists in DOM template",
+    src.includes('id="dbView"'));
+
+  t("syncViewChip sets button text to SIMPLE VIEW when in 3D",
+    src.includes('"SIMPLE VIEW"'));
+
+  t("syncViewChip sets button text to 3D VIEW when in 2D",
+    src.includes('"3D VIEW"'));
+});
+
+suite("V2.5.3: Bloom is skipped on low tier", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-premium-v2300.js", "utf-8");
+  t("setupBloom returns null on low tier",
+    src.includes('if (tier === "low") return null'));
+});
+
+suite("V2.5.3: Adaptive quality ladder order is correct", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-v2218.js", "utf-8");
+  const adaptiveCode = src.match(/We>1\.2[^}]+castShadow[^)]+\)/);
+  const code = adaptiveCode ? adaptiveCode[0] : "";
+
+  const bloomIdx = code.indexOf("_bloomOff");
+  const dprIdx = code.indexOf("Ve*.8");
+  const shadowIdx = code.indexOf("castShadow");
+
+  t("bloom disabled first (cheapest recovery)", bloomIdx >= 0 && bloomIdx < dprIdx);
+  t("DPR reduced second", dprIdx >= 0 && dprIdx < shadowIdx);
+  t("shadows disabled last (most drastic)", shadowIdx >= 0);
+});
+
+suite("V2.5.3: Bloom post-processing runs at reduced resolution", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-premium-v2300.js", "utf-8");
+  t("medium tier bloom scale is 0.25x",
+    src.includes('var scale = tier === "high" ? 0.5 : 0.25'));
+
+  t("bloom skipped if render target too small (< 64px)",
+    src.includes("bw < 64 || bh < 64"));
+});
+
+suite("V2.5.3: perfReport includes quality diagnostics", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-3d-v2218.js", "utf-8");
+  t("perfReport includes quality tier",
+    src.includes("quality:a"));
+
+  t("perfReport includes DPR value",
+    src.includes("dpr:+Ve"));
+
+  t("perfReport includes shadow status",
+    src.includes("shadows:!!r.castShadow"));
+
+  t("perfReport includes GPU info",
+    src.includes("UNMASKED_RENDERER_WEBGL"));
+});
+
+suite("V2.5.3: 3D render loop driven by outer frame(), not internal rAF", async () => {
+  const { readFileSync } = await import("node:fs");
+  const builderSrc = readFileSync("dam-builder-v2217.js", "utf-8");
+  const src3d = readFileSync("dam-builder-3d-v2218.js", "utf-8");
+  t("outer frame() calls run.def.draw(dt)",
+    builderSrc.includes("run.def.draw(dt)"));
+
+  t("3D Day draw calls stage.frame()",
+    src3d.includes("draw(p){") && src3d.includes("e.frame(p)"));
+
+  t("stage.frame calls renderer.render(scene, camera)",
+    src3d.includes("s.render(t,n)"));
+});
+
+suite("V2.5.3: WebGL context loss triggers SVG fallback", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src3d = readFileSync("dam-builder-3d-v2218.js", "utf-8");
+  const builderSrc = readFileSync("dam-builder-v2217.js", "utf-8");
+  t("context loss handler exists",
+    src3d.includes("webglcontextlost"));
+
+  t("mount3D sets onLost to trigger fallback",
+    builderSrc.includes("onLost:function(){ if(token === mountToken) fallback"));
+});
+
+suite("V2.5.3: Heavy-frame throttle in 3D mode when sheet is open", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-v2217.js", "utf-8");
+  t("3D rendering throttled to 1/3 rate when sheet covers scene",
+    src.includes("is3d && sheetOpen && (++heavySkip % 3)) return"));
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.5.2 — Android Build Reproducibility & Device Smoke Test\n");
+console.log("\nV2.5.3 — Android Performance Diagnosis\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");
