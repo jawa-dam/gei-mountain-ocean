@@ -9301,6 +9301,7 @@ function runDamIteHydraulicReactionSelfTest(){
 }
 document.addEventListener("pointerdown",e=>{
   if(e.button!==undefined&&e.button!==0)return;
+  if(window.DamBuilder&&window.DamBuilder.isOpen)return;
   const target=e.target instanceof Element?e.target:null;
   if(target&&target.closest("#tapWaterLayer, script, style"))return;
   let intensity=1;
@@ -10575,19 +10576,37 @@ function spawnMist(){
 const mistStyle = document.createElement("style");
 mistStyle.textContent = "@keyframes mistFloat{from{transform:translateY(0);opacity:.4;}to{transform:translateY(-90px);opacity:0;}}";
 document.head.appendChild(mistStyle);
-setInterval(spawnMist, 3200);
+let _geiMistInterval = setInterval(spawnMist, 3200);
 
 /* ocean wave motion */
 let waveTime = 0;
+let _geiOceanRaf = 0;
 function animateOcean(){
   waveTime += 0.025;
   const a = 770 + Math.sin(waveTime)*6;
   const b = 770 + Math.cos(waveTime)*6;
   const c = 770 + Math.sin(waveTime+1)*6;
   oceanFill.setAttribute("d", `M0 ${a} Q50 ${b} 100 ${a} Q150 ${c} 200 ${b} Q250 ${a} 300 ${c} Q350 ${b} 400 ${a} L400 800 L0 800 Z`);
-  requestAnimationFrame(animateOcean);
+  if(!window._geiArcadeEffectsPaused) _geiOceanRaf = requestAnimationFrame(animateOcean);
+  else _geiOceanRaf = 0;
 }
-animateOcean();
+window._geiArcadeEffectsPaused = false;
+window.pauseArcadeEffects = function(){
+  if(window._geiArcadeEffectsPaused) return;
+  window._geiArcadeEffectsPaused = true;
+  if(_geiMistInterval){ clearInterval(_geiMistInterval); _geiMistInterval = 0; }
+};
+window.resumeArcadeEffects = function(){
+  if(!window._geiArcadeEffectsPaused) return;
+  window._geiArcadeEffectsPaused = false;
+  if(!_geiMistInterval) _geiMistInterval = setInterval(spawnMist, 3200);
+  if(!_geiOceanRaf) _geiOceanRaf = requestAnimationFrame(animateOcean);
+};
+_geiOceanRaf = requestAnimationFrame(animateOcean);
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden) window.pauseArcadeEffects();
+  else if(!window.DamBuilder||!window.DamBuilder.isOpen) window.resumeArcadeEffects();
+});
 
 /* =========================================================
    WATER SOUND EFFECTS (synthesized — no external audio files)

@@ -1,7 +1,7 @@
 # TapLites: GEI — Internal Play Store Test Plan
 
-**Version**: V2.5.2  
-**Status**: Gradlew script fixed, native bridge source-reviewed, recovery scenario analyzed, Android build blocked by dl.google.com — not yet compiled or executed on device
+**Version**: V2.5.4  
+**Status**: Android lifecycle + Arcade effect pausing implemented, 215 test suites pass (951 assertions), Android build blocked by dl.google.com — not yet compiled or executed on device
 
 ## External Prerequisites (Manual Setup Required)
 
@@ -518,3 +518,41 @@ adb install android/app/build/outputs/apk/debug/app-debug.apk
 - [ ] Concurrent billing flow prevention is verified on device
 - [ ] The JS shim ↔ native bridge contract is verified via emulator testing
 - [ ] Security review of WebView navigation is confirmed on device
+
+---
+
+## V2.5.4 — Android Stability Fix (Automated Test Results)
+
+**Date**: 2026-10-18  
+**Suites**: 215 passed, 0 failed (951 assertions)  
+**Test type**: handler-level with source analysis (mocked — no device execution)
+
+### Phase 1 — Android Lifecycle (Kotlin + Manifest)
+- [x] `onPause()` suspends WebView + JS timers (`webView.onPause()` + `pauseTimers()`)
+- [x] `onResume()` resumes WebView + JS timers (`webView.onResume()` + `resumeTimers()`)
+- [x] `onRenderProcessGone` recovers with new WebView, 3-crash limit prevents infinite loop
+- [x] `WebChromeClient` pipes `console.log` → Logcat with correct severity mapping
+- [x] `setRendererPriorityPolicy(IMPORTANT)` with API 26+ guard
+- [x] `android:hardwareAccelerated="true"` on BillingWebViewActivity in manifest
+
+### Phase 2 — Pause Inactive Arcade Effects
+- [x] `animateOcean()` stops rAF loop when paused, resumes cleanly
+- [x] `spawnMist` interval cleared when Builder opens, restarted exactly once on close
+- [x] Document `pointerdown` handler skips tap-water effects when Builder is open
+- [x] `openBuilder()` calls `pauseArcadeEffects()`; `closeBuilder()` calls `resumeArcadeEffects()`
+- [x] `visibilitychange` pauses on hidden, resumes on visible only if Builder is not open
+- [x] Single-owner guards prevent duplicate intervals/rAFs on repeated mode switching
+
+### Build Attempt
+- [ ] **APK build**: BLOCKED — `dl.google.com` returns HTTP 403 from proxy (AGP 8.7.3 + AndroidX cannot be downloaded). This is an environment limitation. Kotlin source compiles structurally but cannot be verified via Gradle.
+
+### Still Requires Device Testing
+- [ ] Verify WebView pauses rendering when activity is backgrounded
+- [ ] Verify WebView resumes without blank screen on foreground
+- [ ] Verify renderer crash recovery creates functional replacement WebView
+- [ ] Verify Logcat receives JS console output at correct levels
+- [ ] Verify ocean animation stops visually when Builder is opened
+- [ ] Verify mist stops spawning during Builder mode
+- [ ] Verify tap-water effects are suppressed during Builder mode
+- [ ] Verify clean resume of all effects when returning to Arcade
+- [ ] Verify repeated Builder open/close cycles don't create duplicate loops

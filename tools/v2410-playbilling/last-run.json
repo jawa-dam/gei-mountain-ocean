@@ -1,10 +1,10 @@
 {
-  "suite": "V2.5.3 — Android Performance Diagnosis",
+  "suite": "V2.5.4 — Android Stability Fix",
   "runDate": "2026-10-18",
-  "suites": 202,
-  "passed": 202,
+  "suites": 215,
+  "passed": 215,
   "failed": 0,
-  "assertions": 914,
+  "assertions": 951,
   "testType": "handler-level-with-doubles",
-  "note": "V2.5.3 adds 12 new suites on top of V2.5.2's 190: adaptive quality now disables bloom before dropping DPR or shadows (3-tier degradation ladder: bloom → DPR → shadows), premium bloom module respects renderer._bloomOff flag, tier detection accounts for Android WebView missing navigator.deviceMemory (phones with <=6 cores in WebView get low tier), SIMPLE VIEW button has enhanced mobile styling (larger tap target, glow effect on screens <=600px), SIMPLE VIEW toggle verified accessible for all 6 Days, bloom skipped on low tier, adaptive quality ladder ordering verified, bloom resolution scaling verified (0.25x medium, 0.5x high), perfReport includes full quality diagnostics, 3D render loop verified as single outer-driven chain (no duplicate rAF), WebGL context loss fallback verified, heavy-frame throttle for sheet overlay verified."
+  "note": "V2.5.4 adds 13 new suites on top of V2.5.3's 202: Android WebView lifecycle management (onPause/onResume with timer suspension), renderer crash recovery with 3-crash limit to prevent infinite reload loops, WebChromeClient with console-to-Logcat routing at correct log levels, hardware acceleration enabled in AndroidManifest.xml, renderer priority policy set to IMPORTANT, ocean animation made pauseable via _geiArcadeEffectsPaused flag, mist interval lifecycle managed with clear/restart, pointerdown handler skipped when DamBuilder is open, openBuilder calls pauseArcadeEffects, closeBuilder calls resumeArcadeEffects, visibilitychange pauses/resumes effects with Builder-open guard, single-owner guards prevent duplicate intervals/rAFs on repeated mode switching, crash recovery limit prevents infinite reload."
 }

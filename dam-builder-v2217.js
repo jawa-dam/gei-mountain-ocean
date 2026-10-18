@@ -745,6 +745,7 @@
       s.tapCount = 0; s.phase = "ready";
     }
     openFlag = true; root.hidden = false; applyMotion(); syncChrome();
+    try{ if(typeof window.pauseArcadeEffects === "function") window.pauseArcadeEffects(); }catch(e){}
     if(store.mode !== "builder"){ store.mode = "builder"; persist(); }
     var i = opts.day != null ? clamp(opts.day | 0, 0, daysDone()) : Math.min(daysDone(), 5);
     mountDay(i, { attempts:0 });
@@ -754,6 +755,7 @@
   function closeBuilder(o){
     if(!openFlag) return;
     openFlag = false; mountToken++; stopLoop(); hideSheet(); unmount(); disposeStage();
+    try{ if(typeof window.resumeArcadeEffects === "function") window.resumeArcadeEffects(); }catch(e){}
     if(root) root.hidden = true;
     uiCache.days = null;
     updatePill();

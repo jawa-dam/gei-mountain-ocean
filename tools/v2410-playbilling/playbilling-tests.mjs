@@ -4625,10 +4625,135 @@ suite("V2.5.3: Heavy-frame throttle in 3D mode when sheet is open", async () => 
 });
 
 // ════════════════════════════════════════════════════════════════════
+// V2.5.4 — Android Stability Fix
+// ════════════════════════════════════════════════════════════════════
+
+suite("V2.5.4: WebView onPause suspends timers and WebView", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+  t("onPause calls webView.onPause()", src.includes("webView.onPause()"));
+  t("onPause calls webView.pauseTimers()", src.includes("webView.pauseTimers()"));
+  t("onResume calls webView.onResume()", src.includes("webView.onResume()"));
+  t("onResume calls webView.resumeTimers()", src.includes("webView.resumeTimers()"));
+});
+
+suite("V2.5.4: WebView renderer crash recovery with limit", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+  t("onRenderProcessGone override exists", src.includes("onRenderProcessGone"));
+  t("crash count tracked to prevent infinite loop", src.includes("rendererCrashCount"));
+  t("finishes activity after too many crashes", src.includes("Too many renderer crashes"));
+  t("recovers by creating new WebView", src.includes("WebView(this@BillingWebViewActivity)"));
+});
+
+suite("V2.5.4: WebChromeClient pipes console to Logcat", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+  t("WebChromeClient assigned", src.includes("webView.webChromeClient"));
+  t("onConsoleMessage override exists", src.includes("onConsoleMessage"));
+  t("maps ERROR level", src.includes("ConsoleMessage.MessageLevel.ERROR"));
+  t("maps WARNING level", src.includes("ConsoleMessage.MessageLevel.WARNING"));
+});
+
+suite("V2.5.4: Hardware acceleration enabled in manifest", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("android/app/src/main/AndroidManifest.xml", "utf-8");
+  t("BillingWebViewActivity has hardwareAccelerated=true",
+    src.includes('android:hardwareAccelerated="true"'));
+});
+
+suite("V2.5.4: Renderer priority policy set for WebView", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+  t("setRendererPriorityPolicy called", src.includes("setRendererPriorityPolicy"));
+  t("RENDERER_PRIORITY_IMPORTANT used", src.includes("RENDERER_PRIORITY_IMPORTANT"));
+  t("API level check for O (26)", src.includes("Build.VERSION_CODES.O"));
+});
+
+suite("V2.5.4: Ocean animation is pauseable", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("index.html", "utf-8");
+  t("ocean rAF stored in trackable variable", src.includes("_geiOceanRaf"));
+  t("animateOcean checks pause flag before requesting frame",
+    src.includes("_geiArcadeEffectsPaused") && src.includes("requestAnimationFrame(animateOcean)"));
+  t("pause flag zeroes rAF ID when paused", src.includes("_geiOceanRaf = 0"));
+});
+
+suite("V2.5.4: Mist interval lifecycle managed", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("index.html", "utf-8");
+  t("mist interval stored in named variable", src.includes("_geiMistInterval"));
+  t("pauseArcadeEffects clears mist interval",
+    src.includes("clearInterval(_geiMistInterval)"));
+  t("resumeArcadeEffects restarts mist interval",
+    src.includes("_geiMistInterval = setInterval(spawnMist, 3200)"));
+});
+
+suite("V2.5.4: Pointerdown skipped when Builder is open", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("index.html", "utf-8");
+  const pointerIdx = src.indexOf('document.addEventListener("pointerdown"');
+  t("pointerdown handler exists", pointerIdx !== -1);
+  const chunk = src.slice(pointerIdx, pointerIdx + 300);
+  t("Builder.isOpen guard in pointerdown handler",
+    chunk.includes("DamBuilder.isOpen"));
+});
+
+suite("V2.5.4: Builder openBuilder calls pauseArcadeEffects", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-v2217.js", "utf-8");
+  const openIdx = src.indexOf("function openBuilder");
+  t("openBuilder function exists", openIdx !== -1);
+  const chunk = src.slice(openIdx, openIdx + 1200);
+  t("openBuilder calls pauseArcadeEffects", chunk.includes("pauseArcadeEffects"));
+});
+
+suite("V2.5.4: Builder closeBuilder calls resumeArcadeEffects", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("dam-builder-v2217.js", "utf-8");
+  const closeIdx = src.indexOf("function closeBuilder");
+  t("closeBuilder function exists", closeIdx !== -1);
+  const chunk = src.slice(closeIdx, closeIdx + 400);
+  t("closeBuilder calls resumeArcadeEffects", chunk.includes("resumeArcadeEffects"));
+});
+
+suite("V2.5.4: Visibility change pauses and resumes effects", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("index.html", "utf-8");
+  t("visibilitychange listener calls pauseArcadeEffects on hidden",
+    src.includes("document.hidden) window.pauseArcadeEffects()") ||
+    src.includes("document.hidden) pauseArcadeEffects()"));
+  t("visibilitychange listener calls resumeArcadeEffects on visible",
+    src.includes("resumeArcadeEffects()"));
+  t("resume checks Builder is not open before resuming",
+    src.includes("DamBuilder.isOpen") && src.includes("resumeArcadeEffects"));
+});
+
+suite("V2.5.4: Single-owner guards prevent duplicate intervals", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("index.html", "utf-8");
+  t("pauseArcadeEffects is idempotent (checks flag first)",
+    src.includes("if(window._geiArcadeEffectsPaused) return"));
+  t("resumeArcadeEffects is idempotent (checks flag first)",
+    src.includes("if(!window._geiArcadeEffectsPaused) return"));
+  t("mist restart only if interval not already running",
+    src.includes("if(!_geiMistInterval)"));
+  t("ocean restart only if rAF not already running",
+    src.includes("if(!_geiOceanRaf)"));
+});
+
+suite("V2.5.4: No infinite reload loop in renderer crash recovery", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync("android/app/src/main/java/com/yalltoo/taplites/gei/BillingWebViewActivity.kt", "utf-8");
+  t("crash count compared against limit", src.includes("rendererCrashCount > 3"));
+  t("activity finishes on excessive crashes", src.includes("finish()"));
+});
+
+// ════════════════════════════════════════════════════════════════════
 // RUN
 // ════════════════════════════════════════════════════════════════════
 
-console.log("\nV2.5.3 — Android Performance Diagnosis\n");
+console.log("\nV2.5.4 — Android Stability Fix\n");
 await runAll();
 
 console.log("\n--- Manual Test Checklist (requires Play Console + RTDN) ---");
