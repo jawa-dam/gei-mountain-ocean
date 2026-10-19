@@ -1,0 +1,43 @@
+PRE    arcade:v2-adaptive-voice/v2198-adaptive-voice-regression   6 passed  0s
+        AssertionError [ERR_ASSERTION]: new-player pacing
+PRE    arcade:v2-ambient/ambient-regression             0 passed  248s
+        ✗ exited 1:    "name": "P3. no new page errors (home)", |    "name": "P4. no new page errors (level/wheel)",
+PRE    arcade:v2-chaos/economy-chaos                    0 passed  0s
+        ✗ exited 1:       "error": "Expected values to be strictly equal:\n\nfalse !== true\n"
+PRE    arcade:v2-chaos/regression-gate                  0 passed  0s
+        V2.0.29 REGRESSION GATE FAILED: one or more economy security tests failed.
+PRE    arcade:v2-contextual-voice/v2197-contextual-voice-regression  11 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only
+PRE    arcade:v2-dam-map/dam-map-regression             0 passed  160s
+        ✗ exited 1:    "name": "F3. no new script errors", |    "name": "G7. no new script errors during the milestone flow",
+PRE    arcade:v2-milestone-voice/milestone-voice-regression   5 passed  0s
+        FAIL female voice fallback
+PRE    arcade:v2-quiet-tap/quiet-tap-regression         0 passed  87s
+        ✗ exited 1:    "name": "no new script errors (only the 4 pre-existing unparseable modules)",
+PRE    arcade:v2-soundtrack/soundtrack-regression       0 passed  59s
+        ✗ exited 1:         "errors": 0, |         "errors": 0,
+PRE    arcade:v2-voice-event-vocabulary/v2203-voice-event-vocabulary-regression  69 passed  48s
+        FAIL A1 vocabulary has exactly the 38 supplied recordings  → 49
+        FAIL A3 no event URL outside the supplied list (no invented assets)
+        FAIL A8 V2.2.03 core reference equals the original 14
+        FAIL B1 selfTest: 38 assets, unique hosted URLs, no core overlap, core matches reference  → {"version":"V2.2.03","eventAssets":49,"categories":{"START":4,"SUCCESS":15,"EN
+PRE    arcade:v2-voice-reactions/v2196-voice-reactions-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only
+PRE    arcade:v2-voice-rewards/v2202-voice-discovery-rewards-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: presentation-only boundary
+PRE    arcade:v2-voice-showcase/v2200-voice-showcase-regression   8 passed  0s
+        AssertionError [ERR_ASSERTION]: accessible dialog
+PRE    arcade:v2-voice-ui/v2195-voice-ui-regression     1 passed  0s
+        AssertionError [ERR_ASSERTION]: Female default
+PRE    arcade:v2-welcome/welcome-regression             0 passed  60s
+        ✗ exited 1:    "name": "A12. no page errors (new visitor)", |    "name": "C6. no page errors (dismissed visitor)",
+FAIL   arcade:v2210-flow-moment/flow-moment-regression  51 passed, 2 failed  373s  (re-run after infra timeout; first attempt: INFRA)
+        ✗ F3c. pressure follows the clock: on while live, off the moment the timer pauses / stops
+        ✗ suite failure crashed: page.waitForFunction: Timeout 30000ms exceeded.
+        !! failures NOT present on the baseline: ["✗ suite failure crashed: page.waitForFunction: Timeout exceeded."]
+FAIL   arcade:v2211-flow-voices/flow-voices-regression  54 passed, 2 failed  280s
+        ✗ suite level crashed: page.waitForFunction: Timeout 15000ms exceeded.
+        ✗ V8e. 390×844: milestone words are centred, readable (≥ 28 px; ≥ 22 px on 568-high phones), inside the viewport, no scrolling
+        !! failures NOT present on the baseline: ["✗ suite level crashed: page.waitForFunction: Timeout exceeded.","✗ V8e. 390×844: milestone words are centred, readable (≥ 28 px; ≥ 22 px on 568-high phones), inside the viewport, no scrolling"]
+
+17 suites · 221 assertions passed · genuine FAIL: 2 · unresolved INFRA: 0 · failing identically on the pre-Builder baseline: 15 · passed only after an infra re-run: 0

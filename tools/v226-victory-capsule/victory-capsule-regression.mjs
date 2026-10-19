@@ -56,7 +56,7 @@ function serve(){
 const results = [];
 function check(name, pass, detail){ results.push({ name, pass: !!pass, detail }); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const KNOWN_PAGE_ERROR = /Unexpected string|addStyle is not defined/;   // pre-existing on the base (reproduces with the Flow module blocked)
+const KNOWN_PAGE_ERROR = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 
 async function newCtx(browser, base, opts){
   const ctx = await browser.newContext(Object.assign({ viewport:{ width:1280, height:800 } }, opts || {}));

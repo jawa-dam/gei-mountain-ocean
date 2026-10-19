@@ -55,7 +55,7 @@ async function boot(opts = {}){
     return r.abort();
   });
   const page = await ctx.newPage();
-  page.on("pageerror", e => { if (!/addStyle is not defined/.test(e.message)) errors.push(e.message); });   // addStyle: pre-existing, unrelated (tap-lites-reward-moments-v2178.js)
+  page.on("pageerror", e => errors.push(e.message));   // V2.2.20: unfiltered — the former "addStyle is not defined" (tap-lites-reward-moments-v2178.js) is fixed and must not return
   await page.goto(base + "/", { waitUntil:"load" }); await sleep(500);
   await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });
   await sleep(1800);

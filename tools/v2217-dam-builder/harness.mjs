@@ -27,24 +27,27 @@ export const srv = await new Promise(ok => {
 });
 export const base = "http://127.0.0.1:" + srv.address().port;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
-export const browser = await chromium.launch({ args:["--autoplay-policy=no-user-gesture-required"] });
+const LAUNCH = { args:["--autoplay-policy=no-user-gesture-required", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] };
+export let browser = await chromium.launch(LAUNCH);
+/* test isolation: software-GL contexts accumulate inside one browser process, so long multi-suite runs get slower and slower. A fresh browser per suite removes that coupling. */
+export async function freshBrowser(){ try { await browser.close(); } catch {} browser = await chromium.launch(LAUNCH); return browser; }
 function wav(ms){ const sr = 8000, n = sr * ms / 1000 | 0, b = Buffer.alloc(44 + n * 2); b.write("RIFF", 0); b.writeUInt32LE(36 + n * 2, 4); b.write("WAVEfmt ", 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22); b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write("data", 36); b.writeUInt32LE(n * 2, 40); return b; }
 const PNG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#c58a4a"/></svg>';
 
-/* opts: viewport, reduced, storage (object of localStorage keys seeded before load), noSkipIntro */
+/* opts: viewport, reduced, block (URL substring to abort), storage (object of localStorage keys seeded before load), noSkipIntro */
 export async function boot(opts = {}){
   const ctx = opts.ctx || await browser.newContext({ viewport:opts.viewport || { width:390, height:844 }, isMobile:true, hasTouch:true, reducedMotion:opts.reduced ? "reduce" : "no-preference" });
   const errors = [];
   if(!opts.ctx) await ctx.route("**/*", r => {
-    const u = r.request().url(); if (u.startsWith(base)) return r.continue();
+    const u = r.request().url(); if (opts.block && u.includes(opts.block)) return r.abort(); if (u.startsWith(base)) return r.continue();
     if (/zyrosite.*\.mp3/.test(u)) return r.fulfill({ status:200, contentType:"audio/wav", body:wav(300) });
     if (/zyrosite.*\.(png|jpg|webp)/.test(u)) return r.fulfill({ status:200, contentType:"image/svg+xml", body:PNG });
     return r.abort();
   });
   const page = await ctx.newPage();
-  page.on("pageerror", e => { if (!/addStyle is not defined/.test(e.message)) errors.push(e.message); });   // pre-existing, unrelated (tap-lites-reward-moments-v2178.js)
+  page.on("pageerror", e => errors.push(e.message));   // no filtering: the former "addStyle is not defined" (tap-lites-reward-moments-v2178.js) was fixed in V2.2.20 and must not come back
   if (opts.storage) await page.addInitScript(s => { if(!sessionStorage.getItem("__seeded")){ for (const k in s) localStorage.setItem(k, s[k]); sessionStorage.setItem("__seeded", "1"); } }, opts.storage);
-  await page.goto(base + "/", { waitUntil:"load" }); await sleep(500);
+  await page.goto(base + "/" + (opts.query == null ? "?b3d=off" : opts.query), { waitUntil:"load" }); await sleep(500);
   await page.evaluate(() => { const b = document.getElementById("geiSplashSkip"); if (b) b.click(); else if (window.geiFinishSplash) geiFinishSplash(); });
   await sleep(1800);
   await page.evaluate(() => { const b = document.getElementById("geiWelcomeBegin"); if (b) b.click(); }); await sleep(1100);

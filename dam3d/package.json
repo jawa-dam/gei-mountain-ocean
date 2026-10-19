@@ -1,0 +1,8 @@
+{
+  "name": "gei-dam-builder-3d",
+  "private": true,
+  "type": "module",
+  "description": "Source + build for the lazy-loaded DAM BUILDER 3D bundle (../dam-builder-3d-v2218.js). The game itself stays build-free; only this bundle is generated.",
+  "scripts": { "build": "node build.mjs" },
+  "devDependencies": { "esbuild": "^0.25.0", "three": "0.186.1" }
+}

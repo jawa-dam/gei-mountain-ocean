@@ -1,0 +1,208 @@
+PASS: five cosmetic reward tiers
+PASS: discovery count source
+PASS: new reward unlock detection
+PASS: local reward memory
+PASS: reward toast
+PASS: reward burst
+PASS: showcase reward panel
+PASS: reward reset
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: presentation-only boundary
+    at file:///home/user/gei-mountain-ocean/tools/v2-voice-rewards/v2202-voice-discovery-rewards-regression.mjs:20:39
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: '/* V2.2.02 — DAM-ITE VOICE DISCOVERY REWARDS\n' +
+    ' * Presentation-only cosmetic reward layer over Voice Discovery + Memory + Showcase.\n' +
+    ' * Rewards are local cosmetic achievements only. No XP, currency, progression,\n' +
+    ' * purchases, scores, or account data are modified.\n' +
+    ' */\n' +
+    '(function(){\n' +
+    '  "use strict";\n' +
+    '  if(window.__GEI_V2202_VOICE_REWARDS__)return;\n' +
+    '\n' +
+    '  var VERSION="V2.2.02";\n' +
+    '  var KEY="geiDamIteVoiceRewardsV2202";\n' +
+    '  var DISCOVERY=window.GEI_VOICE_DISCOVERY||null;\n' +
+    '  var MEMORY=window.GEI_VOICE_MEMORY||null;\n' +
+    '\n' +
+    '  var REWARDS=[\n' +
+    '    {id:"first-voice",need:1,icon:"🎙️",title:"FIRST VOICE",sub:"Discover your first DAM-ITE voice."},\n' +
+    '    {id:"flow-listener",need:3,icon:"💧",title:"FLOW LISTENER",sub:"Discover 3 voice moments."},\n' +
+    '    {id:"hydraulic-listener",need:6,icon:"⚙️",title:"HYDRAULIC LISTENER",sub:"Discover all 6 core milestones."},\n' +
+    '    {id:"voice-collector",need:10,icon:"⭐",title:"VOICE COLLECTOR",sub:"Discover 10 voice variants."},\n' +
+    '    {id:"voice-vault",need:14,icon:"🏆",title:"VOICE VAULT",sub:"Discover the full current voice set."}\n' +
+    '  ];\n' +
+    '\n' +
+    '  var state={unlocked:[],lastUnlocked:null,totalDiscoveries:0};\n' +
+    '\n' +
+    '  function load(){\n' +
+    '    try{\n' +
+    '      var raw=localStorage.getItem(KEY),obj=raw?JSON.parse(raw):{};\n' +
+    '      if(obj&&typeof obj==="object"){\n' +
+    '        state.unlocked=Array.isArray(obj.unlocked)?obj.unlocked:[];\n' +
+    '        state.lastUnlocked=obj.lastUnlocked||null;\n' +
+    '        state.totalDiscoveries=Number(obj.totalDiscoveries||0);\n' +
+    '      }\n' +
+    '    }catch(e){}\n' +
+    '    return state;\n' +
+    '  }\n' +
+    '\n' +
+    '  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}\n' +
+    '\n' +
+    '  function discoveryCount(){\n' +
+    '    try{\n' +
+    '      var s=DISCOVERY&&typeof DISCOVERY.snapshot==="function"?DISCOVERY.snapshot():null;\n' +
+    '      return s&&Array.isArray(s.seen)?s.seen.length:0;\n' +
+    '    }catch(e){return state.totalDiscoveries||0;}\n' +
+    '  }\n' +
+    '\n' +
+    '  function rewardForCount(count){\n' +
+    '    return REWARDS.filter(function(r){return count>=r.need;});\n' +
+    '  }\n' +
+    '\n' +
+    '  function toast(reward){\n' +
+    '    var old=document.getElementById("v2202RewardToast");if(old)old.remove();\n' +
+    '    var el=document.createElement("div");\n' +
+    '    el.id="v2202RewardToast";\n' +
+    `    el.innerHTML='<div class="v2202RewardTop">✨ REWARD UNLOCKED</div><div class="v2202RewardIcon"></div><div class="v2202RewardTitle"></div><div class="v2202RewardSub"></div>';\n` +
+    '    el.querySelector(".v2202RewardIcon").textContent=reward.icon;\n' +
+    '    el.querySelector(".v2202RewardTitle").textContent=reward.title;\n' +
+    '    el.querySelector(".v2202RewardSub").textContent=reward.sub;\n' +
+    '    document.body.appendChild(el);\n' +
+    '    requestAnimationFrame(function(){el.classList.add("show");});\n' +
+    '    setTimeout(function(){el.classList.remove("show");},2100);\n' +
+    '    setTimeout(function(){el.remove();},2450);\n' +
+    '  }\n' +
+    '\n' +
+    '  function cardBurst(reward){\n' +
+    '    var host=document.getElementById("v2200VoiceShowcase")||document.body;\n' +
+    '    var burst=document.createElement("div");\n' +
+    '    burst.className="v2202Burst";\n' +
+    '    burst.textContent=reward.icon+"  "+reward.title;\n' +
+    '    host.appendChild(burst);\n' +
+    '    setTimeout(function(){burst.classList.add("show");},20);\n' +
+    '    setTimeout(function(){burst.remove();},1650);\n' +
+    '  }\n' +
+    '\n' +
+    '  function unlockNew(count){\n' +
+    '    state.totalDiscoveries=count;\n' +
+    '    var available=rewardForCount(count);\n' +
+    '    var newly=available.filter(function(r){return state.unlocked.indexOf(r.id)<0;});\n' +
+    '    if(!newly.length){save();return[];}\n' +
+    '    newly.forEach(function(r){state.unlocked.push(r.id);});\n' +
+    '    var newest=newly[newly.length-1];\n' +
+    '    state.lastUnlocked=newest.id;\n' +
+    '    save();\n' +
+    '    newly.forEach(function(r,i){\n' +
+    '      setTimeout(function(){toast(r);cardBurst(r);},i*700);\n' +
+    '    });\n' +
+    '    return newly;\n' +
+    '  }\n' +
+    '\n' +
+    '  function check(){\n' +
+    '    return unlockNew(discoveryCount());\n' +
+    '  }\n' +
+    '\n' +
+    '  function reset(){\n' +
+    '    state={unlocked:[],lastUnlocked:null,totalDiscoveries:0};\n' +
+    '    save();\n' +
+    '    render();\n' +
+    '    return snapshot();\n' +
+    '  }\n' +
+    '\n' +
+    '  function snapshot(){return JSON.parse(JSON.stringify(state));}\n' +
+    '\n' +
+    '  function render(){\n' +
+    '    var host=document.getElementById("v2200VoiceShowcase");\n' +
+    '    if(!host)return;\n' +
+    '    var old=document.getElementById("v2202Rewards");\n' +
+    '    if(old)old.remove();\n' +
+    '    var wrap=document.createElement("div");\n' +
+    '    wrap.id="v2202Rewards";\n' +
+    '    wrap.className="v2202Rewards";\n' +
+    `    wrap.innerHTML='<div class="v2202RewardsTitle">🏆 DISCOVERY REWARDS</div>'+\n` +
+    `      '<div class="v2202RewardsSub">Cosmetic rewards for exploring the DAM-ITE voices.</div>'+\n` +
+    `      '<div class="v2202RewardGrid"></div>';\n` +
+    '    var grid=wrap.querySelector(".v2202RewardGrid");\n' +
+    '    REWARDS.forEach(function(r){\n' +
+    '      var unlocked=state.unlocked.indexOf(r.id)>=0;\n' +
+    '      var item=document.createElement("div");\n' +
+    '      item.className="v2202RewardItem"+(unlocked?" unlocked":"");\n' +
+    `      item.innerHTML='<span class="v2202RewardMiniIcon">'+r.icon+'</span><span><strong></strong><small></small></span>';\n` +
+    '      item.querySelector("strong").textContent=r.title;\n' +
+    '      item.querySelector("small").textContent=unlocked?"UNLOCKED":"DISCOVER "+r.need;\n' +
+    '      grid.appendChild(item);\n' +
+    '    });\n' +
+    '    var header=host.querySelector(".v2200Header");\n' +
+    '    if(header)header.parentNode.insertBefore(wrap,header.nextSibling);\n' +
+    '    else host.prepend(wrap);\n' +
+    '  }\n' +
+    '\n' +
+    '  function observeDiscovery(){\n' +
+    '    if(!DISCOVERY||DISCOVERY.__v2202Wrapped)return;\n' +
+    '    if(typeof DISCOVERY.discover!=="function")return;\n' +
+    '    var original=DISCOVERY.discover;\n' +
+    '    DISCOVERY.discover=function(){\n' +
+    '      var result=original.apply(DISCOVERY,arguments);\n' +
+    '      if(result)setTimeout(function(){check();render();},45);\n' +
+    '      return result;\n' +
+    '    };\n' +
+    '    DISCOVERY.__v2202Wrapped=true;\n' +
+    '    DISCOVERY.__v2202Original=original;\n' +
+    '  }\n' +
+    '\n' +
+    '  function install(){\n' +
+    '    load();\n' +
+    '    observeDiscovery();\n' +
+    '    setTimeout(function(){check();render();},120);\n' +
+    '    window.addEventListener("load",function(){observeDiscovery();check();render();});\n' +
+    '  }\n' +
+    '\n' +
+    '  var api={\n' +
+    '    version:VERSION,rewards:REWARDS.slice(),check:check,reset:reset,render:render,\n' +
+    '    snapshot:snapshot,presentationOnly:true\n' +
+    '  };\n' +
+    '  window.__GEI_V2202_VOICE_REWARDS__=api;\n' +
+    '  window.GEI_VOICE_REWARDS=api;\n' +
+    '\n' +
+    '  function css(){\n' +
+    '    if(document.getElementById("v2202VoiceRewardsStyle"))return;\n' +
+    '    var s=document.createElement("style");s.id="v2202VoiceRewardsStyle";\n' +
+    '    s.textContent=\n' +
+    '      ".v2202Rewards{max-width:520px;margin:0 auto 9px;padding:12px;border-radius:18px;background:rgba(8,11,22,.94);border:1px solid rgba(255,255,255,.14);box-shadow:0 12px 30px rgba(0,0,0,.24);}" +\n' +
+    '      ".v2202RewardsTitle{font-size:.94rem;font-weight:950;letter-spacing:.04em;}" +\n' +
+    '      ".v2202RewardsSub{font-size:.72rem;opacity:.68;margin:4px 0 10px;}" +\n' +
+    '      ".v2202RewardGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}" +\n' +
+    '      ".v2202RewardItem{display:flex;gap:8px;align-items:center;min-height:54px;padding:8px;border-radius:13px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);opacity:.52;}" +\n' +
+    '      ".v2202RewardItem.unlocked{opacity:1;border-color:rgba(255,216,90,.48);background:rgba(255,216,90,.07);box-shadow:0 0 18px rgba(255,216,90,.08);}" +\n' +
+    '      ".v2202RewardMiniIcon{font-size:1.15rem;}" +\n' +
+    '      ".v2202RewardItem strong{display:block;font-size:.69rem;font-weight:950;}" +\n' +
+    '      ".v2202RewardItem small{display:block;font-size:.58rem;opacity:.68;margin-top:3px;font-weight:800;}" +\n' +
+    '      "#v2202RewardToast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 86px);z-index:8500;min-width:min(285px,84vw);padding:13px 16px;border-radius:19px;background:rgba(8,11,22,.98);border:1px solid rgba(255,216,90,.38);box-shadow:0 18px 45px rgba(0,0,0,.44),0 0 35px rgba(255,216,90,.12);color:#fff;text-align:center;transform:translateX(-50%) translateY(-8px) scale(.96);opacity:0;transition:opacity .22s ease,transform .22s ease;font-family:Inter,system-ui,sans-serif;pointer-events:none;}" +\n' +
+    '      "#v2202RewardToast.show{opacity:1;transform:translateX(-50%) scale(1);}" +\n' +
+    '      ".v2202RewardTop{font-size:.68rem;font-weight:950;letter-spacing:.08em;opacity:.78;}" +\n' +
+    '      ".v2202RewardIcon{font-size:1.8rem;margin:4px 0;}" +\n' +
+    '      ".v2202RewardTitle{font-size:1rem;font-weight:950;}" +\n' +
+    '      ".v2202RewardSub{font-size:.68rem;opacity:.66;margin-top:3px;}" +\n' +
+    '      ".v2202Burst{position:fixed;left:50%;top:50%;z-index:8490;transform:translate(-50%,-50%) scale(.72);padding:10px 15px;border-radius:16px;background:rgba(8,11,22,.94);border:1px solid rgba(255,216,90,.32);box-shadow:0 0 28px rgba(255,216,90,.10);font:950 .84rem/1 Inter,system-ui,sans-serif;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .3s cubic-bezier(.18,.9,.18,1);}" +\n' +
+    '      ".v2202Burst.show{opacity:1;transform:translate(-50%,-50%) scale(1);}" +\n' +
+    '      "@media(max-width:390px){.v2202RewardGrid{grid-template-columns:1fr}}" +\n' +
+    '      "@media(prefers-reduced-motion:reduce){#v2202RewardToast,.v2202Burst{transition:none}}" ;\n' +
+    '    document.head.appendChild(s);\n' +
+    '  }\n' +
+    '\n' +
+    '  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){css();install();},{once:true});\n' +
+    '  else{css();install();}\n' +
+    '})();',
+  expected: /No XP, currency, progression, purchases, scores, or account data/,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v22.22.0

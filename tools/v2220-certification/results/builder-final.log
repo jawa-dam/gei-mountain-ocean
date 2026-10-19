@@ -1,0 +1,20 @@
+PASS   builder-svg                                    229 passed  258s
+PASS   builder-3d:loading                               7 passed  99s
+PASS   builder-3d:render                                7 passed  70s
+PASS   builder-3d:causality                            18 passed  124s  (re-run after infra timeout; first attempt: INFRA)
+PASS   builder-3d:picking                               7 passed  47s
+PASS   builder-3d:parity                                3 passed  39s
+PASS   builder-3d:fallbacks                             9 passed  94s
+PASS   builder-3d:motion                                6 passed  46s
+PASS   builder-3d:lifecycle                             3 passed  204s
+PASS   builder-3d:mobile                                8 passed  105s
+PASS   builder-3d:chain                                11 passed  418s
+PASS   e2e:chain                                       28 passed  118s
+PASS   e2e:routing                                      6 passed  30s
+PASS   e2e:cycle                                       20 passed  364s
+PASS   e2e:rewards                                     28 passed  498s
+PASS   e2e:fallback                                    15 passed  114s
+PASS   e2e:mobile                                      10 passed  954s
+PASS   golden-day5                                      0 passed  15s
+
+18 suites · 415 assertions passed · genuine FAIL: 0 · unresolved INFRA: 0 · failing identically on the pre-Builder baseline: 0 · passed only after an infra re-run: 1

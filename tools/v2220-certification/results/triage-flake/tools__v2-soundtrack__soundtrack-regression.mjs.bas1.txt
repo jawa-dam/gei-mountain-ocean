@@ -1,0 +1,576 @@
+{
+  "engine": "DAM Friendly Soundtrack Director",
+  "version": "2.1.88",
+  "testCount": 42,
+  "passed": 40,
+  "failed": 2,
+  "results": [
+    {
+      "name": "module installed + music button rendered",
+      "pass": true
+    },
+    {
+      "name": "autoplay safety: nothing starts before a user gesture",
+      "pass": false,
+      "detail": {
+        "init": true,
+        "playing": true
+      }
+    },
+    {
+      "name": "AudioContext initializes (shared game context, running)",
+      "pass": true,
+      "detail": {
+        "version": "V2.1.88",
+        "installed": true,
+        "initialized": true,
+        "playing": true,
+        "enabled": true,
+        "phase": "intro",
+        "currentTheme": null,
+        "themes": 8,
+        "sharedContext": true,
+        "contextsCreatedByDirector": 0,
+        "activeVoices": 20,
+        "peakVoices": 22,
+        "maxVoices": 22,
+        "bars": 0,
+        "mixLevel": 0.29,
+        "mixTarget": 0.29,
+        "duckMult": 0.333,
+        "ceilingRespected": true,
+        "hooksWrapped": 19,
+        "errors": 0,
+        "presentationOnly": true,
+        "gameplayStateChanged": false,
+        "rewardEconomyChanged": false,
+        "ctxState": "running",
+        "same": true
+      }
+    },
+    {
+      "name": "soundtrack starts after valid interaction",
+      "pass": true,
+      "detail": "intro"
+    },
+    {
+      "name": "splash intro initializes correctly",
+      "pass": true,
+      "detail": "intro"
+    },
+    {
+      "name": "no duplicate AudioContexts created by the director",
+      "pass": true,
+      "detail": {
+        "version": "V2.1.88",
+        "installed": true,
+        "initialized": true,
+        "playing": true,
+        "enabled": true,
+        "phase": "intro",
+        "currentTheme": null,
+        "themes": 8,
+        "sharedContext": true,
+        "contextsCreatedByDirector": 0,
+        "activeVoices": 20,
+        "peakVoices": 22,
+        "maxVoices": 22,
+        "bars": 0,
+        "mixLevel": 0.29,
+        "mixTarget": 0.29,
+        "duckMult": 0.333,
+        "ceilingRespected": true,
+        "hooksWrapped": 19,
+        "errors": 0,
+        "presentationOnly": true,
+        "gameplayStateChanged": false,
+        "rewardEconomyChanged": false,
+        "ctxState": "running",
+        "same": true
+      }
+    },
+    {
+      "name": "music is audible and conservatively mastered (no clipping)",
+      "pass": true,
+      "detail": {
+        "peak": 0.06612507998943329
+      }
+    },
+    {
+      "name": "splash → random gameplay theme hand-off",
+      "pass": true,
+      "detail": {
+        "phase": "theme",
+        "theme": "cloud-elevator",
+        "st": {
+          "voices": 10,
+          "peakVoices": 22,
+          "notes": 39,
+          "bars": 1,
+          "counters": {
+            "ducks": 3,
+            "crossfades": 0,
+            "starts": 1,
+            "contextsCreated": 0,
+            "activity": 1,
+            "wrapped": 19,
+            "errors": 0
+          },
+          "ducksByKind": {
+            "mission": 1,
+            "confirm": 1,
+            "tap": 1
+          },
+          "duckKind": "",
+          "ctxState": "running",
+          "timerActive": true
+        }
+      }
+    },
+    {
+      "name": "crossfade used for the hand-off",
+      "pass": true,
+      "detail": {
+        "voices": 10,
+        "peakVoices": 22,
+        "notes": 39,
+        "bars": 1,
+        "counters": {
+          "ducks": 3,
+          "crossfades": 0,
+          "starts": 1,
+          "contextsCreated": 0,
+          "activity": 1,
+          "wrapped": 19,
+          "errors": 0
+        },
+        "ducksByKind": {
+          "mission": 1,
+          "confirm": 1,
+          "tap": 1
+        },
+        "duckKind": "",
+        "ctxState": "running",
+        "timerActive": true
+      }
+    },
+    {
+      "name": "NOW PLAYING chip appears (fades away)",
+      "pass": true
+    },
+    {
+      "name": "pre-game guide still closes normally",
+      "pass": true
+    },
+    {
+      "name": "gameplay state detected as PLAY",
+      "pass": true
+    },
+    {
+      "name": "activity score reacts to taps",
+      "pass": true,
+      "detail": {
+        "a": 0.853,
+        "t": 0.18,
+        "l": 0.1801858094139734
+      }
+    },
+    {
+      "name": "music level drops into the tapping band (0.18–0.28)",
+      "pass": true,
+      "detail": {
+        "a": 0.853,
+        "t": 0.18,
+        "l": 0.1801858094139734
+      }
+    },
+    {
+      "name": "music ducks during reward event (never fully cut)",
+      "pass": true,
+      "detail": {
+        "before": 0.7338531484458184,
+        "during": 0.5763386018174327,
+        "g": 0.581602156162262,
+        "after": 1,
+        "gAfter": 0.6536104083061218,
+        "byKind": {
+          "mission": 1,
+          "confirm": 19,
+          "tap": 12,
+          "reward": 5,
+          "splash": 3,
+          "character": 1,
+          "critical": 1
+        }
+      }
+    },
+    {
+      "name": "duck recovers smoothly",
+      "pass": true,
+      "detail": {
+        "before": 0.7338531484458184,
+        "during": 0.5763386018174327,
+        "g": 0.581602156162262,
+        "after": 1,
+        "gAfter": 0.6536104083061218,
+        "byKind": {
+          "mission": 1,
+          "confirm": 19,
+          "tap": 12,
+          "reward": 5,
+          "splash": 3,
+          "character": 1,
+          "critical": 1
+        }
+      }
+    },
+    {
+      "name": "music rises during inactivity",
+      "pass": true,
+      "detail": {
+        "0": 0.3,
+        "8": 0.339,
+        "25": 0.407,
+        "60": 0.48,
+        "120": 0.48,
+        "400": 0.38
+      }
+    },
+    {
+      "name": "idle lift respects ceiling (≤ 0.48) and calm band",
+      "pass": true,
+      "detail": {
+        "0": 0.3,
+        "8": 0.339,
+        "25": 0.407,
+        "60": 0.48,
+        "120": 0.48,
+        "400": 0.38
+      }
+    },
+    {
+      "name": "very long idle settles back down",
+      "pass": true,
+      "detail": {
+        "0": 0.3,
+        "8": 0.339,
+        "25": 0.407,
+        "60": 0.48,
+        "120": 0.48,
+        "400": 0.38
+      }
+    },
+    {
+      "name": "random theme selection works (shuffle bag covers all 8)",
+      "pass": true,
+      "detail": [
+        "water-wander",
+        "little-dam-adventure",
+        "ocean-breeze",
+        "mountain-morning",
+        "cloud-elevator",
+        "splash-club",
+        "happy-hydraulics",
+        "dam-daydream",
+        "cloud-elevator",
+        "ocean-breeze",
+        "happy-hydraulics",
+        "water-wander",
+        "splash-club",
+        "dam-daydream",
+        "mountain-morning",
+        "little-dam-adventure"
+      ]
+    },
+    {
+      "name": "same theme is never selected twice in a row",
+      "pass": true
+    },
+    {
+      "name": "crossfade works (new theme, old faded, no hard stop)",
+      "pass": true,
+      "detail": {
+        "a": "cloud-elevator",
+        "b": "mountain-morning",
+        "c": 1,
+        "minPeak": 0.001838920172303915
+      }
+    },
+    {
+      "name": "soundtrack can pause (faded, timer stopped)",
+      "pass": true,
+      "detail": {
+        "playing": false,
+        "user": 0.029083525761961937,
+        "timer": false
+      }
+    },
+    {
+      "name": "soundtrack can resume",
+      "pass": true,
+      "detail": {
+        "p": {
+          "playing": false,
+          "user": 0.029083525761961937,
+          "timer": false
+        },
+        "resumed": true,
+        "user": 0.839427649974823,
+        "timer": true
+      }
+    },
+    {
+      "name": "music toggle turns music off (🔇, stored)",
+      "pass": true,
+      "detail": {
+        "en": false,
+        "ls": "false",
+        "icon": "🔇"
+      }
+    },
+    {
+      "name": "music toggle turns music back on",
+      "pass": true,
+      "detail": {
+        "en": true,
+        "playing": true,
+        "icon": "🎵"
+      }
+    },
+    {
+      "name": "existing tap audio still works (through wrapper)",
+      "pass": true,
+      "detail": {
+        "tap": true,
+        "hydraulic": true,
+        "sigPresent": true,
+        "sigPlay": true,
+        "nature": true,
+        "wrapped": true,
+        "director": true
+      }
+    },
+    {
+      "name": "existing hydraulic/DAM_AUDIO sounds still work",
+      "pass": true,
+      "detail": {
+        "tap": true,
+        "hydraulic": true,
+        "sigPresent": true,
+        "sigPlay": true,
+        "nature": true,
+        "wrapped": true,
+        "director": true
+      }
+    },
+    {
+      "name": "existing nature audio module still installed",
+      "pass": true,
+      "detail": {
+        "tap": true,
+        "hydraulic": true,
+        "sigPresent": true,
+        "sigPlay": true,
+        "nature": true,
+        "wrapped": true,
+        "director": true
+      }
+    },
+    {
+      "name": "existing signature moment audio still works",
+      "pass": true,
+      "detail": {
+        "tap": true,
+        "hydraulic": true,
+        "sigPresent": true,
+        "sigPlay": true,
+        "nature": true,
+        "wrapped": true,
+        "director": true
+      }
+    },
+    {
+      "name": "other Tap Lites modules unchanged by V2.1.88 (moment director state matches baseline)",
+      "pass": true,
+      "detail": {
+        "withV2188": true,
+        "baseline": true
+      }
+    },
+    {
+      "name": "voice count bounded (no node pile-up)",
+      "pass": true,
+      "detail": {
+        "voices": 14,
+        "peakVoices": 22,
+        "notes": 141,
+        "bars": 10,
+        "counters": {
+          "ducks": 117,
+          "crossfades": 1,
+          "starts": 1,
+          "contextsCreated": 0,
+          "activity": 58,
+          "wrapped": 19,
+          "errors": 0
+        },
+        "ducksByKind": {
+          "mission": 1,
+          "confirm": 44,
+          "tap": 37,
+          "reward": 5,
+          "splash": 23,
+          "character": 1,
+          "critical": 5,
+          "moment": 1
+        },
+        "duckKind": "",
+        "ctxState": "running",
+        "timerActive": true,
+        "max": 22
+      }
+    },
+    {
+      "name": "voices are released after pause (no leak)",
+      "pass": true,
+      "detail": {
+        "voices": 0,
+        "peakVoices": 22,
+        "notes": 141,
+        "bars": 10,
+        "counters": {
+          "ducks": 117,
+          "crossfades": 1,
+          "starts": 1,
+          "contextsCreated": 0,
+          "activity": 58,
+          "wrapped": 19,
+          "errors": 0
+        },
+        "ducksByKind": {
+          "mission": 1,
+          "confirm": 44,
+          "tap": 37,
+          "reward": 5,
+          "splash": 23,
+          "character": 1,
+          "critical": 5,
+          "moment": 1
+        },
+        "duckKind": "",
+        "ctxState": "running",
+        "timerActive": false
+      }
+    },
+    {
+      "name": "scheduler stops while tab is hidden and resumes after",
+      "pass": true,
+      "detail": {
+        "hiddenTimer": false,
+        "visibleTimer": true
+      }
+    },
+    {
+      "name": "volume persists across refresh",
+      "pass": true,
+      "detail": {
+        "v": 0.5,
+        "en": true
+      }
+    },
+    {
+      "name": "next session plays a different tune",
+      "pass": true,
+      "detail": {
+        "firstTheme": "mountain-morning",
+        "t2": "ocean-breeze"
+      }
+    },
+    {
+      "name": "no console errors introduced (vs. baseline without V2.1.88)",
+      "pass": false,
+      "detail": {
+        "own": [],
+        "newErrors": [
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+          "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+        ],
+        "baselineCount": 90
+      }
+    },
+    {
+      "name": "Chrome Android (Pixel 7 emulation): starts on touch gesture",
+      "pass": true,
+      "detail": "intro"
+    },
+    {
+      "name": "Chrome Android (Pixel 7 emulation): music button fits HUD",
+      "pass": true,
+      "detail": {
+        "w": 44,
+        "h": 44,
+        "inView": true
+      }
+    },
+    {
+      "name": "iOS-sized (iPhone 13 emulation on Chromium): starts on touch gesture",
+      "pass": true,
+      "detail": "intro"
+    },
+    {
+      "name": "iOS-sized (iPhone 13 emulation on Chromium): music button fits HUD",
+      "pass": true,
+      "detail": {
+        "w": 44,
+        "h": 44,
+        "inView": true
+      }
+    },
+    {
+      "name": "fails gracefully when Web Audio is unavailable",
+      "pass": true,
+      "detail": {
+        "s": {
+          "exists": true,
+          "playing": false,
+          "btn": true
+        },
+        "own": []
+      }
+    }
+  ]
+}

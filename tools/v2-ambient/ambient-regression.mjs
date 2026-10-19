@@ -71,7 +71,7 @@ const results = [];
 function check(name, pass, detail){ results.push({ name, pass: !!pass, detail }); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const CAMEO_IDS = ["character-7","character-8","character-6","character-2","character-1","character-3","character-4","character-5","lion"];
-const KNOWN_PAGE_ERROR = /Unexpected string/;
+const KNOWN_PAGE_ERROR = /(?!)/;   // V2.2.20: nothing is tolerated any more — the unparseable tap-lites modules (fixed in a9526bf) and the addStyle ReferenceError (fixed in V2.2.20) are gone
 const SAVE_KEY = "yalltooDamGame.v2";
 /* Level 5 finished on this refresh → the card waits for CONTINUE, the Israelite was saved this cycle. */
 const LEVEL5_SAVE = { version:2, level:5, levelFlOz:666, totalFlOz:4000, completedLevels:5, currentStep:5, unlockedSongs:["masters-build"], unlockedSkins:[],
@@ -116,7 +116,7 @@ const E = "window.__GEI_DAM_SURPRISES__";
 
 /* 40 ms sampler: cameo count/sequence/timing, coverage of the given selectors, overflow, on-screen. */
 const SAMPLER = guardSels => {
-  const Q = window.__aq = { max:0, seq:[], modes:[], firstAt:0, spans:[], covered:0, coveredBy:[], overflow:0, outside:0, pe:[], sizes:[], cur:null, curAt:0 };
+  const Q = window.__aq = { max:0, seq:[], modes:[], firstAt:0, spans:[], covered:0, coveredBy:[], coveredInfo:[], overflow:0, outside:0, pe:[], sizes:[], cur:null, curAt:0 };
   const t0 = performance.now();
   Q.iv = setInterval(() => {
     const on = [...document.querySelectorAll(".dscCameo.on")].filter(el => getComputedStyle(el).display !== "none");
@@ -138,7 +138,10 @@ const SAMPLER = guardSels => {
     for (const sel of guardSels){
       document.querySelectorAll(sel).forEach(b => {
         const br = b.getBoundingClientRect(); if (!br.width || b.offsetParent === null) return;
-        if (r.left < br.right && r.right > br.left && r.top < br.bottom && r.bottom > br.top){ Q.covered++; if (!Q.coveredBy.includes(sel)) Q.coveredBy.push(sel); }
+        if (r.left < br.right && r.right > br.left && r.top < br.bottom && r.bottom > br.top){ Q.covered++; if (!Q.coveredBy.includes(sel)) Q.coveredBy.push(sel);
+          /* failure signature (diagnostics only — the assertion is unchanged): who overlapped whom, where, and whether the cameo is really on top of the control's centre */
+          if (Q.coveredInfo.length < 6){ const top = document.elementFromPoint((br.left + br.right) / 2, (br.top + br.bottom) / 2), rd = x => ({ l:Math.round(x.left), t:Math.round(x.top), r:Math.round(x.right), b:Math.round(x.bottom) });
+            Q.coveredInfo.push({ sel, at:Math.round(performance.now() - t0), cameo:on[0].getAttribute("data-cameo"), cameoBox:rd(R), figure:rd(r), guard:rd(br), vp:innerWidth + "x" + innerHeight, pointerEvents:getComputedStyle(on[0]).pointerEvents, hitTest:top ? (top.id || top.className || top.tagName) : null, cameoOnTop:!!(top && top.closest && top.closest(".dscCameo")), cardShow:!!document.querySelector("#levelCard.show") }); } }
       });
     }
   }, 40);
@@ -170,13 +173,14 @@ async function suiteHome(browser, base, device, label){
   const tg = await g.page.evaluate(() => { const r = document.querySelector(".brandTag").getBoundingClientRect(); return { x:r.left + 8, y:r.top + r.height / 2 }; });
   await tap(g, tg.x, tg.y);
   await g.page.evaluate(SAMPLER, HOME_GUARDS);
-  await sleep(label ? 12000 : 16000);
+  /* worst case for TWO cameos: first 3–6 s, shown 1–2 s, next 3–6 s later ⇒ the second can start as late as 14 s after the tap, so the window must exceed that on every viewport (it was 12 s on phones) */
+  await sleep(label ? 15500 : 16000);
   const q = await g.page.evaluate(SAMPLE_READ);
   check("1a. " + tag + "MENU IDLE: the board waiting for its first tap is the home screensaver", st0.mode === "home" && st0.phase === "ready", st0);
   check("1b. " + tag + "MENU IDLE: cameos appear on their own (first after ~3–6 s)", q.seq.length >= 2 && q.firstAt >= 2900 && q.firstAt <= 6400 && q.modes.every(m => m === "home"), { firstAt:Math.round(q.firstAt), seq:q.seq });
   check("1c. " + tag + "MENU IDLE: each shows ~1–2 s then disappears; one at a time", q.spans.slice(0, -1).every(ms => ms >= 850 && ms <= 2300) && q.max === 1, { spans:q.spans.map(Math.round), max:q.max });
   check("1d. " + tag + "MENU IDLE: no image repeats within the last several", noRepeatWithin(q.seq, 4), q.seq);
-  check("1e. " + tag + "MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
+  check("1e. " + tag + "MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   check("12a. " + tag + "MOBILE/desktop: no horizontal overflow, cameo stays on screen (home)", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
 
   /* 2 — non-board tap: cameo leaves at once, the screensaver waits again */
@@ -190,7 +194,10 @@ async function suiteHome(browser, base, device, label){
   for (let i = 0; i < 90; i++){ if (await g.page.evaluate(E + ".visible")) break; await sleep(100); }
   const w = await g.page.evaluate(() => { const r = document.getElementById("world").getBoundingClientRect(); return { x:r.left + r.width * .45, y:r.top + r.height * .55 }; });
   await tap(g, w.x, w.y); await sleep(80);
-  const t2 = await g.page.evaluate(`({ vis:${E}.visible, mode:${E}.mode, phase:state.phase })`);
+  let t2 = await g.page.evaluate(`({ vis:${E}.visible, mode:${E}.mode, phase:state.phase })`);
+  /* the cameo itself must be gone at once (t2.vis); the director's MODE follows on its next evaluation (setTimeout 0 after the tap, else its 600 ms poll) — on a loaded machine the 80 ms read could still see "home".
+     Allow up to 2 poll periods for the mode to follow; it is still required to become "" and is re-checked after 4 s below. */
+  for (let i = 0; i < 12 && t2.mode !== ""; i++){ await sleep(100); t2 = { ...await g.page.evaluate(`({ vis:${E}.visible, mode:${E}.mode, phase:state.phase })`), vis:t2.vis, waitedMs:(i + 1) * 100 }; }
   await sleep(4000);
   const t3 = await g.page.evaluate(`({ on:document.querySelectorAll(".dscCameo.on").length, mode:${E}.mode, phase:state.phase })`);
   check("2b. " + tag + "MENU TAP: board tap starts play; screensaver stops and stays off during gameplay", !t2.vis && t2.phase === "playing" && t2.mode === "" && (t3.phase !== "playing" || (t3.on === 0 && t3.mode === "")), { t2, t3 });
@@ -225,7 +232,7 @@ async function suitePregame(browser, base, device, label){
   for (let i = 0; i < 12; i++){ await g.page.evaluate(E + ".debug.show()"); await sleep(260); }
   const q = await g.page.evaluate(SAMPLE_READ);
   check("3a. " + tag + "PRE-GAME: guide open → friendly cameo layer, one at a time", m0 === "pregame" && q.seq.length >= 2 && q.max === 1 && q.modes.every(m => m === "pregame"), { m0, seq:q.seq.length, max:q.max });
-  check("3b. " + tag + "PRE-GAME: START GAME / tabs / close never covered", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
+  check("3b. " + tag + "PRE-GAME: START GAME / tabs / close never covered", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   check("12b. " + tag + "PRE-GAME: no overflow, cameo on screen", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
   await g.page.evaluate(E + ".debug.show()"); await sleep(200);
   await shot(g, "pregame-" + (label || "desktop").replace(/\s/g, ""));
@@ -267,15 +274,24 @@ async function suiteLevel(browser, base, device, label){
   /* 5 — large cameos, never over the headline, rescue card, FL OZ line or buttons */
   const LEVEL_GUARDS = ["#lcBtn", "#lcLevel", "#lcRescue", ".lcOz"];
   await g.page.evaluate(SAMPLER, LEVEL_GUARDS);
+  /* the level director rolls a 65 % chance every 7–12 s (first at 3.5–6 s): waiting for the first natural cameo needs several rolls, so allow ~60 s (it returns the moment one appears) */
   let natural = 0;
-  for (let i = 0; i < 140 && natural < 1; i++){ await sleep(100); natural = await g.page.evaluate(`(${E}.stats().byMode.level || 0)`); }
+  for (let i = 0; i < 600 && natural < 1; i++){ await sleep(100); natural = await g.page.evaluate(`(${E}.stats().byMode.level || 0)`); }
+  /* The forced placements below measure the guards at the instant they are placed, exactly like the real director (whose first level cameo is 3.5 s after the card appears). Wait until the card's controls have STOPPED MOVING
+     (three identical consecutive layout readings) — a fixed sleep was only a guess at that and under CPU load the victory-capsule entrance was still settling (captured failure: #lcBtn 14 px higher than when the cameo was placed). */
+  const settleT0 = Date.now(); let prev = "", same = 0;
+  for (let i = 0; i < 150 && same < 3; i++){
+    const sig = await g.page.evaluate(guards => guards.map(sel => { const e = document.querySelector(sel), r = e && e.getBoundingClientRect(); return r ? [r.left, r.top, r.width, r.height].map(v => Math.round(v * 10)).join(",") : "-"; }).join("|"), LEVEL_GUARDS);
+    same = sig === prev ? same + 1 : 0; prev = sig; await sleep(150);
+  }
+  const settleMs = Date.now() - settleT0;
   for (let i = 0; i < 14; i++){ await g.page.evaluate(E + ".debug.show()"); await sleep(240); }
   const q = await g.page.evaluate(SAMPLE_READ);
   /* V2.2.6: on phone-width screens the capsule fills the screen, so the cameo system (which only uses free space around guarded elements) correctly finds none; wide screens still get them. */
   const narrow = await g.page.evaluate(() => innerWidth < 700);
   check("5b. " + tag + "LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)", natural >= 1 || narrow, { natural, narrow });
   check("5c. " + tag + "LEVEL COMPLETE: large presentation (≥ 96 px), one at a time", Math.min(...q.sizes) >= 96 && q.max === 1, { min:Math.min(...q.sizes), max:Math.max(...q.sizes) });
-  check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy });
+  check("5d. " + tag + "LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE", q.covered === 0 && q.pe.every(v => v === "none"), { covered:q.covered, by:q.coveredBy, info:q.coveredInfo, settleMs });
   check("12c. " + tag + "LEVEL COMPLETE: no overflow, cameo on screen", q.overflow === 0 && q.outside === 0, { overflow:q.overflow, outside:q.outside });
 
   /* 8 — collection popout */
@@ -310,7 +326,10 @@ async function suiteLevel(browser, base, device, label){
   check("8e. " + tag + "COLLECTION: reads the existing record; saved data / economy unchanged", econ0 === econ1, {});
 
   /* 4 — Bonus Waterwheel */
-  await tapSel(g, "#lcBtn"); await sleep(500);
+  await tapSel(g, "#lcBtn");
+  /* CONTINUE → the Bonus Waterwheel card follows the flow-forward animation, not a fixed 500 ms (it was still on its way on a loaded machine: captured w0 = { show:false, mode:"level" }); wait for the card itself, then let the director's mode follow */
+  await g.page.waitForFunction(() => document.getElementById("bonusCard").classList.contains("show"), null, { timeout: 15000 }).catch(() => {});
+  await sleep(500);
   const w0 = await g.page.evaluate(`({ show:document.getElementById("bonusCard").classList.contains("show"), mode:${E}.mode })`);
   await g.page.evaluate(SAMPLER, ["#bonusBtn", ".bwTitle", ".bwPointer"]);
   let wn = 0;
@@ -337,14 +356,18 @@ async function suiteTryAgain(browser, base){
   const g = await open(browser, base);
   const w = await g.page.evaluate(() => { const r = document.getElementById("world").getBoundingClientRect(); return { x:r.left + r.width * .45, y:r.top + r.height * .55 }; });
   await tap(g, w.x, w.y); await sleep(150);
-  await g.page.evaluate(() => handleDayTimeout()); await sleep(300);
+  await g.page.evaluate(() => handleDayTimeout());
+  /* V2.2.20: the TRY AGAIN card now appears about 7.5 s after the timeout (the V2.2.x timeout sequence plays first), and the idle cameo director only enters "idle" once the card is up. The old fixed 300 ms
+     wait therefore read mode "" and the 12 s sampling window started long before the first cameo could appear. Wait for the card, then measure — assertions unchanged. */
+  await g.page.waitForFunction(() => document.getElementById("timeUpCard").classList.contains("show"), null, { timeout:20000 });
+  await sleep(300);
   const m = await g.page.evaluate(`({ mode:${E}.mode, music:DAMSoundtrack.playing })`);
   await g.page.evaluate(SAMPLER, ["#retryDayBtn", "#timeUpTitle"]);
   await sleep(12000);
   const q = await g.page.evaluate(SAMPLE_READ);
   const music = await g.page.evaluate(() => DAMSoundtrack.playing);
   check("6a. TRY AGAIN: music keeps playing and the random cameo loop continues", m.mode === "idle" && m.music && music && q.seq.length >= 2 && q.max === 1 && noRepeatWithin(q.seq, 1), { m, music, seq:q.seq });
-  check("6b. TRY AGAIN: TRY DAY AGAIN never covered", q.covered === 0, { covered:q.covered, by:q.coveredBy });
+  check("6b. TRY AGAIN: TRY DAY AGAIN never covered", q.covered === 0, { covered:q.covered, by:q.coveredBy, info:q.coveredInfo });
   for (let i = 0; i < 80; i++){ if (await g.page.evaluate(E + ".visible")) break; await sleep(100); }
   const pt = await g.page.evaluate(() => { const r = document.getElementById("timeUpCard").getBoundingClientRect(); return { x:r.left + 12, y:r.bottom - 14 }; });
   await tap(g, pt.x, pt.y); await sleep(80);

@@ -1,0 +1,1281 @@
+{
+ "version": "V2.1.92",
+ "passed": 105,
+ "failed": 3,
+ "results": [
+  {
+   "name": "9. SPLASH: TAPLITES Wet logo replaces the plain 'TAP LITES' title; no duplicate text",
+   "pass": true,
+   "detail": {
+    "img": true,
+    "src": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-tap-lites-QEy1mPNkhhmLrEN4.png",
+    "alt": "TAP LITES",
+    "text": "",
+    "others": 0
+   }
+  },
+  {
+   "name": "10. HEADER: standard TAPLITES logo replaces the heading; tagline kept; logo not tiny",
+   "pass": true,
+   "detail": {
+    "src": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+    "alt": "TAP LITES",
+    "text": "",
+    "h": 54,
+    "w": 162,
+    "right": 565,
+    "vw": 1280,
+    "tag": "TAP WATER. MAKE WAVES. SAVE THE -ITES."
+   }
+  },
+  {
+   "name": "1a. MENU IDLE: the board waiting for its first tap is the home screensaver",
+   "pass": true,
+   "detail": {
+    "mode": "home",
+    "screen": "home",
+    "phase": "ready"
+   }
+  },
+  {
+   "name": "1b. MENU IDLE: cameos appear on their own (first after ~3–6 s)",
+   "pass": true,
+   "detail": {
+    "firstAt": 4091,
+    "seq": [
+     "character-7",
+     "character-4",
+     "character-6"
+    ]
+   }
+  },
+  {
+   "name": "1c. MENU IDLE: each shows ~1–2 s then disappears; one at a time",
+   "pass": true,
+   "detail": {
+    "spans": [
+     1630,
+     1283,
+     1804
+    ],
+    "max": 1
+   }
+  },
+  {
+   "name": "1d. MENU IDLE: no image repeats within the last several",
+   "pass": true,
+   "detail": [
+    "character-7",
+    "character-4",
+    "character-6"
+   ]
+  },
+  {
+   "name": "1e. MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12a. MOBILE/desktop: no horizontal overflow, cameo stays on screen (home)",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "2a. MENU TAP: any tap removes the cameo immediately and restarts the wait",
+   "pass": true,
+   "detail": {
+    "vis0": true,
+    "t1": {
+     "vis": false,
+     "on": 0,
+     "mode": "home"
+    }
+   }
+  },
+  {
+   "name": "2b. MENU TAP: board tap starts play; screensaver stops and stays off during gameplay",
+   "pass": true,
+   "detail": {
+    "t2": {
+     "vis": false,
+     "mode": "",
+     "phase": "playing"
+    },
+    "t3": {
+     "on": 0,
+     "mode": "",
+     "phase": "playing"
+    }
+   }
+  },
+  {
+   "name": "11. CHARACTER SELECTION: the nine cameo images remain non-playable",
+   "pass": true,
+   "detail": {
+    "got": [
+     "wilbert-dam-guide",
+     "yall-too-beaver",
+     "operator-fireman",
+     "operator-moses",
+     "operator-valentine",
+     "operator-sam",
+     "operator-jack-o-lantern",
+     "operator-santa-claus",
+     "operator-woman",
+     "operator-man",
+     "nite",
+     "lite",
+     "jesus",
+     "dam-black-jesus",
+     "devil",
+     "ite-danite",
+     "ite-levite",
+     "ite-israelite",
+     "ite-amorite",
+     "ite-jebusite",
+     "ite-hittite",
+     "ite-hivite",
+     "ite-ammonite",
+     "ite-benjamite",
+     "ite-ephraimite"
+    ],
+    "bad": [],
+    "playable": []
+   }
+  },
+  {
+   "name": "P1. one bounded aria-hidden pointer-events:none layer; V2.1.92 modes",
+   "pass": true,
+   "detail": {
+    "version": "V2.1.92",
+    "cameos": 9,
+    "effects": 14,
+    "tiers": "normal:65,special:25,rare:8,ultra:2",
+    "tierWeightsSum": 100,
+    "singleLayer": true,
+    "boundedDom": true,
+    "pointerEventsNone": true,
+    "ariaHidden": true,
+    "artFromCatalog": true,
+    "noneSelectable": true,
+    "modes": [
+     "home",
+     "pregame",
+     "wheel",
+     "level",
+     "idle",
+     "map"
+    ],
+    "screen": "",
+    "presentationOnly": true
+   }
+  },
+  {
+   "name": "P2. presentation only: engine/showcase write no storage keys",
+   "pass": true,
+   "detail": {
+    "added": []
+   }
+  },
+  {
+   "name": "P3. no new page errors (home)",
+   "pass": false,
+   "detail": [
+    "addStyle is not defined"
+   ]
+  },
+  {
+   "name": "3a. PRE-GAME: guide open → friendly cameo layer, one at a time",
+   "pass": true,
+   "detail": {
+    "m0": "pregame",
+    "seq": 14,
+    "max": 1
+   }
+  },
+  {
+   "name": "3b. PRE-GAME: START GAME / tabs / close never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12b. PRE-GAME: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "3c. PRE-GAME: START GAME hit-tests to itself and works immediately during a cameo",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "after": {
+     "open": false,
+     "vis": false,
+     "mode": "home"
+    }
+   }
+  },
+  {
+   "name": "3d. PRE-GAME: economy/progression untouched by the cameo layer",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "5a. LEVEL COMPLETE: 'LEVEL 5 COMPLETE' card with the -ite rescue is the level idle screen",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "title": "LEVEL 5 COMPLETE",
+    "rescue": true,
+    "mode": "level",
+    "phase": "levelComplete"
+   }
+  },
+  {
+   "name": "7a. SAVED -ITE: shown as a compact capsule chip (avatar ≥ 28 px, tappable role=button, fully visible)",
+   "pass": true,
+   "detail": {
+    "w": 30,
+    "h": 30,
+    "left": 767.921875,
+    "right": 797.921875,
+    "vw": 1280,
+    "vh": 800,
+    "reveal": "bounce+splash",
+    "anim": "tl92Bounce",
+    "boxL": 762.921875,
+    "boxR": 976.1875,
+    "innerL": 190,
+    "innerR": 1090,
+    "title": "\"✅ \"",
+    "role": "button"
+   }
+  },
+  {
+   "name": "7b. SAVED -ITE: stays inside the card and the mobile viewport",
+   "pass": true,
+   "detail": {
+    "w": 30,
+    "h": 30,
+    "left": 767.921875,
+    "right": 797.921875,
+    "vw": 1280,
+    "vh": 800,
+    "reveal": "bounce+splash",
+    "anim": "tl92Bounce",
+    "boxL": 762.921875,
+    "boxR": 976.1875,
+    "innerL": 190,
+    "innerR": 1090,
+    "title": "\"✅ \"",
+    "role": "button"
+   }
+  },
+  {
+   "name": "7c. SAVED -ITE: randomized reveal applied (entrance + afterglow)",
+   "pass": true,
+   "detail": {
+    "reveal": "bounce+splash",
+    "anim": "tl92Bounce"
+   }
+  },
+  {
+   "name": "7d. SAVED -ITE: reveal varies between completions",
+   "pass": true,
+   "detail": [
+    "bounce+splash",
+    "bounce+shimmer",
+    "rise+float",
+    "pop+float",
+    "burst+shimmer",
+    "burst+splash",
+    "pop+shimmer",
+    "burst+float",
+    "pop+splash",
+    "rise+glow",
+    "burst+glow",
+    "rise+splash",
+    "bounce+float",
+    "bounce+glow",
+    "pop+glow"
+   ]
+  },
+  {
+   "name": "5b. LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)",
+   "pass": true,
+   "detail": {
+    "natural": 1,
+    "narrow": false
+   }
+  },
+  {
+   "name": "5c. LEVEL COMPLETE: large presentation (≥ 96 px), one at a time",
+   "pass": true,
+   "detail": {
+    "min": 219,
+    "max": 304
+   }
+  },
+  {
+   "name": "5d. LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12c. LEVEL COMPLETE: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "8a. TAP SAVED -ITE CARD: collection popout opens with the saved -ites (newest first)",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "role": "dialog",
+    "modal": "true",
+    "title": "SAVED -ITES",
+    "names": [
+     "Israelite",
+     "Levite",
+     "Danite"
+    ],
+    "minImg": 123.38818359375,
+    "latest": true,
+    "inView": true,
+    "focus": "tl92ColClose",
+    "overflow": false,
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8b. COLLECTION: large thumbnails, fits the viewport, close button focused, no overflow",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "role": "dialog",
+    "modal": "true",
+    "title": "SAVED -ITES",
+    "names": [
+     "Israelite",
+     "Levite",
+     "Danite"
+    ],
+    "minImg": 123.38818359375,
+    "latest": true,
+    "inView": true,
+    "focus": "tl92ColClose",
+    "overflow": false,
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8c. COLLECTION: ambient cameos pause while it is open",
+   "pass": true,
+   "detail": {
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8d. COLLECTION: no accidental gameplay interaction; ✕ / Esc / backdrop close it; focus returns",
+   "pass": true,
+   "detail": {
+    "still": {
+     "show": true,
+     "level": true,
+     "phase": "levelComplete"
+    },
+    "closed1": {
+     "show": false,
+     "focus": "lcRescue"
+    },
+    "closed2": false,
+    "closed3": false
+   }
+  },
+  {
+   "name": "8e. COLLECTION: reads the existing record; saved data / economy unchanged",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "4a. BONUS WHEEL: waiting to spin → subtle cameos around the wheel",
+   "pass": true,
+   "detail": {
+    "w0": {
+     "show": true,
+     "mode": "wheel"
+    },
+    "wn": 1
+   }
+  },
+  {
+   "name": "4b. BONUS WHEEL: SPIN, title and pointer never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12d. BONUS WHEEL: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "4c. BONUS WHEEL: SPIN hit-tests to itself; ambient stops the moment the wheel is activated",
+   "pass": true,
+   "detail": {
+    "spinHit": true,
+    "sp": {
+     "vis": false,
+     "on": 0,
+     "mode": "",
+     "spinning": true
+    },
+    "sp2": {
+     "on": 0,
+     "shownWheel": 1
+    }
+   }
+  },
+  {
+   "name": "P4. no new page errors (level/wheel)",
+   "pass": false,
+   "detail": [
+    "addStyle is not defined"
+   ]
+  },
+  {
+   "name": "6a. TRY AGAIN: music keeps playing and the random cameo loop continues",
+   "pass": false,
+   "detail": {
+    "m": {
+     "mode": "",
+     "music": true
+    },
+    "music": true,
+    "seq": [
+     "character-6"
+    ]
+   }
+  },
+  {
+   "name": "6b. TRY AGAIN: TRY DAY AGAIN never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "6c. TRY AGAIN: a tap stops the sequence, removes the cameo, returns to play",
+   "pass": true,
+   "detail": {
+    "on": 0,
+    "mode": "",
+    "phase": "playing"
+   }
+  },
+  {
+   "name": "R1. reduced motion: level cameo fades/scales only; rescue reveal is a simple fade",
+   "pass": true,
+   "detail": {
+    "c": {
+     "id": "character-1",
+     "label": "DAM Sundae",
+     "tier": "ultra",
+     "effect": "glow",
+     "entry": "fade",
+     "exit": "fade",
+     "ms": 1856
+    },
+    "cls": "dscCameo on t-ultra",
+    "parts": 0,
+    "reveal": "tl92Fade",
+    "glow": "none"
+   }
+  },
+  {
+   "name": "L1. Wet logo in the DAM Map header; standard logo marks in Song Vault / Profile / Characters (not everywhere)",
+   "pass": true,
+   "detail": {
+    "map": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-tap-lites-QEy1mPNkhhmLrEN4.png",
+    "marks": {
+     "vault": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+     "profile": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+     "chars": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+     "count": 5
+    }
+   }
+  },
+  {
+   "name": "L2. logo image fails → 'TAP LITES' text fallback (header + splash)",
+   "pass": true,
+   "detail": {
+    "header": "TAP LITES",
+    "splash": "TAP LITES"
+   }
+  },
+  {
+   "name": "10. [Pixel 7] HEADER: standard TAPLITES logo replaces the heading; tagline kept; logo not tiny",
+   "pass": true,
+   "detail": {
+    "src": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+    "alt": "TAP LITES",
+    "text": "",
+    "h": 37,
+    "w": 111,
+    "right": 144.234375,
+    "vw": 412,
+    "tag": "TAP WATER. MAKE WAVES. SAVE THE -ITES."
+   }
+  },
+  {
+   "name": "1a. [Pixel 7] MENU IDLE: the board waiting for its first tap is the home screensaver",
+   "pass": true,
+   "detail": {
+    "mode": "home",
+    "screen": "home",
+    "phase": "ready"
+   }
+  },
+  {
+   "name": "1b. [Pixel 7] MENU IDLE: cameos appear on their own (first after ~3–6 s)",
+   "pass": true,
+   "detail": {
+    "firstAt": 4961,
+    "seq": [
+     "character-5",
+     "character-4"
+    ]
+   }
+  },
+  {
+   "name": "1c. [Pixel 7] MENU IDLE: each shows ~1–2 s then disappears; one at a time",
+   "pass": true,
+   "detail": {
+    "spans": [
+     1599,
+     1236
+    ],
+    "max": 1
+   }
+  },
+  {
+   "name": "1d. [Pixel 7] MENU IDLE: no image repeats within the last several",
+   "pass": true,
+   "detail": [
+    "character-5",
+    "character-4"
+   ]
+  },
+  {
+   "name": "1e. [Pixel 7] MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12a. [Pixel 7] MOBILE/desktop: no horizontal overflow, cameo stays on screen (home)",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "2a. [Pixel 7] MENU TAP: any tap removes the cameo immediately and restarts the wait",
+   "pass": true,
+   "detail": {
+    "vis0": true,
+    "t1": {
+     "vis": false,
+     "on": 0,
+     "mode": "home"
+    }
+   }
+  },
+  {
+   "name": "2b. [Pixel 7] MENU TAP: board tap starts play; screensaver stops and stays off during gameplay",
+   "pass": true,
+   "detail": {
+    "t2": {
+     "vis": false,
+     "mode": "",
+     "phase": "playing"
+    },
+    "t3": {
+     "on": 0,
+     "mode": "",
+     "phase": "playing"
+    }
+   }
+  },
+  {
+   "name": "3a. [Pixel 7] PRE-GAME: guide open → friendly cameo layer, one at a time",
+   "pass": true,
+   "detail": {
+    "m0": "pregame",
+    "seq": 14,
+    "max": 1
+   }
+  },
+  {
+   "name": "3b. [Pixel 7] PRE-GAME: START GAME / tabs / close never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12b. [Pixel 7] PRE-GAME: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "3c. [Pixel 7] PRE-GAME: START GAME hit-tests to itself and works immediately during a cameo",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "after": {
+     "open": false,
+     "vis": false,
+     "mode": "home"
+    }
+   }
+  },
+  {
+   "name": "3d. [Pixel 7] PRE-GAME: economy/progression untouched by the cameo layer",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "5a. [Pixel 7] LEVEL COMPLETE: 'LEVEL 5 COMPLETE' card with the -ite rescue is the level idle screen",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "title": "LEVEL 5 COMPLETE",
+    "rescue": true,
+    "mode": "level",
+    "phase": "levelComplete"
+   }
+  },
+  {
+   "name": "7a. [Pixel 7] SAVED -ITE: shown as a compact capsule chip (avatar ≥ 28 px, tappable role=button, fully visible)",
+   "pass": true,
+   "detail": {
+    "w": 30,
+    "h": 30,
+    "left": 115.671875,
+    "right": 145.671875,
+    "vw": 412,
+    "vh": 839,
+    "reveal": "burst+glow",
+    "anim": "tl92Burst",
+    "boxL": 110.671875,
+    "boxR": 301.3125,
+    "innerL": 20,
+    "innerR": 392,
+    "title": "\"✅ \"",
+    "role": "button"
+   }
+  },
+  {
+   "name": "7b. [Pixel 7] SAVED -ITE: stays inside the card and the mobile viewport",
+   "pass": true,
+   "detail": {
+    "w": 30,
+    "h": 30,
+    "left": 115.671875,
+    "right": 145.671875,
+    "vw": 412,
+    "vh": 839,
+    "reveal": "burst+glow",
+    "anim": "tl92Burst",
+    "boxL": 110.671875,
+    "boxR": 301.3125,
+    "innerL": 20,
+    "innerR": 392,
+    "title": "\"✅ \"",
+    "role": "button"
+   }
+  },
+  {
+   "name": "7c. [Pixel 7] SAVED -ITE: randomized reveal applied (entrance + afterglow)",
+   "pass": true,
+   "detail": {
+    "reveal": "burst+glow",
+    "anim": "tl92Burst"
+   }
+  },
+  {
+   "name": "7d. [Pixel 7] SAVED -ITE: reveal varies between completions",
+   "pass": true,
+   "detail": [
+    "pop+splash",
+    "burst+glow",
+    "bounce+splash",
+    "burst+shimmer",
+    "burst+float",
+    "bounce+shimmer",
+    "pop+glow",
+    "rise+shimmer",
+    "rise+float",
+    "pop+float",
+    "rise+splash",
+    "burst+splash",
+    "bounce+float",
+    "pop+shimmer"
+   ]
+  },
+  {
+   "name": "5b. [Pixel 7] LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)",
+   "pass": true,
+   "detail": {
+    "natural": 1,
+    "narrow": true
+   }
+  },
+  {
+   "name": "5c. [Pixel 7] LEVEL COMPLETE: large presentation (≥ 96 px), one at a time",
+   "pass": true,
+   "detail": {
+    "min": 129,
+    "max": 173
+   }
+  },
+  {
+   "name": "5d. [Pixel 7] LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12c. [Pixel 7] LEVEL COMPLETE: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "8a. [Pixel 7] TAP SAVED -ITE CARD: collection popout opens with the saved -ites (newest first)",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "role": "dialog",
+    "modal": "true",
+    "title": "SAVED -ITES",
+    "names": [
+     "Israelite",
+     "Levite",
+     "Danite"
+    ],
+    "minImg": 123.7420654296875,
+    "latest": true,
+    "inView": true,
+    "focus": "tl92ColClose",
+    "overflow": false,
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8b. [Pixel 7] COLLECTION: large thumbnails, fits the viewport, close button focused, no overflow",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "role": "dialog",
+    "modal": "true",
+    "title": "SAVED -ITES",
+    "names": [
+     "Israelite",
+     "Levite",
+     "Danite"
+    ],
+    "minImg": 123.7420654296875,
+    "latest": true,
+    "inView": true,
+    "focus": "tl92ColClose",
+    "overflow": false,
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8c. [Pixel 7] COLLECTION: ambient cameos pause while it is open",
+   "pass": true,
+   "detail": {
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8d. [Pixel 7] COLLECTION: no accidental gameplay interaction; ✕ / Esc / backdrop close it; focus returns",
+   "pass": true,
+   "detail": {
+    "still": {
+     "show": true,
+     "level": true,
+     "phase": "levelComplete"
+    },
+    "closed1": {
+     "show": false,
+     "focus": "lcRescue"
+    },
+    "closed2": false,
+    "closed3": false
+   }
+  },
+  {
+   "name": "8e. [Pixel 7] COLLECTION: reads the existing record; saved data / economy unchanged",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "4a. [Pixel 7] BONUS WHEEL: waiting to spin → subtle cameos around the wheel",
+   "pass": true,
+   "detail": {
+    "w0": {
+     "show": true,
+     "mode": "wheel"
+    },
+    "wn": 1
+   }
+  },
+  {
+   "name": "4b. [Pixel 7] BONUS WHEEL: SPIN, title and pointer never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12d. [Pixel 7] BONUS WHEEL: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "4c. [Pixel 7] BONUS WHEEL: SPIN hit-tests to itself; ambient stops the moment the wheel is activated",
+   "pass": true,
+   "detail": {
+    "spinHit": true,
+    "sp": {
+     "vis": false,
+     "on": 0,
+     "mode": "",
+     "spinning": true
+    },
+    "sp2": {
+     "on": 0,
+     "shownWheel": 1
+    }
+   }
+  },
+  {
+   "name": "10. [iPhone 13] HEADER: standard TAPLITES logo replaces the heading; tagline kept; logo not tiny",
+   "pass": true,
+   "detail": {
+    "src": "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png",
+    "alt": "TAP LITES",
+    "text": "",
+    "h": 36,
+    "w": 108,
+    "right": 141,
+    "vw": 390,
+    "tag": "TAP WATER. MAKE WAVES. SAVE THE -ITES."
+   }
+  },
+  {
+   "name": "1a. [iPhone 13] MENU IDLE: the board waiting for its first tap is the home screensaver",
+   "pass": true,
+   "detail": {
+    "mode": "home",
+    "screen": "home",
+    "phase": "ready"
+   }
+  },
+  {
+   "name": "1b. [iPhone 13] MENU IDLE: cameos appear on their own (first after ~3–6 s)",
+   "pass": true,
+   "detail": {
+    "firstAt": 5201,
+    "seq": [
+     "character-2",
+     "character-5"
+    ]
+   }
+  },
+  {
+   "name": "1c. [iPhone 13] MENU IDLE: each shows ~1–2 s then disappears; one at a time",
+   "pass": true,
+   "detail": {
+    "spans": [
+     1559,
+     1321
+    ],
+    "max": 1
+   }
+  },
+  {
+   "name": "1d. [iPhone 13] MENU IDLE: no image repeats within the last several",
+   "pass": true,
+   "detail": [
+    "character-2",
+    "character-5"
+   ]
+  },
+  {
+   "name": "1e. [iPhone 13] MENU IDLE: never over HUD buttons, floating buttons, timer or the glowing station; pointer-events:none",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12a. [iPhone 13] MOBILE/desktop: no horizontal overflow, cameo stays on screen (home)",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "2a. [iPhone 13] MENU TAP: any tap removes the cameo immediately and restarts the wait",
+   "pass": true,
+   "detail": {
+    "vis0": true,
+    "t1": {
+     "vis": false,
+     "on": 0,
+     "mode": "home"
+    }
+   }
+  },
+  {
+   "name": "2b. [iPhone 13] MENU TAP: board tap starts play; screensaver stops and stays off during gameplay",
+   "pass": true,
+   "detail": {
+    "t2": {
+     "vis": false,
+     "mode": "",
+     "phase": "playing"
+    },
+    "t3": {
+     "on": 0,
+     "mode": "",
+     "phase": "playing"
+    }
+   }
+  },
+  {
+   "name": "3a. [iPhone 13] PRE-GAME: guide open → friendly cameo layer, one at a time",
+   "pass": true,
+   "detail": {
+    "m0": "pregame",
+    "seq": 14,
+    "max": 1
+   }
+  },
+  {
+   "name": "3b. [iPhone 13] PRE-GAME: START GAME / tabs / close never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12b. [iPhone 13] PRE-GAME: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "3c. [iPhone 13] PRE-GAME: START GAME hit-tests to itself and works immediately during a cameo",
+   "pass": true,
+   "detail": {
+    "hit": true,
+    "after": {
+     "open": false,
+     "vis": false,
+     "mode": "home"
+    }
+   }
+  },
+  {
+   "name": "3d. [iPhone 13] PRE-GAME: economy/progression untouched by the cameo layer",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "5a. [iPhone 13] LEVEL COMPLETE: 'LEVEL 5 COMPLETE' card with the -ite rescue is the level idle screen",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "title": "LEVEL 5 COMPLETE",
+    "rescue": true,
+    "mode": "level",
+    "phase": "levelComplete"
+   }
+  },
+  {
+   "name": "7a. [iPhone 13] SAVED -ITE: shown as a compact capsule chip (avatar ≥ 28 px, tappable role=button, fully visible)",
+   "pass": true,
+   "detail": {
+    "w": 30,
+    "h": 30,
+    "left": 105.53125,
+    "right": 135.53125,
+    "vw": 390,
+    "vh": 664,
+    "reveal": "pop+shimmer",
+    "anim": "tl92Pop",
+    "boxL": 100.53125,
+    "boxR": 289.46875,
+    "innerL": 20,
+    "innerR": 370,
+    "title": "\"✅ \"",
+    "role": "button"
+   }
+  },
+  {
+   "name": "7b. [iPhone 13] SAVED -ITE: stays inside the card and the mobile viewport",
+   "pass": true,
+   "detail": {
+    "w": 30,
+    "h": 30,
+    "left": 105.53125,
+    "right": 135.53125,
+    "vw": 390,
+    "vh": 664,
+    "reveal": "pop+shimmer",
+    "anim": "tl92Pop",
+    "boxL": 100.53125,
+    "boxR": 289.46875,
+    "innerL": 20,
+    "innerR": 370,
+    "title": "\"✅ \"",
+    "role": "button"
+   }
+  },
+  {
+   "name": "7c. [iPhone 13] SAVED -ITE: randomized reveal applied (entrance + afterglow)",
+   "pass": true,
+   "detail": {
+    "reveal": "pop+shimmer",
+    "anim": "tl92Pop"
+   }
+  },
+  {
+   "name": "7d. [iPhone 13] SAVED -ITE: reveal varies between completions",
+   "pass": true,
+   "detail": [
+    "bounce+shimmer",
+    "rise+shimmer",
+    "bounce+glow",
+    "pop+glow",
+    "burst+float",
+    "bounce+splash",
+    "pop+float",
+    "burst+splash",
+    "pop+shimmer",
+    "rise+splash",
+    "rise+float",
+    "bounce+float",
+    "burst+shimmer",
+    "pop+splash",
+    "rise+glow"
+   ]
+  },
+  {
+   "name": "5b. [iPhone 13] LEVEL COMPLETE: a cameo appears on its own after the card settles (wide screens; phone-width capsules leave no free space)",
+   "pass": true,
+   "detail": {
+    "natural": 1,
+    "narrow": true
+   }
+  },
+  {
+   "name": "5c. [iPhone 13] LEVEL COMPLETE: large presentation (≥ 96 px), one at a time",
+   "pass": true,
+   "detail": {
+    "min": 117,
+    "max": 169
+   }
+  },
+  {
+   "name": "5d. [iPhone 13] LEVEL COMPLETE: never covers the headline, rescue card, FL OZ line or CONTINUE",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12c. [iPhone 13] LEVEL COMPLETE: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "8a. [iPhone 13] TAP SAVED -ITE CARD: collection popout opens with the saved -ites (newest first)",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "role": "dialog",
+    "modal": "true",
+    "title": "SAVED -ITES",
+    "names": [
+     "Israelite",
+     "Levite",
+     "Danite"
+    ],
+    "minImg": 117.14614868164062,
+    "latest": true,
+    "inView": true,
+    "focus": "tl92ColClose",
+    "overflow": false,
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8b. [iPhone 13] COLLECTION: large thumbnails, fits the viewport, close button focused, no overflow",
+   "pass": true,
+   "detail": {
+    "show": true,
+    "role": "dialog",
+    "modal": "true",
+    "title": "SAVED -ITES",
+    "names": [
+     "Israelite",
+     "Levite",
+     "Danite"
+    ],
+    "minImg": 117.14614868164062,
+    "latest": true,
+    "inView": true,
+    "focus": "tl92ColClose",
+    "overflow": false,
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8c. [iPhone 13] COLLECTION: ambient cameos pause while it is open",
+   "pass": true,
+   "detail": {
+    "cameos": 0,
+    "mode": ""
+   }
+  },
+  {
+   "name": "8d. [iPhone 13] COLLECTION: no accidental gameplay interaction; ✕ / Esc / backdrop close it; focus returns",
+   "pass": true,
+   "detail": {
+    "still": {
+     "show": true,
+     "level": true,
+     "phase": "levelComplete"
+    },
+    "closed1": {
+     "show": false,
+     "focus": "lcRescue"
+    },
+    "closed2": false,
+    "closed3": false
+   }
+  },
+  {
+   "name": "8e. [iPhone 13] COLLECTION: reads the existing record; saved data / economy unchanged",
+   "pass": true,
+   "detail": {}
+  },
+  {
+   "name": "4a. [iPhone 13] BONUS WHEEL: waiting to spin → subtle cameos around the wheel",
+   "pass": true,
+   "detail": {
+    "w0": {
+     "show": true,
+     "mode": "wheel"
+    },
+    "wn": 1
+   }
+  },
+  {
+   "name": "4b. [iPhone 13] BONUS WHEEL: SPIN, title and pointer never covered",
+   "pass": true,
+   "detail": {
+    "covered": 0,
+    "by": []
+   }
+  },
+  {
+   "name": "12d. [iPhone 13] BONUS WHEEL: no overflow, cameo on screen",
+   "pass": true,
+   "detail": {
+    "overflow": 0,
+    "outside": 0
+   }
+  },
+  {
+   "name": "4c. [iPhone 13] BONUS WHEEL: SPIN hit-tests to itself; ambient stops the moment the wheel is activated",
+   "pass": true,
+   "detail": {
+    "spinHit": true,
+    "sp": {
+     "vis": false,
+     "on": 0,
+     "mode": "",
+     "spinning": true
+    },
+    "sp2": {
+     "on": 0,
+     "shownWheel": 1
+    }
+   }
+  }
+ ]
+}

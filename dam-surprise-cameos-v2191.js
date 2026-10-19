@@ -392,7 +392,10 @@
           else { x = side === "left" ? ir.left + rnd(.05, .4) * size : ir.right - rnd(.05, .4) * size; y = rnd(ir.top + half, ir.bottom - half); }
         }
         x = Math.max(box.left + half*.7, Math.min(box.right - half*.7, x)); y = Math.max(box.top + half*.7, Math.min(box.bottom - half*.7, y));
-        var b = { left:x - half*.78, right:x + half*.78, top:y - half*.78, bottom:y + half*.78 };
+        /* V2.2.20: the footprint tested against the guards is the cameo as it is DRAWN, not as it is placed: tier scale up to 1.25 × a ±14° tilt (bounding box ×1.2) makes the art reach ≈ 1.05 × half the placed size.
+           It was 0.78 × half, so on a crowded Level Complete card the art could poke 4–9 px past the 10 px guard margin into the CONTINUE button / level headline (captured by the loaded ambient runs; pointer-events is none, so it was
+           a visual overlap, never a blocked tap). */
+        var fp = half*1.05, b = { left:x - fp, right:x + fp, top:y - fp, bottom:y + fp };
         if(!hits(b, o.guards)) return { left:(x - hr.left).toFixed(0) + "px", top:(y - hr.top).toFixed(0) + "px", size:size };
       }
     }
@@ -572,7 +575,11 @@
     var xPct = Math.max(lo, Math.min(hi, a.x / MAP_W * 100 + rnd(-4, 4)));
     /* hover above the landmark; never down in the region-pill row (top 88%+) */
     var halfH = size / 2 / h * 100;
-    var ylo = Math.max(12, view.t0 + halfH + 1), yhi = Math.min(74, view.t1 - halfH - 1);
+    /* V2.2.20: the pill row is no longer fixed at 88%+ — on wide screens the pills sit inside the scene from about 76% down. Measure where the first pill really starts and keep the DRAWN figure
+       (the cameo box minus its 15% transparent margin, i.e. centre + 0.7 × half-height) above it. On phones the pills are lower and the old 74% bound still rules. */
+    var pillTop = 100;
+    try{ var fp = document.querySelector("#geiMapRegions .dmwPill"), sr = scene.getBoundingClientRect(), fr = fp && fp.getBoundingClientRect(); if(fr && fr.width && sr.height) pillTop = Math.max(0, Math.min(100, (fr.top - sr.top) / sr.height * 100)); }catch(e){}
+    var ylo = Math.max(12, view.t0 + halfH + 1), yhi = Math.min(74, view.t1 - halfH - 1, pillTop - halfH * 0.7 - 4);
     if(yhi < ylo){ ylo = Math.max(view.t0 + halfH, 0); yhi = Math.max(ylo, Math.min(86, view.t1 - halfH)); }
     var yPct = Math.max(ylo, Math.min(yhi, (a.top / MAP_H * 100) - rnd(10, 22)));
     var place = { left:xPct.toFixed(1) + "%", top:yPct.toFixed(1) + "%", size:size };

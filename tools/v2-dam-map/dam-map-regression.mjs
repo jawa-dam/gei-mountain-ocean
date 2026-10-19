@@ -24,7 +24,7 @@ import { execSync, execFileSync } from "node:child_process";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
 const BASE_REF = process.env.BASE_REF || "b2e7691";
-const KNOWN_BROKEN = 4;          // pre-existing unparseable tap-lites modules (V2.1.73/75/77/78)
+const KNOWN_BROKEN = 0;          // V2.2.20: was 4 (the unparseable tap-lites modules V2.1.73/75/77/78, fixed in a9526bf) — no script error is tolerated any more
 
 async function loadPlaywright(){
   try { return await import("playwright"); } catch {}
@@ -204,9 +204,16 @@ async function milestoneRun(browser, base, { milestoneLevel, auto }){
   // eslint-disable-next-line no-undef
   if (milestoneLevel) await g.page.evaluate(() => { state.level = 6; state.completedLevels = 5; });
   const phase = await playLevel(g);
+  /* V2.2.20: since V2.2.11 the game plays a short victory sequence (stabilise → controlled release → … → LEVEL COMPLETE!) AFTER state.phase becomes "levelComplete" and only then raises the level card.
+     The old flow clicked #lcBtn the moment the phase flipped — i.e. on a card that was not on screen yet, so nothing happened and G2–G4 failed. A player can only press CONTINUE once the card is up, so wait for that. */
+  await g.page.waitForFunction(() => { const c = document.getElementById("levelCard"), b = document.getElementById("lcBtn"); return c && c.classList.contains("show") && b && b.getBoundingClientRect().width > 0 && !b.disabled; }, null, { timeout:20000 });
+  await sleep(400);
   const pre = await g.page.evaluate(ECON);
   await g.page.click("#lcBtn");
-  await sleep(500);
+  /* V2.2.20: on a milestone level the V2.2.6 victory capsule plays its own ~3.5 s hand-off before the click reaches the DAM MAP hook (measured: milestone card at t+3.5–4 s), so a fixed 500 ms wait cannot see it.
+     Wait for whichever comes first — the DAM MAP milestone or, on an ordinary level, the Bonus Waterwheel. Nothing is skipped: the assertions below are unchanged. */
+  await g.page.waitForFunction(() => { const m = document.getElementById("geiMapMilestone"), b = document.getElementById("bonusCard"); return (m && m.classList.contains("show")) || (b && b.classList.contains("show")); }, null, { timeout:12000 }).catch(() => {});
+  await sleep(300);
   const during = await g.page.evaluate(() => { const box = document.getElementById("geiMapMilestone"); return { map:document.getElementById("geiDamMapPage") ? document.getElementById("geiDamMapPage").classList.contains("show") : false,
     milestone:!!box && box.classList.contains("show"), text:box ? box.textContent : "", bonus:document.getElementById("bonusCard").classList.contains("show") }; });
   if (during.milestone){ if (auto) await sleep(5600); else { await g.page.click("#geiMapMilestoneContinue"); await sleep(700); } }

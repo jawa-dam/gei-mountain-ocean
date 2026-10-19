@@ -1,0 +1,92 @@
+[
+ {
+  "suite": "tools/v2-soundtrack/soundtrack-regression.mjs",
+  "cur": [
+   {
+    "code": 1,
+    "passes": 38,
+    "fails": [
+     "autoplay safety: nothing starts before a user gesture",
+     "idle lift respects ceiling (≤ 0.48) and calm band",
+     "very long idle settles back down",
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 40,
+    "fails": [
+     "autoplay safety: nothing starts before a user gesture",
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 41,
+    "fails": [
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 41,
+    "fails": [
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 41,
+    "fails": [
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   }
+  ],
+  "bas": [
+   {
+    "code": 1,
+    "passes": 41,
+    "fails": [
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 38,
+    "fails": [
+     "autoplay safety: nothing starts before a user gesture",
+     "idle lift respects ceiling (≤ 0.48) and calm band",
+     "very long idle settles back down",
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 40,
+    "fails": [
+     "autoplay safety: nothing starts before a user gesture",
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 41,
+    "fails": [
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   },
+   {
+    "code": 1,
+    "passes": 39,
+    "fails": [
+     "idle lift respects ceiling (≤ 0.48) and calm band",
+     "very long idle settles back down",
+     "no console errors introduced (vs. baseline without V2.1.88)"
+    ]
+   }
+  ],
+  "onlyCurrent": [],
+  "onlyBaseline": [],
+  "stable": false
+ }
+]

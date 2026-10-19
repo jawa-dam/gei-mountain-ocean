@@ -1,0 +1,2 @@
+tools/v2-ambient/ambient-regression.mjs                                        cur[1:105p/3f 1:105p/3f 1:105p/3f] base[1:105p/3f 1:105p/3f 1:105p/3f]
+tools/v2-soundtrack/soundtrack-regression.mjs                                  cur[1:41p/1f 1:41p/1f 1:38p/4f] base[1:40p/2f 1:41p/1f 1:40p/2f]  ONLY-CURRENT: ["idle lift respects ceiling (≤ 0.48) and calm band","very long idle settles back down"]  (UNSTABLE between repeats)
