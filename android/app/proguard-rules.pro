@@ -1,0 +1,2 @@
+-keep class com.yalltoo.taplites.gei.PlayBillingBridge { *; }
+-keep class com.android.vending.billing.** { *; }

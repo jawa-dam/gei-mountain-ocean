@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TapLites: GEI</string>
+    <!-- Digital Asset Links: replace fingerprint after generating signing key -->
+    <string name="asset_statements">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://gei-mountain-ocean.vercel.app\"}}]</string>
+</resources>
