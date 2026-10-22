@@ -41,7 +41,9 @@ function mkEl(cls,x,y,w,h,bg,anim,dur){
   var d=document.createElement("div");
   d.className="cwe-p "+cls;
   d.style.cssText="left:"+x+"px;top:"+y+"px;width:"+w+"px;height:"+h+"px;background:"+bg+";animation:"+anim+" "+dur+"s ease-out forwards";
-  d.addEventListener("animationend",function(){d.remove();tapCount=Math.max(0,tapCount-1)},{once:true});
+  var cleanup=function(){if(d.parentNode){d.remove();tapCount=Math.max(0,tapCount-1)}};
+  d.addEventListener("animationend",cleanup,{once:true});
+  setTimeout(cleanup,Math.ceil(dur*1000)+500);
   return d;
 }
 
@@ -223,6 +225,7 @@ function selfTest(){
 }
 
 function boot(){
+  if(window.__GEI_COLOR_WORLD_EFFECTS__)return;
   injectCSS();
   var w=document.querySelector(".world");
   if(w)w.addEventListener("pointerdown",handleTap,{passive:true});
