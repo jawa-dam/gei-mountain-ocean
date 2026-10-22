@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>DAM-ITE | YALLTOO</title>
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
-<meta name="theme-color" content="#06070d">
+<meta name="theme-color" content="#c8f0ff">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -413,11 +413,11 @@ html,body{
 .operatorSlot{ flex:0 0 auto; display:flex; align-items:center; }
 .operatorSlot:empty{ display:none; }
 .tapProg{ text-align:center; }
-.tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:#fff; white-space:nowrap; }
+.tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:var(--world-text,#fff); white-space:nowrap; }
 .tapProg .tpNum{ display:inline-block; min-width:3.6ch; font-variant-numeric:tabular-nums; color:var(--gold); text-shadow:0 0 10px color-mix(in srgb,var(--gold) 50%,transparent); transform-origin:50% 60%; }
-.tapProg .tpUnit{ color:var(--foam); }
+.tapProg .tpUnit{ color:var(--world-text-secondary,var(--foam)); }
 .tapProg .tpDone{ display:none; margin-left:.5em; color:var(--water-bright); }
-.tapProg .tpBar{ margin:3px auto 0; height:6px; max-width:100%; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+.tapProg .tpBar{ margin:3px auto 0; height:6px; max-width:100%; border-radius:999px; background:color-mix(in srgb,var(--juicy-navy) 16%,transparent); overflow:hidden; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--juicy-navy) 10%,transparent); }
 .tapProg .tpBar i{ display:block; height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,var(--juicy-blue),var(--water-bright),var(--juicy-magenta)); transition:width .11s ease-out; }
 .tapProg.tap .tpNum{ animation:tpPulse .16s ease-out; }
 .tapProg.tap .tpBar i{ animation:tpFlash .16s ease-out; }
