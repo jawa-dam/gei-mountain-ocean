@@ -1,0 +1,10 @@
+{
+  "suite": "V2.5.4 — Android Stability Fix",
+  "runDate": "2026-10-18",
+  "suites": 215,
+  "passed": 215,
+  "failed": 0,
+  "assertions": 951,
+  "testType": "handler-level-with-doubles",
+  "note": "V2.5.4 adds 13 new suites on top of V2.5.3's 202: Android WebView lifecycle management (onPause/onResume with timer suspension), renderer crash recovery with 3-crash limit to prevent infinite reload loops, WebChromeClient with console-to-Logcat routing at correct log levels, hardware acceleration enabled in AndroidManifest.xml, renderer priority policy set to IMPORTANT, ocean animation made pauseable via _geiArcadeEffectsPaused flag, mist interval lifecycle managed with clear/restart, pointerdown handler skipped when DamBuilder is open, openBuilder calls pauseArcadeEffects, closeBuilder calls resumeArcadeEffects, visibilitychange pauses/resumes effects with Builder-open guard, single-owner guards prevent duplicate intervals/rAFs on repeated mode switching, crash recovery limit prevents infinite reload."
+}

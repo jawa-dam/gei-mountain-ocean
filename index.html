@@ -5,21 +5,23 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>DAM-ITE | YALLTOO</title>
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
+<meta name="theme-color" content="#c8f0ff">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <script>
 (function(){
-  /* V2.1.12 — LIVING SKIN SYSTEM: the original seven + nine new worlds. Presentation only. */
-  var ids = ["aurora","clay","canopy","heaven","neon","ember","abyss",
-             "midnight","storm","crystal","frost","golden","pink","cosmic","industrial","floodlight"];
+  /* V2.2.0 — TODDLER COLOR WORLD ENGINE: six bright worlds, randomized every refresh. Presentation only. */
+  var ids = ["rainbow","bubble","candy","forest","mountain","magic"];
   var last = null, recent = [];
   try { last = sessionStorage.getItem("ytNiteSkin"); } catch (e) {}
   try { recent = JSON.parse(sessionStorage.getItem("ytNiteSkinRecent") || "[]"); if (!Array.isArray(recent)) recent = []; } catch (e) { recent = []; }
   var forced = null;
   try { var q = new URLSearchParams(window.location.search).get("skin"); if (q && ids.indexOf(q) >= 0) forced = q; } catch (e) {}
-  /* "It looks different this time": skip the last few worlds this tab has already shown. */
   var fresh = ids.filter(function(id){ return id !== last && recent.indexOf(id) < 0; });
   var pool = fresh.length ? fresh : ids.filter(function(id){ return id !== last; });
   var pick = forced || pool[Math.floor(Math.random() * pool.length)];
-  recent = [pick].concat(recent.filter(function(id){ return id !== pick && ids.indexOf(id) >= 0; })).slice(0, 5);
+  recent = [pick].concat(recent.filter(function(id){ return id !== pick && ids.indexOf(id) >= 0; })).slice(0, 3);
   try { sessionStorage.setItem("ytNiteSkin", pick); sessionStorage.setItem("ytNiteSkinRecent", JSON.stringify(recent)); } catch (e) {}
   document.documentElement.className = "skin-" + pick;
   document.documentElement.setAttribute("data-skin", pick);
@@ -56,1036 +58,231 @@
 </style><style>
 
 :root{
-  --water-deep:#03203f;
+  color-scheme:light;
+  --water-deep:#e0f7ff;
   --water-bright:#2fd2ff;
-  --foam:#eafcff;
+  --foam:#ffffff;
 
-  --juicy-navy:#0b1739;
-  --juicy-blue:#29c6ff;
+  --juicy-navy:#1a2744;
+  --juicy-blue:#2fd2ff;
   --juicy-violet:#7a5cff;
-  --juicy-magenta:#ff2ec4;
-  --juicy-pink:#EE8DF5;
+  --juicy-magenta:#f310ba;
+  --juicy-pink:#ff9df2;
 
   --gold:#ffd76a;
   --danger:#ff5e7a;
-  --panel:rgba(6,11,28,.9);
-  --glassBorder:rgba(255,255,255,.16);
+  --panel:rgba(255,255,255,.92);
+  --glassBorder:rgba(47,210,255,.25);
   --radius:22px;
 
-  --page-bg-a:#1b3f8f;
-  --page-bg-b:#050f2b;
-  --sky-0:#1b3f8f;
-  --sky-1:#0b4d7a;
-  --sky-2:#03101f;
-  --world-top:#12296b;
-  --world-bot:#02060f;
-  --glow-a:rgba(41,198,255,.18);
-  --glow-b:rgba(255,46,196,.14);
-  --flow-0:#29c6ff;
-  --flow-1:#eafcff;
+  --page-bg-a:#c8f0ff;
+  --page-bg-b:#eaf8ff;
+  --sky-0:#7ec8f0;
+  --sky-1:#a8e0ff;
+  --sky-2:#d4f0ff;
+  --world-top:#8ed4f8;
+  --world-bot:#d8f2ff;
+  --glow-a:rgba(47,210,255,.22);
+  --glow-b:rgba(255,157,242,.16);
+  --flow-0:#2fd2ff;
+  --flow-1:#ffffff;
   --flow-2:#7a5cff;
-  --mtn-front-0:#8fa3d9;
-  --mtn-front-1:#5b6ca8;
-  --mtn-back:#5b6ca8;
-  --snow:#eaf6ff;
-  --tree:#204a34;
-  --water-accent:#29c6ff;
-  --dam-0:#d7dfe8;
-  --dam-1:#9aa8bb;
-  --dam-stroke:#6d7c92;
-  --dam-line:rgba(60,75,95,.35);
-  --pond-0:#7cf9ff;
-  --pond-1:#0f8fc7;
-  --reed:#2f8f5a;
-  --sluice:#8697ad;
-  --sluice-stroke:#5a6578;
-  --wood-0:#b97a4a;
-  --wood-1:#7a4a2a;
-  --wood-mid:#8a5a2b;
-  --wood-spoke:#6b4423;
+  --mtn-front-0:#7bb86a;
+  --mtn-front-1:#4a8a3e;
+  --mtn-back:#5a9a4e;
+  --snow:#ffffff;
+  --tree:#2d7a3a;
+  --water-accent:#2fd2ff;
+  --dam-0:#d4dce6;
+  --dam-1:#a8b8cc;
+  --dam-stroke:#7a8ea6;
+  --dam-line:rgba(60,80,110,.2);
+  --pond-0:#80e8ff;
+  --pond-1:#30b0e0;
+  --reed:#3a9a5a;
+  --sluice:#9ab0c8;
+  --sluice-stroke:#6a7e96;
+  --wood-0:#c89060;
+  --wood-1:#8a6038;
+  --wood-mid:#a07848;
+  --wood-spoke:#7a5430;
   --wood-dark:#5a3a1e;
-  --mill-roof:#7a3b2e;
-  --mill-door:#3a2416;
+  --mill-roof:#cc5544;
+  --mill-door:#4a2a18;
   --mill-light:#ffe9a8;
-  --mill-metal:#5a5a5a;
-  --mill-add:#9a6a3e;
-  --mill-tank:#b7c3cf;
-  --mill-factory:#6b7684;
-  --mill-factory-stroke:#3a4450;
-  --ocean:#29c6ff;
-  --mist:rgba(41,198,255,.12);
-  --seg-track:rgba(41,198,255,.32);
-  --flood-0:rgba(41,198,255,.88);
-  --flood-1:rgba(3,12,28,.97);
-  --flash:rgba(41,198,255,.45);
-  --fs-bg:#03060f;
-  --deco-shadow:rgba(41,198,255,.6);
+  --mill-metal:#6a7080;
+  --mill-add:#b07a4a;
+  --mill-tank:#d8e4ee;
+  --mill-factory:#8a96a6;
+  --mill-factory-stroke:#5a6878;
+  --ocean:#2fd2ff;
+  --mist:rgba(47,210,255,.1);
+  --seg-track:rgba(47,210,255,.35);
+  --flood-0:rgba(47,210,255,.85);
+  --flood-1:rgba(234,248,255,.97);
+  --flash:rgba(47,210,255,.4);
+  --fs-bg:#eaf8ff;
+  --deco-shadow:rgba(47,210,255,.5);
+  --world-text:#1a2744;
+  --world-text-secondary:rgba(26,39,68,.7);
 }
 
-/* ===== SKIN: Aurora (original Nite Lite) ===== */
-html.skin-aurora{ color-scheme: dark; }
-
-/* ===== SKIN: Red Clay — terracotta harvest night ===== */
-html.skin-clay{
-  --water-deep:#2a1208;
-  --water-bright:#ffb067;
-  --foam:#fff3e0;
-  --juicy-navy:#2a140c;
-  --juicy-blue:#e07a3d;
-  --juicy-violet:#c45c26;
-  --juicy-magenta:#9a3412;
-  --juicy-pink:#f2cc8f;
-  --gold:#ffd76a;
-  --danger:#ff6b5a;
-  --panel:rgba(28,12,6,.92);
-  --radius:16px;
-  --page-bg-a:#6b2a12;
-  --page-bg-b:#1a0c06;
-  --sky-0:#c45c26;
-  --sky-1:#7a2e12;
-  --sky-2:#1c0c08;
-  --world-top:#5a2814;
-  --world-bot:#120806;
-  --glow-a:rgba(224,122,61,.24);
-  --glow-b:rgba(242,204,143,.16);
-  --flow-0:#e07a3d;
-  --flow-1:#fff3e0;
-  --flow-2:#c45c26;
-  --mtn-front-0:#d4a373;
-  --mtn-front-1:#8b5a32;
-  --mtn-back:#6b4423;
-  --snow:#fff6e8;
-  --tree:#3d4a1c;
-  --water-accent:#ffb067;
-  --dam-0:#e8d5c4;
-  --dam-1:#b08968;
-  --dam-stroke:#7a5c43;
-  --dam-line:rgba(90,50,20,.35);
-  --pond-0:#ffd6a5;
-  --pond-1:#c45c26;
-  --reed:#606c38;
-  --sluice:#c4a484;
-  --sluice-stroke:#7a5c43;
-  --wood-0:#c47a3a;
-  --wood-1:#7a3e18;
-  --wood-mid:#a35c22;
-  --wood-spoke:#6b3a14;
-  --wood-dark:#4a240e;
-  --mill-roof:#8a2e12;
-  --mill-door:#3a1c0c;
-  --mill-light:#ffe9a8;
-  --mill-metal:#6b5344;
-  --mill-add:#b07a48;
-  --mill-tank:#d4c4b0;
-  --mill-factory:#8a6a50;
-  --mill-factory-stroke:#4a3020;
-  --ocean:#e07a3d;
-  --mist:rgba(224,122,61,.14);
-  --seg-track:rgba(224,122,61,.38);
-  --flood-0:rgba(224,122,61,.9);
-  --flood-1:rgba(28,8,4,.97);
-  --flash:rgba(224,122,61,.45);
-  --fs-bg:#120806;
-  --deco-shadow:rgba(224,122,61,.65);
+/* ===== WORLD: Rainbow Splash ===== */
+html.skin-rainbow{
+  color-scheme:light;
+  --water-deep:#e0f7ff;--water-bright:#2fd2ff;--foam:#ffffff;
+  --juicy-navy:#1a2744;--juicy-blue:#2fd2ff;--juicy-violet:#7a5cff;--juicy-magenta:#f310ba;--juicy-pink:#ff9df2;
+  --gold:#ffd76a;--danger:#ff5e7a;--panel:rgba(255,255,255,.92);--glassBorder:rgba(47,210,255,.25);--radius:22px;
+  --page-bg-a:#c8f0ff;--page-bg-b:#eaf8ff;
+  --sky-0:#7ec8f0;--sky-1:#a8e0ff;--sky-2:#d4f0ff;
+  --world-top:#8ed4f8;--world-bot:#d8f2ff;
+  --glow-a:rgba(47,210,255,.22);--glow-b:rgba(255,157,242,.16);
+  --flow-0:#2fd2ff;--flow-1:#ffffff;--flow-2:#7a5cff;
+  --mtn-front-0:#7bb86a;--mtn-front-1:#4a8a3e;--mtn-back:#5a9a4e;--snow:#ffffff;--tree:#2d7a3a;
+  --water-accent:#2fd2ff;
+  --dam-0:#d4dce6;--dam-1:#a8b8cc;--dam-stroke:#7a8ea6;--dam-line:rgba(60,80,110,.2);
+  --pond-0:#80e8ff;--pond-1:#30b0e0;--reed:#3a9a5a;
+  --sluice:#9ab0c8;--sluice-stroke:#6a7e96;
+  --wood-0:#c89060;--wood-1:#8a6038;--wood-mid:#a07848;--wood-spoke:#7a5430;--wood-dark:#5a3a1e;
+  --mill-roof:#cc5544;--mill-door:#4a2a18;--mill-light:#ffe9a8;--mill-metal:#6a7080;--mill-add:#b07a4a;
+  --mill-tank:#d8e4ee;--mill-factory:#8a96a6;--mill-factory-stroke:#5a6878;
+  --ocean:#2fd2ff;--mist:rgba(47,210,255,.1);--seg-track:rgba(47,210,255,.35);
+  --flood-0:rgba(47,210,255,.85);--flood-1:rgba(234,248,255,.97);--flash:rgba(47,210,255,.4);
+  --fs-bg:#eaf8ff;--deco-shadow:rgba(47,210,255,.5);
+  --world-text:#1a2744;--world-text-secondary:rgba(26,39,68,.7);
 }
 
-/* ===== SKIN: Canopy — moss, creek, fireflies ===== */
-html.skin-canopy{
-  --water-deep:#042016;
-  --water-bright:#5eead4;
-  --foam:#ecfdf5;
-  --juicy-navy:#052e16;
-  --juicy-blue:#34d399;
-  --juicy-violet:#65a30d;
-  --juicy-magenta:#a3e635;
-  --juicy-pink:#bbf7d0;
-  --gold:#fde68a;
-  --danger:#fb7185;
-  --panel:rgba(4,22,14,.92);
-  --radius:24px;
-  --page-bg-a:#14532d;
-  --page-bg-b:#022c16;
-  --sky-0:#166534;
-  --sky-1:#064e3b;
-  --sky-2:#022c22;
-  --world-top:#14532d;
-  --world-bot:#01140c;
-  --glow-a:rgba(52,211,153,.22);
-  --glow-b:rgba(163,230,53,.16);
-  --flow-0:#34d399;
-  --flow-1:#ecfdf5;
-  --flow-2:#a3e635;
-  --mtn-front-0:#86efac;
-  --mtn-front-1:#3f6b4a;
-  --mtn-back:#2f4a38;
-  --snow:#f0fdf4;
-  --tree:#14532d;
-  --water-accent:#5eead4;
-  --dam-0:#c8ddd0;
-  --dam-1:#7a9a86;
-  --dam-stroke:#4a6b58;
-  --dam-line:rgba(30,60,40,.35);
-  --pond-0:#99f6e4;
-  --pond-1:#0f766e;
-  --reed:#166534;
-  --sluice:#7a9a86;
-  --sluice-stroke:#3f5a4a;
-  --wood-0:#a67c52;
-  --wood-1:#5c3d24;
-  --wood-mid:#8a5a32;
-  --wood-spoke:#5c3d24;
-  --wood-dark:#3a2416;
-  --mill-roof:#3f6212;
-  --mill-door:#1c1917;
-  --mill-light:#fef08a;
-  --mill-metal:#4a5a50;
-  --mill-add:#6b8f4a;
-  --mill-tank:#a7c4b0;
-  --mill-factory:#4a6b58;
-  --mill-factory-stroke:#24382e;
-  --ocean:#2dd4bf;
-  --mist:rgba(52,211,153,.14);
-  --seg-track:rgba(52,211,153,.35);
-  --flood-0:rgba(45,212,191,.88);
-  --flood-1:rgba(2,20,14,.97);
-  --flash:rgba(52,211,153,.45);
-  --fs-bg:#01140c;
-  --deco-shadow:rgba(52,211,153,.6);
+/* ===== WORLD: Bubble Ocean ===== */
+html.skin-bubble{
+  color-scheme:light;
+  --water-deep:#d0f4ff;--water-bright:#00c8e8;--foam:#ffffff;
+  --juicy-navy:#0a3048;--juicy-blue:#00b8d8;--juicy-violet:#4a90ff;--juicy-magenta:#00e0c0;--juicy-pink:#80f0e0;
+  --gold:#ffe06a;--danger:#ff6080;--panel:rgba(255,255,255,.90);--glassBorder:rgba(0,200,232,.25);--radius:24px;
+  --page-bg-a:#a8e8f8;--page-bg-b:#daf6ff;
+  --sky-0:#60c0e8;--sky-1:#90d8f0;--sky-2:#c8f0ff;
+  --world-top:#70c8e8;--world-bot:#d0f4ff;
+  --glow-a:rgba(0,200,232,.18);--glow-b:rgba(74,144,255,.14);
+  --flow-0:#00c8e8;--flow-1:#ffffff;--flow-2:#4a90ff;
+  --mtn-front-0:#6aaa8a;--mtn-front-1:#3a7a5a;--mtn-back:#4a8a6a;--snow:#e8fff8;--tree:#2a7050;
+  --water-accent:#00c8e8;
+  --dam-0:#c8dae8;--dam-1:#98b0c8;--dam-stroke:#6a88a8;--dam-line:rgba(50,70,100,.18);
+  --pond-0:#70e8f8;--pond-1:#20a0c8;--reed:#2a8860;
+  --sluice:#88a8c0;--sluice-stroke:#5a7898;
+  --wood-0:#b8906a;--wood-1:#806040;--wood-mid:#987048;--wood-spoke:#705038;--wood-dark:#503820;
+  --mill-roof:#3888b0;--mill-door:#1a3848;--mill-light:#fff4b0;--mill-metal:#607888;--mill-add:#98784a;
+  --mill-tank:#d0e8f4;--mill-factory:#7088a0;--mill-factory-stroke:#485868;
+  --ocean:#00c8e8;--mist:rgba(0,200,232,.1);--seg-track:rgba(0,200,232,.3);
+  --flood-0:rgba(0,200,232,.8);--flood-1:rgba(218,246,255,.97);--flash:rgba(0,200,232,.35);
+  --fs-bg:#daf6ff;--deco-shadow:rgba(0,200,232,.45);
+  --world-text:#0a3048;--world-text-secondary:rgba(10,48,72,.65);
 }
 
-/* ===== SKIN: Heaven — golden hour, ivory light ===== */
-html.skin-heaven{
-  --water-deep:#1c1910;
-  --water-bright:#f5d76e;
-  --foam:#fffbeb;
-  --juicy-navy:#1c1917;
-  --juicy-blue:#fbbf24;
-  --juicy-violet:#d4a017;
-  --juicy-magenta:#fde68a;
-  --juicy-pink:#fef3c7;
-  --gold:#ffe08a;
-  --danger:#f87171;
-  --panel:rgba(28,22,12,.92);
-  --radius:26px;
-  --page-bg-a:#4a3f24;
-  --page-bg-b:#12100a;
-  --sky-0:#6b5a30;
-  --sky-1:#3a3018;
-  --sky-2:#12100a;
-  --world-top:#3f3620;
-  --world-bot:#0c0a06;
-  --glow-a:rgba(251,191,36,.22);
-  --glow-b:rgba(253,230,138,.18);
-  --flow-0:#fbbf24;
-  --flow-1:#fffbeb;
-  --flow-2:#d4a017;
-  --mtn-front-0:#e8d5a3;
-  --mtn-front-1:#8a7340;
-  --mtn-back:#6b5a30;
-  --snow:#fffbeb;
-  --tree:#3f4a20;
-  --water-accent:#f5d76e;
-  --dam-0:#efe6d4;
-  --dam-1:#c4b494;
-  --dam-stroke:#8a7a58;
-  --dam-line:rgba(90,70,30,.35);
-  --pond-0:#fde68a;
-  --pond-1:#b45309;
-  --reed:#a16207;
-  --sluice:#c4b494;
-  --sluice-stroke:#8a7a58;
-  --wood-0:#d4a017;
-  --wood-1:#7a4e10;
-  --wood-mid:#b45309;
-  --wood-spoke:#7a4e10;
-  --wood-dark:#4a2e0c;
-  --mill-roof:#92400e;
-  --mill-door:#1c1917;
-  --mill-light:#fef9c3;
-  --mill-metal:#78716c;
-  --mill-add:#c4a056;
-  --mill-tank:#e7e5e4;
-  --mill-factory:#a8a29e;
-  --mill-factory-stroke:#57534e;
-  --ocean:#f5d76e;
-  --mist:rgba(251,191,36,.14);
-  --seg-track:rgba(251,191,36,.38);
-  --flood-0:rgba(245,215,110,.9);
-  --flood-1:rgba(20,16,8,.97);
-  --flash:rgba(251,191,36,.45);
-  --fs-bg:#0c0a06;
-  --deco-shadow:rgba(251,191,36,.65);
+/* ===== WORLD: Candy River Village ===== */
+html.skin-candy{
+  color-scheme:light;
+  --water-deep:#ffe0f0;--water-bright:#ff70c0;--foam:#ffffff;
+  --juicy-navy:#3a1848;--juicy-blue:#e060b0;--juicy-violet:#a070ff;--juicy-magenta:#ff70c0;--juicy-pink:#ffb0e0;
+  --gold:#ffe870;--danger:#ff5080;--panel:rgba(255,255,255,.92);--glassBorder:rgba(255,112,192,.25);--radius:26px;
+  --page-bg-a:#ffd0e8;--page-bg-b:#fff0f6;
+  --sky-0:#f0a0d0;--sky-1:#f8c0e0;--sky-2:#ffe8f4;
+  --world-top:#f0b0d8;--world-bot:#ffe8f4;
+  --glow-a:rgba(255,112,192,.2);--glow-b:rgba(160,112,255,.16);
+  --flow-0:#ff70c0;--flow-1:#ffffff;--flow-2:#a070ff;
+  --mtn-front-0:#a8d090;--mtn-front-1:#70a860;--mtn-back:#80b870;--snow:#fff0f8;--tree:#509848;
+  --water-accent:#ff70c0;
+  --dam-0:#e8d0e0;--dam-1:#c8a8c0;--dam-stroke:#a080a0;--dam-line:rgba(100,60,100,.18);
+  --pond-0:#ffb0e0;--pond-1:#d060a0;--reed:#60a058;
+  --sluice:#c0a0b8;--sluice-stroke:#907888;
+  --wood-0:#d0a070;--wood-1:#987048;--wood-mid:#b88858;--wood-spoke:#886040;--wood-dark:#604028;
+  --mill-roof:#d870a0;--mill-door:#4a2038;--mill-light:#fff4c0;--mill-metal:#8878a0;--mill-add:#c08860;
+  --mill-tank:#f0d8e8;--mill-factory:#a08898;--mill-factory-stroke:#706070;
+  --ocean:#ff70c0;--mist:rgba(255,112,192,.08);--seg-track:rgba(255,112,192,.3);
+  --flood-0:rgba(255,112,192,.78);--flood-1:rgba(255,240,246,.97);--flash:rgba(255,112,192,.35);
+  --fs-bg:#fff0f6;--deco-shadow:rgba(255,112,192,.4);
+  --world-text:#3a1848;--world-text-secondary:rgba(58,24,72,.65);
 }
 
-/* ===== SKIN: Neon Grid — arcade magenta / lime ===== */
-html.skin-neon{
-  --water-deep:#05050a;
-  --water-bright:#c8ff00;
-  --foam:#f5f5ff;
-  --juicy-navy:#0a0a12;
-  --juicy-blue:#ff2d95;
-  --juicy-violet:#7a5cff;
-  --juicy-magenta:#c8ff00;
-  --juicy-pink:#ff6bb5;
-  --gold:#c8ff00;
-  --danger:#ff2d95;
-  --panel:rgba(8,8,16,.94);
-  --radius:10px;
-  --page-bg-a:#1a0520;
-  --page-bg-b:#050508;
-  --sky-0:#1a0030;
-  --sky-1:#0a0018;
-  --sky-2:#000000;
-  --world-top:#140020;
-  --world-bot:#000000;
-  --glow-a:rgba(255,45,149,.28);
-  --glow-b:rgba(200,255,0,.18);
-  --flow-0:#ff2d95;
-  --flow-1:#c8ff00;
-  --flow-2:#7a5cff;
-  --mtn-front-0:#c084fc;
-  --mtn-front-1:#3b0764;
-  --mtn-back:#2e1065;
-  --snow:#f5f5ff;
-  --tree:#14532d;
-  --water-accent:#c8ff00;
-  --dam-0:#2a2a38;
-  --dam-1:#161622;
-  --dam-stroke:#c8ff00;
-  --dam-line:rgba(200,255,0,.28);
-  --pond-0:#c8ff00;
-  --pond-1:#7a5cff;
-  --reed:#22c55e;
-  --sluice:#2a2a38;
-  --sluice-stroke:#ff2d95;
-  --wood-0:#ff2d95;
-  --wood-1:#7a5cff;
-  --wood-mid:#ff2d95;
-  --wood-spoke:#7a5cff;
-  --wood-dark:#1a0520;
-  --mill-roof:#ff2d95;
-  --mill-door:#050508;
-  --mill-light:#c8ff00;
-  --mill-metal:#3f3f46;
-  --mill-add:#7a5cff;
-  --mill-tank:#27272a;
-  --mill-factory:#18181b;
-  --mill-factory-stroke:#c8ff00;
-  --ocean:#ff2d95;
-  --mist:rgba(200,255,0,.1);
-  --seg-track:rgba(200,255,0,.4);
-  --flood-0:rgba(255,45,149,.88);
-  --flood-1:rgba(5,5,10,.97);
-  --flash:rgba(200,255,0,.4);
-  --fs-bg:#000000;
-  --deco-shadow:rgba(200,255,0,.7);
+/* ===== WORLD: Beaver Builder Forest ===== */
+html.skin-forest{
+  color-scheme:light;
+  --water-deep:#d8f0e0;--water-bright:#40c880;--foam:#f0fff4;
+  --juicy-navy:#1a3020;--juicy-blue:#40c880;--juicy-violet:#70a0e0;--juicy-magenta:#e8a020;--juicy-pink:#f0d060;
+  --gold:#ffd040;--danger:#e06040;--panel:rgba(255,255,255,.90);--glassBorder:rgba(64,200,128,.25);--radius:20px;
+  --page-bg-a:#a8dab0;--page-bg-b:#e0f4e4;
+  --sky-0:#70b8e0;--sky-1:#98d0e8;--sky-2:#c8e8f0;
+  --world-top:#80c0a0;--world-bot:#d8f0e0;
+  --glow-a:rgba(64,200,128,.18);--glow-b:rgba(232,160,32,.14);
+  --flow-0:#40c880;--flow-1:#e8fff0;--flow-2:#70a0e0;
+  --mtn-front-0:#6aaa58;--mtn-front-1:#3a7a30;--mtn-back:#4a8a3a;--snow:#f0fff0;--tree:#1a6828;
+  --water-accent:#40c880;
+  --dam-0:#c8b898;--dam-1:#a09070;--dam-stroke:#786848;--dam-line:rgba(80,60,30,.18);
+  --pond-0:#80e8b0;--pond-1:#30a868;--reed:#208840;
+  --sluice:#a09878;--sluice-stroke:#706048;
+  --wood-0:#c89058;--wood-1:#8a6030;--wood-mid:#a87840;--wood-spoke:#785028;--wood-dark:#503818;
+  --mill-roof:#60884a;--mill-door:#2a3818;--mill-light:#fff0a0;--mill-metal:#687060;--mill-add:#a88048;
+  --mill-tank:#c8d8c0;--mill-factory:#708068;--mill-factory-stroke:#485840;
+  --ocean:#40c880;--mist:rgba(64,200,128,.08);--seg-track:rgba(64,200,128,.3);
+  --flood-0:rgba(64,200,128,.78);--flood-1:rgba(224,244,228,.97);--flash:rgba(64,200,128,.35);
+  --fs-bg:#e0f4e4;--deco-shadow:rgba(64,200,128,.4);
+  --world-text:#1a3020;--world-text-secondary:rgba(26,48,32,.65);
 }
 
-/* ===== SKIN: Ember Dam — volcanic lava night ===== */
-html.skin-ember{
-  --water-deep:#1a0804;
-  --water-bright:#ff7a18;
-  --foam:#ffe8d6;
-  --juicy-navy:#1a0a06;
-  --juicy-blue:#ff6a00;
-  --juicy-violet:#ff2a2a;
-  --juicy-magenta:#ff7a18;
-  --juicy-pink:#ffb347;
-  --gold:#ffd76a;
-  --danger:#ff3b30;
-  --panel:rgba(22,8,4,.93);
-  --radius:14px;
-  --page-bg-a:#4a1408;
-  --page-bg-b:#0a0402;
-  --sky-0:#5a1a08;
-  --sky-1:#2a0c06;
-  --sky-2:#0a0402;
-  --world-top:#3a1208;
-  --world-bot:#080201;
-  --glow-a:rgba(255,106,0,.26);
-  --glow-b:rgba(255,42,42,.18);
-  --flow-0:#ff6a00;
-  --flow-1:#ffe8d6;
-  --flow-2:#ff2a2a;
-  --mtn-front-0:#8a4a32;
-  --mtn-front-1:#3a1c14;
-  --mtn-back:#2a1410;
-  --snow:#ffe8d6;
-  --tree:#1c2a10;
-  --water-accent:#ff7a18;
-  --dam-0:#6b5344;
-  --dam-1:#3a2a22;
-  --dam-stroke:#1c1410;
-  --dam-line:rgba(255,106,0,.25);
-  --pond-0:#ffb347;
-  --pond-1:#9a1a00;
-  --reed:#3f6212;
-  --sluice:#4a3028;
-  --sluice-stroke:#1c1410;
-  --wood-0:#9a3412;
-  --wood-1:#4a1808;
-  --wood-mid:#7a2e0e;
-  --wood-spoke:#4a1808;
-  --wood-dark:#2a0c06;
-  --mill-roof:#7f1d1d;
-  --mill-door:#1c0a06;
-  --mill-light:#ffd76a;
-  --mill-metal:#44403c;
-  --mill-add:#9a3412;
-  --mill-tank:#78716c;
-  --mill-factory:#292524;
-  --mill-factory-stroke:#ff6a00;
-  --ocean:#ff6a00;
-  --mist:rgba(255,106,0,.14);
-  --seg-track:rgba(255,106,0,.4);
-  --flood-0:rgba(255,106,0,.9);
-  --flood-1:rgba(10,4,2,.97);
-  --flash:rgba(255,106,0,.5);
-  --fs-bg:#080201;
-  --deco-shadow:rgba(255,106,0,.7);
+/* ===== WORLD: Mountain Adventure ===== */
+html.skin-mountain{
+  color-scheme:light;
+  --water-deep:#d0eaff;--water-bright:#30b0f0;--foam:#ffffff;
+  --juicy-navy:#1a2848;--juicy-blue:#30b0f0;--juicy-violet:#6080d0;--juicy-magenta:#f08030;--juicy-pink:#f8c070;
+  --gold:#ffc840;--danger:#e85040;--panel:rgba(255,255,255,.92);--glassBorder:rgba(48,176,240,.25);--radius:20px;
+  --page-bg-a:#90c8e8;--page-bg-b:#d8eef8;
+  --sky-0:#50a0d8;--sky-1:#80c0e8;--sky-2:#b8e0f0;
+  --world-top:#68b0d8;--world-bot:#c8e4f0;
+  --glow-a:rgba(48,176,240,.18);--glow-b:rgba(240,128,48,.14);
+  --flow-0:#30b0f0;--flow-1:#ffffff;--flow-2:#6080d0;
+  --mtn-front-0:#78a858;--mtn-front-1:#487838;--mtn-back:#588848;--snow:#ffffff;--tree:#2a6030;
+  --water-accent:#30b0f0;
+  --dam-0:#d0d8e0;--dam-1:#a0b0c0;--dam-stroke:#708898;--dam-line:rgba(50,60,80,.18);
+  --pond-0:#70d0f8;--pond-1:#2090c0;--reed:#308850;
+  --sluice:#90a8b8;--sluice-stroke:#607888;
+  --wood-0:#c09060;--wood-1:#886038;--wood-mid:#a07848;--wood-spoke:#785030;--wood-dark:#503818;
+  --mill-roof:#a06040;--mill-door:#3a2018;--mill-light:#fff0a0;--mill-metal:#607080;--mill-add:#a87848;
+  --mill-tank:#d0dce4;--mill-factory:#7888a0;--mill-factory-stroke:#4a5868;
+  --ocean:#30b0f0;--mist:rgba(48,176,240,.08);--seg-track:rgba(48,176,240,.3);
+  --flood-0:rgba(48,176,240,.8);--flood-1:rgba(216,238,248,.97);--flash:rgba(48,176,240,.35);
+  --fs-bg:#d8eef8;--deco-shadow:rgba(48,176,240,.4);
+  --world-text:#1a2848;--world-text-secondary:rgba(26,40,72,.65);
 }
 
-/* ===== SKIN: Abyss — bioluminescent deep ===== */
-html.skin-abyss{
-  --water-deep:#010814;
-  --water-bright:#00ffc8;
-  --foam:#e6ffff;
-  --juicy-navy:#020617;
-  --juicy-blue:#22d3ee;
-  --juicy-violet:#6366f1;
-  --juicy-magenta:#00ffc8;
-  --juicy-pink:#67e8f9;
-  --gold:#67e8f9;
-  --danger:#fb7185;
-  --panel:rgba(2,6,23,.94);
-  --radius:20px;
-  --page-bg-a:#0b1a3a;
-  --page-bg-b:#01040d;
-  --sky-0:#0c1a3a;
-  --sky-1:#061018;
-  --sky-2:#01040d;
-  --world-top:#0b1a3a;
-  --world-bot:#000208;
-  --glow-a:rgba(0,255,200,.2);
-  --glow-b:rgba(99,102,241,.18);
-  --flow-0:#22d3ee;
-  --flow-1:#e6ffff;
-  --flow-2:#00ffc8;
-  --mtn-front-0:#1e3a5f;
-  --mtn-front-1:#0b1a33;
-  --mtn-back:#0a1628;
-  --snow:#e6ffff;
-  --tree:#064e3b;
-  --water-accent:#00ffc8;
-  --dam-0:#1e3a5f;
-  --dam-1:#0f2744;
-  --dam-stroke:#22d3ee;
-  --dam-line:rgba(0,255,200,.28);
-  --pond-0:#67e8f9;
-  --pond-1:#0e7490;
-  --reed:#115e59;
-  --sluice:#1e3a5f;
-  --sluice-stroke:#22d3ee;
-  --wood-0:#164e63;
-  --wood-1:#083344;
-  --wood-mid:#0e7490;
-  --wood-spoke:#083344;
-  --wood-dark:#042f2e;
-  --mill-roof:#1e3a8a;
-  --mill-door:#020617;
-  --mill-light:#a5f3fc;
-  --mill-metal:#334155;
-  --mill-add:#164e63;
-  --mill-tank:#1e3a5f;
-  --mill-factory:#0f172a;
-  --mill-factory-stroke:#00ffc8;
-  --ocean:#00ffc8;
-  --mist:rgba(0,255,200,.12);
-  --seg-track:rgba(0,255,200,.35);
-  --flood-0:rgba(0,255,200,.85);
-  --flood-1:rgba(1,4,13,.97);
-  --flash:rgba(0,255,200,.4);
-  --fs-bg:#000208;
-  --deco-shadow:rgba(0,255,200,.7);
+/* ===== WORLD: Magic Water World ===== */
+html.skin-magic{
+  color-scheme:light;
+  --water-deep:#e8d8ff;--water-bright:#a070ff;--foam:#fff8ff;
+  --juicy-navy:#281848;--juicy-blue:#a070ff;--juicy-violet:#7060e0;--juicy-magenta:#e060d0;--juicy-pink:#f0a0e8;
+  --gold:#ffe070;--danger:#f06080;--panel:rgba(255,255,255,.92);--glassBorder:rgba(160,112,255,.25);--radius:24px;
+  --page-bg-a:#d0b8f8;--page-bg-b:#f0e8ff;
+  --sky-0:#b090e8;--sky-1:#c8b0f0;--sky-2:#e4d8ff;
+  --world-top:#b898e8;--world-bot:#e4d8ff;
+  --glow-a:rgba(160,112,255,.2);--glow-b:rgba(224,96,208,.16);
+  --flow-0:#a070ff;--flow-1:#fff8ff;--flow-2:#60c8e8;
+  --mtn-front-0:#90b888;--mtn-front-1:#608860;--mtn-back:#709870;--snow:#f8f0ff;--tree:#407848;
+  --water-accent:#a070ff;
+  --dam-0:#d8c8e8;--dam-1:#b0a0c8;--dam-stroke:#8878a0;--dam-line:rgba(80,60,100,.18);
+  --pond-0:#c8a0ff;--pond-1:#8060c0;--reed:#508858;
+  --sluice:#b0a0c0;--sluice-stroke:#807090;
+  --wood-0:#c0906a;--wood-1:#886048;--wood-mid:#a07850;--wood-spoke:#785038;--wood-dark:#503820;
+  --mill-roof:#8868b0;--mill-door:#2a1840;--mill-light:#fff4c0;--mill-metal:#707088;--mill-add:#a08060;
+  --mill-tank:#d8d0e8;--mill-factory:#8880a0;--mill-factory-stroke:#585068;
+  --ocean:#a070ff;--mist:rgba(160,112,255,.08);--seg-track:rgba(160,112,255,.3);
+  --flood-0:rgba(160,112,255,.78);--flood-1:rgba(240,232,255,.97);--flash:rgba(160,112,255,.35);
+  --fs-bg:#f0e8ff;--deco-shadow:rgba(160,112,255,.4);
+  --world-text:#281848;--world-text-secondary:rgba(40,24,72,.65);
 }
 
-/* ===== V2.1.12 — LIVING SKIN SYSTEM: nine new hydraulic worlds (same token contract as the original seven) ===== */
-/* ===== SKIN: Midnight Reservoir — moonlit navy, silver water ===== */
-html.skin-midnight{
-  --water-deep:#020a1f;
-  --water-bright:#9fc9ff;
-  --foam:#f2f6ff;
-  --juicy-navy:#050b24;
-  --juicy-blue:#7fb2ff;
-  --juicy-violet:#4c5fd6;
-  --juicy-magenta:#c7d6ff;
-  --juicy-pink:#e6ecff;
-  --gold:#f5e6a8;
-  --danger:#ff7a8a;
-  --panel:rgba(4,8,26,.93);
-  --radius:22px;
-  --page-bg-a:#13224d;
-  --page-bg-b:#01030c;
-  --sky-0:#1a2a5c;
-  --sky-1:#0c1638;
-  --sky-2:#02050f;
-  --world-top:#101d45;
-  --world-bot:#01030a;
-  --glow-a:rgba(159,201,255,.18);
-  --glow-b:rgba(245,230,168,.10);
-  --flow-0:#7fb2ff;
-  --flow-1:#f2f6ff;
-  --flow-2:#4c5fd6;
-  --mtn-front-0:#5a6a9a;
-  --mtn-front-1:#2a355e;
-  --mtn-back:#1c2548;
-  --snow:#eef3ff;
-  --tree:#10263a;
-  --water-accent:#9fc9ff;
-  --dam-0:#b8c3dc;
-  --dam-1:#76829e;
-  --dam-stroke:#4a5578;
-  --dam-line:rgba(40,50,80,.4);
-  --pond-0:#bcd8ff;
-  --pond-1:#2a4f9a;
-  --reed:#1f4a4a;
-  --sluice:#6a7896;
-  --sluice-stroke:#3e4968;
-  --wood-0:#7a6250;
-  --wood-1:#4a3a2e;
-  --wood-mid:#5e4a3a;
-  --wood-spoke:#3e3026;
-  --wood-dark:#2a2019;
-  --mill-roof:#3a3f6a;
-  --mill-door:#0a0c1a;
-  --mill-light:#f5e6a8;
-  --mill-metal:#4a4f63;
-  --mill-add:#6a5a4a;
-  --mill-tank:#8a96b0;
-  --mill-factory:#3a4258;
-  --mill-factory-stroke:#1e2436;
-  --ocean:#6f9fe8;
-  --mist:rgba(159,201,255,.12);
-  --seg-track:rgba(127,178,255,.32);
-  --flood-0:rgba(127,178,255,.85);
-  --flood-1:rgba(1,3,12,.97);
-  --flash:rgba(159,201,255,.42);
-  --fs-bg:#01030a;
-  --deco-shadow:rgba(159,201,255,.6);
-}
-/* ===== SKIN: Storm Dam — slate thunderheads, electric water ===== */
-html.skin-storm{
-  --water-deep:#0a1622;
-  --water-bright:#7ee8ff;
-  --foam:#eef9ff;
-  --juicy-navy:#0d1520;
-  --juicy-blue:#5fc8ff;
-  --juicy-violet:#5a6b8c;
-  --juicy-magenta:#ffe45c;
-  --juicy-pink:#b9e6ff;
-  --gold:#ffe45c;
-  --danger:#ff5e6a;
-  --panel:rgba(10,16,24,.93);
-  --radius:18px;
-  --page-bg-a:#2c3a4c;
-  --page-bg-b:#06090f;
-  --sky-0:#3a4a5e;
-  --sky-1:#1e2a3a;
-  --sky-2:#070b12;
-  --world-top:#263446;
-  --world-bot:#05080d;
-  --glow-a:rgba(126,232,255,.16);
-  --glow-b:rgba(255,228,92,.10);
-  --flow-0:#5fc8ff;
-  --flow-1:#eef9ff;
-  --flow-2:#8fa6c4;
-  --mtn-front-0:#6f7f94;
-  --mtn-front-1:#3a4656;
-  --mtn-back:#2a3442;
-  --snow:#dfe8f2;
-  --tree:#1c3328;
-  --water-accent:#7ee8ff;
-  --dam-0:#c3ccd6;
-  --dam-1:#818d9c;
-  --dam-stroke:#4e5a6a;
-  --dam-line:rgba(30,40,55,.45);
-  --pond-0:#9fe3ff;
-  --pond-1:#1f5f86;
-  --reed:#2b5a44;
-  --sluice:#7a8698;
-  --sluice-stroke:#465264;
-  --wood-0:#8a6a4e;
-  --wood-1:#54402e;
-  --wood-mid:#6e5238;
-  --wood-spoke:#463424;
-  --wood-dark:#33261a;
-  --mill-roof:#4a5566;
-  --mill-door:#10141a;
-  --mill-light:#ffe45c;
-  --mill-metal:#50565f;
-  --mill-add:#7a6450;
-  --mill-tank:#a3adb9;
-  --mill-factory:#4a5360;
-  --mill-factory-stroke:#22282f;
-  --ocean:#4fb4e8;
-  --mist:rgba(126,232,255,.12);
-  --seg-track:rgba(95,200,255,.32);
-  --flood-0:rgba(95,200,255,.86);
-  --flood-1:rgba(4,7,12,.97);
-  --flash:rgba(255,228,92,.4);
-  --fs-bg:#05080d;
-  --deco-shadow:rgba(126,232,255,.6);
-}
-/* ===== SKIN: Crystal Water — turquoise glass, sharp highlights ===== */
-html.skin-crystal{
-  --water-deep:#032a33;
-  --water-bright:#5ff5ff;
-  --foam:#f0ffff;
-  --juicy-navy:#062a36;
-  --juicy-blue:#3ce0f0;
-  --juicy-violet:#3a9fd6;
-  --juicy-magenta:#a0fff4;
-  --juicy-pink:#d4fbff;
-  --gold:#fff4a8;
-  --danger:#ff6f91;
-  --panel:rgba(3,24,32,.92);
-  --radius:24px;
-  --page-bg-a:#0e6a7c;
-  --page-bg-b:#021a22;
-  --sky-0:#1a8aa0;
-  --sky-1:#0a4f60;
-  --sky-2:#021319;
-  --world-top:#0e5566;
-  --world-bot:#01121a;
-  --glow-a:rgba(95,245,255,.24);
-  --glow-b:rgba(160,255,244,.14);
-  --flow-0:#3ce0f0;
-  --flow-1:#f0ffff;
-  --flow-2:#a0fff4;
-  --mtn-front-0:#8fd8e0;
-  --mtn-front-1:#4a9aa8;
-  --mtn-back:#3a7a88;
-  --snow:#f4ffff;
-  --tree:#0e5a4a;
-  --water-accent:#5ff5ff;
-  --dam-0:#e0f6f8;
-  --dam-1:#9ccbd2;
-  --dam-stroke:#5f98a2;
-  --dam-line:rgba(30,90,100,.3);
-  --pond-0:#a8fbff;
-  --pond-1:#0fa8c0;
-  --reed:#1f8a6a;
-  --sluice:#8ec4cc;
-  --sluice-stroke:#4f8a94;
-  --wood-0:#b08a5a;
-  --wood-1:#6f5236;
-  --wood-mid:#8e6c44;
-  --wood-spoke:#5e4428;
-  --wood-dark:#43301c;
-  --mill-roof:#2f7a8a;
-  --mill-door:#06232a;
-  --mill-light:#fff4a8;
-  --mill-metal:#4e6a70;
-  --mill-add:#9a7a52;
-  --mill-tank:#cfeef2;
-  --mill-factory:#5a8088;
-  --mill-factory-stroke:#2a4a50;
-  --ocean:#3ce0f0;
-  --mist:rgba(95,245,255,.14);
-  --seg-track:rgba(60,224,240,.36);
-  --flood-0:rgba(60,224,240,.88);
-  --flood-1:rgba(1,14,20,.97);
-  --flash:rgba(95,245,255,.48);
-  --fs-bg:#01121a;
-  --deco-shadow:rgba(95,245,255,.7);
-}
-/* ===== SKIN: Frozen Reservoir — pale ice, frost-light water ===== */
-html.skin-frost{
-  --water-deep:#0c1e33;
-  --water-bright:#bfe9ff;
-  --foam:#ffffff;
-  --juicy-navy:#0f2238;
-  --juicy-blue:#8fd3ff;
-  --juicy-violet:#7a9ccf;
-  --juicy-magenta:#e3f4ff;
-  --juicy-pink:#cfe8ff;
-  --gold:#e8f6ff;
-  --danger:#ff7b8f;
-  --panel:rgba(10,24,40,.92);
-  --radius:20px;
-  --page-bg-a:#3a5f86;
-  --page-bg-b:#081524;
-  --sky-0:#5d86b0;
-  --sky-1:#2a4a70;
-  --sky-2:#0a1626;
-  --world-top:#34587e;
-  --world-bot:#07121f;
-  --glow-a:rgba(191,233,255,.22);
-  --glow-b:rgba(255,255,255,.10);
-  --flow-0:#8fd3ff;
-  --flow-1:#ffffff;
-  --flow-2:#b8d6f2;
-  --mtn-front-0:#d8e8f6;
-  --mtn-front-1:#8aa6c4;
-  --mtn-back:#6a86a6;
-  --snow:#ffffff;
-  --tree:#2a4a4e;
-  --water-accent:#bfe9ff;
-  --dam-0:#eef5fb;
-  --dam-1:#aebfd2;
-  --dam-stroke:#7088a4;
-  --dam-line:rgba(60,80,110,.3);
-  --pond-0:#dff4ff;
-  --pond-1:#4a8ac0;
-  --reed:#4a7a78;
-  --sluice:#a8bcd2;
-  --sluice-stroke:#6a82a0;
-  --wood-0:#9c8470;
-  --wood-1:#5e4e42;
-  --wood-mid:#7e6a58;
-  --wood-spoke:#4e4036;
-  --wood-dark:#3a2e26;
-  --mill-roof:#5a7aa0;
-  --mill-door:#142234;
-  --mill-light:#e8f6ff;
-  --mill-metal:#6a7888;
-  --mill-add:#8c7a68;
-  --mill-tank:#dfeaf4;
-  --mill-factory:#6f8298;
-  --mill-factory-stroke:#34465a;
-  --ocean:#8fd3ff;
-  --mist:rgba(191,233,255,.16);
-  --seg-track:rgba(143,211,255,.34);
-  --flood-0:rgba(143,211,255,.86);
-  --flood-1:rgba(6,14,24,.97);
-  --flash:rgba(255,255,255,.45);
-  --fs-bg:#07121f;
-  --deco-shadow:rgba(191,233,255,.7);
-}
-/* ===== SKIN: Golden Hour — sunset sky, golden hydraulics ===== */
-html.skin-golden{
-  --water-deep:#2a1430;
-  --water-bright:#ffc46b;
-  --foam:#fff6e6;
-  --juicy-navy:#2a1228;
-  --juicy-blue:#ff9f5a;
-  --juicy-violet:#c45a8a;
-  --juicy-magenta:#ff6f91;
-  --juicy-pink:#ffc2a8;
-  --gold:#ffd76a;
-  --danger:#ff5e6a;
-  --panel:rgba(34,14,30,.92);
-  --radius:22px;
-  --page-bg-a:#b8566a;
-  --page-bg-b:#1c0a1a;
-  --sky-0:#ff9a5a;
-  --sky-1:#b8466a;
-  --sky-2:#2a0f28;
-  --world-top:#7a3a5a;
-  --world-bot:#140818;
-  --glow-a:rgba(255,196,107,.24);
-  --glow-b:rgba(255,111,145,.18);
-  --flow-0:#ffb45a;
-  --flow-1:#fff6e6;
-  --flow-2:#ff6f91;
-  --mtn-front-0:#d88a7a;
-  --mtn-front-1:#8a4a5a;
-  --mtn-back:#6a3448;
-  --snow:#fff0e0;
-  --tree:#3a3a2a;
-  --water-accent:#ffc46b;
-  --dam-0:#f4dcc8;
-  --dam-1:#c49a86;
-  --dam-stroke:#8a5e56;
-  --dam-line:rgba(100,50,50,.3);
-  --pond-0:#ffd9a8;
-  --pond-1:#c8607a;
-  --reed:#6a6a3a;
-  --sluice:#c8a092;
-  --sluice-stroke:#8a5e56;
-  --wood-0:#c88048;
-  --wood-1:#7e4228;
-  --wood-mid:#a86034;
-  --wood-spoke:#6e3a1e;
-  --wood-dark:#4e2814;
-  --mill-roof:#9a3a4a;
-  --mill-door:#2e1018;
-  --mill-light:#ffe9a8;
-  --mill-metal:#6a4e56;
-  --mill-add:#b0784a;
-  --mill-tank:#e8cfc0;
-  --mill-factory:#8a5e66;
-  --mill-factory-stroke:#4a2a34;
-  --ocean:#ff9f5a;
-  --mist:rgba(255,196,107,.14);
-  --seg-track:rgba(255,159,90,.38);
-  --flood-0:rgba(255,159,90,.88);
-  --flood-1:rgba(20,6,16,.97);
-  --flash:rgba(255,196,107,.48);
-  --fs-bg:#140818;
-  --deco-shadow:rgba(255,196,107,.7);
-}
-/* ===== SKIN: Pink Current — hot pink flow, cyan spray ===== */
-html.skin-pink{
-  --water-deep:#1a0730;
-  --water-bright:#3ff0ff;
-  --foam:#fff0fb;
-  --juicy-navy:#1e0632;
-  --juicy-blue:#3ff0ff;
-  --juicy-violet:#b04aff;
-  --juicy-magenta:#ff2fa8;
-  --juicy-pink:#ff9ad8;
-  --gold:#ffe066;
-  --danger:#ff4f6f;
-  --panel:rgba(26,6,40,.92);
-  --radius:26px;
-  --page-bg-a:#8a1a78;
-  --page-bg-b:#12041e;
-  --sky-0:#d42f9a;
-  --sky-1:#6a1a8a;
-  --sky-2:#14041f;
-  --world-top:#5a1470;
-  --world-bot:#0e0318;
-  --glow-a:rgba(255,47,168,.24);
-  --glow-b:rgba(63,240,255,.18);
-  --flow-0:#3ff0ff;
-  --flow-1:#fff0fb;
-  --flow-2:#ff2fa8;
-  --mtn-front-0:#e08ad0;
-  --mtn-front-1:#8a3a9a;
-  --mtn-back:#6a2a7e;
-  --snow:#fff0fb;
-  --tree:#3a2a6a;
-  --water-accent:#3ff0ff;
-  --dam-0:#f6dff0;
-  --dam-1:#c49ad6;
-  --dam-stroke:#8a5aa6;
-  --dam-line:rgba(120,40,120,.3);
-  --pond-0:#9ff8ff;
-  --pond-1:#c42a9a;
-  --reed:#5a3aa0;
-  --sluice:#c89ad8;
-  --sluice-stroke:#8a5aa6;
-  --wood-0:#d07aa8;
-  --wood-1:#7a3a6a;
-  --wood-mid:#a85488;
-  --wood-spoke:#6a2e5a;
-  --wood-dark:#4a1e40;
-  --mill-roof:#c42a8a;
-  --mill-door:#22062e;
-  --mill-light:#ffe066;
-  --mill-metal:#6a4a7a;
-  --mill-add:#b06a9a;
-  --mill-tank:#f0d6ec;
-  --mill-factory:#7a4a8a;
-  --mill-factory-stroke:#3e1e4a;
-  --ocean:#3ff0ff;
-  --mist:rgba(255,47,168,.14);
-  --seg-track:rgba(255,47,168,.38);
-  --flood-0:rgba(255,47,168,.86);
-  --flood-1:rgba(14,3,24,.97);
-  --flash:rgba(63,240,255,.45);
-  --fs-bg:#0e0318;
-  --deco-shadow:rgba(255,47,168,.7);
-}
-/* ===== SKIN: Cosmic Flow — violet space, cyan current ===== */
-html.skin-cosmic{
-  --water-deep:#0a0626;
-  --water-bright:#7af0ff;
-  --foam:#f4eeff;
-  --juicy-navy:#0c0626;
-  --juicy-blue:#5ad8ff;
-  --juicy-violet:#8a4dff;
-  --juicy-magenta:#c46bff;
-  --juicy-pink:#d9b8ff;
-  --gold:#ffe38a;
-  --danger:#ff6b8a;
-  --panel:rgba(10,6,34,.93);
-  --radius:22px;
-  --page-bg-a:#3a1a7a;
-  --page-bg-b:#03020d;
-  --sky-0:#4a2a9a;
-  --sky-1:#1e0e4e;
-  --sky-2:#04020f;
-  --world-top:#2a1560;
-  --world-bot:#020108;
-  --glow-a:rgba(138,77,255,.22);
-  --glow-b:rgba(122,240,255,.16);
-  --flow-0:#7af0ff;
-  --flow-1:#f4eeff;
-  --flow-2:#8a4dff;
-  --mtn-front-0:#7a6ac4;
-  --mtn-front-1:#3a2a7a;
-  --mtn-back:#2a1e5e;
-  --snow:#efe8ff;
-  --tree:#1e2a5a;
-  --water-accent:#7af0ff;
-  --dam-0:#d6ccf2;
-  --dam-1:#9486c4;
-  --dam-stroke:#5e4e9a;
-  --dam-line:rgba(70,40,130,.35);
-  --pond-0:#b8f6ff;
-  --pond-1:#5a3ac8;
-  --reed:#3a4a9a;
-  --sluice:#8e84c4;
-  --sluice-stroke:#54468e;
-  --wood-0:#8a6aa0;
-  --wood-1:#4e3a64;
-  --wood-mid:#6c5284;
-  --wood-spoke:#42305a;
-  --wood-dark:#2e2042;
-  --mill-roof:#5a2aa0;
-  --mill-door:#0e0624;
-  --mill-light:#ffe38a;
-  --mill-metal:#4e4a6a;
-  --mill-add:#7a6090;
-  --mill-tank:#cfc6ee;
-  --mill-factory:#4e4278;
-  --mill-factory-stroke:#261e44;
-  --ocean:#7af0ff;
-  --mist:rgba(138,77,255,.14);
-  --seg-track:rgba(138,77,255,.38);
-  --flood-0:rgba(138,77,255,.86);
-  --flood-1:rgba(2,1,8,.97);
-  --flash:rgba(122,240,255,.45);
-  --fs-bg:#020108;
-  --deco-shadow:rgba(138,77,255,.7);
-}
-/* ===== SKIN: Industrial Dam — steel, concrete, amber warning lights ===== */
-html.skin-industrial{
-  --water-deep:#0c1a26;
-  --water-bright:#4ec3ff;
-  --foam:#eaf4fa;
-  --juicy-navy:#101a24;
-  --juicy-blue:#4ea8d8;
-  --juicy-violet:#50657c;
-  --juicy-magenta:#ffb020;
-  --juicy-pink:#c2d4e2;
-  --gold:#ffb020;
-  --danger:#ff5a3c;
-  --panel:rgba(14,22,30,.94);
-  --radius:14px;
-  --page-bg-a:#34475a;
-  --page-bg-b:#080d13;
-  --sky-0:#4a6078;
-  --sky-1:#243444;
-  --sky-2:#0a1017;
-  --world-top:#2c3e50;
-  --world-bot:#070b10;
-  --glow-a:rgba(78,195,255,.16);
-  --glow-b:rgba(255,176,32,.12);
-  --flow-0:#4ec3ff;
-  --flow-1:#eaf4fa;
-  --flow-2:#7890a8;
-  --mtn-front-0:#8898a8;
-  --mtn-front-1:#4e5c6a;
-  --mtn-back:#3a4552;
-  --snow:#e6edf2;
-  --tree:#2a3a30;
-  --water-accent:#4ec3ff;
-  --dam-0:#cfd4d8;
-  --dam-1:#8c949c;
-  --dam-stroke:#5a626a;
-  --dam-line:rgba(40,48,56,.45);
-  --pond-0:#9ad8ff;
-  --pond-1:#26628e;
-  --reed:#3e5a44;
-  --sluice:#8a949e;
-  --sluice-stroke:#4e565e;
-  --wood-0:#8a7a66;
-  --wood-1:#544a3e;
-  --wood-mid:#6e6252;
-  --wood-spoke:#463e34;
-  --wood-dark:#332c24;
-  --mill-roof:#5a6470;
-  --mill-door:#12161a;
-  --mill-light:#ffb020;
-  --mill-metal:#5a6068;
-  --mill-add:#7e7262;
-  --mill-tank:#b4bcc4;
-  --mill-factory:#56606a;
-  --mill-factory-stroke:#262c32;
-  --ocean:#3fa8e0;
-  --mist:rgba(78,195,255,.10);
-  --seg-track:rgba(78,195,255,.3);
-  --flood-0:rgba(78,168,216,.86);
-  --flood-1:rgba(6,10,14,.97);
-  --flash:rgba(255,176,32,.38);
-  --fs-bg:#070b10;
-  --deco-shadow:rgba(255,176,32,.55);
-}
-/* ===== SKIN: Floodlight — bright arcade water, white-cyan light ===== */
-html.skin-floodlight{
-  --water-deep:#032a6a;
-  --water-bright:#4fe3ff;
-  --foam:#ffffff;
-  --juicy-navy:#06225a;
-  --juicy-blue:#36c8ff;
-  --juicy-violet:#3a7bff;
-  --juicy-magenta:#00e0ff;
-  --juicy-pink:#b8f2ff;
-  --gold:#fff27a;
-  --danger:#ff4f6a;  --panel:rgba(4,24,64,.9);
-  --radius:22px;
-  --page-bg-a:#1a6ad8;
-  --page-bg-b:#031a4a;
-  --sky-0:#2a8aff;
-  --sky-1:#0a4ab8;
-  --sky-2:#031a4a;
-  --world-top:#1860c8;
-  --world-bot:#021640;
-  --glow-a:rgba(79,227,255,.3);
-  --glow-b:rgba(255,255,255,.16);
-  --flow-0:#4fe3ff;
-  --flow-1:#ffffff;
-  --flow-2:#36c8ff;
-  --mtn-front-0:#a8c8ff;
-  --mtn-front-1:#5a88d8;
-  --mtn-back:#4a74c0;
-  --snow:#ffffff;
-  --tree:#0e5a6a;
-  --water-accent:#4fe3ff;
-  --dam-0:#eef6ff;
-  --dam-1:#b0c8e6;
-  --dam-stroke:#6a8cc0;
-  --dam-line:rgba(40,80,140,.3);
-  --pond-0:#b8f8ff;
-  --pond-1:#1a8ae8;
-  --reed:#1a8a8a;
-  --sluice:#9ab8e0;
-  --sluice-stroke:#5a7ab0;
-  --wood-0:#c49060;
-  --wood-1:#7a5436;
-  --wood-mid:#9e7046;
-  --wood-spoke:#6a4a2a;
-  --wood-dark:#4a321c;
-  --mill-roof:#2a6ad8;
-  --mill-door:#06225a;
-  --mill-light:#fff27a;
-  --mill-metal:#5a74a0;
-  --mill-add:#a8804e;
-  --mill-tank:#dff0ff;
-  --mill-factory:#4a6ab0;
-  --mill-factory-stroke:#203a70;
-  --ocean:#4fe3ff;
-  --mist:rgba(79,227,255,.16);
-  --seg-track:rgba(79,227,255,.4);
-  --flood-0:rgba(79,227,255,.9);
-  --flood-1:rgba(2,14,40,.97);
-  --flash:rgba(255,255,255,.5);
-  --fs-bg:#021640;
-  --deco-shadow:rgba(79,227,255,.75);
-}
-html.skin-midnight .world{ box-shadow:0 0 40px rgba(159,201,255,.3), 0 0 70px rgba(245,230,168,.12), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-storm .world{ box-shadow:0 0 40px rgba(126,232,255,.26), 0 0 70px rgba(255,228,92,.1), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-crystal .world{ box-shadow:0 0 40px rgba(95,245,255,.38), 0 0 70px rgba(160,255,244,.18), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-frost .world{ box-shadow:0 0 40px rgba(191,233,255,.34), 0 0 70px rgba(255,255,255,.14), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-golden .world{ box-shadow:0 0 40px rgba(255,196,107,.36), 0 0 70px rgba(255,111,145,.2), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-pink .world{ box-shadow:0 0 40px rgba(255,47,168,.38), 0 0 70px rgba(63,240,255,.2), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-cosmic .world{ box-shadow:0 0 40px rgba(138,77,255,.36), 0 0 70px rgba(122,240,255,.18), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-industrial .world{ box-shadow:0 0 40px rgba(78,195,255,.22), 0 0 70px rgba(255,176,32,.12), inset 0 0 60px rgba(0,0,0,.42); }
-html.skin-floodlight .world{ box-shadow:0 0 40px rgba(79,227,255,.45), 0 0 80px rgba(255,255,255,.2), inset 0 0 60px rgba(0,0,0,.42); }
-
+html.skin-rainbow .world{ box-shadow:0 0 40px rgba(47,210,255,.3), 0 0 70px rgba(255,157,242,.15), inset 0 0 40px rgba(255,255,255,.2); }
+html.skin-bubble .world{ box-shadow:0 0 40px rgba(0,200,232,.28), 0 0 70px rgba(74,144,255,.14), inset 0 0 40px rgba(255,255,255,.2); }
+html.skin-candy .world{ box-shadow:0 0 40px rgba(255,112,192,.3), 0 0 70px rgba(160,112,255,.15), inset 0 0 40px rgba(255,255,255,.2); }
+html.skin-forest .world{ box-shadow:0 0 40px rgba(64,200,128,.28), 0 0 70px rgba(232,160,32,.12), inset 0 0 40px rgba(255,255,255,.2); }
+html.skin-mountain .world{ box-shadow:0 0 40px rgba(48,176,240,.3), 0 0 70px rgba(240,128,48,.12), inset 0 0 40px rgba(255,255,255,.2); }
+html.skin-magic .world{ box-shadow:0 0 40px rgba(160,112,255,.3), 0 0 70px rgba(224,96,208,.15), inset 0 0 40px rgba(255,255,255,.2); }
 *{margin:0;padding:0;box-sizing:border-box;}
 
 html,body{
@@ -1093,7 +290,7 @@ html,body{
   overflow:hidden;
   font-family:Inter,system-ui,sans-serif;
   background:radial-gradient(circle at 50% 0%,var(--page-bg-a),var(--page-bg-b) 75%);
-  color:#fff;
+  color:var(--world-text,#fff);
   -webkit-tap-highlight-color:transparent;
 }
 
@@ -1115,39 +312,6 @@ html,body{
 }
 @keyframes floatGlow{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-50px);} }
 
-html.skin-heaven .bg{
-  background-image:
-    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,.75), transparent),
-    radial-gradient(1px 1px at 28% 42%, rgba(255,215,106,.8), transparent),
-    radial-gradient(1.5px 1.5px at 63% 14%, rgba(255,255,255,.7), transparent),
-    radial-gradient(1px 1px at 81% 36%, rgba(255,215,106,.7), transparent),
-    radial-gradient(1px 1px at 44% 8%, rgba(255,255,255,.55), transparent),
-    radial-gradient(1.5px 1.5px at 90% 70%, rgba(255,255,255,.5), transparent);
-}
-html.skin-neon .bg::after{
-  content:"";
-  position:absolute; inset:0;
-  background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.18) 3px);
-  opacity:.45;
-}
-html.skin-neon .world{
-  box-shadow:0 0 40px rgba(255,45,149,.4), 0 0 70px rgba(200,255,0,.16), inset 0 0 60px rgba(0,0,0,.5);
-}
-html.skin-ember .world{
-  box-shadow:0 0 40px rgba(255,106,0,.4), 0 0 70px rgba(255,42,42,.2), inset 0 0 60px rgba(0,0,0,.45);
-}
-html.skin-abyss .world{
-  box-shadow:0 0 50px rgba(0,255,200,.28), 0 0 80px rgba(99,102,241,.18), inset 0 0 70px rgba(0,0,0,.5);
-}
-html.skin-canopy .world{
-  box-shadow:0 0 40px rgba(52,211,153,.3), 0 0 70px rgba(163,230,53,.14), inset 0 0 60px rgba(0,0,0,.4);
-}
-html.skin-clay .world{
-  box-shadow:0 0 40px rgba(224,122,61,.32), 0 0 70px rgba(154,52,18,.18), inset 0 0 60px rgba(0,0,0,.4);
-}
-html.skin-heaven .world{
-  box-shadow:0 0 40px rgba(251,191,36,.32), 0 0 70px rgba(253,230,138,.16), inset 0 0 60px rgba(0,0,0,.35);
-}
 
 .dropletDeco{
   position:absolute; font-size:1.6rem; opacity:.35; filter:drop-shadow(0 0 8px var(--deco-shadow));
@@ -1191,7 +355,7 @@ html.skin-heaven .world{
   position:relative;
   background:var(--panel);
   backdrop-filter:blur(18px);
-  border:1.5px solid rgba(255,255,255,.22);
+  border:1.5px solid var(--glassBorder);
   border-radius:var(--radius);
   padding:10px 12px;
   margin-bottom:8px;
@@ -1229,9 +393,9 @@ html.skin-heaven .world{
 .iconBtn:active{ transform:scale(.92); }
 
 .progressRow{ display:flex; align-items:center; gap:6px; margin-top:10px; }
-.dot{ flex:1; height:8px; border-radius:999px; background:rgba(255,255,255,.12); overflow:hidden; }
+.dot{ flex:1; height:8px; border-radius:999px; background:color-mix(in srgb,var(--juicy-navy) 14%,transparent); overflow:hidden; }
 .dot i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--juicy-blue),var(--juicy-violet),var(--juicy-magenta)); transition:width .5s ease; }
-.loopBadge{ font-size:.68rem; font-weight:800; color:rgba(255,255,255,.75); white-space:nowrap; padding-left:2px; }
+.loopBadge{ font-size:.68rem; font-weight:800; color:var(--world-text-secondary,rgba(255,255,255,.75)); white-space:nowrap; padding-left:2px; }
 .loopBadge strong{ color:var(--gold); }
 
 /* ============ WORLD ============ */
@@ -1249,11 +413,11 @@ html.skin-heaven .world{
 .operatorSlot{ flex:0 0 auto; display:flex; align-items:center; }
 .operatorSlot:empty{ display:none; }
 .tapProg{ text-align:center; }
-.tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:#fff; white-space:nowrap; }
+.tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:var(--world-text,#fff); white-space:nowrap; }
 .tapProg .tpNum{ display:inline-block; min-width:3.6ch; font-variant-numeric:tabular-nums; color:var(--gold); text-shadow:0 0 10px color-mix(in srgb,var(--gold) 50%,transparent); transform-origin:50% 60%; }
-.tapProg .tpUnit{ color:var(--foam); }
+.tapProg .tpUnit{ color:var(--world-text-secondary,var(--foam)); }
 .tapProg .tpDone{ display:none; margin-left:.5em; color:var(--water-bright); }
-.tapProg .tpBar{ margin:3px auto 0; height:6px; max-width:100%; border-radius:999px; background:rgba(255,255,255,.14); overflow:hidden; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+.tapProg .tpBar{ margin:3px auto 0; height:6px; max-width:100%; border-radius:999px; background:color-mix(in srgb,var(--juicy-navy) 16%,transparent); overflow:hidden; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--juicy-navy) 10%,transparent); }
 .tapProg .tpBar i{ display:block; height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,var(--juicy-blue),var(--water-bright),var(--juicy-magenta)); transition:width .11s ease-out; }
 .tapProg.tap .tpNum{ animation:tpPulse .16s ease-out; }
 .tapProg.tap .tpBar i{ animation:tpFlash .16s ease-out; }
@@ -5001,26 +4165,15 @@ const OCEAN_Y = 770;
 const MILL_INDEX = 5;
 
 const SKIN_META = {
-  aurora: { name:"Aurora Nite", deco:"💧" },
-  clay:   { name:"Red Clay",    deco:"🌾" },
-  canopy: { name:"Canopy",      deco:"🍃" },
-  heaven: { name:"Heaven",      deco:"✨" },
-  neon:   { name:"Neon Grid",   deco:"⚡" },
-  ember:  { name:"Ember Dam",   deco:"🔥" },
-  abyss:  { name:"Abyss",       deco:"🌊" },
-  /* V2.1.12 — Living Skin System additions (presentation only; free and random like the originals). */
-  midnight:   { name:"Midnight Reservoir", deco:"🌙" },
-  storm:      { name:"Storm Dam",          deco:"⛈️" },
-  crystal:    { name:"Crystal Water",      deco:"💎" },
-  frost:      { name:"Frozen Reservoir",   deco:"❄️" },
-  golden:     { name:"Golden Hour",        deco:"🌅" },
-  pink:       { name:"Pink Current",       deco:"🌸" },
-  cosmic:     { name:"Cosmic Flow",        deco:"🌌" },
-  industrial: { name:"Industrial Dam",     deco:"⚙️" },
-  floodlight: { name:"Floodlight",         deco:"💡" }
+  rainbow:  { name:"Rainbow Splash",        deco:"🌈" },
+  bubble:   { name:"Bubble Ocean",          deco:"🫧" },
+  candy:    { name:"Candy River Village",   deco:"🍭" },
+  forest:   { name:"Beaver Builder Forest", deco:"🦫" },
+  mountain: { name:"Mountain Adventure",    deco:"⛰️" },
+  magic:    { name:"Magic Water World",     deco:"✨" }
 };
-const activeSkinId = document.documentElement.getAttribute("data-skin") || "aurora";
-const activeSkin = SKIN_META[activeSkinId] || SKIN_META.aurora;
+const activeSkinId = document.documentElement.getAttribute("data-skin") || "rainbow";
+const activeSkin = SKIN_META[activeSkinId] || SKIN_META.rainbow;
 document.querySelectorAll(".dropletDeco").forEach(el => { el.textContent = activeSkin.deco; });
 const gameLogo = document.getElementById("gameLogo");
 if (gameLogo) gameLogo.title = "Skin: " + activeSkin.name;
@@ -9297,6 +8450,7 @@ function runDamIteHydraulicReactionSelfTest(){
 }
 document.addEventListener("pointerdown",e=>{
   if(e.button!==undefined&&e.button!==0)return;
+  if(window.DamBuilder&&window.DamBuilder.isOpen)return;
   const target=e.target instanceof Element?e.target:null;
   if(target&&target.closest("#tapWaterLayer, script, style"))return;
   let intensity=1;
@@ -10571,19 +9725,37 @@ function spawnMist(){
 const mistStyle = document.createElement("style");
 mistStyle.textContent = "@keyframes mistFloat{from{transform:translateY(0);opacity:.4;}to{transform:translateY(-90px);opacity:0;}}";
 document.head.appendChild(mistStyle);
-setInterval(spawnMist, 3200);
+let _geiMistInterval = setInterval(spawnMist, 3200);
 
 /* ocean wave motion */
 let waveTime = 0;
+let _geiOceanRaf = 0;
 function animateOcean(){
   waveTime += 0.025;
   const a = 770 + Math.sin(waveTime)*6;
   const b = 770 + Math.cos(waveTime)*6;
   const c = 770 + Math.sin(waveTime+1)*6;
   oceanFill.setAttribute("d", `M0 ${a} Q50 ${b} 100 ${a} Q150 ${c} 200 ${b} Q250 ${a} 300 ${c} Q350 ${b} 400 ${a} L400 800 L0 800 Z`);
-  requestAnimationFrame(animateOcean);
+  if(!window._geiArcadeEffectsPaused) _geiOceanRaf = requestAnimationFrame(animateOcean);
+  else _geiOceanRaf = 0;
 }
-animateOcean();
+window._geiArcadeEffectsPaused = false;
+window.pauseArcadeEffects = function(){
+  if(window._geiArcadeEffectsPaused) return;
+  window._geiArcadeEffectsPaused = true;
+  if(_geiMistInterval){ clearInterval(_geiMistInterval); _geiMistInterval = 0; }
+};
+window.resumeArcadeEffects = function(){
+  if(!window._geiArcadeEffectsPaused) return;
+  window._geiArcadeEffectsPaused = false;
+  if(!_geiMistInterval) _geiMistInterval = setInterval(spawnMist, 3200);
+  if(!_geiOceanRaf) _geiOceanRaf = requestAnimationFrame(animateOcean);
+};
+_geiOceanRaf = requestAnimationFrame(animateOcean);
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden) window.pauseArcadeEffects();
+  else if(!window.DamBuilder||!window.DamBuilder.isOpen) window.resumeArcadeEffects();
+});
 
 /* =========================================================
    WATER SOUND EFFECTS (synthesized — no external audio files)
@@ -10692,46 +9864,26 @@ const LIVING_MAX_EVENT_NODES = 36;       // hard cap: live rare-event nodes
 
 /* Each skin's atmospheric voice. Gameplay sounds stay identical; only this layer changes. */
 const SKIN_AUDIO_PROFILES = Object.freeze({
-  aurora:     { root:523, wave:"sine",     noise:[700,1500], gain:.016 },
-  clay:       { root:294, wave:"triangle", noise:[300,700],  gain:.018 },
-  canopy:     { root:659, wave:"sine",     noise:[1400,2600],gain:.012 },
-  heaven:     { root:784, wave:"sine",     noise:[1600,3000],gain:.012 },
-  neon:       { root:440, wave:"square",   noise:[900,2000], gain:.010 },
-  ember:      { root:147, wave:"sawtooth", noise:[200,500],  gain:.016 },
-  abyss:      { root:196, wave:"sine",     noise:[250,650],  gain:.020 },
-  midnight:   { root:392, wave:"sine",     noise:[500,1100], gain:.014 },
-  storm:      { root:73,  wave:"sine",     noise:[60,220],   gain:.040 },
-  crystal:    { root:1047,wave:"sine",     noise:[2400,4200],gain:.010 },
-  frost:      { root:880, wave:"triangle", noise:[2000,3800],gain:.010 },
-  golden:     { root:330, wave:"triangle", noise:[500,1200], gain:.014 },
-  pink:       { root:587, wave:"sine",     noise:[900,1900], gain:.012 },
-  cosmic:     { root:247, wave:"sine",     noise:[400,1600], gain:.016 },
-  industrial: { root:110, wave:"square",   noise:[150,450],  gain:.012 },
-  floodlight: { root:698, wave:"triangle", noise:[1200,2600],gain:.012 }
+  rainbow:  { root:523, wave:"sine",     noise:[700,1500], gain:.014 },
+  bubble:   { root:659, wave:"sine",     noise:[1400,2600],gain:.012 },
+  candy:    { root:784, wave:"sine",     noise:[1600,3000],gain:.012 },
+  forest:   { root:294, wave:"triangle", noise:[500,1200], gain:.014 },
+  mountain: { root:392, wave:"sine",     noise:[500,1100], gain:.014 },
+  magic:    { root:587, wave:"sine",     noise:[900,1900], gain:.012 }
 });
 
 /* Skin moments: atmosphere + ambient particle + accent + rare pool + signature event. */
 const DAM_SKIN_MOMENTS = Object.freeze([
-  { id:"aurora",     atmosphere:"Nite-lite water glowing through the valley", sky:"none",   particle:"drop",    rate:[2600,4600], accent:null,        rare:["reservoirWave","waterSpark","giantDroplet"],   signature:"reservoirWave" },
-  { id:"clay",       atmosphere:"Harvest dust over a terracotta reservoir",   sky:"haze",   particle:"dust",    rate:[2400,4200], accent:null,        rare:["pressureRelease","reservoirWave","emberBurst"], signature:"pressureRelease" },
-  { id:"canopy",     atmosphere:"Jungle reservoir · fireflies over the creek", sky:"haze",  particle:"firefly", rate:[2200,4000], accent:"firefly",   rare:["fireflySwarm","reservoirWave","waterSpark"],   signature:"fireflySwarm" },
-  { id:"heaven",     atmosphere:"Ivory light on still water",                 sky:"beams",  particle:"mote",    rate:[2600,4600], accent:null,        rare:["lightSweep","waterSpark","giantDroplet"],      signature:"lightSweep" },
-  { id:"neon",       atmosphere:"Arcade current on the grid",                 sky:"none",   particle:"glint",   rate:[2400,4200], accent:null,        rare:["hydraulicFlash","waterSpark","lightSweep"],    signature:"hydraulicFlash" },
-  { id:"ember",      atmosphere:"Volcanic dam · embers on the spillway",      sky:"haze",   particle:"ember",   rate:[1900,3600], accent:null,        rare:["emberBurst","pressureRelease","hydraulicFlash"],signature:"emberBurst" },
-  { id:"abyss",      atmosphere:"Deep ocean · bioluminescent bubbles",        sky:"none",   particle:"bubble",  rate:[2000,3800], accent:null,        rare:["bubbleColumn","reservoirWave","waterSpark"],   signature:"bubbleColumn" },
-  { id:"midnight",   atmosphere:"Moonlit reservoir under the stars",          sky:"stars",  particle:"star",    rate:[2200,4000], accent:"shimmer",   rare:["moonShimmer","waterSpark","reservoirWave"],    signature:"moonShimmer" },
-  { id:"storm",      atmosphere:"Thunderheads over the spillway",             sky:"clouds", particle:"rain",    rate:[900,1900],  accent:"lightning", rare:["stormSurge","hydraulicFlash","reservoirWave"],  signature:"stormSurge" },
-  { id:"crystal",    atmosphere:"Crystal-clear water, sharp as glass",        sky:"none",   particle:"glint",   rate:[2200,4000], accent:null,        rare:["frostShimmer","waterSpark","giantDroplet"],    signature:"waterSpark" },
-  { id:"frost",      atmosphere:"Frozen reservoir · frost on the gates",      sky:"haze",   particle:"frost",   rate:[1800,3400], accent:null,        rare:["frostShimmer","moonShimmer","reservoirWave"],  signature:"frostShimmer" },
-  { id:"golden",     atmosphere:"Golden hour on the hydraulics",              sky:"haze",   particle:"mote",    rate:[2200,4000], accent:null,        rare:["lightSweep","waterSpark","reservoirWave"],     signature:"lightSweep" },
-  { id:"pink",       atmosphere:"Pink current, cyan spray",                   sky:"none",   particle:"petal",   rate:[2200,4000], accent:null,        rare:["waterSpark","reservoirWave","giantDroplet"],   signature:"giantDroplet" },
-  { id:"cosmic",     atmosphere:"Cosmic flow across the firmament",           sky:"stars",  particle:"mote",    rate:[2000,3800], accent:"shimmer",   rare:["cosmicDrift","waterSpark","frostShimmer"],     signature:"cosmicDrift" },
-  { id:"industrial", atmosphere:"Steel, concrete and warning lights",         sky:"haze",   particle:"dust",    rate:[2400,4200], accent:"beacon",    rare:["warningBeacon","pressureRelease","hydraulicFlash"], signature:"warningBeacon" },
-  { id:"floodlight", atmosphere:"Floodlights on bright blue water",           sky:"beams",  particle:"drop",    rate:[2200,4000], accent:null,        rare:["lightSweep","giantDroplet","reservoirWave"],   signature:"lightSweep" }
+  { id:"rainbow",  atmosphere:"Rainbow light dancing on the water",      sky:"beams",  particle:"drop",    rate:[2600,4600], accent:null,      rare:["reservoirWave","waterSpark","giantDroplet"],  signature:"reservoirWave" },
+  { id:"bubble",   atmosphere:"Bubbles rising through crystal water",    sky:"none",   particle:"bubble",  rate:[2200,4000], accent:null,      rare:["bubbleColumn","reservoirWave","waterSpark"],  signature:"bubbleColumn" },
+  { id:"candy",    atmosphere:"Sweet river flowing through the village", sky:"none",   particle:"mote",    rate:[2400,4200], accent:null,      rare:["lightSweep","waterSpark","giantDroplet"],     signature:"lightSweep" },
+  { id:"forest",   atmosphere:"Beavers building in the sunny forest",   sky:"haze",   particle:"firefly", rate:[2200,4000], accent:"firefly", rare:["fireflySwarm","reservoirWave","waterSpark"],  signature:"fireflySwarm" },
+  { id:"mountain", atmosphere:"Fresh mountain streams and waterfalls",   sky:"haze",   particle:"drop",    rate:[2200,4000], accent:null,      rare:["reservoirWave","waterSpark","giantDroplet"],  signature:"giantDroplet" },
+  { id:"magic",    atmosphere:"Sparkles and magic flowing everywhere",   sky:"stars",  particle:"star",    rate:[2000,3800], accent:"shimmer", rare:["moonShimmer","waterSpark","lightSweep"],      signature:"moonShimmer" }
 ]);
 const DAM_SKIN_MOMENT_BY_ID = {};
 DAM_SKIN_MOMENTS.forEach(m => { DAM_SKIN_MOMENT_BY_ID[m.id] = m; });
-function getSkinMoment(id){ return DAM_SKIN_MOMENT_BY_ID[id] || DAM_SKIN_MOMENT_BY_ID.aurora; }
+function getSkinMoment(id){ return DAM_SKIN_MOMENT_BY_ID[id] || DAM_SKIN_MOMENT_BY_ID.rainbow; }
 
 /* ---------- audio vocabulary (reuses the existing Web Audio context; never autoplays) ---------- */
 function livingAudioCtx(allowCreate){
@@ -10811,7 +9963,7 @@ const DAM_AUDIO = Object.freeze({
   }),
   env: Object.freeze({
     play: kind => {
-      const p = SKIN_AUDIO_PROFILES[livingWorld.skinId] || SKIN_AUDIO_PROFILES.aurora;
+      const p = SKIN_AUDIO_PROFILES[livingWorld.skinId] || SKIN_AUDIO_PROFILES.rainbow;
       if(kind === "rumble")  return damNoise({ dur:1.3, from:p.noise[0], to:Math.max(40, p.noise[0] * .6), gain:p.gain * 1.2, filter:"lowpass" });
       if(kind === "shimmer") return damVoice({ freq:p.root * 2, time:.5, gain:p.gain * .6, type:"sine" });
       if(kind === "swell")   return damNoise({ dur:1.1, from:p.noise[0], to:p.noise[1], gain:p.gain });
@@ -10821,7 +9973,7 @@ const DAM_AUDIO = Object.freeze({
 });
 
 /* ---------- world state (presentation only) ---------- */
-const livingWorld = { skinId:"aurora", moment:null, started:false, timers:{ ambient:0, accent:0, event:0 }, events:0, lastEventId:null, badgeShown:false };
+const livingWorld = { skinId:"rainbow", moment:null, started:false, timers:{ ambient:0, accent:0, event:0 }, events:0, lastEventId:null, badgeShown:false };
 function livingReducedMotion(){ try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } }
 function livingQuiet(){
   try{
@@ -10969,7 +10121,7 @@ function revealSkinWhenReady(tries){
 /* ---------- start ---------- */
 function startLivingWorld(){
   if(livingWorld.started) return false;
-  livingWorld.skinId = SKIN_META[activeSkinId] ? activeSkinId : "aurora";
+  livingWorld.skinId = SKIN_META[activeSkinId] ? activeSkinId : "rainbow";
   livingWorld.moment = getSkinMoment(livingWorld.skinId);
   document.documentElement.setAttribute("data-sky", livingWorld.moment.sky);
   livingWorld.started = true;
@@ -11103,12 +10255,12 @@ function runLivingWorldSelfTest(){
   const t = (name, fn) => { let ok = false; try { ok = !!fn(); } catch(e){ ok = false; } results.push({ name, ok }); };
   const snapshot = () => JSON.stringify(state);
   const skinIds = Object.keys(SKIN_META);
-  t("V2.1.12: expanded skin catalog exists", () => skinIds.length >= 12 && skinIds.length <= 18 && ["aurora","clay","canopy","heaven","neon","ember","abyss"].every(id => skinIds.includes(id)));
+  t("V2.2.0: toddler color world catalog exists", () => skinIds.length === 6 && ["rainbow","bubble","candy","forest","mountain","magic"].every(id => skinIds.includes(id)));
   t("V2.1.12: every skin has a valid visual profile", () => {
     const probe = document.createElement("div"); probe.style.display = "none"; document.body.appendChild(probe);
     try{
       return skinIds.every(id => {
-        const cssOk = [...document.styleSheets].some(sh => { try { return [...sh.cssRules].some(r => r.selectorText === "html.skin-" + id || (id === "aurora" && r.selectorText === ":root")); } catch(e){ return false; } });
+        const cssOk = [...document.styleSheets].some(sh => { try { return [...sh.cssRules].some(r => r.selectorText === "html.skin-" + id || (id === "rainbow" && r.selectorText === ":root")); } catch(e){ return false; } });
         const m = DAM_SKIN_MOMENT_BY_ID[id], meta = SKIN_META[id];
         return cssOk && !!meta.name && !!meta.deco && !!m && !!SKIN_AUDIO_PROFILES[id] &&
           Array.isArray(m.rare) && m.rare.length > 0 && m.rare.every(ev => !!LIVING_WORLD_EVENTS[ev]) && !!LIVING_WORLD_EVENTS[m.signature] &&
@@ -12740,6 +11892,7 @@ function restoreVisualProgress(){
   <script src="/utility-dock-v2189.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
+  <script src="/color-world-effects-v2400.js" defer></script>
   <script src="/splash-cinematic-v2189.js" defer></script>
   <script src="/character-signature-moments.js" defer></script>
   <script src="/signature-moment-audio.js" defer></script>
@@ -12760,6 +11913,49 @@ function restoreVisualProgress(){
   };})();
 </script>
 <script src="/customer-purchase-recovery.js" defer></script>
+<script src="/play-billing-bridge.js" defer></script>
+<script>
+/* V2.5.0 — PLAY BILLING INTEGRATION
+   When running inside the Android TWA, routes purchases through Google Play
+   Billing instead of PayPal, and triggers automatic purchase recovery on startup.
+   In a normal browser, this does nothing — PayPal checkout remains unchanged. */
+(function(){
+  "use strict";
+  if(typeof window.GeiPlayBilling==="undefined") return;
+  var detected=window.GeiPlayBilling.detect();
+  if(!detected) return;
+
+  var originalStartCheckout=window.startCheckout;
+  window.startCheckout=function(packId){
+    if(!window.GeiPlayBilling.isAvailable()){
+      var s=document.getElementById("paypalCheckoutStatus");
+      if(s) s.textContent="Google Play Billing is loading… please try again in a moment.";
+      return;
+    }
+    window.GeiPlayBilling.startCheckout(packId, {
+      onStatus: function(msg){ var s=document.getElementById("paypalCheckoutStatus"); if(s) s.textContent=msg; },
+      onCredit: function(packId, fulfillmentId, meta){
+        if(typeof window.creditPack==="function") return window.creditPack(packId, fulfillmentId, meta);
+        if(window.YalltooDamEconomy && typeof window.YalltooDamEconomy.creditPack==="function") return window.YalltooDamEconomy.creditPack(packId, fulfillmentId, meta);
+        return {ok:false, message:"Game wallet not ready."};
+      },
+      onError: function(msg){ var s=document.getElementById("paypalCheckoutStatus"); if(s) s.textContent=msg; }
+    });
+  };
+
+  function tryAutoRecovery(){
+    var credit=function(packId, fulfillmentId, meta){
+      if(typeof window.creditPack==="function") return window.creditPack(packId, fulfillmentId, meta);
+      if(window.YalltooDamEconomy && typeof window.YalltooDamEconomy.creditPack==="function") return window.YalltooDamEconomy.creditPack(packId, fulfillmentId, meta);
+      return {ok:false, message:"Game wallet not ready."};
+    };
+    window.GeiPlayBilling.initAutoRecovery({onCredit: credit});
+  }
+
+  if(document.readyState==="complete") tryAutoRecovery();
+  else window.addEventListener("load", tryAutoRecovery, {once:true});
+})();
+</script>
 
 <script>
 (function(){

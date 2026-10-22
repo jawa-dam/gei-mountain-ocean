@@ -674,7 +674,7 @@
       var origRender = renderer.render.bind(renderer);
       var mainScene = scene, mainCam = camera;
       renderer.render = function (s, c) {
-        if (s === mainScene && c === mainCam && !renderer.getRenderTarget()) {
+        if (s === mainScene && c === mainCam && !renderer.getRenderTarget() && !renderer._bloomOff) {
           bloom.render(function () { origRender(s, c); });
         } else {
           origRender(s, c);
