@@ -407,27 +407,52 @@ html,body{
   box-shadow:0 0 40px color-mix(in srgb, var(--juicy-blue) 28%, transparent), 0 0 70px color-mix(in srgb, var(--juicy-magenta) 16%, transparent), inset 0 0 60px rgba(0,0,0,.4);
   touch-action:manipulation;
 }
-/* V2.1.86 — LIVE TAP PROGRESS: one compact row between the HUD and the world (never over the timer, station or tap target). */
-.gameBar{ flex:0 0 auto; display:flex; align-items:center; gap:8px; margin:0 4px 6px; min-height:34px; }
-.gameBar .tapProg{ flex:1 1 auto; min-width:0; margin:0; padding:0; text-align:center; }
+/* V2.4.0 — TAP LITES HERO COUNTER: the most prominent gameplay instruction.
+   One row between the HUD and the world (never over the timer, station or tap target).
+   Brand colors: #2fd2ff, #3d3dea, #f310ba, #ff9df2, #06070d. */
+.gameBar{ flex:0 0 auto; display:flex; align-items:center; gap:8px; margin:0 4px 6px; min-height:auto; }
+.gameBar .tapProg{ flex:1 1 auto; min-width:0; margin:0; padding:8px 0 4px; text-align:center; }
 .operatorSlot{ flex:0 0 auto; display:flex; align-items:center; }
 .operatorSlot:empty{ display:none; }
 .tapProg{ text-align:center; }
-.tapProg .tpText{ font-size:clamp(.82rem,3.6vw,1rem); font-weight:1000; letter-spacing:.08em; line-height:1.15; color:var(--world-text,#fff); white-space:nowrap; }
-.tapProg .tpNum{ display:inline-block; min-width:3.6ch; font-variant-numeric:tabular-nums; color:var(--gold); text-shadow:0 0 10px color-mix(in srgb,var(--gold) 50%,transparent); transform-origin:50% 60%; }
-.tapProg .tpUnit{ color:var(--world-text-secondary,var(--foam)); }
-.tapProg .tpDone{ display:none; margin-left:.5em; color:var(--water-bright); }
-.tapProg .tpBar{ margin:3px auto 0; height:6px; max-width:100%; border-radius:999px; background:color-mix(in srgb,var(--juicy-navy) 16%,transparent); overflow:hidden; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--juicy-navy) 10%,transparent); }
-.tapProg .tpBar i{ display:block; height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,var(--juicy-blue),var(--water-bright),var(--juicy-magenta)); transition:width .11s ease-out; }
-.tapProg.tap .tpNum{ animation:tpPulse .16s ease-out; }
+/* Hero counter line: TAP 3 / 6 */
+.tapProg .tpHero{ display:flex; align-items:baseline; justify-content:center; gap:clamp(4px,1.5vw,8px); line-height:1; white-space:nowrap; }
+.tapProg .tpLabel{ font-size:clamp(1.1rem,5.5vw,1.6rem); font-weight:1000; letter-spacing:.12em; color:#ff9df2; text-transform:uppercase; }
+.tapProg .tpNum{ font-size:clamp(1.6rem,8vw,2.6rem); font-weight:1000; font-variant-numeric:tabular-nums; color:#2fd2ff; text-shadow:0 0 14px rgba(47,210,255,.6),0 0 28px rgba(47,210,255,.25); transform-origin:50% 60%; display:inline-block; }
+.tapProg .tpSep{ font-size:clamp(1.3rem,6vw,2rem); font-weight:900; color:rgba(255,255,255,.5); }
+.tapProg .tpReq{ font-size:clamp(1.3rem,6vw,2rem); font-weight:1000; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.85); }
+/* Remaining taps message */
+.tapProg .tpRemaining{ font-size:clamp(.7rem,3vw,.92rem); font-weight:800; letter-spacing:.1em; color:#ff9df2; margin-top:2px; text-shadow:0 0 8px rgba(243,16,186,.3); }
+/* Done badge */
+.tapProg .tpDone{ display:none; font-size:clamp(.8rem,3.4vw,1rem); font-weight:1000; letter-spacing:.12em; color:#2fd2ff; margin-top:2px; text-shadow:0 0 12px rgba(47,210,255,.5); }
+/* Per-tap progress dots */
+.tapProg .tpDots{ display:flex; align-items:center; justify-content:center; gap:clamp(4px,1.2vw,8px); margin-top:6px; }
+.tapProg .tpDot{ width:clamp(10px,3vw,16px); height:clamp(10px,3vw,16px); border-radius:50%; background:rgba(255,255,255,.15); border:2px solid rgba(255,255,255,.2); transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,transform .15s ease; flex-shrink:0; }
+.tapProg .tpDot.filled{ background:#3d3dea; border-color:#2fd2ff; box-shadow:0 0 8px rgba(47,210,255,.5); }
+.tapProg .tpDot.current{ border-color:#f310ba; box-shadow:0 0 10px rgba(243,16,186,.5); }
+.tapProg .tpDot.final{ border-color:#ff9df2; }
+.tapProg .tpDot.final.filled{ background:linear-gradient(135deg,#f310ba,#ff9df2); border-color:#ff9df2; box-shadow:0 0 12px rgba(255,157,242,.6); }
+/* Gradient progress bar */
+.tapProg .tpBar{ margin:4px auto 0; height:6px; max-width:100%; border-radius:999px; background:color-mix(in srgb,var(--juicy-navy) 16%,transparent); overflow:hidden; box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--juicy-navy) 10%,transparent); }
+.tapProg .tpBar i{ display:block; height:100%; width:0%; border-radius:inherit; background:linear-gradient(90deg,#3d3dea,#2fd2ff,#f310ba); transition:width .11s ease-out; }
+/* Pop animation on tap */
+.tapProg.tap .tpNum{ animation:tpPop .22s cubic-bezier(.34,1.56,.64,1); }
 .tapProg.tap .tpBar i{ animation:tpFlash .16s ease-out; }
-.tapProg.complete .tpDone{ display:inline; animation:tpPulse .3s ease-out; }
-.tapProg.complete .tpUnit{ display:none; }
-.tapProg.complete .tpBar i{ background:linear-gradient(90deg,var(--water-bright),var(--gold)); }
-@keyframes tpPulse{ 0%{ transform:scale(1.28); filter:brightness(1.5); } 100%{ transform:none; filter:none; } }
+.tapProg.tap .tpDots .tpDot.just-filled{ animation:tpDotPop .3s cubic-bezier(.34,1.56,.64,1); }
+/* Complete state */
+.tapProg.complete .tpDone{ display:block; animation:tpPop .35s cubic-bezier(.34,1.56,.64,1); }
+.tapProg.complete .tpRemaining{ display:none; }
+.tapProg.complete .tpNum{ color:var(--gold); text-shadow:0 0 14px rgba(255,215,106,.6); }
+.tapProg.complete .tpBar i{ background:linear-gradient(90deg,#2fd2ff,var(--gold)); }
+.tapProg.complete .tpDot.filled{ background:var(--gold); border-color:var(--gold); box-shadow:0 0 8px rgba(255,215,106,.5); }
+/* Final tap highlight — pulsing glow on the last dot before completion */
+.tapProg .tpDot.final-next{ animation:tpFinalPulse 1s ease-in-out infinite; }
+@keyframes tpPop{ 0%{ transform:scale(1.3); filter:brightness(1.5); } 100%{ transform:none; filter:none; } }
 @keyframes tpFlash{ 0%{ filter:brightness(1.7); } 100%{ filter:none; } }
-@media (max-height:620px){ .tapProg{ margin-bottom:4px; } .tapProg .tpBar{ height:5px; margin-top:2px; } }
-@media (prefers-reduced-motion:reduce){ .tapProg .tpBar i{ transition:none; } .tapProg.tap .tpNum,.tapProg.tap .tpBar i,.tapProg.complete .tpDone{ animation:none; } }
+@keyframes tpDotPop{ 0%{ transform:scale(1.5); } 100%{ transform:scale(1); } }
+@keyframes tpFinalPulse{ 0%,100%{ box-shadow:0 0 6px rgba(243,16,186,.4); } 50%{ box-shadow:0 0 16px rgba(243,16,186,.8),0 0 24px rgba(255,157,242,.4); } }
+@media (max-height:620px){ .tapProg{ padding:4px 0 2px; } .tapProg .tpHero{ gap:3px; } .tapProg .tpLabel{ font-size:clamp(.9rem,4.5vw,1.2rem); } .tapProg .tpNum{ font-size:clamp(1.3rem,6.5vw,2rem); } .tapProg .tpSep,.tapProg .tpReq{ font-size:clamp(1rem,5vw,1.5rem); } .tapProg .tpBar{ height:5px; margin-top:2px; } .tapProg .tpDots{ margin-top:3px; gap:3px; } .tapProg .tpDot{ width:clamp(8px,2.5vw,12px); height:clamp(8px,2.5vw,12px); } }
+@media (prefers-reduced-motion:reduce){ .tapProg .tpBar i{ transition:none; } .tapProg.tap .tpNum,.tapProg.tap .tpBar i,.tapProg.complete .tpDone,.tapProg.tap .tpDots .tpDot.just-filled,.tapProg .tpDot.final-next{ animation:none; } }
 .iteHud[hidden]{ display:none!important; }
 /* V2.1.27 — MOBILE FRAME GUARD: keep the playable SVG as a real flex child with a
    non-zero floor. Mobile browser chrome can change the visual viewport while the page stays loaded. */
@@ -2587,10 +2612,19 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
       </div>
     </div>
 
-    <!-- V2.1.86: LIVE TAP PROGRESS — reads state.tapCount / getRequiredTaps(state.level); owns no state of its own -->
+    <!-- V2.1.86 → V2.4.0: TAP LITES HERO COUNTER — the most prominent gameplay instruction.
+         Reads state.tapCount / getRequiredTaps(state.level); owns no state of its own. -->
     <div class="gameBar" id="gameBar">
       <div class="tapProg" id="tapProg" role="progressbar" aria-label="Taps completed" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0">
-        <div class="tpText"><span class="tpDrop" aria-hidden="true">💧</span><b class="tpNum" id="tapProgNum">0 / 6</b><span class="tpUnit"> TAPS</span><span class="tpDone" id="tapProgDone" aria-hidden="true">✓ FLOW COMPLETE</span></div>
+        <div class="tpHero">
+          <span class="tpLabel">TAP</span>
+          <b class="tpNum" id="tapProgNum">0</b>
+          <span class="tpSep">/</span>
+          <span class="tpReq" id="tapProgReq">6</span>
+        </div>
+        <div class="tpRemaining" id="tapProgRemaining" aria-live="polite">6 TAPS LEFT TO FINISH TODAY!</div>
+        <div class="tpDone" id="tapProgDone" aria-hidden="true">FLOW COMPLETE</div>
+        <div class="tpDots" id="tapProgDots" aria-hidden="true"></div>
         <div class="tpBar" aria-hidden="true"><i id="tapProgFill"></i></div>
       </div>
       <!-- V2.1.88: SESSION OPERATOR lives here (was an absolutely-positioned box in the world that the action rail could cover) -->
@@ -4607,18 +4641,58 @@ STEPS.forEach(()=>{
   dot.innerHTML = "<i></i>";
   progressRow.appendChild(dot);
 });
-/* V2.1.86 — live tap progress. Pure view of the existing gameplay state; no counter of its own. */
-let tapProgShown = -1, tapProgReq = -1;
+/* V2.4.0 — TAP LITES hero counter. Pure view of the existing gameplay state; no counter of its own. */
+let tapProgShown = -1, tapProgReq = -1, tapProgDotsBuilt = -1;
 function renderTapProgress(){
   const root = $("tapProg"); if(!root) return;
   const req = Math.max(1, getRequiredTaps(state.level));
   const cur = Math.max(0, Math.min(req, state.tapCount || 0));
+  const remaining = req - cur;
   const complete = cur >= req;
-  $("tapProgNum").textContent = `${cur} / ${req}`;
+
+  $("tapProgNum").textContent = String(cur);
+  $("tapProgReq").textContent = String(req);
   $("tapProgFill").style.width = (cur / req * 100) + "%";
+
+  const remEl = $("tapProgRemaining");
+  if(remEl){
+    if(complete){ remEl.textContent = ""; }
+    else if(remaining === 1){ remEl.textContent = "1 TAP LEFT TO FINISH TODAY!"; }
+    else { remEl.textContent = remaining + " TAPS LEFT TO FINISH TODAY!"; }
+  }
+
   root.setAttribute("aria-valuemax", String(req)); root.setAttribute("aria-valuenow", String(cur));
   root.classList.toggle("complete", complete);
-  if(cur > tapProgShown && cur > 0 && tapProgReq === req){   // a real step forward: tiny pulse, restartable on rapid taps
+
+  /* Build / rebuild dot markers when required taps changes */
+  const dotsEl = $("tapProgDots");
+  if(dotsEl && tapProgDotsBuilt !== req){
+    dotsEl.innerHTML = "";
+    for(let i = 0; i < req; i++){
+      const d = document.createElement("span");
+      d.className = "tpDot";
+      if(i === req - 1) d.classList.add("final");
+      dotsEl.appendChild(d);
+    }
+    tapProgDotsBuilt = req;
+  }
+
+  /* Update dot states */
+  if(dotsEl){
+    const dots = dotsEl.querySelectorAll(".tpDot");
+    dots.forEach((d, i) => {
+      const wasFilled = d.classList.contains("filled");
+      d.classList.toggle("filled", i < cur);
+      d.classList.toggle("current", i === cur && !complete);
+      d.classList.toggle("final-next", i === req - 1 && cur === req - 1 && !complete);
+      d.classList.remove("just-filled");
+      if(!wasFilled && i < cur && cur > tapProgShown && tapProgReq === req){
+        d.classList.add("just-filled");
+      }
+    });
+  }
+
+  if(cur > tapProgShown && cur > 0 && tapProgReq === req){
     root.classList.remove("tap"); void root.offsetWidth; root.classList.add("tap");
   }
   tapProgShown = cur; tapProgReq = req;
@@ -8446,6 +8520,50 @@ function runDamIteHydraulicReactionSelfTest(){
   t("V2.1.20: reaction engine is presentation-only",()=>{triggerDamIteHydraulicReaction("dam",{index:1,power:2});return JSON.stringify({totalFlOz:state.totalFlOz,level:state.level,levelFlOz:state.levelFlOz,tapCount:state.tapCount,completedLevels:state.completedLevels,damMachineFreePlays:state.damMachineFreePlays})===before});
   t("V2.1.20: breakthrough context is ocean",()=>getTapWaterContext({index:MILL_INDEX,breakthrough:true})==="ocean");
   t("V2.1.20: engine contains no economy authority calls",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(triggerDamIteHydraulicReaction.toString()));
+  return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
+}
+/* V2.4.0 — TAP LITES hero counter self-test. Console-only; touches no persistent state. */
+function runTapProgressSelfTest(){
+  const results=[]; const t=(name,fn)=>{let ok=false;try{ok=!!fn()}catch(e){}results.push({name,ok})};
+  const savedTap=state.tapCount, savedLevel=state.level, savedStep=state.currentStep, savedPhase=state.phase;
+  const savedShown=tapProgShown, savedReq=tapProgReq, savedDotsBuilt=tapProgDotsBuilt;
+
+  t("V2.4.0: hero counter DOM exists",()=>!!$("tapProg")&&!!$("tapProgNum")&&!!$("tapProgReq")&&!!$("tapProgRemaining")&&!!$("tapProgDone")&&!!$("tapProgDots")&&!!$("tapProgFill"));
+
+  state.tapCount=0; state.level=1; tapProgShown=-1; tapProgReq=-1; tapProgDotsBuilt=-1;
+  renderTapProgress();
+  t("V2.4.0: counter shows 0 at start",()=>$("tapProgNum").textContent==="0");
+  t("V2.4.0: required shows 6 at level 1",()=>$("tapProgReq").textContent==="6");
+  t("V2.4.0: remaining message at 0 taps",()=>$("tapProgRemaining").textContent==="6 TAPS LEFT TO FINISH TODAY!");
+  t("V2.4.0: 6 dot markers created",()=>$("tapProgDots").querySelectorAll(".tpDot").length===6);
+  t("V2.4.0: no dots filled at 0",()=>$("tapProgDots").querySelectorAll(".tpDot.filled").length===0);
+
+  state.tapCount=3; renderTapProgress();
+  t("V2.4.0: counter reads 3 after 3 taps",()=>$("tapProgNum").textContent==="3");
+  t("V2.4.0: remaining reads 3 taps left",()=>$("tapProgRemaining").textContent==="3 TAPS LEFT TO FINISH TODAY!");
+  t("V2.4.0: 3 dots filled after 3 taps",()=>$("tapProgDots").querySelectorAll(".tpDot.filled").length===3);
+  t("V2.4.0: progress bar non-zero",()=>parseFloat($("tapProgFill").style.width)>0);
+
+  state.tapCount=5; renderTapProgress();
+  t("V2.4.0: 1 tap remaining singular",()=>$("tapProgRemaining").textContent==="1 TAP LEFT TO FINISH TODAY!");
+  t("V2.4.0: final dot has final-next class",()=>$("tapProgDots").querySelector(".tpDot.final-next")!==null);
+
+  state.tapCount=6; renderTapProgress();
+  t("V2.4.0: complete state shows done badge",()=>$("tapProgDone").style.display!=="none"||window.getComputedStyle($("tapProgDone")).display!=="none");
+  t("V2.4.0: remaining hidden on complete",()=>$("tapProgRemaining").textContent===""||window.getComputedStyle($("tapProgRemaining")).display==="none");
+  t("V2.4.0: all 6 dots filled on complete",()=>$("tapProgDots").querySelectorAll(".tpDot.filled").length===6);
+  t("V2.4.0: progress bar at 100%",()=>$("tapProgFill").style.width==="100%");
+  t("V2.4.0: complete class on root",()=>$("tapProg").classList.contains("complete"));
+
+  state.tapCount=0; state.level=7; tapProgDotsBuilt=-1; renderTapProgress();
+  t("V2.4.0: dots rebuild for level 7 (12 taps)",()=>$("tapProgDots").querySelectorAll(".tpDot").length===12);
+  t("V2.4.0: required shows 12 at level 7",()=>$("tapProgReq").textContent==="12");
+
+  t("V2.4.0: renderTapProgress is presentation-only",()=>!/safeAddFlOz|commitDamResult|creditPack|awardDay|purchase|entitlement|paypal/i.test(renderTapProgress.toString()));
+
+  state.tapCount=savedTap; state.level=savedLevel; state.currentStep=savedStep; state.phase=savedPhase;
+  tapProgShown=savedShown; tapProgReq=savedReq; tapProgDotsBuilt=savedDotsBuilt;
+  renderTapProgress();
   return {pass:results.filter(r=>r.ok).length,fail:results.filter(r=>!r.ok).length,results};
 }
 document.addEventListener("pointerdown",e=>{
