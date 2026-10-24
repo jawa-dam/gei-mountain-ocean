@@ -163,7 +163,7 @@ async function suiteDesktop(browser, base){
   const after = await page.evaluate(SNAP);
   check("F1. opening, staging-restore and closing the map leave game state unchanged", before === after, { before, after });
   const st = await page.evaluate(() => window.__GEI_V2170_DAM_MAP__.selfTest());
-  check("F2. selfTest: scene, live state, level hook, launcher", st.scene && st.readsLiveState && st.levelHook && st.launcher && st.version === "V2.1.90", st);
+  check("F2. selfTest: scene, live state, level hook, launcher", st.scene && st.readsLiveState && st.levelHook && st.launcher && st.version === "V2.3.0", st);
   check("F3. no new script errors", g.errors.length <= KNOWN_BROKEN, g.errors);
   await g.ctx.close();
 }
