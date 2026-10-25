@@ -583,27 +583,38 @@
   }
   function mount3D(i, o, prev, token){
     var fallback = function(why){ if(token !== mountToken || !openFlag) return; warn("3D unavailable (" + why + ") — using the simple view"); toast("3D view unavailable on this device — using the simple view."); mountDay(i, { attempts:o.attempts, keepIntro:o.keepIntro, autostart:o.autostart, force2d:true }); };
-    var ld = document.createElement("div"); ld.className = "db3dLoad"; ld.innerHTML = "<i></i><span>BUILDING THE HYDRAULIC WORLD…</span>"; var reuse = !!(holder3D.stage && canvasEl);
+    var reuse = !!(holder3D.stage && canvasEl);
+    var loader = null, ld = null;
+    if(window.DamBuilderLoading && !reuse){
+      loader = window.DamBuilderLoading.create();
+      ld = loader.el;
+    } else {
+      ld = document.createElement("div"); ld.className = "db3dLoad"; ld.innerHTML = "<i></i><span>BUILDING THE HYDRAULIC WORLD…</span>";
+    }
     if(!reuse) els.dbStage.appendChild(ld);
     els.dbCtl.innerHTML = ""; els.dbGauges.innerHTML = "";
+    var cleanup = function(){ if(loader){ loader.destroy(); loader = null; } else if(ld && ld.parentNode){ ld.remove(); } };
     var mk = function(D){
       var q = url3D(); if(q === "off") q = "";
       var env = { level:level(), up:{ bear:store.up.bear, liner:store.up.liner, act:store.up.act }, canvas:canvasEl, stageEl:els.dbStage, ctl:els.dbCtl, api:api(), kit:kit, day:i, quality:q || undefined, fast:!!o.autostart, holder:holder3D,
         isPlaying:function(){ return !!(run && run.status === "playing" && !sheetOpen); }, onLost:function(){ if(token === mountToken) fallback("WebGL context lost"); } };
       var def = D.create(i, env);
-      if(!def){ ld.remove(); throw new Error("scene refused to build"); }
-      ld.remove(); finishMount(i, def, env, o, prev, true);
+      if(!def){ cleanup(); throw new Error("scene refused to build"); }
+      if(loader){
+        loader.setReady().then(function(){ cleanup(); });
+      } else { cleanup(); }
+      finishMount(i, def, env, o, prev, true);
     };
     load3D().then(function(D){
-      if(token !== mountToken || !openFlag){ ld.remove(); return; }
+      if(token !== mountToken || !openFlag){ cleanup(); return; }
       if(!D.supported()) throw new Error("no WebGL2");
       if(reuse){ mk(D); return; }
-      return new Promise(function(r){ setTimeout(r, 40); }).then(function(){       // let the loading screen paint before the (synchronous) world build
-        if(token !== mountToken || !openFlag){ ld.remove(); return; }
+      return new Promise(function(r){ setTimeout(r, 40); }).then(function(){
+        if(token !== mountToken || !openFlag){ cleanup(); return; }
         var cv = document.createElement("canvas"); cv.className = "db3d"; cv.setAttribute("role", "img"); cv.setAttribute("aria-label", "3D scene: a mountain reservoir, dam, millpond, sluice gate, waterwheel, gears, mill and the river running to the sea");
         els.dbStage.insertBefore(cv, els.dbStage.firstChild); canvasEl = cv; mk(D);
       });
-    }).catch(function(e){ ld.remove(); disposeStage(); fallback(e && e.message || e); });
+    }).catch(function(e){ if(loader){ loader.setError(e && e.message || String(e)); } cleanup(); disposeStage(); fallback(e && e.message || e); });
   }
 
   /* shared by the SVG and 3D mounts: gauges, copy, run record, intro */
@@ -626,6 +637,7 @@
     if(svgEl && svgEl.parentNode) svgEl.parentNode.removeChild(svgEl);
     if(!keep3d && canvasEl && canvasEl.parentNode){ canvasEl.parentNode.removeChild(canvasEl); }
     var ld = els.dbStage && els.dbStage.querySelector(".db3dLoad"); if(ld) ld.remove();
+    var lo = els.dbStage && els.dbStage.querySelector(".dblOverlay"); if(lo) lo.remove();
     svgEl = null; sceneG = null; fx = null; run = null; if(!keep3d) canvasEl = null;
     if(els.dbCtl){ els.dbCtl.innerHTML = ""; els.dbGauges.innerHTML = ""; }
   }
