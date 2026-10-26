@@ -125,6 +125,73 @@ var WORLD_TAP={
       el.style.clipPath="polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)";
       document.body.appendChild(el);
     }
+  },
+  ocean:function(x,y){
+    var n=2+Math.floor(Math.random()*2);
+    for(var i=0;i<n&&tapCount<MAX_TAP;i++){
+      tapCount++;
+      var sz=8+Math.random()*8;
+      var el=mkEl("",x-sz/2,y-sz/2,sz,sz,"radial-gradient(circle,rgba(26,154,170,.5),rgba(42,104,136,.2))","cwPop",.6+Math.random()*.3);
+      el.style.borderRadius="50%";
+      document.body.appendChild(el);
+    }
+  },
+  emerald:function(x,y){
+    var greens=["rgba(26,154,104,.6)","rgba(168,144,48,.5)","rgba(58,120,88,.5)"];
+    var n=2+Math.floor(Math.random()*2);
+    for(var i=0;i<n&&tapCount<MAX_TAP;i++){
+      tapCount++;
+      var c=greens[Math.floor(Math.random()*greens.length)];
+      var dx=(Math.random()-.5)*40;
+      var dy=30+Math.random()*30;
+      var rot=60+Math.random()*180;
+      var el=mkEl("",x-5,y-5,10,10,c,"cwFlutter",.7+Math.random()*.3);
+      el.style.setProperty("--dx",dx+"px");el.style.setProperty("--dy",dy+"px");
+      el.style.setProperty("--rot",rot+"deg");
+      el.style.borderRadius="40% 60% 50% 50%";
+      document.body.appendChild(el);
+    }
+  },
+  blueprint:function(x,y){
+    var n=2+Math.floor(Math.random()*2);
+    for(var i=0;i<n&&tapCount<MAX_TAP;i++){
+      tapCount++;
+      var sz=6+Math.random()*4;
+      var dx=(Math.random()-.5)*24;
+      var dy=-24-Math.random()*24;
+      var el=mkEl("",x-sz/2,y-sz/2,sz,sz,"rgba(64,128,184,.55)","cwRise",.5+Math.random()*.25);
+      el.style.setProperty("--dx",dx+"px");el.style.setProperty("--dy",dy+"px");
+      el.style.borderRadius="2px";
+      document.body.appendChild(el);
+    }
+  },
+  sunset:function(x,y){
+    var colors=["rgba(192,128,56,.6)","rgba(208,144,64,.5)","rgba(152,104,56,.5)"];
+    var n=2+Math.floor(Math.random()*2);
+    for(var i=0;i<n&&tapCount<MAX_TAP;i++){
+      tapCount++;
+      var c=colors[Math.floor(Math.random()*colors.length)];
+      var dx=(Math.random()-.5)*30;
+      var dy=-20-Math.random()*30;
+      var el=mkEl("",x-6,y-6,12,12,c,"cwRise",.6+Math.random()*.3);
+      el.style.setProperty("--dx",dx+"px");el.style.setProperty("--dy",dy+"px");
+      el.style.setProperty("--es",String(.3+Math.random()*.3));
+      el.style.borderRadius="50%";
+      document.body.appendChild(el);
+    }
+  },
+  stone:function(x,y){
+    var n=2+Math.floor(Math.random()*1);
+    for(var i=0;i<n&&tapCount<MAX_TAP;i++){
+      tapCount++;
+      var sz=6+Math.random()*5;
+      var dx=(Math.random()-.5)*20;
+      var dy=-20-Math.random()*20;
+      var el=mkEl("",x-sz/2,y-sz/2,sz,sz,"rgba(120,136,152,.5)","cwRise",.5+Math.random()*.2);
+      el.style.setProperty("--dx",dx+"px");el.style.setProperty("--dy",dy+"px");
+      el.style.borderRadius="50%";
+      document.body.appendChild(el);
+    }
   }
 };
 
@@ -182,7 +249,12 @@ var AMBIENT_SHAPES={
   candy:function(){return{bg:Math.random()>.5?"#ffb0e0":"#e8d0ff",w:6+Math.random()*5,h:0,br:Math.random()>.5?"50%":"2px",anim:"cwFloat",dur:5+Math.random()*3}},
   forest:function(){return{bg:Math.random()>.5?"#6aaa58":"#e8a020",w:8+Math.random()*6,h:0,br:"40% 60% 50% 50%",anim:"cwDrift",dur:12+Math.random()*8}},
   mountain:function(){return{bg:"rgba(255,255,255,.35)",w:30+Math.random()*30,h:8+Math.random()*6,br:"50%",anim:"cwDrift",dur:18+Math.random()*10}},
-  magic:function(){return{bg:Math.random()>.5?"#a070ff":"#e060d0",w:4+Math.random()*4,h:0,br:"50%",anim:"cwTwinkle",dur:2+Math.random()*3}}
+  magic:function(){return{bg:Math.random()>.5?"#a070ff":"#e060d0",w:4+Math.random()*4,h:0,br:"50%",anim:"cwTwinkle",dur:2+Math.random()*3}},
+  ocean:function(){return{bg:"radial-gradient(circle,rgba(26,154,170,.2),rgba(42,104,136,.08))",w:14+Math.random()*10,h:0,br:"50%",anim:"cwFloat",dur:7+Math.random()*5}},
+  emerald:function(){return{bg:Math.random()>.5?"rgba(26,154,104,.2)":"rgba(168,144,48,.15)",w:8+Math.random()*6,h:0,br:"40% 60% 50% 50%",anim:"cwDrift",dur:14+Math.random()*8}},
+  blueprint:function(){return{bg:"rgba(64,128,184,.15)",w:20+Math.random()*20,h:2,br:"1px",anim:"cwDrift",dur:16+Math.random()*10}},
+  sunset:function(){return{bg:"rgba(192,128,56,.15)",w:16+Math.random()*12,h:0,br:"50%",anim:"cwFloat",dur:8+Math.random()*5}},
+  stone:function(){return{bg:"rgba(120,136,152,.12)",w:10+Math.random()*8,h:0,br:"50%",anim:"cwTwinkle",dur:4+Math.random()*4}}
 };
 
 function spawnAmbient(){
