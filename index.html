@@ -11,17 +11,23 @@
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <script>
 (function(){
-  /* V2.2.0 — TODDLER COLOR WORLD ENGINE: six bright worlds, randomized every refresh. Presentation only. */
-  var ids = ["rainbow","bubble","candy","forest","mountain","magic"];
+  /* V2.6.0 — DUAL-STYLE RANDOM SKIN ENGINE: Playful Flow (6 colorful) + Premium Flow (5 sophisticated). Presentation only. */
+  var PLAYFUL_IDS = ["rainbow","bubble","candy","forest","mountain","magic"];
+  var PREMIUM_IDS = ["ocean","emerald","blueprint","sunset","stone"];
+  var ALL_IDS = PLAYFUL_IDS.concat(PREMIUM_IDS);
+  var skinMode = "surprise";
+  try { skinMode = localStorage.getItem("ytSkinMode") || "surprise"; } catch (e) {}
+  if (["surprise","playful","premium"].indexOf(skinMode) < 0) skinMode = "surprise";
+  var ids = skinMode === "playful" ? PLAYFUL_IDS : skinMode === "premium" ? PREMIUM_IDS : ALL_IDS;
   var last = null, recent = [];
   try { last = sessionStorage.getItem("ytNiteSkin"); } catch (e) {}
   try { recent = JSON.parse(sessionStorage.getItem("ytNiteSkinRecent") || "[]"); if (!Array.isArray(recent)) recent = []; } catch (e) { recent = []; }
   var forced = null;
-  try { var q = new URLSearchParams(window.location.search).get("skin"); if (q && ids.indexOf(q) >= 0) forced = q; } catch (e) {}
+  try { var q = new URLSearchParams(window.location.search).get("skin"); if (q && ALL_IDS.indexOf(q) >= 0) forced = q; } catch (e) {}
   var fresh = ids.filter(function(id){ return id !== last && recent.indexOf(id) < 0; });
   var pool = fresh.length ? fresh : ids.filter(function(id){ return id !== last; });
   var pick = forced || pool[Math.floor(Math.random() * pool.length)];
-  recent = [pick].concat(recent.filter(function(id){ return id !== pick && ids.indexOf(id) >= 0; })).slice(0, 3);
+  recent = [pick].concat(recent.filter(function(id){ return id !== pick && ALL_IDS.indexOf(id) >= 0; })).slice(0, 3);
   try { sessionStorage.setItem("ytNiteSkin", pick); sessionStorage.setItem("ytNiteSkinRecent", JSON.stringify(recent)); } catch (e) {}
   document.documentElement.className = "skin-" + pick;
   document.documentElement.setAttribute("data-skin", pick);
@@ -277,12 +283,142 @@ html.skin-magic{
   --world-text:#281848;--world-text-secondary:rgba(40,24,72,.65);
 }
 
+/* ===== PREMIUM FLOW: Ocean Depths ===== */
+html.skin-ocean{
+  color-scheme:light;
+  --water-deep:#0c2030;--water-bright:#1a9aaa;--foam:#c8dce8;
+  --juicy-navy:#d0e0e8;--juicy-blue:#1a9aaa;--juicy-violet:#2a6888;--juicy-magenta:#2ab0b8;--juicy-pink:#4ac0c8;
+  --gold:#b8a050;--danger:#c85858;--panel:rgba(12,30,46,.92);--glassBorder:rgba(26,154,170,.25);--radius:16px;
+  --page-bg-a:#0a1a28;--page-bg-b:#0e2234;
+  --sky-0:#061018;--sky-1:#0a1822;--sky-2:#102030;
+  --world-top:#0a1820;--world-bot:#0e2230;
+  --glow-a:rgba(26,154,170,.14);--glow-b:rgba(42,104,136,.1);
+  --flow-0:#1a9aaa;--flow-1:#c8dce8;--flow-2:#2a6888;
+  --mtn-front-0:#143040;--mtn-front-1:#0c2030;--mtn-back:#102838;--snow:#a0b8c8;--tree:#0c3038;
+  --water-accent:#1a9aaa;
+  --dam-0:#1a3040;--dam-1:#122430;--dam-stroke:#2a4858;--dam-line:rgba(26,154,170,.1);
+  --pond-0:#145060;--pond-1:#0c3848;--reed:#0c4038;
+  --sluice:#1a3040;--sluice-stroke:#2a4858;
+  --wood-0:#3a2e20;--wood-1:#2a2018;--wood-mid:#30281c;--wood-spoke:#241c12;--wood-dark:#1a140c;
+  --mill-roof:#164050;--mill-door:#081420;--mill-light:#2a4858;--mill-metal:#203040;--mill-add:#2a3028;
+  --mill-tank:#102838;--mill-factory:#1a2c3c;--mill-factory-stroke:#2a3e50;
+  --ocean:#1a9aaa;--mist:rgba(26,154,170,.06);--seg-track:rgba(26,154,170,.22);
+  --flood-0:rgba(26,154,170,.7);--flood-1:rgba(14,34,52,.92);--flash:rgba(26,154,170,.28);
+  --fs-bg:#0e2234;--deco-shadow:rgba(26,154,170,.3);
+  --world-text:#c8dce8;--world-text-secondary:rgba(200,220,232,.6);
+}
+
+/* ===== PREMIUM FLOW: Emerald Current ===== */
+html.skin-emerald{
+  color-scheme:light;
+  --water-deep:#0a2018;--water-bright:#1a9a68;--foam:#c0e0d0;
+  --juicy-navy:#c8e0d0;--juicy-blue:#1a9a68;--juicy-violet:#3a7858;--juicy-magenta:#a89030;--juicy-pink:#c0a848;
+  --gold:#b89838;--danger:#b85848;--panel:rgba(10,28,20,.92);--glassBorder:rgba(26,154,104,.25);--radius:16px;
+  --page-bg-a:#081810;--page-bg-b:#0c2218;
+  --sky-0:#060e08;--sky-1:#0a1810;--sky-2:#102018;
+  --world-top:#081810;--world-bot:#0e2418;
+  --glow-a:rgba(26,154,104,.14);--glow-b:rgba(168,144,48,.08);
+  --flow-0:#1a9a68;--flow-1:#c0e0d0;--flow-2:#3a7858;
+  --mtn-front-0:#143020;--mtn-front-1:#0c2018;--mtn-back:#10281c;--snow:#a0c0a8;--tree:#083018;
+  --water-accent:#1a9a68;
+  --dam-0:#182c20;--dam-1:#102018;--dam-stroke:#284038;--dam-line:rgba(26,154,104,.1);
+  --pond-0:#145038;--pond-1:#0c3828;--reed:#084028;
+  --sluice:#182c20;--sluice-stroke:#284038;
+  --wood-0:#382a18;--wood-1:#281e10;--wood-mid:#302214;--wood-spoke:#221a0c;--wood-dark:#181008;
+  --mill-roof:#184028;--mill-door:#081410;--mill-light:#284030;--mill-metal:#203028;--mill-add:#283020;
+  --mill-tank:#102820;--mill-factory:#182c28;--mill-factory-stroke:#283c38;
+  --ocean:#1a9a68;--mist:rgba(26,154,104,.06);--seg-track:rgba(26,154,104,.22);
+  --flood-0:rgba(26,154,104,.7);--flood-1:rgba(12,34,24,.92);--flash:rgba(26,154,104,.28);
+  --fs-bg:#0c2218;--deco-shadow:rgba(26,154,104,.3);
+  --world-text:#c0e0d0;--world-text-secondary:rgba(192,224,208,.6);
+}
+
+/* ===== PREMIUM FLOW: Industrial Blueprint ===== */
+html.skin-blueprint{
+  color-scheme:light;
+  --water-deep:#101c28;--water-bright:#4080b8;--foam:#c0d0e0;
+  --juicy-navy:#c0ccd8;--juicy-blue:#4080b8;--juicy-violet:#506898;--juicy-magenta:#6088a8;--juicy-pink:#78a0c0;
+  --gold:#a89850;--danger:#b85848;--panel:rgba(16,24,36,.92);--glassBorder:rgba(64,128,184,.22);--radius:12px;
+  --page-bg-a:#0c1620;--page-bg-b:#121e2a;
+  --sky-0:#081018;--sky-1:#0c1820;--sky-2:#121e28;
+  --world-top:#0c1820;--world-bot:#142028;
+  --glow-a:rgba(64,128,184,.12);--glow-b:rgba(80,104,152,.08);
+  --flow-0:#4080b8;--flow-1:#c0d0e0;--flow-2:#506898;
+  --mtn-front-0:#1a2838;--mtn-front-1:#101c28;--mtn-back:#142030;--snow:#a0b0c0;--tree:#142828;
+  --water-accent:#4080b8;
+  --dam-0:#1a2838;--dam-1:#121e28;--dam-stroke:#2a3c4c;--dam-line:rgba(64,128,184,.08);
+  --pond-0:#1a4058;--pond-1:#102c40;--reed:#143028;
+  --sluice:#1a2838;--sluice-stroke:#2a3c4c;
+  --wood-0:#302820;--wood-1:#242018;--wood-mid:#2a241c;--wood-spoke:#201c14;--wood-dark:#14120c;
+  --mill-roof:#283848;--mill-door:#081018;--mill-light:#384858;--mill-metal:#243040;--mill-add:#283028;
+  --mill-tank:#142030;--mill-factory:#1a2838;--mill-factory-stroke:#2a3c4c;
+  --ocean:#4080b8;--mist:rgba(64,128,184,.05);--seg-track:rgba(64,128,184,.2);
+  --flood-0:rgba(64,128,184,.65);--flood-1:rgba(18,30,42,.92);--flash:rgba(64,128,184,.24);
+  --fs-bg:#121e2a;--deco-shadow:rgba(64,128,184,.25);
+  --world-text:#c0ccd8;--world-text-secondary:rgba(192,204,216,.55);
+}
+
+/* ===== PREMIUM FLOW: Sunset Reservoir ===== */
+html.skin-sunset{
+  color-scheme:light;
+  --water-deep:#1c1208;--water-bright:#c08038;--foam:#e8d4c0;
+  --juicy-navy:#e0d0c0;--juicy-blue:#c08038;--juicy-violet:#986838;--juicy-magenta:#d09040;--juicy-pink:#d8a858;
+  --gold:#c89830;--danger:#c05038;--panel:rgba(26,18,12,.92);--glassBorder:rgba(192,128,56,.22);--radius:16px;
+  --page-bg-a:#161008;--page-bg-b:#1e1810;
+  --sky-0:#120c04;--sky-1:#181208;--sky-2:#201810;
+  --world-top:#14100a;--world-bot:#201a10;
+  --glow-a:rgba(192,128,56,.14);--glow-b:rgba(152,104,56,.08);
+  --flow-0:#c08038;--flow-1:#e8d4c0;--flow-2:#986838;
+  --mtn-front-0:#2a1e14;--mtn-front-1:#1e180e;--mtn-back:#241c12;--snow:#c0b098;--tree:#1c2810;
+  --water-accent:#c08038;
+  --dam-0:#2a2018;--dam-1:#1e1810;--dam-stroke:#3a2e20;--dam-line:rgba(192,128,56,.08);
+  --pond-0:#384020;--pond-1:#282c14;--reed:#283818;
+  --sluice:#2a2018;--sluice-stroke:#3a2e20;
+  --wood-0:#3a2810;--wood-1:#2a1e0c;--wood-mid:#302210;--wood-spoke:#241a08;--wood-dark:#1a1006;
+  --mill-roof:#3a2818;--mill-door:#100c06;--mill-light:#483820;--mill-metal:#2a2418;--mill-add:#382818;
+  --mill-tank:#1e1810;--mill-factory:#2a2018;--mill-factory-stroke:#3a2e28;
+  --ocean:#c08038;--mist:rgba(192,128,56,.05);--seg-track:rgba(192,128,56,.2);
+  --flood-0:rgba(192,128,56,.65);--flood-1:rgba(30,24,16,.92);--flash:rgba(192,128,56,.24);
+  --fs-bg:#1e1810;--deco-shadow:rgba(192,128,56,.25);
+  --world-text:#e0d0c0;--world-text-secondary:rgba(224,208,192,.55);
+}
+
+/* ===== PREMIUM FLOW: Stone & Silver ===== */
+html.skin-stone{
+  color-scheme:light;
+  --water-deep:#141618;--water-bright:#788898;--foam:#c0c4cc;
+  --juicy-navy:#c0c4cc;--juicy-blue:#788898;--juicy-violet:#606878;--juicy-magenta:#8890a0;--juicy-pink:#98a0b0;
+  --gold:#a09060;--danger:#a85050;--panel:rgba(20,22,26,.92);--glassBorder:rgba(120,136,152,.22);--radius:14px;
+  --page-bg-a:#101214;--page-bg-b:#1a1c20;
+  --sky-0:#0c0e10;--sky-1:#121416;--sky-2:#1a1c20;
+  --world-top:#101214;--world-bot:#1c1e22;
+  --glow-a:rgba(120,136,152,.1);--glow-b:rgba(96,104,120,.06);
+  --flow-0:#788898;--flow-1:#c0c4cc;--flow-2:#606878;
+  --mtn-front-0:#1e2024;--mtn-front-1:#141618;--mtn-back:#1a1c20;--snow:#9098a0;--tree:#182020;
+  --water-accent:#788898;
+  --dam-0:#1e2024;--dam-1:#16181c;--dam-stroke:#2c3038;--dam-line:rgba(120,136,152,.06);
+  --pond-0:#222c34;--pond-1:#1a2028;--reed:#182820;
+  --sluice:#1e2024;--sluice-stroke:#2c3038;
+  --wood-0:#282420;--wood-1:#201c18;--wood-mid:#242018;--wood-spoke:#1c1814;--wood-dark:#14100e;
+  --mill-roof:#242830;--mill-door:#0c0e10;--mill-light:#303438;--mill-metal:#202830;--mill-add:#262420;
+  --mill-tank:#181c22;--mill-factory:#1c2028;--mill-factory-stroke:#2a3038;
+  --ocean:#788898;--mist:rgba(120,136,152,.04);--seg-track:rgba(120,136,152,.16);
+  --flood-0:rgba(120,136,152,.58);--flood-1:rgba(26,28,32,.92);--flash:rgba(120,136,152,.2);
+  --fs-bg:#1a1c20;--deco-shadow:rgba(120,136,152,.2);
+  --world-text:#c0c4cc;--world-text-secondary:rgba(192,196,204,.5);
+}
+
 html.skin-rainbow .world{ box-shadow:0 0 40px rgba(47,210,255,.3), 0 0 70px rgba(255,157,242,.15), inset 0 0 40px rgba(255,255,255,.2); }
 html.skin-bubble .world{ box-shadow:0 0 40px rgba(0,200,232,.28), 0 0 70px rgba(74,144,255,.14), inset 0 0 40px rgba(255,255,255,.2); }
 html.skin-candy .world{ box-shadow:0 0 40px rgba(255,112,192,.3), 0 0 70px rgba(160,112,255,.15), inset 0 0 40px rgba(255,255,255,.2); }
 html.skin-forest .world{ box-shadow:0 0 40px rgba(64,200,128,.28), 0 0 70px rgba(232,160,32,.12), inset 0 0 40px rgba(255,255,255,.2); }
 html.skin-mountain .world{ box-shadow:0 0 40px rgba(48,176,240,.3), 0 0 70px rgba(240,128,48,.12), inset 0 0 40px rgba(255,255,255,.2); }
 html.skin-magic .world{ box-shadow:0 0 40px rgba(160,112,255,.3), 0 0 70px rgba(224,96,208,.15), inset 0 0 40px rgba(255,255,255,.2); }
+html.skin-ocean .world{ box-shadow:0 0 40px rgba(26,154,170,.25), 0 0 70px rgba(42,104,136,.12), inset 0 0 40px rgba(26,154,170,.08); }
+html.skin-emerald .world{ box-shadow:0 0 40px rgba(26,154,104,.25), 0 0 70px rgba(168,144,48,.1), inset 0 0 40px rgba(26,154,104,.08); }
+html.skin-blueprint .world{ box-shadow:0 0 40px rgba(64,128,184,.22), 0 0 70px rgba(80,104,152,.1), inset 0 0 40px rgba(64,128,184,.06); }
+html.skin-sunset .world{ box-shadow:0 0 40px rgba(192,128,56,.25), 0 0 70px rgba(152,104,56,.1), inset 0 0 40px rgba(192,128,56,.08); }
+html.skin-stone .world{ box-shadow:0 0 40px rgba(120,136,152,.2), 0 0 70px rgba(96,104,120,.08), inset 0 0 40px rgba(120,136,152,.06); }
 *{margin:0;padding:0;box-sizing:border-box;}
 
 html,body{
@@ -4214,7 +4350,12 @@ const SKIN_META = {
   candy:    { name:"Candy River Village",   deco:"🍭" },
   forest:   { name:"Beaver Builder Forest", deco:"🦫" },
   mountain: { name:"Mountain Adventure",    deco:"⛰️" },
-  magic:    { name:"Magic Water World",     deco:"✨" }
+  magic:    { name:"Magic Water World",     deco:"✨" },
+  ocean:    { name:"Ocean Depths",          deco:"🌊" },
+  emerald:  { name:"Emerald Current",       deco:"💎" },
+  blueprint:{ name:"Industrial Blueprint",  deco:"📐" },
+  sunset:   { name:"Sunset Reservoir",      deco:"🌅" },
+  stone:    { name:"Stone & Silver",        deco:"🪨" }
 };
 const activeSkinId = document.documentElement.getAttribute("data-skin") || "rainbow";
 const activeSkin = SKIN_META[activeSkinId] || SKIN_META.rainbow;
@@ -9997,7 +10138,12 @@ const SKIN_AUDIO_PROFILES = Object.freeze({
   candy:    { root:784, wave:"sine",     noise:[1600,3000],gain:.012 },
   forest:   { root:294, wave:"triangle", noise:[500,1200], gain:.014 },
   mountain: { root:392, wave:"sine",     noise:[500,1100], gain:.014 },
-  magic:    { root:587, wave:"sine",     noise:[900,1900], gain:.012 }
+  magic:    { root:587, wave:"sine",     noise:[900,1900], gain:.012 },
+  ocean:    { root:220, wave:"sine",     noise:[300,800],  gain:.010 },
+  emerald:  { root:262, wave:"triangle", noise:[350,900],  gain:.010 },
+  blueprint:{ root:330, wave:"square",   noise:[400,1000], gain:.008 },
+  sunset:   { root:247, wave:"sine",     noise:[300,700],  gain:.010 },
+  stone:    { root:196, wave:"sine",     noise:[250,600],  gain:.008 }
 });
 
 /* Skin moments: atmosphere + ambient particle + accent + rare pool + signature event. */
@@ -10007,7 +10153,12 @@ const DAM_SKIN_MOMENTS = Object.freeze([
   { id:"candy",    atmosphere:"Sweet river flowing through the village", sky:"none",   particle:"mote",    rate:[2400,4200], accent:null,      rare:["lightSweep","waterSpark","giantDroplet"],     signature:"lightSweep" },
   { id:"forest",   atmosphere:"Beavers building in the sunny forest",   sky:"haze",   particle:"firefly", rate:[2200,4000], accent:"firefly", rare:["fireflySwarm","reservoirWave","waterSpark"],  signature:"fireflySwarm" },
   { id:"mountain", atmosphere:"Fresh mountain streams and waterfalls",   sky:"haze",   particle:"drop",    rate:[2200,4000], accent:null,      rare:["reservoirWave","waterSpark","giantDroplet"],  signature:"giantDroplet" },
-  { id:"magic",    atmosphere:"Sparkles and magic flowing everywhere",   sky:"stars",  particle:"star",    rate:[2000,3800], accent:"shimmer", rare:["moonShimmer","waterSpark","lightSweep"],      signature:"moonShimmer" }
+  { id:"magic",    atmosphere:"Sparkles and magic flowing everywhere",   sky:"stars",  particle:"star",    rate:[2000,3800], accent:"shimmer", rare:["moonShimmer","waterSpark","lightSweep"],      signature:"moonShimmer" },
+  { id:"ocean",    atmosphere:"Deep currents moving through dark waters",   sky:"none",  particle:"drop",    rate:[3000,5000], accent:null,      rare:["reservoirWave","waterSpark","giantDroplet"],  signature:"reservoirWave" },
+  { id:"emerald",  atmosphere:"Emerald waters flowing through ancient stone",sky:"haze", particle:"firefly", rate:[2800,4800], accent:"firefly", rare:["fireflySwarm","reservoirWave","waterSpark"],  signature:"fireflySwarm" },
+  { id:"blueprint",atmosphere:"Engineered waterways in precise motion",     sky:"none",  particle:"drop",    rate:[3200,5200], accent:null,      rare:["waterSpark","reservoirWave","giantDroplet"],  signature:"waterSpark" },
+  { id:"sunset",   atmosphere:"Golden light over the evening reservoir",    sky:"haze",  particle:"mote",    rate:[3000,5000], accent:null,      rare:["lightSweep","reservoirWave","waterSpark"],    signature:"lightSweep" },
+  { id:"stone",    atmosphere:"Silent waters between weathered stone",      sky:"none",  particle:"drop",    rate:[3400,5400], accent:null,      rare:["reservoirWave","waterSpark","giantDroplet"],  signature:"giantDroplet" }
 ]);
 const DAM_SKIN_MOMENT_BY_ID = {};
 DAM_SKIN_MOMENTS.forEach(m => { DAM_SKIN_MOMENT_BY_ID[m.id] = m; });
@@ -10383,7 +10534,7 @@ function runLivingWorldSelfTest(){
   const t = (name, fn) => { let ok = false; try { ok = !!fn(); } catch(e){ ok = false; } results.push({ name, ok }); };
   const snapshot = () => JSON.stringify(state);
   const skinIds = Object.keys(SKIN_META);
-  t("V2.2.0: toddler color world catalog exists", () => skinIds.length === 6 && ["rainbow","bubble","candy","forest","mountain","magic"].every(id => skinIds.includes(id)));
+  t("V2.6.0: dual-style skin catalog exists", () => skinIds.length === 11 && ["rainbow","bubble","candy","forest","mountain","magic","ocean","emerald","blueprint","sunset","stone"].every(id => skinIds.includes(id)));
   t("V2.1.12: every skin has a valid visual profile", () => {
     const probe = document.createElement("div"); probe.style.display = "none"; document.body.appendChild(probe);
     try{
@@ -12019,6 +12170,7 @@ function restoreVisualProgress(){
   <script src="/dam-builder-v2217.js" defer></script>
   <script src="/dam-builder-days-v2217.js" defer></script>
   <script src="/utility-dock-v2189.js" defer></script>
+  <script src="/appearance-selector-v2600.js" defer></script>
   <script src="/dam-surprise-cameos-v2191.js" defer></script>
   <script src="/tap-lites-showcase-v2192.js" defer></script>
   <script src="/color-world-effects-v2400.js" defer></script>
