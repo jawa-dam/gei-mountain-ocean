@@ -2428,6 +2428,255 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .stationsGroup,.station{pointer-events:auto!important;touch-action:manipulation}
 .preGameCard.show,.characterSpotlight.show,.sidePanel.open,.navSheet.open,.bonusCard.show,.dmCard.show,.levelCard.show{pointer-events:auto}
 
+/* =========================================================
+   TAPLITES IMMERSIVE REDESIGN — V3.0
+   Compact toolbar, dominant tap area, floating timer HUD,
+   water ripple effects. Presentation-only changes.
+========================================================= */
+
+/* --- Hide dashboard clutter (keep elements in DOM for JS) --- */
+.econLevel, .econOz, .econReward { display:none !important; }
+.econRow { margin-top:0; gap:0; }
+.econInfo { display:none !important; }
+
+/* --- Compact toolbar replaces old HUD chrome --- */
+.tapToolbar {
+  display:flex; align-items:center; gap:5px;
+  padding:6px 8px;
+  background:rgba(6,7,13,.88);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(47,210,255,.18);
+  overflow-x:auto; overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  flex-shrink:0;
+  z-index:100;
+}
+.tapToolbar::-webkit-scrollbar { display:none; }
+.tapToolbarBtn {
+  flex:0 0 auto;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px;
+  min-width:46px; height:46px;
+  padding:4px 5px;
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:12px;
+  background:linear-gradient(145deg, rgba(47,210,255,.12), rgba(122,92,255,.10));
+  color:#eaf8ff;
+  cursor:pointer;
+  transition:background .15s, border-color .15s, transform .1s;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.tapToolbarBtn:hover { background:linear-gradient(145deg, rgba(47,210,255,.22), rgba(122,92,255,.18)); border-color:rgba(47,210,255,.4); }
+.tapToolbarBtn:active { transform:scale(.93); }
+.tapToolbarBtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+.tapToolbarIcon { font-size:1.15rem; line-height:1; }
+.tapToolbarLabel { font-size:.52rem; font-weight:900; letter-spacing:.03em; line-height:1; white-space:nowrap; opacity:.85; }
+.tapToolbarSpacer { flex:1 1 0; min-width:2px; }
+.tapToolbarBrand {
+  flex:0 0 auto;
+  font-size:.7rem; font-weight:1000; letter-spacing:.06em;
+  background:linear-gradient(90deg,var(--juicy-blue),var(--juicy-violet),var(--juicy-magenta));
+  background-size:200% auto;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  animation:hueSlide 7s linear infinite;
+  white-space:nowrap;
+  margin-right:2px;
+}
+
+/* --- Redesigned HUD: hidden, keeps IDs alive for JS --- */
+.hud { position:absolute !important; left:-9999px !important; top:-9999px !important; width:1px !important; height:1px !important; overflow:hidden !important; opacity:0 !important; pointer-events:none !important; }
+
+/* --- Floating Timer HUD --- */
+.tapTimerFloat {
+  position:absolute; top:8px; left:50%; transform:translateX(-50%);
+  z-index:88;
+  display:flex; align-items:center; gap:8px;
+  padding:6px 14px 6px 12px;
+  border-radius:20px;
+  background:rgba(6,7,13,.82);
+  backdrop-filter:blur(14px);
+  border:1px solid rgba(47,210,255,.3);
+  box-shadow:0 4px 20px rgba(0,0,0,.4), 0 0 20px rgba(47,210,255,.12);
+  pointer-events:none;
+  transition:opacity .3s, transform .3s;
+}
+.tapTimerFloat .timerBox {
+  flex:0 0 auto; min-width:auto; max-width:none; padding:0; border:none; background:none;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+}
+.tapTimerFloat .timerNum {
+  font-size:1.5rem; font-weight:1000; line-height:1; color:#fff;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 12px rgba(47,210,255,.5);
+}
+.tapTimerFloat .timerUnit {
+  font-size:.58rem; margin-top:0; color:rgba(255,255,255,.7); white-space:nowrap;
+}
+.tapTimerFloat .timerBox.idle .timerNum { opacity:.65; }
+.tapTimerFloat .timerBox.urgent { background:none; border:none; animation:timerUrgentFloat .5s ease-in-out infinite alternate; }
+.tapTimerFloat .timerBox.urgent .timerNum { color:#ff5e7a; text-shadow:0 0 14px rgba(255,94,122,.6); }
+@keyframes timerUrgentFloat { from{ transform:scale(1); } to{ transform:scale(1.07); } }
+.tapTimerFloat .tapTimerBarWrap {
+  width:80px; height:4px; border-radius:999px;
+  background:rgba(255,255,255,.12); overflow:hidden;
+}
+.tapTimerFloat .tapTimerBarWrap i {
+  display:block; height:100%; width:100%;
+  background:linear-gradient(90deg, var(--juicy-blue), var(--foam));
+  transition:width .1s linear;
+}
+.tapTimerFloat .tapTimerBarWrap.urgent i { background:var(--danger); }
+
+/* --- Enlarge the world/tap area --- */
+.app { padding:0 !important; gap:0 !important; }
+.world { border-radius:0 !important; border:none !important; flex:1 1 0 !important; min-height:0 !important; }
+
+/* --- Immersive water background for the world --- */
+.world::before {
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 110%, rgba(47,210,255,.18), transparent 60%),
+    radial-gradient(ellipse 80% 40% at 20% 80%, rgba(122,92,255,.08), transparent 50%),
+    radial-gradient(ellipse 80% 40% at 80% 80%, rgba(243,16,186,.06), transparent 50%);
+  pointer-events:none; z-index:1; mix-blend-mode:screen;
+}
+/* --- Water caustics overlay --- */
+.world::after {
+  content:""; position:absolute; inset:0;
+  background:
+    repeating-conic-gradient(from 0deg at 30% 70%, transparent 0deg, rgba(47,210,255,.03) 4deg, transparent 8deg),
+    repeating-conic-gradient(from 45deg at 70% 60%, transparent 0deg, rgba(255,255,255,.02) 3deg, transparent 6deg);
+  pointer-events:none; z-index:1; opacity:.5;
+  animation:causticsDrift 12s linear infinite;
+}
+@keyframes causticsDrift {
+  0% { transform:translate(0,0) rotate(0deg); }
+  50% { transform:translate(-3%,2%) rotate(2deg); }
+  100% { transform:translate(0,0) rotate(0deg); }
+}
+
+/* --- Tap ripple effects --- */
+.tapRipple {
+  position:absolute; pointer-events:none; z-index:8;
+  width:0; height:0; border-radius:50%;
+  border:2px solid rgba(47,210,255,.6);
+  box-shadow:0 0 8px rgba(47,210,255,.3), inset 0 0 8px rgba(47,210,255,.15);
+  transform:translate(-50%,-50%);
+  animation:tapRippleExpand .8s ease-out forwards;
+}
+.tapRipple:nth-child(odd) { border-color:rgba(122,92,255,.5); box-shadow:0 0 8px rgba(122,92,255,.2); }
+@keyframes tapRippleExpand { 0% { width:0; height:0; opacity:1; } 100% { width:120px; height:120px; opacity:0; } }
+.tapSplash {
+  position:absolute; pointer-events:none; z-index:9;
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(47,210,255,.7); box-shadow:0 0 6px rgba(47,210,255,.5);
+  transform:translate(-50%,-50%);
+  animation:tapSplashFly .6s ease-out forwards;
+}
+@keyframes tapSplashFly { 0% { opacity:1; transform:translate(-50%,-50%) translate(0,0) scale(1); } 100% { opacity:0; transform:translate(-50%,-50%) translate(var(--sx,20px),var(--sy,-30px)) scale(.3); } }
+.tapRewardFloat {
+  position:absolute; pointer-events:none; z-index:10;
+  font-size:.82rem; font-weight:1000; color:var(--gold);
+  text-shadow:0 0 10px rgba(255,215,106,.5), 0 2px 4px rgba(0,0,0,.5);
+  transform:translate(-50%,-50%);
+  animation:tapRewardRise 1.2s ease-out forwards; white-space:nowrap;
+}
+@keyframes tapRewardRise { 0% { opacity:1; transform:translate(-50%,-50%) translateY(0) scale(1); } 60% { opacity:1; } 100% { opacity:0; transform:translate(-50%,-50%) translateY(-50px) scale(1.1); } }
+
+/* --- Tap target glow pulse --- */
+.world.tapActive { box-shadow:inset 0 0 60px rgba(47,210,255,.15),inset 0 0 120px rgba(47,210,255,.05),0 0 40px rgba(47,210,255,.12) !important; }
+
+/* --- Hide old floating buttons (toolbar replaces them) --- */
+.dmStoreFloatBtn,.songVaultFloatBtn,.damMapLauncherBtn,.dmFloatBtn { display:none !important; }
+.geiUtilityDock { display:none !important; }
+
+/* --- Compact gameBar as floating overlay --- */
+.gameBar {
+  position:absolute !important;
+  bottom:8px; left:50%; transform:translateX(-50%);
+  z-index:87;
+  background:rgba(6,7,13,.78); backdrop-filter:blur(12px);
+  border:1px solid rgba(47,210,255,.22); border-radius:16px;
+  padding:6px 16px !important; margin:0 !important;
+  max-width:min(85%, 320px);
+  box-shadow:0 4px 16px rgba(0,0,0,.3);
+}
+.gameBar .tapProg { padding:4px 0 2px !important; }
+.gameBar .tapProg .tpLabel { font-size:clamp(.8rem,3.5vw,1rem); }
+.gameBar .tapProg .tpNum { font-size:clamp(1.2rem,5vw,1.8rem); }
+.gameBar .tapProg .tpReq { font-size:clamp(.8rem,3vw,1rem); }
+.gameBar .tapProg .tpRemaining { font-size:.6rem; }
+.operatorSlot { display:none !important; }
+
+/* --- Progress dots floating --- */
+.progressRow {
+  position:absolute !important; bottom:58px; left:50%; transform:translateX(-50%);
+  z-index:86; display:flex; gap:4px; margin:0 !important;
+  padding:4px 10px; background:rgba(6,7,13,.6); border-radius:12px; backdrop-filter:blur(8px);
+}
+.progressRow .dot { height:5px; border-radius:3px; min-width:20px; }
+.loopBadge { display:none; }
+
+/* --- DAM-ITE combo floating overlay --- */
+.damIteCombo {
+  position:fixed !important; top:62px; left:50%; transform:translateX(-50%);
+  z-index:89; background:rgba(6,7,13,.78); backdrop-filter:blur(10px);
+  border:1px solid rgba(47,210,255,.2); border-radius:12px;
+  padding:5px 12px !important; margin:0 !important;
+  max-width:min(80%, 300px); box-shadow:0 2px 12px rgba(0,0,0,.3);
+  opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.damIteCombo.active { opacity:1 !important; }
+
+/* --- iteHud subtle floating overlay --- */
+.iteHud {
+  position:fixed !important; bottom:90px; left:50%; transform:translateX(-50%);
+  z-index:85; background:rgba(6,7,13,.72); backdrop-filter:blur(10px);
+  border:1px solid rgba(47,210,255,.15); border-radius:14px;
+  padding:6px 14px !important; margin:0 !important;
+  max-width:min(80%, 300px); box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+
+/* --- Fullscreen optimizations --- */
+.app:fullscreen, .app:-webkit-full-screen { max-width:100% !important; background:var(--juicy-navy) !important; }
+.app:fullscreen .tapToolbar, .app:-webkit-full-screen .tapToolbar { padding-top:max(6px, env(safe-area-inset-top)); }
+
+/* --- Prevent page scroll during gameplay --- */
+html, body { overflow:hidden; }
+.app { overflow:hidden; }
+
+/* --- Mobile responsive --- */
+@media (max-width:380px) {
+  .tapToolbarBtn { min-width:40px; height:40px; padding:3px 4px; }
+  .tapToolbarIcon { font-size:1rem; }
+  .tapToolbarLabel { font-size:.48rem; }
+  .tapTimerFloat { padding:5px 10px; }
+  .tapTimerFloat .timerNum { font-size:1.3rem; }
+}
+@media (max-height:600px) {
+  .tapToolbar { padding:4px 6px; }
+  .tapToolbarBtn { min-width:38px; height:38px; }
+  .gameBar { bottom:4px; padding:4px 12px !important; }
+  .progressRow { bottom:46px; }
+}
+@media (orientation:landscape) and (max-height:500px) {
+  .tapToolbar { padding:3px 6px; }
+  .tapToolbarBtn { min-width:34px; height:34px; gap:1px; }
+  .tapToolbarIcon { font-size:.9rem; }
+  .tapToolbarLabel { display:none; }
+  .tapTimerFloat { top:4px; padding:4px 10px; }
+  .tapTimerFloat .timerNum { font-size:1.1rem; }
+  .gameBar { bottom:2px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .tapRipple, .tapSplash, .tapRewardFloat { animation:none !important; display:none !important; }
+  .world::after { animation:none; }
+  .world.tapActive { box-shadow:inherit !important; }
+  .world::before, .world::after { display:none; }
+}
+
 /* V2.1.18 — DAM-ITE PERSONALITY ENGINE: restrained presentation layer. */
 #damItePersonalityLayer{position:fixed;left:50%;top:17%;transform:translate(-50%,-10px);z-index:9500;width:min(92vw,520px);display:flex;justify-content:center;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .22s ease,transform .22s ease,visibility .22s;}
 #damItePersonalityLayer.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
@@ -2648,6 +2897,44 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 
   <div class="app" id="appRoot">
 
+    <!-- V3.0: COMPACT TOP TOOLBAR — all 7 features + fullscreen -->
+    <nav class="tapToolbar" id="tapToolbar" role="toolbar" aria-label="Game navigation">
+      <span class="tapToolbarBrand" aria-hidden="true">DAM-ITE</span>
+      <button class="tapToolbarBtn" id="tbBuyItes" type="button" aria-label="Buy Ites">
+        <span class="tapToolbarIcon" aria-hidden="true">🛒</span>
+        <span class="tapToolbarLabel">Buy Ites</span>
+      </button>
+      <button class="tapToolbarBtn" id="tbSongVault" type="button" aria-label="Song Vault">
+        <span class="tapToolbarIcon" aria-hidden="true">🎵</span>
+        <span class="tapToolbarLabel">Songs</span>
+      </button>
+      <button class="tapToolbarBtn" id="tbDamMap" type="button" aria-label="Dam Map">
+        <span class="tapToolbarIcon" aria-hidden="true">🗺️</span>
+        <span class="tapToolbarLabel">Map</span>
+      </button>
+      <button class="tapToolbarBtn" id="tbDamBuilder" type="button" aria-label="Dam Builder">
+        <span class="tapToolbarIcon" aria-hidden="true">🔨</span>
+        <span class="tapToolbarLabel">Builder</span>
+      </button>
+      <button class="tapToolbarBtn" id="tbArcade" type="button" aria-label="TapLites Arcade">
+        <span class="tapToolbarIcon" aria-hidden="true">🕹️</span>
+        <span class="tapToolbarLabel">Arcade</span>
+      </button>
+      <button class="tapToolbarBtn" id="tbDamMachine" type="button" aria-label="The Dam Machine">
+        <span class="tapToolbarIcon" aria-hidden="true">🎰</span>
+        <span class="tapToolbarLabel">Machine</span>
+      </button>
+      <button class="tapToolbarBtn" id="tbSkins" type="button" aria-label="Skins">
+        <span class="tapToolbarIcon" aria-hidden="true">🎨</span>
+        <span class="tapToolbarLabel">Skins</span>
+      </button>
+      <span class="tapToolbarSpacer"></span>
+      <button class="tapToolbarBtn" id="tbFullscreen" type="button" aria-label="Toggle fullscreen">
+        <span class="tapToolbarIcon tbFsIcon" aria-hidden="true">⛶</span>
+        <span class="tapToolbarLabel">Full</span>
+      </button>
+    </nav>
+
     <div class="hud">
       <div class="hudTop">
         <div class="brand">
@@ -2768,6 +3055,8 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
     </div>
 
     <div class="world" id="world">
+      <!-- V3.0: Floating Timer HUD — timerBox + timerBar moved here by JS -->
+      <div class="tapTimerFloat" id="tapTimerFloat"></div>
       <div class="layer" id="mistLayer"></div>
       <div class="layer livingWorldLayer" id="livingWorldLayer" aria-hidden="true"><div class="livingBreath"></div></div>
       <div class="layer livingEventLayer" id="livingEventLayer" aria-hidden="true"></div>
@@ -12267,5 +12556,137 @@ function restoreVisualProgress(){
   <script src="/dam-ite-voice-discovery-v2201.js"></script>
   <script src="/dam-ite-voice-discovery-rewards-v2202.js"></script>
   <script src="/dam-ite-voice-event-vocabulary-v2203.js"></script>
+
+<script>
+/* V3.0 — TAPLITES IMMERSIVE REDESIGN: toolbar wiring + floating timer + water ripples.
+   Presentation-only. Runs after all other scripts. Preserves every existing ID and handler. */
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* --- Move timer into floating HUD --- */
+  var timerBox = $("timerBox");
+  var timerBar = $("timerBar");
+  var timerFloat = $("tapTimerFloat");
+  if(timerBox && timerFloat){
+    timerFloat.appendChild(timerBox);
+    if(timerBar){
+      timerBar.classList.add("tapTimerBarWrap");
+      timerFloat.appendChild(timerBar);
+    }
+  }
+
+  /* --- Move progressRow into the world for floating positioning --- */
+  var progressRow = $("progressRow");
+  var world = $("world");
+  if(progressRow && world) world.appendChild(progressRow);
+
+  /* --- Move gameBar into the world for absolute positioning --- */
+  var gameBar = $("gameBar");
+  if(gameBar && world) world.appendChild(gameBar);
+
+  /* --- Move damIteCombo + iteHud into body for fixed positioning --- */
+  var combo = $("damIteCombo");
+  var iteHud = $("iteHud");
+  if(combo) document.body.appendChild(combo);
+  if(iteHud) document.body.appendChild(iteHud);
+
+  /* --- Toolbar button wiring (delegates to existing hidden buttons) --- */
+  function safeClick(el){ if(el) el.click(); }
+
+  var tbBuyItes = $("tbBuyItes");
+  var tbSongVault = $("tbSongVault");
+  var tbDamMap = $("tbDamMap");
+  var tbDamBuilder = $("tbDamBuilder");
+  var tbArcade = $("tbArcade");
+  var tbDamMachine = $("tbDamMachine");
+  var tbSkins = $("tbSkins");
+  var tbFullscreen = $("tbFullscreen");
+
+  if(tbBuyItes) tbBuyItes.addEventListener("click", function(){ safeClick($("dmStoreFloatBtn")); });
+  if(tbSongVault) tbSongVault.addEventListener("click", function(){ safeClick($("songVaultFloatBtn")); });
+  if(tbDamMap) tbDamMap.addEventListener("click", function(){ safeClick($("damMapLauncherBtn")); });
+  if(tbDamBuilder) tbDamBuilder.addEventListener("click", function(){
+    if(window.DamBuilder && typeof window.DamBuilder.open === "function") window.DamBuilder.open();
+  });
+  if(tbArcade) tbArcade.addEventListener("click", function(){
+    try{ if(typeof closeAllWindows === "function") closeAllWindows(); }catch(e){}
+  });
+  if(tbDamMachine) tbDamMachine.addEventListener("click", function(){ safeClick($("dmFloatBtn")); });
+  if(tbSkins) tbSkins.addEventListener("click", function(){
+    safeClick($("dmStoreFloatBtn"));
+    setTimeout(function(){
+      var btn = document.querySelector('[data-store-jump="storeOzSection"]');
+      if(btn) btn.click();
+    }, 250);
+  });
+  if(tbFullscreen) tbFullscreen.addEventListener("click", function(){
+    safeClick($("fullscreenBtn"));
+  });
+
+  /* --- Sync fullscreen icon on toolbar button --- */
+  function syncFsIcon(){
+    var icon = tbFullscreen && tbFullscreen.querySelector(".tbFsIcon");
+    if(!icon) return;
+    var fs = document.fullscreenElement || document.webkitFullscreenElement;
+    icon.textContent = fs ? "⤢" : "⛶";
+  }
+  ["fullscreenchange","webkitfullscreenchange"].forEach(function(evt){
+    document.addEventListener(evt, syncFsIcon);
+  });
+
+  /* --- Water ripple effect on tap --- */
+  var rippleLayer = document.createElement("div");
+  rippleLayer.id = "tapRippleLayer";
+  rippleLayer.setAttribute("aria-hidden","true");
+  rippleLayer.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:8;overflow:hidden;";
+  if(world) world.appendChild(rippleLayer);
+
+  var reducedMotion = false;
+  try{ reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+
+  function createRipple(x, y){
+    if(reducedMotion) return;
+    var rect = world.getBoundingClientRect();
+    var lx = x - rect.left, ly = y - rect.top;
+    var i, r, s, angle, dist;
+
+    for(i = 0; i < 2; i++){
+      r = document.createElement("div");
+      r.className = "tapRipple";
+      r.style.left = lx + "px";
+      r.style.top = ly + "px";
+      r.style.animationDelay = (i * 0.15) + "s";
+      r.style.animationDuration = (0.6 + i * 0.3) + "s";
+      rippleLayer.appendChild(r);
+      setTimeout(function(el){ if(el.parentNode) el.remove(); }, 1200, r);
+    }
+
+    for(i = 0; i < 5; i++){
+      s = document.createElement("div");
+      s.className = "tapSplash";
+      angle = (Math.PI * 2 * i / 5) + (Math.random() - 0.5) * 0.8;
+      dist = 18 + Math.random() * 28;
+      s.style.left = lx + "px";
+      s.style.top = ly + "px";
+      s.style.setProperty("--sx", Math.cos(angle) * dist + "px");
+      s.style.setProperty("--sy", Math.sin(angle) * dist + "px");
+      rippleLayer.appendChild(s);
+      setTimeout(function(el){ if(el.parentNode) el.remove(); }, 800, s);
+    }
+  }
+
+  if(world){
+    world.addEventListener("pointerdown", function(e){
+      if(e.target.closest(".sidePanel, .tribeCard, .gameOverCard, .celebCard, .preGameCard, .characterSpotlight, .dmCard, .bonusCard, .levelCard, .tapTimerFloat, .gameBar")) return;
+      createRipple(e.clientX, e.clientY);
+      world.classList.add("tapActive");
+      clearTimeout(world._tapActiveTimeout);
+      world._tapActiveTimeout = setTimeout(function(){ world.classList.remove("tapActive"); }, 200);
+    });
+  }
+
+})();
+</script>
 </body>
 </html>
