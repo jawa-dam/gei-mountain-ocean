@@ -36,57 +36,99 @@
     var s = document.createElement("style");
     s.id = "geiWelcome2190Style";
     s.textContent =
-      "#geiWelcome{position:fixed;inset:0;z-index:99000;display:flex;align-items:flex-end;justify-content:center;"+
-        "padding:16px 16px calc(env(safe-area-inset-bottom) + 18px);background:linear-gradient(180deg,rgba(2,8,20,.12),rgba(2,8,20,.62));"+
-        "opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility .35s ease}"+
+      "#geiWelcome{position:fixed;inset:0;z-index:99000;display:flex;align-items:center;justify-content:center;"+
+        "padding:16px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease,visibility .45s ease;"+
+        "background:radial-gradient(ellipse at 50% 80%,#0a3d6b 0%,#041428 55%,#020a14 100%);overflow:hidden}"+
       "#geiWelcome.show{opacity:1;visibility:visible;pointer-events:auto}"+
-      "#geiWelcome .gwCard{position:relative;width:min(100%,440px);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;"+
-        "padding:18px 18px 16px;border-radius:26px;color:#f3fbff;font-family:Inter,system-ui,sans-serif;"+
-        "background:linear-gradient(160deg,rgba(9,34,62,.96),rgba(6,16,34,.97) 60%,rgba(20,12,44,.96));"+
-        "border:1px solid rgba(47,210,255,.34);box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 34px rgba(47,210,255,.16);"+
-        "transform:translateY(40px) scale(.97);transition:transform .55s cubic-bezier(.2,.9,.25,1.15)}"+
+      /* Animated ocean floor background */
+      "#geiWelcome .gwOcean{position:absolute;inset:0;overflow:hidden;pointer-events:none}"+
+      "#geiWelcome .gwWaveTop{position:absolute;top:-2px;left:-5%;width:110%;height:80px;"+
+        "background:repeating-linear-gradient(90deg,transparent,rgba(47,210,255,.12) 25%,transparent 50%);"+
+        "background-size:200px 100%;animation:gwWaveMove 4s linear infinite;border-radius:0 0 50% 50%}"+
+      "#geiWelcome .gwWaveTop:nth-child(2){top:6px;opacity:.5;animation-duration:5.5s;animation-direction:reverse}"+
+      /* Floating bubbles */
+      "#geiWelcome .gwBub{position:absolute;border-radius:50%;pointer-events:none;"+
+        "background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.35),rgba(47,210,255,.18) 60%,transparent);"+
+        "border:1px solid rgba(157,234,255,.25);animation:gwFloat linear infinite}"+
+      /* Light rays from above */
+      "#geiWelcome .gwRays{position:absolute;top:-20%;left:10%;width:80%;height:70%;"+
+        "background:conic-gradient(from 170deg at 50% 0%,transparent 40%,rgba(47,210,255,.06) 45%,transparent 50%,"+
+        "transparent 65%,rgba(157,234,255,.05) 70%,transparent 75%);animation:gwRayPulse 6s ease-in-out infinite;pointer-events:none}"+
+      /* The card */
+      "#geiWelcome .gwCard{position:relative;width:min(100%,420px);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;"+
+        "padding:28px 22px 22px;border-radius:32px;color:#f3fbff;font-family:Inter,system-ui,sans-serif;text-align:center;"+
+        "background:linear-gradient(170deg,rgba(10,61,107,.88) 0%,rgba(4,20,40,.92) 50%,rgba(12,8,32,.9) 100%);"+
+        "border:1.5px solid rgba(47,210,255,.4);box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 60px rgba(47,210,255,.18),inset 0 1px 0 rgba(255,255,255,.1);"+
+        "transform:translateY(50px) scale(.92);transition:transform .65s cubic-bezier(.2,.9,.25,1.12);backdrop-filter:blur(12px)}"+
       "#geiWelcome.show .gwCard{transform:none}"+
-      "#geiWelcome .gwCard::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;border-radius:26px 26px 0 0;"+
-        "background:linear-gradient(90deg,transparent,#2fd2ff,#9deaff,#2fd2ff,transparent);background-size:200% 100%;animation:gwWater 3s linear infinite}"+
-      "#geiWelcome .gwClose{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.22);"+
-        "background:rgba(255,255,255,.08);color:#fff;font:800 20px/1 system-ui,sans-serif;cursor:pointer;display:grid;place-items:center}"+
+      /* Water shimmer top bar */
+      "#geiWelcome .gwCard::before{content:'';position:absolute;left:0;right:0;top:0;height:6px;border-radius:32px 32px 0 0;"+
+        "background:linear-gradient(90deg,transparent,#2fd2ff,#9deaff,#5ff5c8,#2fd2ff,transparent);background-size:300% 100%;animation:gwWater 2.5s linear infinite}"+
+      "#geiWelcome .gwClose{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:1.5px solid rgba(255,255,255,.2);"+
+        "background:rgba(0,30,60,.5);color:#9deaff;font:800 18px/1 system-ui,sans-serif;cursor:pointer;display:grid;place-items:center;"+
+        "transition:background .2s,transform .15s;z-index:2}"+
+      "#geiWelcome .gwClose:hover{background:rgba(47,210,255,.2);transform:scale(1.1)}"+
       "#geiWelcome .gwClose:focus-visible,#geiWelcome button:focus-visible,#geiWelcome input:focus-visible{outline:3px solid #9deaff;outline-offset:2px}"+
-      "#geiWelcome .gwHost{display:flex;align-items:flex-end;gap:12px;padding-right:44px}"+
-      "#geiWelcome .gwBeaver{position:relative;flex:0 0 auto;width:96px;height:104px;display:grid;place-items:end center}"+
-      "#geiWelcome .gwBeaver::after{content:'';position:absolute;left:8px;right:8px;bottom:0;height:14px;border-radius:50%;"+
-        "background:radial-gradient(closest-side,rgba(47,210,255,.55),transparent);animation:gwRipple 2.6s ease-in-out infinite}"+
-      "#geiWelcome .gwBeaver img,#geiWelcome .gwBeaver .gwEmoji{position:relative;z-index:1;max-width:100%;max-height:100%;object-fit:contain;"+
-        "filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));transform-origin:50% 100%;animation:gwArrive .8s cubic-bezier(.2,.9,.25,1.3) both,gwIdle 3.2s 0.8s ease-in-out infinite}"+
+      /* Character spotlight */
+      "#geiWelcome .gwHost{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:6px}"+
+      "#geiWelcome .gwBeaver{position:relative;flex:0 0 auto;width:120px;height:120px;display:grid;place-items:center;"+
+        "border-radius:50%;background:radial-gradient(circle,rgba(47,210,255,.15),transparent 70%)}"+
+      "#geiWelcome .gwBeaver::after{content:'';position:absolute;left:10%;right:10%;bottom:-4px;height:18px;border-radius:50%;"+
+        "background:radial-gradient(closest-side,rgba(47,210,255,.6),transparent);animation:gwRipple 2.2s ease-in-out infinite}"+
+      "#geiWelcome .gwBeaver::before{content:'';position:absolute;inset:-8px;border-radius:50%;"+
+        "border:2px solid rgba(47,210,255,.25);animation:gwRing 3s ease-in-out infinite}"+
+      "#geiWelcome .gwBeaver img,#geiWelcome .gwBeaver .gwEmoji{position:relative;z-index:1;max-width:88%;max-height:88%;object-fit:contain;"+
+        "filter:drop-shadow(0 8px 18px rgba(0,0,0,.5));transform-origin:50% 100%;animation:gwArrive .9s cubic-bezier(.2,.9,.25,1.3) both,gwBob 3s 0.9s ease-in-out infinite}"+
       "#geiWelcome .gwBeaver .gwEmoji{font-size:72px;line-height:1}"+
-      "#geiWelcome .gwWave{position:absolute;z-index:2;right:-4px;top:4px;font-size:28px;transform-origin:70% 80%;animation:gwWave 1.1s .9s ease-in-out 3 both}"+
-      "#geiWelcome .gwTitle{margin:0;font:900 clamp(20px,6vw,26px)/1.12 system-ui,sans-serif;letter-spacing:.02em;color:#fff;"+
-        "text-shadow:0 0 18px rgba(47,210,255,.45)}"+
-      "#geiWelcome .gwBubble{position:relative;margin:12px 0 0;padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.08);"+
-        "border:1px solid rgba(157,234,255,.24);font:600 17px/1.4 system-ui,sans-serif;color:#eafcff}"+
-      "#geiWelcome .gwBubble::before{content:'';position:absolute;left:34px;top:-8px;width:14px;height:14px;transform:rotate(45deg);"+
-        "background:rgba(28,52,78,1);border-left:1px solid rgba(157,234,255,.24);border-top:1px solid rgba(157,234,255,.24)}"+
-      "#geiWelcome .gwGuide{display:none;margin:12px 0 0;padding:0;list-style:none}"+
+      "#geiWelcome .gwWave{position:absolute;z-index:2;right:2px;top:8px;font-size:32px;transform-origin:70% 80%;animation:gwWaveHand 1.1s .9s ease-in-out 3 both}"+
+      /* Title */
+      "#geiWelcome .gwTitle{margin:0;font:900 clamp(22px,7vw,30px)/1.1 system-ui,sans-serif;letter-spacing:.01em;"+
+        "background:linear-gradient(135deg,#eafcff 0%,#2fd2ff 40%,#5ff5c8 70%,#9deaff 100%);-webkit-background-clip:text;background-clip:text;color:transparent;"+
+        "filter:drop-shadow(0 2px 8px rgba(47,210,255,.4))}"+
+      /* Speech bubble */
+      "#geiWelcome .gwBubble{position:relative;margin:10px 0 0;padding:14px 16px;border-radius:20px;"+
+        "background:rgba(47,210,255,.08);border:1px solid rgba(157,234,255,.22);font:600 15px/1.45 system-ui,sans-serif;color:#d0f4ff;text-align:left}"+
+      "#geiWelcome .gwBubble::before{content:'';position:absolute;left:50%;top:-7px;margin-left:-7px;width:14px;height:14px;transform:rotate(45deg);"+
+        "background:rgba(10,45,75,.9);border-left:1px solid rgba(157,234,255,.22);border-top:1px solid rgba(157,234,255,.22)}"+
+      /* Guide list */
+      "#geiWelcome .gwGuide{display:none;margin:12px 0 0;padding:0;list-style:none;text-align:left}"+
       "#geiWelcome[data-mode='review'] .gwGuide{display:grid;gap:8px}"+
-      "#geiWelcome .gwGuide li{padding:10px 12px;border-radius:14px;background:rgba(47,210,255,.08);border:1px solid rgba(47,210,255,.18);"+
-        "font:500 16px/1.4 system-ui,sans-serif;color:#dff6ff}"+
+      "#geiWelcome .gwGuide li{padding:10px 12px;border-radius:14px;background:rgba(47,210,255,.06);border:1px solid rgba(47,210,255,.15);"+
+        "font:500 15px/1.4 system-ui,sans-serif;color:#d0f4ff}"+
       "#geiWelcome .gwGuide strong{color:#fff}"+
-      "#geiWelcome .gwActions{display:grid;gap:10px;margin-top:14px}"+
-      "#geiWelcome .gwBegin,#geiWelcome .gwChoose{min-height:54px;border-radius:16px;cursor:pointer;font:900 18px/1.1 system-ui,sans-serif;letter-spacing:.04em}"+
-      "#geiWelcome .gwBegin{border:0;color:#03121f;background:linear-gradient(135deg,#9deaff,#2fd2ff 55%,#3d8bea);box-shadow:0 8px 24px rgba(47,210,255,.35)}"+
-      "#geiWelcome .gwChoose{border:1px solid rgba(255,255,255,.26);color:#fff;background:rgba(255,255,255,.07);font-size:16px}"+
-      "#geiWelcome .gwNever{display:flex;align-items:center;gap:10px;margin-top:12px;min-height:44px;font:700 15px/1.3 system-ui,sans-serif;color:#cfeeff;cursor:pointer}"+
-      "#geiWelcome .gwNever input{width:24px;height:24px;flex:0 0 auto;accent-color:#2fd2ff;cursor:pointer}"+
+      /* Buttons */
+      "#geiWelcome .gwActions{display:grid;gap:10px;margin-top:16px}"+
+      "#geiWelcome .gwBegin,#geiWelcome .gwChoose{min-height:56px;border-radius:18px;cursor:pointer;font:900 18px/1.1 system-ui,sans-serif;letter-spacing:.04em;"+
+        "transition:transform .15s,box-shadow .15s}"+
+      "#geiWelcome .gwBegin{border:0;color:#021a2e;position:relative;overflow:hidden;"+
+        "background:linear-gradient(135deg,#5ff5c8 0%,#2fd2ff 50%,#3d8bea 100%);"+
+        "box-shadow:0 8px 28px rgba(47,210,255,.4),inset 0 1px 0 rgba(255,255,255,.3)}"+
+      "#geiWelcome .gwBegin::after{content:'';position:absolute;inset:0;"+
+        "background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);background-size:200% 100%;animation:gwShine 2.5s ease-in-out infinite}"+
+      "#geiWelcome .gwBegin:active{transform:scale(.97)}"+
+      "#geiWelcome .gwChoose{border:1.5px solid rgba(47,210,255,.35);color:#fff;background:rgba(47,210,255,.1);font-size:16px;"+
+        "box-shadow:0 4px 16px rgba(47,210,255,.12)}"+
+      "#geiWelcome .gwChoose:active{transform:scale(.97)}"+
+      "#geiWelcome .gwNever{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;min-height:44px;"+
+        "font:700 14px/1.3 system-ui,sans-serif;color:rgba(157,234,255,.7);cursor:pointer}"+
+      "#geiWelcome .gwNever input{width:22px;height:22px;flex:0 0 auto;accent-color:#2fd2ff;cursor:pointer}"+
       "#geiWelcome[data-mode='review'] .gwNever{display:none}"+
-      "#geiWelcome .gwDrops{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:26px}"+
-      "#geiWelcome .gwDrops i{position:absolute;bottom:-12px;width:8px;height:8px;border-radius:50%;background:rgba(157,234,255,.5);animation:gwBubble 5s linear infinite}"+
+      /* Floating drop particles inside card */
+      "#geiWelcome .gwDrops{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:32px}"+
+      "#geiWelcome .gwDrops i{position:absolute;bottom:-12px;width:6px;height:6px;border-radius:50%;background:rgba(157,234,255,.4);animation:gwDropUp 6s linear infinite}"+
       ".geiWelcomeAgainBtn{display:block;width:100%;min-height:50px;margin:8px 0 12px;border-radius:16px;border:1px solid rgba(47,210,255,.4);"+
         "background:linear-gradient(135deg,rgba(47,210,255,.16),rgba(61,61,234,.14));color:#fff;font:900 16px/1.1 system-ui,sans-serif;letter-spacing:.05em;cursor:pointer}"+
-      "@keyframes gwWater{to{background-position:200% 0}}"+
-      "@keyframes gwArrive{0%{opacity:0;transform:translateY(34px) scale(.8)}70%{opacity:1;transform:translateY(-4px) scale(1.04)}100%{transform:none}}"+
-      "@keyframes gwIdle{0%,100%{transform:translateY(0) scaleY(1)}45%{transform:translateY(-4px) scaleY(1.02)}55%{transform:translateY(-4px) scaleY(.99)}}"+
-      "@keyframes gwWave{0%,100%{transform:rotate(0)}25%{transform:rotate(18deg)}75%{transform:rotate(-12deg)}}"+
-      "@keyframes gwRipple{0%,100%{transform:scaleX(.8);opacity:.6}50%{transform:scaleX(1.1);opacity:1}}"+
-      "@keyframes gwBubble{0%{transform:translateY(0);opacity:0}15%{opacity:.8}100%{transform:translateY(-320px);opacity:0}}"+
+      "@keyframes gwWater{to{background-position:300% 0}}"+
+      "@keyframes gwWaveMove{to{background-position:200px 0}}"+
+      "@keyframes gwFloat{0%{transform:translateY(0) scale(1);opacity:.7}50%{opacity:1}100%{transform:translateY(calc(-100vh - 40px)) scale(.6);opacity:0}}"+
+      "@keyframes gwRayPulse{0%,100%{opacity:.5}50%{opacity:1}}"+
+      "@keyframes gwArrive{0%{opacity:0;transform:translateY(40px) scale(.7)}60%{opacity:1;transform:translateY(-8px) scale(1.06)}100%{transform:none}}"+
+      "@keyframes gwBob{0%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}60%{transform:translateY(-5px)}}"+
+      "@keyframes gwWaveHand{0%,100%{transform:rotate(0)}25%{transform:rotate(20deg)}75%{transform:rotate(-14deg)}}"+
+      "@keyframes gwRipple{0%,100%{transform:scaleX(.7);opacity:.5}50%{transform:scaleX(1.15);opacity:1}}"+
+      "@keyframes gwRing{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.08);opacity:.9}}"+
+      "@keyframes gwDropUp{0%{transform:translateY(0);opacity:0}10%{opacity:.7}100%{transform:translateY(-400px);opacity:0}}"+
+      "@keyframes gwShine{0%,100%{background-position:-200% 0}50%{background-position:200% 0}}"+
       "@media (min-width:700px){#geiWelcome{align-items:center}}"+
       "@media (prefers-reduced-motion:reduce){#geiWelcome,#geiWelcome *{animation:none!important;transition:none!important}#geiWelcome .gwCard{transform:none}}";
     document.head.appendChild(s);
@@ -101,15 +143,26 @@
     root.setAttribute("aria-modal","true");
     root.setAttribute("aria-labelledby","geiWelcomeTitle");
     root.setAttribute("aria-hidden","true");
+    var bubbles = '';
+    var sizes = [14,10,18,8,12,16,9,22,11,15,7,20];
+    for(var b = 0; b < 12; b++){
+      var sz = sizes[b];
+      bubbles += '<div class="gwBub" style="width:'+sz+'px;height:'+sz+'px;left:'+(5+b*8)+'%;bottom:-'+sz+'px;animation-duration:'+(5+b*1.3).toFixed(1)+'s;animation-delay:'+(b*.7).toFixed(1)+'s"></div>';
+    }
     root.innerHTML =
+      '<div class="gwOcean" aria-hidden="true">'+
+        '<div class="gwWaveTop"></div><div class="gwWaveTop"></div>'+
+        '<div class="gwRays"></div>'+
+        bubbles+
+      '</div>'+
       '<div class="gwCard">'+
-        '<div class="gwDrops" aria-hidden="true"><i style="left:12%;animation-delay:0s"></i><i style="left:38%;animation-delay:1.6s"></i><i style="left:66%;animation-delay:.8s"></i><i style="left:88%;animation-delay:2.7s"></i></div>'+
+        '<div class="gwDrops" aria-hidden="true"><i style="left:10%;animation-delay:0s"></i><i style="left:30%;animation-delay:1.4s"></i><i style="left:55%;animation-delay:.6s"></i><i style="left:75%;animation-delay:2.2s"></i><i style="left:90%;animation-delay:3.1s"></i></div>'+
         '<button class="gwClose" id="geiWelcomeClose" type="button" aria-label="Close welcome and don\'t show it again">✕</button>'+
         '<div class="gwHost">'+
           '<div class="gwBeaver" aria-hidden="true"><img alt="" decoding="async"><span class="gwWave">👋</span></div>'+
-          '<h2 class="gwTitle" id="geiWelcomeTitle">HEY, DAM-ITE! WELCOME TO THE FLOW! 🦫💧</h2>'+
+          '<h2 class="gwTitle" id="geiWelcomeTitle">WELCOME TO THE FLOW! 💧</h2>'+
         '</div>'+
-        '<p class="gwBubble" id="geiWelcomeLine">I\'m your Beaver buddy. You can choose another player or begin the game.</p>'+
+        '<p class="gwBubble" id="geiWelcomeLine">Hey DAM-ITE! I\'m your Beaver buddy. Tap to move water from the Mountain to the Ocean!</p>'+
         '<ul class="gwGuide" aria-label="DAM-ITE command guide">'+
           '<li>🌊 <strong>What it is:</strong> move water from the ⛰️ Mountain through the 🧱 Dam, 🚪 Sluice, ⚙️ Waterwheel and 🏭 Mill to the Ocean — and rescue the -ites on the way.</li>'+
           '<li>▶ <strong>How to begin:</strong> tap <strong>BEGIN THE FLOW</strong>, then tap anywhere on the board. Your first tap starts the day\'s clock.</li>'+
@@ -118,10 +171,10 @@
           '<li>🧭 <strong>Top buttons:</strong> 🗺️ DAM Map · 📖 full Command Guide · 👤 Profile (this welcome lives there).</li>'+
         '</ul>'+
         '<div class="gwActions">'+
-          '<button class="gwBegin" id="geiWelcomeBegin" type="button">▶ BEGIN THE FLOW</button>'+
+          '<button class="gwBegin" id="geiWelcomeBegin" type="button">💧 BEGIN THE FLOW</button>'+
           '<button class="gwChoose" id="geiWelcomeChoose" type="button">👤 CHOOSE ANOTHER PLAYER</button>'+
         '</div>'+
-        '<label class="gwNever"><input type="checkbox" id="geiWelcomeNever"> DON\'T SHOW THIS WELCOME AGAIN</label>'+
+        '<label class="gwNever"><input type="checkbox" id="geiWelcomeNever"> DON\'T SHOW THIS AGAIN</label>'+
       '</div>';
     document.body.appendChild(root);
 
@@ -175,8 +228,8 @@
     if(never) never.checked = false;
     root.querySelector("#geiWelcomeLine").textContent = W.mode === "review"
       ? "Welcome back, DAM-ITE! Here's the quick guide — nothing about your progress changes."
-      : "I'm your Beaver buddy. You can choose another player or begin the game.";
-    root.querySelector("#geiWelcomeBegin").textContent = W.mode === "review" ? "▶ BACK TO THE FLOW" : "▶ BEGIN THE FLOW";
+      : "Hey DAM-ITE! I'm your Beaver buddy. Tap to move water from the Mountain to the Ocean!";
+    root.querySelector("#geiWelcomeBegin").textContent = W.mode === "review" ? "💧 BACK TO THE FLOW" : "💧 BEGIN THE FLOW";
     root.querySelector("#geiWelcomeClose").setAttribute("aria-label", W.mode === "review" ? "Close welcome" : "Close welcome and don't show it again");
     /* Restart the host entrance each time it appears. */
     Array.prototype.forEach.call(root.querySelectorAll(".gwBeaver img,.gwBeaver .gwEmoji,.gwWave"), function(el){

@@ -12712,26 +12712,45 @@ function restoreVisualProgress(){
   var ids = ["tapWaterLayer","tapFeelPulse","damIteCombo","iteHud","livingSkinBadge",
     "tl2174Pulse","tl2175FlowAura","tl2177Milestone","tl2178Reward","tl2178Wave",
     "tl2180Aura","tl2183SceneVeil","tl2183SceneCard","tl2184TransitionRing",
-    "tl2184TransitionLabel","tl2185IntroBadge","tl2185IntroSync","fmeTop"];
+    "tl2184TransitionLabel","tl2185IntroBadge","tl2185IntroSync","fmeTop",
+    "ncRoot","geiWelcome"];
+  function isFs(){ return (document.fullscreenElement || document.webkitFullscreenElement) === app; }
   function reparent(){
-    var fs = document.fullscreenElement || document.webkitFullscreenElement;
+    var fs = isFs();
     ids.forEach(function(id){
       var el = document.getElementById(id);
       if(!el) return;
-      if(fs === app && el.parentNode !== app){
+      if(fs && el.parentNode !== app){
         app.appendChild(el);
       } else if(!fs && el.parentNode === app){
         document.body.appendChild(el);
       }
     });
     document.querySelectorAll(".cwe-amb").forEach(function(el){
-      if(fs === app && el.parentNode !== app) app.appendChild(el);
+      if(fs && el.parentNode !== app) app.appendChild(el);
       else if(!fs && el.parentNode === app) document.body.appendChild(el);
     });
   }
   ["fullscreenchange","webkitfullscreenchange"].forEach(function(evt){
     document.addEventListener(evt, reparent);
   });
+  /* Catch elements created by external JS while already in fullscreen */
+  try{
+    new MutationObserver(function(mutations){
+      if(!isFs()) return;
+      mutations.forEach(function(m){
+        for(var i = 0; i < m.addedNodes.length; i++){
+          var n = m.addedNodes[i];
+          if(n.nodeType === 1 && n.parentNode === document.body){
+            var s = getComputedStyle(n);
+            if(s.position === "fixed" || s.position === "absolute"){
+              app.appendChild(n);
+            }
+          }
+        }
+      });
+    }).observe(document.body, { childList:true });
+  }catch(e){}
 })();
 </script>
 </body>
