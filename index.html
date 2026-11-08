@@ -1241,6 +1241,29 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 .songVaultNextName{ margin-top:2px; font-size:.96rem; font-weight:900; line-height:1.25; overflow-wrap:anywhere; }
 .songVaultNextMeta{ margin-top:3px; font-size:.76rem; font-weight:700; color:rgba(255,255,255,.72); }
 .songVaultStoreBtn{ width:100%; margin-top:8px; }
+.rpControls{ display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px; }
+.rpCtrl{ width:40px; height:40px; border-radius:50%; border:1.5px solid rgba(255,255,255,.4); background:rgba(255,255,255,.08);
+  cursor:pointer; font-size:1rem; color:#fff; display:flex; align-items:center; justify-content:center; transition:background .15s, border-color .15s; }
+.rpCtrl:hover{ background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.6); }
+.rpCtrl:active{ transform:scale(.92); }
+.rpCtrl.active{ background:linear-gradient(135deg, color-mix(in srgb, var(--juicy-blue) 40%, transparent), color-mix(in srgb, var(--juicy-violet) 40%, transparent)); border-color:var(--juicy-blue); }
+.rpVolRow{ display:flex; align-items:center; gap:8px; margin:8px 0 2px; padding:0 10px; }
+.rpVolIcon{ font-size:.9rem; cursor:pointer; }
+.rpVolSlider{ flex:1; -webkit-appearance:none; appearance:none; height:6px; border-radius:999px; background:rgba(255,255,255,.18); outline:none; cursor:pointer; }
+.rpVolSlider::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid rgba(255,255,255,.5); }
+.rpVolSlider::-moz-range-thumb{ width:16px; height:16px; border-radius:50%; background:var(--gold); cursor:pointer; border:2px solid rgba(255,255,255,.5); }
+.rpTimeRow{ display:flex; justify-content:space-between; font-size:.7rem; font-weight:700; color:rgba(255,255,255,.55); padding:0 4px; margin-top:2px; }
+.rpSeekBar{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:rgba(255,255,255,.12); cursor:pointer; margin:6px 0 2px; }
+.rpSeekBar::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:linear-gradient(135deg, var(--juicy-blue), var(--gold)); cursor:pointer; border:2px solid rgba(255,255,255,.5); }
+.rpSeekBar::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:linear-gradient(135deg, var(--juicy-blue), var(--gold)); cursor:pointer; border:2px solid rgba(255,255,255,.5); }
+.geiDiscovery{ position:fixed; left:50%; bottom:120px; transform:translateX(-50%) translateY(20px); opacity:0;
+  max-width:min(88vw,340px); padding:14px 20px; border-radius:18px; text-align:center; z-index:180;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--juicy-blue) 35%, rgba(0,0,0,.85)), color-mix(in srgb, var(--juicy-violet) 25%, rgba(0,0,0,.85)));
+  border:1.5px solid rgba(255,255,255,.2); box-shadow:0 6px 28px rgba(0,0,0,.55);
+  font-size:.88rem; font-weight:700; line-height:1.35; color:#fff; pointer-events:none;
+  transition:opacity .4s ease, transform .4s ease; }
+.geiDiscovery.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+.geiDiscovery .geiDiscLabel{ font-size:.65rem; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; }
 .songRow.locked .songMeta{ opacity:.72; }
 
 /* V2.1.66 — ORGANIZED BUY-ites STORE FRONT
@@ -3064,6 +3087,7 @@ html, body { overflow:hidden; }
       <div class="layer" id="particleLayer"></div>
 
       <div class="labelToast" id="labelToast"></div>
+      <div class="geiDiscovery" id="geiDiscovery"><div class="geiDiscLabel">GEI DISCOVERY</div><span id="geiDiscText"></span></div>
 
       <svg id="worldSVG" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid meet">
         <defs>
@@ -3188,8 +3212,18 @@ html, body { overflow:hidden; }
           <div class="rpLabel">Now playing</div>
           <div class="rpTitle" id="rpTitle">Nothing playing</div>
           <div class="rpArtist" id="rpArtist"></div>
-          <div class="rpProgress" aria-hidden="true"><i id="rpFill"></i></div>
-          <button class="rpBtn" id="rpToggle" aria-label="Play">▶ PLAY</button>
+          <input type="range" class="rpSeekBar" id="rpSeekBar" min="0" max="100" value="0" step="0.5" aria-label="Seek">
+          <div class="rpTimeRow"><span id="rpTimeElapsed">0:00</span><span id="rpTimeDuration">0:00</span></div>
+          <div class="rpControls">
+            <button class="rpCtrl" id="rpPrev" aria-label="Previous track" title="Previous">⏮</button>
+            <button class="rpBtn" id="rpToggle" aria-label="Play">▶ PLAY</button>
+            <button class="rpCtrl" id="rpSkip" aria-label="Next track" title="Next">⏭</button>
+            <button class="rpCtrl" id="rpShuffle" aria-label="Shuffle" title="Shuffle">🔀</button>
+          </div>
+          <div class="rpVolRow">
+            <span class="rpVolIcon" id="rpVolIcon" title="Mute/Unmute">🔊</span>
+            <input type="range" class="rpVolSlider" id="rpVolSlider" min="0" max="100" value="80" aria-label="Volume">
+          </div>
           <div class="rpNext">Up next: <strong id="rpNext">—</strong></div>
         </div>
         <div class="panelGroup">Unlocked playlist</div>
@@ -3573,6 +3607,144 @@ const SONGS = [
   { id:"water-above",              title:"Water Above",                        file:"water_above-SwjB6UPa5N9Ccwgn.mp3" },
   { id:"divide-the-dark",          title:"Divide the Dark",                    file:"divide_the_dark-KMgxdayJnOWPCzuz.mp3" }
 ].map(s => ({ ...s, artist:"Y'all Too", src: SONG_BASE + s.file }));
+
+/* =========================================================
+   RANDOMIZED STAGE IDENTITIES
+   Each playthrough shuffles station names from themed pools.
+   Names are stable for the session (seeded PRNG), vary between
+   playthroughs, and never affect saved progress.
+========================================================= */
+const STAGE_NAME_POOLS = [
+  ["Tributaries","Spirits","Most High","The Beginning","First Flow","Source Waters","The Origin","Headwaters"],
+  ["Firmament","The Divide","Heaven's Wall","The Barrier","Partition","The Separation","Upper Waters","The Hold"],
+  ["Reservoir","The Gathering","Collected Waters","Still Basin","Deep Pool","Stored Flow","The Reserve","Calm Collection"],
+  ["The Channel","Release Point","Outflow","The Passage","Gate of Flow","Water Door","The Opening","Surge Point"],
+  ["The Wheel","Power Turn","Flow Engine","The Mill Drive","Turning Force","Water Power","The Mechanism","Kinetic Drive"],
+  ["The Works","Production","The Output","Final Station","Completion","The Destination","Full Circle","The Yield"]
+];
+const STAGE_MEANING_POOLS = [
+  ["The mountain releases its water","In the beginning, the source flows","From the heights, water descends","The first waters find their path","All rivers begin at the source","The origin pours forth","Living water from the summit","The headwaters awaken"],
+  ["The Firmament divides the water","Heaven separates the waters above and below","A great divide holds the flood","The barrier shapes the flow","Waters above, waters below","The wall between sky and sea","Division creates purpose","The firmament stands firm"],
+  ["The reservoir stores the water","Gathered waters wait with purpose","The pool holds its breath","Stillness before the surge","Patience fills the basin","The deep stores its strength","Collected waters grow mighty","Calm water runs deep"],
+  ["The channel releases the water","The gate opens to the flow","Controlled release brings power","Water finds its guided path","The passage opens wide","Flow meets its moment","The door yields to pressure","Release follows patience"],
+  ["The water drives the wheel","Turning force from flowing water","The wheel converts the current","Motion born from the stream","Power flows through rotation","The mechanism awakens","Water becomes energy","The wheel obeys the river"],
+  ["The system completes the hydraulic cycle","The full circuit is restored","From source to sea, the cycle closes","Every drop finds its purpose","The water completes its journey","Production fulfills the design","The destination receives the flow","The works are finished"]
+];
+let _stageSessionSeed = null;
+function stageSessionSeed(){
+  if(_stageSessionSeed !== null) return _stageSessionSeed;
+  _stageSessionSeed = Date.now() ^ (Math.random() * 0xFFFFFFFF >>> 0);
+  return _stageSessionSeed;
+}
+function seededPick(pool, dayIndex, seed){
+  let h = seed ^ (dayIndex * 2654435761);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 13), 0x45d9f3b);
+  h = (h ^ (h >>> 16)) >>> 0;
+  return pool[h % pool.length];
+}
+function getStageIdentity(dayIndex){
+  const seed = stageSessionSeed();
+  return {
+    station: seededPick(STAGE_NAME_POOLS[dayIndex], dayIndex, seed),
+    meaning: seededPick(STAGE_MEANING_POOLS[dayIndex], dayIndex + 100, seed)
+  };
+}
+
+/* =========================================================
+   GEI DISCOVERY MOMENTS
+   Occasional short messages during gameplay. Large pool,
+   randomly rotated, some referencing the current stage.
+========================================================= */
+const GEI_DISCOVERY_MESSAGES = [
+  "Every beginning has a source",
+  "Follow the flow",
+  "The water remembers its path",
+  "Dam the flood, build the future",
+  "Pressure creates diamonds",
+  "Still waters run deep",
+  "From mountain to mill, every drop counts",
+  "The wheel turns for those who tap",
+  "Heaven's design flows downhill",
+  "Your hands shape the waterway",
+  "Even the mightiest dam began with one stone",
+  "The current knows the way",
+  "Patience fills the reservoir",
+  "Every gate opens in its time",
+  "The river bends but never breaks",
+  "Build with purpose, flow with grace",
+  "Water finds the cracks we miss",
+  "The deep calls to the deep",
+  "Tap into something greater",
+  "The hydraulic cycle never rests",
+  "Red clay holds the foundation",
+  "Above the firmament, below the firmament",
+  "The source never runs dry",
+  "Trust the current",
+  "What flows together, grows together",
+  "The dam stands because the stones agree",
+  "Level by level, the water rises",
+  "Every tap sends a ripple forward",
+  "The mill grinds only when the water flows",
+  "From chaos, a channel. From a channel, power.",
+  "The waterwheel waits for no one",
+  "Flow is the oldest engineer",
+  "Your reservoir is filling",
+  "The gate opens when you're ready",
+  "Between the waters: that's where the work happens",
+  "The tributaries gather what the mountain releases",
+  "Don't fight the current — direct it",
+  "The strongest walls hold the deepest water",
+  "A drop is never wasted in the system",
+  "The cycle completes itself through you"
+];
+const GEI_STAGE_MESSAGES = [
+  ["{station}: where all water begins","The source speaks through {station}","At {station}, the first drop falls"],
+  ["{station} holds back the sky","The wall of {station} stands firm","Through {station}, heaven divides"],
+  ["{station} gathers its strength","Deep within {station}, patience waits","The stillness of {station} deceives"],
+  ["{station}: the moment of release","{station} opens to the worthy","Through {station}, pressure finds purpose"],
+  ["{station} turns pressure into power","The force of {station} drives creation","At {station}, water becomes motion"],
+  ["{station}: the cycle completes","All paths lead to {station}","Through {station}, the design is fulfilled"]
+];
+let _lastDiscoveryIdx = -1;
+let _discoveryTimer = null;
+const DISCOVERY_MIN_INTERVAL_MS = 25000;
+const DISCOVERY_MAX_INTERVAL_MS = 55000;
+function pickDiscoveryMessage(){
+  const dayIdx = Math.min(state.currentStep, DAYS_PER_LEVEL - 1);
+  const identity = getStageIdentity(dayIdx);
+  if(Math.random() < 0.3){
+    const pool = GEI_STAGE_MESSAGES[dayIdx] || GEI_STAGE_MESSAGES[0];
+    const msg = pool[Math.floor(Math.random() * pool.length)];
+    return msg.replace(/\{station\}/g, identity.station);
+  }
+  let idx;
+  do { idx = Math.floor(Math.random() * GEI_DISCOVERY_MESSAGES.length); } while(idx === _lastDiscoveryIdx && GEI_DISCOVERY_MESSAGES.length > 1);
+  _lastDiscoveryIdx = idx;
+  return GEI_DISCOVERY_MESSAGES[idx];
+}
+function showGeiDiscovery(text){
+  const el = $("geiDiscovery"), t = $("geiDiscText");
+  if(!el || !t) return;
+  clearTimeout(_discoveryTimer);
+  el.classList.remove("show");
+  t.textContent = text;
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    el.classList.add("show");
+    _discoveryTimer = setTimeout(()=> el.classList.remove("show"), 4500);
+  }));
+}
+function scheduleDiscoveryMoment(){
+  clearTimeout(_discoveryTimer);
+  const delay = DISCOVERY_MIN_INTERVAL_MS + Math.random() * (DISCOVERY_MAX_INTERVAL_MS - DISCOVERY_MIN_INTERVAL_MS);
+  _discoveryTimer = setTimeout(()=>{
+    if(state.currentStep >= 0 && state.currentStep < DAYS_PER_LEVEL && !document.hidden){
+      showGeiDiscovery(pickDiscoveryMessage());
+    }
+    scheduleDiscoveryMoment();
+  }, delay);
+}
+function stopDiscoveryMoments(){ clearTimeout(_discoveryTimer); }
 
 /* V2.1.52 — CHARACTER COLLECTION EXPANSION
    Eleven new store characters. Each is permanently priced at 6,660 FL OZ.
@@ -5473,7 +5645,7 @@ world.addEventListener("click", (e)=>{
     g.classList.add("highlight");
   } else if(state.tapCount === 2){
     g.classList.add("showName");
-    showToast(step.name);
+    showToast(getStageIdentity(index).station);
   } else if(state.tapCount < requiredTaps){
     if(tapRatio >= .5) g.classList.add("showName");
     if(tapRatio >= .75) g.classList.add("highlight");
@@ -5540,6 +5712,7 @@ function beginDay(index){
   resetDayTimer();
   if(isTimerBlocked()) WOW_TIMER_ENGINE.timerPaused = true;   // a panel is open / tab hidden: hold at the full budget
   else startDayTimer();
+  scheduleDiscoveryMoment();
 }
 
 /* Exactly-once award: a day pays only if the level ledger says it hasn't been paid yet. */
@@ -5688,7 +5861,8 @@ function handleDayTimeout(){
   updateProgressDots();
   renderTimer();
   const d = DAM_DAYS[state.currentStep];
-  timeUpDetail.textContent = `${d.title} (${d.station}) — you keep your ${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ.`;
+  timeUpDetail.textContent = `${d.title} (${getStageIdentity(state.currentStep).station}) — you keep your ${fmt(state.levelFlOz)} / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ.`;
+  stopDiscoveryMoments();
   $("timeUpQuip").textContent = getDamHumor("timeout");
   $("timeUpTip").textContent = "💡 " + getDamHumor("figurative");
   pickTimeUpArt();
@@ -5768,7 +5942,7 @@ function renderHud(){
   const d = DAM_DAYS[Math.min(state.currentStep, DAYS_PER_LEVEL - 1)];
   hudLevel.textContent = `Level ${fmt(state.level)}`;
   hudDay.textContent = `Day ${d.day} / ${DAYS_PER_LEVEL}`;
-  hudStation.textContent = d.station;                  // V2.1.86: the live TAP PROGRESS row owns the tap count
+  hudStation.textContent = getStageIdentity(Math.min(state.currentStep, DAYS_PER_LEVEL - 1)).station;
   renderTapProgress();
   hudOz.innerHTML = `💧 <strong>${fmt(state.levelFlOz)}</strong> / ${fmt(LEVEL_REWARD_FL_OZ)} FL OZ`;
   hudReward.innerHTML = `${d.title} reward: ${esc(d.displayAmount)} = <strong>+${DAY_REWARD_FL_OZ} FL OZ</strong>`;
@@ -5903,8 +6077,9 @@ function showDayCelebration(index){
   const card = $("celebCard"), who = $("celebChar");
   celebTimers.forEach(clearTimeout); celebTimers = [];
   card.classList.remove("show", "exit"); void card.offsetWidth;
-  $("celebDay").textContent = `${d.title} complete · ${d.station}`;
-  $("celebMeaning").textContent = d.meaning;
+  const _celebIdentity = getStageIdentity(index);
+  $("celebDay").textContent = `${d.title} complete · ${_celebIdentity.station}`;
+  $("celebMeaning").textContent = _celebIdentity.meaning;
   $("celebConv").textContent = `${d.displayAmount} → ${DAY_REWARD_FL_OZ} FL OZ`;
   $("celebTag").textContent = line.tag;
   $("celebLine").textContent = line.text;
@@ -9143,7 +9318,7 @@ function renderGuideRules(){
   const nextTier = Math.ceil(Math.max(1, state.level) / 6) * 6 + 1;
   const secs = WOW_TIMER_ENGINE.currentTimerSeconds;
   const rules = [
-    `🌊 <strong>Six days per level.</strong> ${DAM_DAYS.map(d => esc(d.station)).join(" → ")} → Ocean. Each day is one station.`,
+    `🌊 <strong>Six days per level.</strong> ${DAM_DAYS.map((_d,i) => esc(getStageIdentity(i).station)).join(" → ")} → Ocean. Each day is one station.`,
     `👆 <strong>Taps per station.</strong> At your level (Level ${fmt(state.level)}) each station needs <strong>${fmt(taps)} taps</strong>. The requirement goes up as you level — next increase at Level ${fmt(nextTier)} (${fmt(getRequiredTaps(nextTier))} taps).`,
     `⏱️ <strong>Beat the timer.</strong> Your first tap starts a ${secs}-second clock for that day. Complete a six-item WOW collection to release pressure: +3 seconds, saved forever.`,
     `💥 <strong>Timer runs out?</strong> The dam breaks and you retry that day. FL OZ you already earned stays in your wallet.`,
@@ -9709,7 +9884,8 @@ function onRadioEnded(){
 }
 function onRadioProgress(){
   const d = radioAudio && radioAudio.duration;
-  $("rpFill").style.width = (d && isFinite(d) ? Math.min(100, radioAudio.currentTime / d * 100) : 0) + "%";
+  const sb = $("rpSeekBar");
+  if(sb && d && isFinite(d)){ sb.value = radioAudio.currentTime / d * 100; }
 }
 let radioFinished = false;
 
@@ -9991,7 +10167,7 @@ function renderRadio(){
   toggle.setAttribute("aria-label", playing ? "Pause" : "Play");
   const upNext = current ? nextUnlockedAfter(current.id) : (first ? nextUnlockedAfter(first.id) : null);
   $("rpNext").textContent = upNext ? upNext.title : "End of your playlist";
-  if(!current) $("rpFill").style.width = "0%";
+  if(!current){ var sb = $("rpSeekBar"); if(sb) sb.value = 0; }
   songList.innerHTML = SONGS.map((s, i) => {
     const open = isUnlocked("songs", s.id);
     const isPlaying = playing && playing.id === s.id;
@@ -12705,6 +12881,173 @@ function restoreVisualProgress(){
 
 })();
 
+/* =========================================================
+   AUDIO ENGINE — SHUFFLED QUEUE WITH REPETITION PREVENTION
+   Builds on existing CDN songs + GEI_AUDIO infrastructure.
+   Autoplay after first user gesture, shuffled queue, no repeats.
+========================================================= */
+(function(){
+  var shuffledQueue = [];
+  var queueIdx = 0;
+  var recentlyPlayed = [];
+  var MAX_RECENT = 8;
+
+  function getUnlocked(){
+    if(typeof unlockedSongsInOrder !== "function") return [];
+    return unlockedSongsInOrder();
+  }
+
+  function buildShuffledQueue(){
+    var songs = getUnlocked();
+    if(!songs.length) return;
+    var pool = songs.filter(function(s){ return recentlyPlayed.indexOf(s.id) === -1; });
+    if(pool.length < 2) pool = songs.slice();
+    for(var i = pool.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    }
+    shuffledQueue = pool;
+    queueIdx = 0;
+  }
+
+  function playFromQueue(){
+    if(!shuffledQueue.length) buildShuffledQueue();
+    if(!shuffledQueue.length) return;
+    if(queueIdx >= shuffledQueue.length) buildShuffledQueue();
+    var song = shuffledQueue[queueIdx++];
+    recentlyPlayed.push(song.id);
+    if(recentlyPlayed.length > MAX_RECENT) recentlyPlayed.shift();
+    if(typeof playSong === "function") playSong(song.id);
+  }
+
+  window.__GEI_AUDIO_ENGINE__ = {
+    playFromQueue: playFromQueue,
+    buildShuffledQueue: buildShuffledQueue,
+    getQueue: function(){ return shuffledQueue.map(function(s){ return s.id; }); }
+  };
+})();
+
+/* =========================================================
+   ENHANCED SONG VAULT CONTROLS
+   Prev/Next, Shuffle, Volume, Seek bar, Time display.
+========================================================= */
+(function(){
+  var shuffleOn = false;
+
+  function fmtTime(s){
+    if(!s || !isFinite(s)) return "0:00";
+    var m = Math.floor(s / 60), sec = Math.floor(s % 60);
+    return m + ":" + (sec < 10 ? "0" : "") + sec;
+  }
+
+  var seekBar = $("rpSeekBar");
+  var elapsedEl = $("rpTimeElapsed");
+  var durationEl = $("rpTimeDuration");
+  var volSlider = $("rpVolSlider");
+  var volIcon = $("rpVolIcon");
+  var prevBtn = $("rpPrev");
+  var skipBtn = $("rpSkip");
+  var shuffleBtn = $("rpShuffle");
+
+  var seeking = false;
+
+  if(seekBar){
+    seekBar.addEventListener("input", function(){
+      seeking = true;
+      if(radioAudio && radioAudio.duration && isFinite(radioAudio.duration)){
+        elapsedEl.textContent = fmtTime(radioAudio.duration * seekBar.value / 100);
+      }
+    });
+    seekBar.addEventListener("change", function(){
+      seeking = false;
+      if(radioAudio && radioAudio.duration && isFinite(radioAudio.duration)){
+        radioAudio.currentTime = radioAudio.duration * seekBar.value / 100;
+      }
+    });
+  }
+
+  function updateSeek(){
+    if(!seeking && radioAudio && radioAudio.duration && isFinite(radioAudio.duration)){
+      var pct = radioAudio.currentTime / radioAudio.duration * 100;
+      if(seekBar) seekBar.value = pct;
+      if(elapsedEl) elapsedEl.textContent = fmtTime(radioAudio.currentTime);
+      if(durationEl) durationEl.textContent = fmtTime(radioAudio.duration);
+    }
+    requestAnimationFrame(updateSeek);
+  }
+  requestAnimationFrame(updateSeek);
+
+  if(volSlider){
+    try{ var savedVol = localStorage.getItem("yalltooDamGame.radioVol"); if(savedVol !== null) volSlider.value = savedVol; }catch(e){}
+    function applyVolume(){
+      var v = volSlider.value / 100;
+      if(radioAudio) radioAudio.volume = v;
+      if(volIcon) volIcon.textContent = v === 0 ? "🔇" : v < 0.4 ? "🔈" : v < 0.75 ? "🔉" : "🔊";
+      try{ localStorage.setItem("yalltooDamGame.radioVol", volSlider.value); }catch(e){}
+    }
+    volSlider.addEventListener("input", applyVolume);
+    var _origPlaySong = playSong;
+    playSong = function(id){
+      _origPlaySong(id);
+      setTimeout(applyVolume, 50);
+    };
+    setTimeout(applyVolume, 200);
+  }
+
+  if(volIcon){
+    var lastVol = 80;
+    volIcon.addEventListener("click", function(){
+      if(volSlider.value > 0){ lastVol = volSlider.value; volSlider.value = 0; }
+      else { volSlider.value = lastVol || 80; }
+      volSlider.dispatchEvent(new Event("input"));
+    });
+  }
+
+  function prevUnlockedBefore(id){
+    var idx = id ? SONGS.findIndex(function(s){ return s.id === id; }) : SONGS.length;
+    for(var i = idx - 1; i >= 0; i--){
+      if(isUnlocked("songs", SONGS[i].id)) return SONGS[i];
+    }
+    return null;
+  }
+
+  if(prevBtn){
+    prevBtn.addEventListener("click", function(){
+      if(radioAudio && radioAudio.currentTime > 3){ radioAudio.currentTime = 0; return; }
+      var prev = prevUnlockedBefore(nowPlayingId);
+      if(prev) playSong(prev.id);
+    });
+  }
+
+  if(skipBtn){
+    skipBtn.addEventListener("click", function(){
+      if(shuffleOn && window.__GEI_AUDIO_ENGINE__){
+        window.__GEI_AUDIO_ENGINE__.playFromQueue();
+        return;
+      }
+      var next = nextUnlockedAfter(nowPlayingId);
+      if(next) playSong(next.id);
+    });
+  }
+
+  if(shuffleBtn){
+    shuffleBtn.addEventListener("click", function(){
+      shuffleOn = !shuffleOn;
+      shuffleBtn.classList.toggle("active", shuffleOn);
+      if(shuffleOn && window.__GEI_AUDIO_ENGINE__) window.__GEI_AUDIO_ENGINE__.buildShuffledQueue();
+    });
+  }
+
+  var _origOnRadioEnded = onRadioEnded;
+  onRadioEnded = function(){
+    if(shuffleOn && window.__GEI_AUDIO_ENGINE__){
+      window.__GEI_AUDIO_ENGINE__.playFromQueue();
+      return;
+    }
+    _origOnRadioEnded();
+  };
+})();
+
 /* --- Fullscreen fix: reparent overlay elements into appRoot so they render --- */
 (function(){
   var app = document.getElementById("appRoot");
@@ -12713,7 +13056,7 @@ function restoreVisualProgress(){
     "tl2174Pulse","tl2175FlowAura","tl2177Milestone","tl2178Reward","tl2178Wave",
     "tl2180Aura","tl2183SceneVeil","tl2183SceneCard","tl2184TransitionRing",
     "tl2184TransitionLabel","tl2185IntroBadge","tl2185IntroSync","fmeTop",
-    "ncRoot","geiWelcome"];
+    "ncRoot","geiWelcome","geiDiscovery"];
   function isFs(){ return (document.fullscreenElement || document.webkitFullscreenElement) === app; }
   function reparent(){
     var fs = isFs();
