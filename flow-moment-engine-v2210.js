@@ -37,7 +37,11 @@
     whoa:     "whoa-rl4QpSsPab74UAje.mp3",
     flood:    "that-was-a-flood-oNcCWcGAYWWWzlov.mp3",
     who:      "who-turned-that-water-on-2yJFhN0Ls4FOt51a.mp3",
-    again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3"
+    again:    "try-again-dam-ite-ilLtMjhuvdHAwmZn.mp3",
+    wKeepFlow:   "keep-that-dam-flow-moving-JSEyCxp7j40caFiJ.mp3",
+    wThreeSec:   "three-more-seconds-4aYw9BjIYyvlGThF.mp3",
+    wNotDone:    "we-re-not-done-yet-Z5p74bYNKqmMRcdM.mp3",
+    wLetsGo:     "let-s-go-dam-ite-OInFVuDhoB0Hw2j2.mp3"
   };
   /* spoken-voice priority (smaller number wins): failure cinematic · level complete · ONE MORE · timer warnings · milestone progress · achievement / combo · character reaction (music = ducked, not a voice) */
   var PRI = { cinematic:1, levelComplete:2, oneMore:3, warning:3.5, milestone:4, nextChallenge:4.5, stem:4.8, achievement:5, wow:5.5, personality:6, reaction:7 };
@@ -612,10 +616,10 @@
   var fl = { level: 0, tick: 0 };
   var pr = { on: false, stage: 0, fired: {}, lastDrip: 0, lastMusic: 0, minRem: 1e9, timerBox: null };
   var WARN = [
-    { at: 4000, clip: "pressure", text: "PRESSURE CRITICAL!", emoji: "⚠️" },
-    { at: 3000, clip: "hold",     text: "HOLD THE DAM!",       emoji: "🧱" },
-    { at: 2000, clip: "toomuch",  text: "TOO MUCH FLOW!",      emoji: "🌊" },
-    { at: 1000, clip: "cracking", text: "THE DAM IS CRACKING!", emoji: "💥" }
+    { at: 4000, clip: "wKeepFlow", text: "KEEP THAT FLOW MOVING!", emoji: "💧" },
+    { at: 3000, clip: "wThreeSec", text: "THREE MORE SECONDS!",    emoji: "⏱️" },
+    { at: 2000, clip: "wNotDone",  text: "WE'RE NOT DONE YET!",    emoji: "🔥" },
+    { at: 1000, clip: "wLetsGo",   text: "LET'S GO, DAM-ITE!",     emoji: "⚡" }
   ];
   function stageFor(rem){ return rem <= 1000 ? 4 : rem <= 2000 ? 3 : rem <= 3000 ? 2 : rem <= 4000 ? 1 : 0; }
   function pressureApply(stage){
@@ -1071,7 +1075,7 @@
     var r = []; function t(n, f){ var ok = false; try{ ok = !!f(); }catch(e){} r.push({ name: n, ok: ok }); }
     t("dom mounts inside the world", function(){ return ensure() && root.parentNode === world; });
     t("one voice lane / priorities ordered", function(){ return PRI.milestone < PRI.nextChallenge && PRI.nextChallenge < PRI.stem && PRI.stem < PRI.achievement && PRI.achievement < PRI.wow && PRI.wow < PRI.personality && PRI.cinematic < PRI.levelComplete && PRI.levelComplete < PRI.oneMore && PRI.oneMore < PRI.warning && PRI.warning < PRI.milestone && PRI.milestone < PRI.achievement && PRI.achievement < PRI.personality && PRI.personality < PRI.reaction; });
-    t("all twelve clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 12 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
+    t("all sixteen clips use the supplied CDN", function(){ return Object.keys(CLIPS).length === 16 && Object.keys(CLIPS).every(function(k){ return /^https:\/\/assets\.zyrosite\.com\/YZ9jg46Bljs5wOZR\/.+\.mp3$/.test(urlOf(k)); }); });
     t("too-much-flow uses the corrected URL", function(){ return urlOf("toomuch") === "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/too-much-flow-8Yz9tQO0XI2GCwby.mp3"; });
     t("combo ladder", function(){ return COMBO[2].text === "FLOW COMBO" && COMBO[3].text === "HYDRAULIC SURGE" && COMBO[5].text === "MAXIMUM FLOW" && COMBO[7].text === "PRESSURE BOOST" && COMBO[10].text === "DAM-ITE OVERDRIVE"; });
     t("comedy chance within 10–20 %", function(){ return config.comedyChance >= .1 && config.comedyChance <= .2; });

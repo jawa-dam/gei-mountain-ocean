@@ -141,8 +141,8 @@ async function suitePressure(){
     if (s.phase !== "playing") break; await sleep(80);
   }
   check("F3a. ≤5 s: board vibrates (fmePressure) and the timer turns urgent", seen.p5 && seen.p5.press && seen.p5.urgent, seen.p5);
-  const warnIds = (seen.log || []).filter(x => ["pressure", "hold", "toomuch", "cracking"].includes(x));
-  check("F3b. warnings play once each in order: Pressure Critical (4 s) → Hold the Dam (3 s) → Too Much Flow (2 s) → The Dam Is Cracking (1 s)", JSON.stringify(warnIds) === JSON.stringify(["pressure", "hold", "toomuch", "cracking"]), seen.log);
+  const warnIds = (seen.log || []).filter(x => ["wKeepFlow", "wThreeSec", "wNotDone", "wLetsGo"].includes(x));
+  check("F3b. warnings play once each in order: Keep Flow (4 s) → Three Sec (3 s) → Not Done (2 s) → Let's Go (1 s)", JSON.stringify(warnIds) === JSON.stringify(["wKeepFlow", "wThreeSec", "wNotDone", "wLetsGo"]), seen.log);
   await h.untilCard(); await h.page.click("#retryDayBtn"); await sleep(400);
   await h.tap(); await sleep(300);   // day restarts
   /* pause: a panel open must stop the vibration */
