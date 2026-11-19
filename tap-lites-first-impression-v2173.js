@@ -4,7 +4,7 @@
 (function(){
   "use strict";
 
-  var BRAND="TAP LITES";
+  var BRAND="GEI 6";
   var TAGLINE="TAP WATER. MAKE WAVES. SAVE THE -ITES.";
   var accents=[
     {name:"WATER",glyph:"💧"},

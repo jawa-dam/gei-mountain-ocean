@@ -12,5 +12,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TapLites-GEI"
+rootProject.name = "GEI-6"
 include(":app")

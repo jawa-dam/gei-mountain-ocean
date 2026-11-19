@@ -5,7 +5,7 @@
  */
 (function(){
   "use strict";
-  var PUBLIC_NAME = "TAP LITES";
+  var PUBLIC_NAME = "GEI 6";
   var TAGLINE = "TAP WATER. MAKE WAVES. SAVE THE -ITES.";
 
   function setText(id, text){
@@ -26,7 +26,7 @@
         el.textContent = PUBLIC_NAME;
       });
 
-      document.documentElement.setAttribute("data-public-brand", "tap-lites");
+      document.documentElement.setAttribute("data-public-brand", "gei-6");
       document.documentElement.setAttribute("data-brand-version", "2.1.72");
 
       window.__GEI_PUBLIC_BRAND__ = Object.freeze({
