@@ -296,7 +296,7 @@
     root.innerHTML =
       '<div class="dbHead">' +
         '<div class="dbSeg" role="tablist" aria-label="Game mode">' +
-          '<button type="button" role="tab" data-mode="arcade" aria-selected="false">TAPLITES ARCADE</button>' +
+          '<button type="button" role="tab" data-mode="arcade" aria-selected="false">GEI 6 ARCADE</button>' +
           '<button type="button" role="tab" data-mode="builder" aria-selected="true">DAM BUILDER</button>' +
         '</div>' +
         '<button type="button" class="dbIcon" id="dbSnd" aria-label="Sound" aria-pressed="false">🔊</button>' +
@@ -782,7 +782,7 @@
     if($("dbPill")) return;
     addCss();
     var p = document.createElement("div"); p.id = "dbPill"; p.className = "dbPill"; p.setAttribute("role", "tablist"); p.setAttribute("aria-label", "Game mode");
-    p.innerHTML = '<button type="button" role="tab" data-mode="arcade" aria-selected="true">TAPLITES ARCADE</button><button type="button" role="tab" data-mode="builder" aria-selected="false">DAM BUILDER<em>NEW</em></button>';
+    p.innerHTML = '<button type="button" role="tab" data-mode="arcade" aria-selected="true">GEI 6 ARCADE</button><button type="button" role="tab" data-mode="builder" aria-selected="false">DAM BUILDER<em>NEW</em></button>';
     p.addEventListener("click", function(e){ var b = e.target.closest("[data-mode]"); if(b && b.getAttribute("data-mode") === "builder") openBuilder(); });
     document.body.appendChild(p);
   }

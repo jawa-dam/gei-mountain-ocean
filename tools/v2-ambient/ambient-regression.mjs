@@ -63,8 +63,8 @@ function png(w, h, rgba){
   const raw = Buffer.concat(Array.from({ length:h }, () => row));
   return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]), chunk("IHDR", ih), chunk("IDAT", deflateSync(raw)), chunk("IEND", Buffer.alloc(0))]);
 }
-const LOGO_WET = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-tap-lites-QEy1mPNkhhmLrEN4.png";
-const LOGO_STD = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png";
+const LOGO_WET = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei-yalltoo-666-9qoyhEUbsZmy89kI.png";
+const LOGO_STD = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei-yalltoo-666-9qoyhEUbsZmy89kI.png";
 const STUB = { [LOGO_WET]:png(600, 200, [47,210,255,255]), [LOGO_STD]:png(600, 200, [243,16,186,255]) };
 
 const results = [];
@@ -156,16 +156,16 @@ async function suiteHome(browser, base, device, label){
   let splash = null;
   const g = await open(browser, base, { device, beforeSkip: async g => {
     splash = await g.page.evaluate(() => { const t = document.querySelector(".geiSplashTitle"), img = t && t.querySelector("img");
-      return { img:!!img, src:img && img.src, alt:img && img.alt, text:(t.textContent || "").trim(), others:[...document.querySelectorAll("#geiSplash *")].filter(e => e.children.length === 0 && /TAP\s*LITES/i.test(e.textContent)).length }; });
+      return { img:!!img, src:img && img.src, alt:img && img.alt, text:(t.textContent || "").trim(), others:[...document.querySelectorAll("#geiSplash *")].filter(e => e.children.length === 0 && /GEI\s*6/i.test(e.textContent)).length }; });
   } });
   const econ0 = await g.page.evaluate(ECON), keys0 = await g.page.evaluate(() => Object.keys(localStorage).sort());
   if (!label){
-    check("9. SPLASH: TAPLITES Wet logo replaces the plain 'TAP LITES' title; no duplicate text", splash.img && splash.src === LOGO_WET && splash.alt === "TAP LITES" && splash.text === "" && splash.others === 0, splash);
+    check("9. SPLASH: GEI 6 logo replaces the plain title; no duplicate text", splash.img && splash.src === LOGO_WET && splash.alt === "GEI 6" && splash.text === "" && splash.others === 0, splash);
   }
   const hdr = await g.page.evaluate(() => { const l = document.getElementById("gameLogo"), img = l.querySelector("img"), r = img && img.getBoundingClientRect();
     return { src:img && img.src, alt:img && img.alt, text:l.textContent.trim(), h:r && Math.round(r.height), w:r && Math.round(r.width), right:r && r.right, vw:innerWidth,
       tag:document.querySelector(".brandTag").textContent.trim() }; });
-  check("10. " + tag + "HEADER: standard TAPLITES logo replaces the heading; tagline kept; logo not tiny", hdr.src === LOGO_STD && hdr.alt === "TAP LITES" && hdr.text === "" && hdr.h >= 34 && hdr.w >= 60 && hdr.right <= hdr.vw && hdr.tag === "TAP WATER. MAKE WAVES. SAVE THE -ITES.", hdr);
+  check("10. " + tag + "HEADER: GEI 6 logo replaces the heading; tagline kept; logo not tiny", hdr.src === LOGO_STD && hdr.alt === "GEI 6" && hdr.text === "" && hdr.h >= 34 && hdr.w >= 60 && hdr.right <= hdr.vw && hdr.tag === "TAP WATER. MAKE WAVES. SAVE THE -ITES.", hdr);
   await shot(g, "home-" + (label || "desktop").replace(/\s/g, ""));
 
   const st0 = await g.page.evaluate(`({ mode:${E}.mode, screen:${E}.screen, phase:state.phase })`);
@@ -401,7 +401,7 @@ async function suiteLogos(browser, base){
   await ctx.route("**/*", r => r.request().url().startsWith(base) ? r.continue() : r.abort());
   const p = await ctx.newPage(); await p.goto(base + "/", { waitUntil:"load" }); await sleep(800);
   const fb = await p.evaluate(() => ({ header:document.getElementById("gameLogo").textContent.trim(), splash:document.querySelector(".geiSplashTitle").textContent.trim() }));
-  check("L2. logo image fails → 'TAP LITES' text fallback (header + splash)", fb.header === "TAP LITES" && fb.splash === "TAP LITES", fb);
+  check("L2. logo image fails → 'GEI 6' text fallback (header + splash)", fb.header === "GEI 6" && fb.splash === "GEI 6", fb);
   await ctx.close();
 }
 

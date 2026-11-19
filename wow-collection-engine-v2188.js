@@ -360,7 +360,7 @@
     var w=S(),eng=WOW_TIMER_ENGINE,h="";
     h+='<div class="wowPanelTimer"><small>⏱️ PRESSURE RELEASE</small><small style="color:rgba(255,255,255,.7);margin-top:2px">CURRENT TIMER</small><strong>'+eng.currentTimerSeconds+' SECONDS</strong>'+
        '<span>Base '+eng.baseTimerSeconds+'s + '+eng.bonusTimerSeconds+'s earned · +3s per completed collection</span></div>';
-    if(w.campaignComplete)h+='<div class="wowCampaign">🏆 TAP-LITES COMPLETE<button type="button" class="wowBtn" id="wowCertBtn">📜 TAP-LITES COMPLETION CERTIFICATE</button></div>';
+    if(w.campaignComplete)h+='<div class="wowCampaign">🏆 GEI 6 COMPLETE<button type="button" class="wowBtn" id="wowCertBtn">📜 GEI 6 COMPLETION CERTIFICATE</button></div>';
     WOW_COLLECTIONS.forEach(function(c){
       var n=w.counts[c.id],done=n>=c.required,active=!w.campaignComplete&&w.activeCollection===c.id;
       var idx=WOW_COLLECTIONS.indexOf(c),locked=!done&&!active;
@@ -385,7 +385,7 @@
   }
   function certHtml(){
     var c=certData();
-    return '<div class="wowCert"><h3>🏆 TAP-LITES COMPLETE</h3><div style="font-size:.66rem;font-weight:900;letter-spacing:.1em;margin-top:2px">📜 TAP-LITES COMPLETION CERTIFICATE</div>'+
+    return '<div class="wowCert"><h3>🏆 GEI 6 COMPLETE</h3><div style="font-size:.66rem;font-weight:900;letter-spacing:.1em;margin-top:2px">📜 GEI 6 COMPLETION CERTIFICATE</div>'+
       (c.img?'<img class="wowCertChar" alt="" src="'+esc(c.img)+'" style="margin-top:8px">':"")+
       '<div class="wowCertGrid">'+
         '<div class="wide"><small>PLAYER</small><b>'+esc(c.name||"DAM NATION OPERATOR")+(c.rank?" · "+esc(c.rank):"")+'</b></div>'+
@@ -397,7 +397,7 @@
   function showCertificate(onClose){
     if(!S().campaignComplete){if(typeof onClose==="function")onClose();return;}
     css();var host=appRoot(),old=$("wowCertScene");if(old)old.remove();
-    var el=document.createElement("div");el.className="wowScene show";el.id="wowCertScene";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Tap-Lites completion certificate");
+    var el=document.createElement("div");el.className="wowScene show";el.id="wowCertScene";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","GEI 6 completion certificate");
     var card=document.createElement("div");card.className="wowCard";card.style.transform="none";card.style.overflowY="auto";
     card.innerHTML=certHtml()+'<button type="button" class="wowBtn" id="wowCertPortfolio">VIEW CERTIFICATION PORTFOLIO</button><button type="button" class="wowBtn alt" id="wowCertClose">CONTINUE PLAYING</button>';
     el.appendChild(card);host.appendChild(el);window.geiWowOpen=true;try{syncTimerPause();}catch(e){}
@@ -411,7 +411,7 @@
     var box=$("wowPortfolio");if(!box){box=document.createElement("div");box.id="wowPortfolio";box.style.marginTop="12px";panel.appendChild(box);}
     var w=S(),h='<div class="panelTitle" style="font-size:.9rem;margin:10px 0 6px">📜 CERTIFICATION PORTFOLIO</div>';
     if(w.campaignComplete)h+=certHtml();
-    else h+='<div class="wowNote">Complete all six WOW collections to earn the TAP-LITES COMPLETION CERTIFICATE. Progress: '+w.completed.length+' / '+WOW_COLLECTIONS.length+' collections.</div>';
+    else h+='<div class="wowNote">Complete all six WOW collections to earn the GEI 6 COMPLETION CERTIFICATE. Progress: '+w.completed.length+' / '+WOW_COLLECTIONS.length+' collections.</div>';
     box.innerHTML=h;
   }
   function refreshAll(){refreshChip();var p=$("wowPanel");if(p&&p.classList.contains("open"))renderPanel();}

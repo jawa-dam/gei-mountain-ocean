@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>DAM-ITE | YALLTOO</title>
+<title>GEI 6 | YALLTOO</title>
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
 <meta name="theme-color" content="#c8f0ff">
 <link rel="manifest" href="/manifest.json">
@@ -2171,14 +2171,17 @@ html[data-sky="stars"] .livingSky{opacity:.6;background-image:radial-gradient(1.
 #geiSplash{
   position:fixed; inset:0; z-index:99999; overflow:hidden;
   display:grid; place-items:center;
-  background:
-    radial-gradient(circle at 50% 28%,rgba(47,210,255,.16),transparent 30%),
-    radial-gradient(circle at 50% 82%,rgba(61,61,234,.18),transparent 42%),
-    #030711;
+  background:#030711;
   color:#fff; font-family:Inter,system-ui,sans-serif;
   isolation:isolate; opacity:1; visibility:visible;
   transition:opacity .9s ease, visibility .9s ease;
 }
+.gei6SplashImg{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:center; z-index:0;
+  opacity:0; animation:gei6SplashFadeIn 1.2s ease-out .1s forwards;
+}
+@keyframes gei6SplashFadeIn{0%{opacity:0;transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
 #geiSplash.isDone{opacity:0;visibility:hidden;pointer-events:none}
 .geiSplashSkip{
   position:absolute; right:14px; bottom:calc(env(safe-area-inset-bottom) + 16px); z-index:20;
@@ -2815,7 +2818,8 @@ html, body { overflow:hidden; }
 })();
 </script>
 
-<div id="geiSplash" class="cine" aria-label="Genesis Engineered opening sequence">
+<div id="geiSplash" aria-label="GEI 6 opening sequence">
+  <img class="gei6SplashImg" id="gei6SplashImg" alt="GEI 6" aria-hidden="true">
   <div class="geiSplashNoise"></div><div class="geiSplashGlow"></div><div class="geiSplashWater"></div>
   <div class="geiSplashIteFrame" aria-hidden="true"></div>
   <img class="geiSplashIte" id="geiSplashIte" alt="" aria-hidden="true">
@@ -2826,10 +2830,22 @@ html, body { overflow:hidden; }
     <svg class="geiSplashPath" viewBox="0 0 760 360" preserveAspectRatio="none"><path d="M105 75 C175 100 190 155 285 165 C350 175 360 235 425 238 C510 240 560 292 650 278"/></svg>
     <div class="geiSplashLabel mountain">Mountain</div><div class="geiSplashLabel dam">Dam</div><div class="geiSplashLabel mill">Mill</div><div class="geiSplashLabel ocean">Ocean</div>
   </div>
-  <div class="geiSplashBrand"><div class="geiSplashEyebrow">GENESIS ENGINEERED</div><div class="geiSplashTitle">DAM-ITE</div><div class="geiSplashSub">MOUNTAIN → DAM → MILL → OCEAN</div></div>
+  <div class="geiSplashBrand"><div class="geiSplashEyebrow">GENESIS ENGINEERED</div><div class="geiSplashTitle">GEI 6</div><div class="geiSplashSub">MOUNTAIN → DAM → MILL → OCEAN</div></div>
   <div class="geiSplashEnter">HYDRAULIC SYSTEM ONLINE</div><div class="geiSplashProgress"><i></i></div>
-  <button class="geiSplashSkip" id="geiSplashSkip" type="button" aria-label="Skip the 10 second intro">SKIP INTRO</button>
+  <button class="geiSplashSkip" id="geiSplashSkip" type="button" aria-label="Skip the intro">SKIP INTRO</button>
 </div>
+<script>
+/* GEI 6 — RANDOM SPLASH IMAGE: picks one of three splash images on each page load */
+(function(){
+  var imgs=[
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei-6-6-6-rXN7OmoMh8crdikW.jpg",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei666-wZ12LItrVH6dzLzr.jpg",
+    "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei-666-YRWG4GMQSeBJRnKu.jpg"
+  ];
+  var el=document.getElementById("gei6SplashImg");
+  if(el) el.src=imgs[Math.floor(Math.random()*imgs.length)];
+})();
+</script>
 <script>
 /* V2.1.53 — SPLASH CHARACTER EXPANSION
    Every opening gets a fresh crew member from the expanded character collection.
@@ -2923,7 +2939,7 @@ html, body { overflow:hidden; }
 
     <!-- V3.0: COMPACT TOP TOOLBAR — all 7 features + fullscreen -->
     <nav class="tapToolbar" id="tapToolbar" role="toolbar" aria-label="Game navigation">
-      <span class="tapToolbarBrand" aria-hidden="true">DAM-ITE</span>
+      <span class="tapToolbarBrand" aria-hidden="true">GEI 6</span>
       <button class="tapToolbarBtn" id="tbBuyItes" type="button" aria-label="Buy Ites">
         <span class="tapToolbarIcon" aria-hidden="true">🛒</span>
         <span class="tapToolbarLabel">Buy Ites</span>
@@ -2940,7 +2956,7 @@ html, body { overflow:hidden; }
         <span class="tapToolbarIcon" aria-hidden="true">🔨</span>
         <span class="tapToolbarLabel">Builder</span>
       </button>
-      <button class="tapToolbarBtn" id="tbArcade" type="button" aria-label="TapLites Arcade">
+      <button class="tapToolbarBtn" id="tbArcade" type="button" aria-label="GEI 6 Arcade">
         <span class="tapToolbarIcon" aria-hidden="true">🕹️</span>
         <span class="tapToolbarLabel">Arcade</span>
       </button>
@@ -2962,7 +2978,7 @@ html, body { overflow:hidden; }
     <div class="hud">
       <div class="hudTop">
         <div class="brand">
-          <div class="logo" id="gameLogo">DAM-ITE</div>
+          <div class="logo" id="gameLogo">GEI 6</div>
           <div class="brandTag">SAVE THE -ITES. SAVE THE WATER.</div>
         </div>
         <div class="hudRight">

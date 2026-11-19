@@ -22,9 +22,9 @@
   "use strict";
   if(window.__GEI_TAPLITES_SHOWCASE__) return;
   var VERSION = "V2.1.92";
-  var LOGO_WET = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/dam-tap-lites-QEy1mPNkhhmLrEN4.png";
-  var LOGO_STD = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/tap-lites-dam-game-jbpqyY7isgNwO53J.png";
-  var BRAND = "TAP LITES";
+  var LOGO_WET = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei-yalltoo-666-9qoyhEUbsZmy89kI.png";
+  var LOGO_STD = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/gei-yalltoo-666-9qoyhEUbsZmy89kI.png";
+  var BRAND = "GEI 6";
   var ENTRANCES = ["pop","bounce","rise","burst"];
   var AFTERGLOWS = ["glow","splash","shimmer","float"];
 
