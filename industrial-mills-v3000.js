@@ -292,10 +292,18 @@
   }
   setTimeout(init, 1000);
 
+  function getCurrentMill(){
+    try {
+      var cl = Math.max(0, Number(window.state && window.state.completedLevels) || 0);
+      return getMillForLevel(cl);
+    } catch(e){ return MILLS[0]; }
+  }
+
   window.__GEI_V3000_MILLS__ = {
     version: VERSION,
     mills: MILLS,
     getMillForLevel: getMillForLevel,
+    getCurrentMill: getCurrentMill,
     buildMillEnvironment: buildMillEnvironment,
     selfTest: function(){
       return {
