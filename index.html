@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>GEI 6 | YALLTOO</title>
+<title>GEI 666 | MOUNTAIN TO OCEAN</title>
 <meta name="description" content="Tap your way through the GEI hydraulic system — Mountain to Ocean — and watch a new -ite name reveal itself every loop.">
 <meta name="theme-color" content="#c8f0ff">
 <link rel="manifest" href="/manifest.json">
@@ -2978,8 +2978,8 @@ html, body { overflow:hidden; }
     <div class="hud">
       <div class="hudTop">
         <div class="brand">
-          <div class="logo" id="gameLogo">GEI 6</div>
-          <div class="brandTag">SAVE THE -ITES. SAVE THE WATER.</div>
+          <div class="logo" id="gameLogo">GEI 666</div>
+          <div class="brandTag">MOUNTAIN TO OCEAN — SAVE THE WATER.</div>
         </div>
         <div class="hudRight">
           <button class="iconBtn damTopAction" id="damMapLauncherBtn" type="button" aria-label="Open DAM Map" title="DAM Map">🗺️</button><button class="iconBtn damTopAction" id="guideTopBtn" aria-label="Open DAM-ITE Command Guide" title="DAM-ITE Command Guide">📖</button><button class="iconBtn damTopAction" id="profileTopBtn" aria-label="Open player profile" title="Player Profile">👤</button>
@@ -3425,9 +3425,9 @@ html, body { overflow:hidden; }
       <div class="dmInner">
         <div class="dmFlashFx" aria-hidden="true"></div>
         <button class="dmClose" id="dmCloseBtn" aria-label="Close the Dam Machine">✕</button>
-        <div class="bwEyebrow">💧 Free hydraulic arcade</div>
-        <div class="dmTitle" id="dmTitle">🎰 DAM MACHINE</div>
-        <div class="dmSubtitle" id="dmSubtitle">Where the flow meets the reels.</div>
+        <div class="bwEyebrow">GEI 666 — FREE HYDRAULIC ARCADE</div>
+        <div class="dmTitle" id="dmTitle">THE HYDRAULIC DAM MACHINE</div>
+        <div class="dmSubtitle" id="dmSubtitle">Where mountain water powers the reels.</div>
         <div class="dmPlays" id="dmPlays" role="status">NO FREE PLAYS</div>
         <div class="dmCabinet" aria-hidden="true">
           <div class="dmPipe dmPipeL"></div>
@@ -6348,16 +6348,19 @@ const DAM_IMAGE_BASE = "https://assets.zyrosite.com/YZ9jg46Bljs5wOZR/";
 const DAM_MACHINE_SYMBOLS = [
   { id:"water",    label:"WATER",        fallback:"💧", iconClass:null, imageUrl: DAM_IMAGE_BASE + "gei-wet-floor-VORHZm8eHpZLzJTv.png" },
   { id:"dam",      label:"DAM",          fallback:"🧱", iconClass:null, imageUrl:null },
-  { id:"millpond", label:"MILLPOND",     fallback:"🌊", iconClass:null, imageUrl:null },
-  { id:"sluice",   label:"SLUICE",       fallback:"🚪", iconClass:null, imageUrl:null },
+  { id:"millpond", label:"MOUNTAIN",     fallback:"⛰️", iconClass:null, imageUrl:null },
+  { id:"sluice",   label:"666",          fallback:"6️⃣", iconClass:null, imageUrl:null },
   { id:"wheel",    label:"WATERWHEEL",   fallback:"⚙️", iconClass:null, imageUrl:null },
-  { id:"factory",  label:"FACTORY",      fallback:"🏭", iconClass:null, imageUrl:null },
-  { id:"fl-111",   label:"111 FL OZ",    fallback:"💧", iconClass:null, imageUrl:null },
-  { id:"fl-666",   label:"666 FL OZ",    fallback:"💧", iconClass:null, imageUrl:null },
+  { id:"factory",  label:"MILL",         fallback:"🏭", iconClass:null, imageUrl:null },
+  { id:"fl-111",   label:"FLOUR",        fallback:"🌾", iconClass:null, imageUrl:null },
+  { id:"fl-666",   label:"RICE",         fallback:"🍚", iconClass:null, imageUrl:null },
   { id:"fl-6660",  label:"6,660 FL OZ",  fallback:"🚨", iconClass:null, imageUrl: DAM_IMAGE_BASE + "wilbert-bouie-jr-gei-y-all-too-WNMWb3MfHDWZOOZM.png" },
-  { id:"song",     label:"FREE SONG",    fallback:"🎵", iconClass:null, imageUrl:null },
+  { id:"song",     label:"LUMBER",       fallback:"🪵", iconClass:null, imageUrl:null },
   { id:"character",label:"CHARACTER",    fallback:"👤", iconClass:null, imageUrl: DAM_IMAGE_BASE + "adam-the-yalltoo-mascot-gei-beaver-G0C3b8xauhYy7K6L.png" },
-  { id:"pun",      label:"DAM PUN",      fallback:"😂", iconClass:null, imageUrl:null },
+  { id:"pun",      label:"COFFEE",       fallback:"☕", iconClass:null, imageUrl:null },
+  { id:"paper",    label:"PAPER",        fallback:"📜", iconClass:null, imageUrl:null },
+  { id:"oil",      label:"OIL",          fallback:"🛢️", iconClass:null, imageUrl:null },
+  { id:"sugar",    label:"SUGAR",        fallback:"🍬", iconClass:null, imageUrl:null },
   /* V2.1.87 — DAM DEVIL JACKPOT symbol. Artwork = the SAME asset the Store uses for the Devil character (no new image).
      It is a machine-only jackpot symbol, NOT a character: winning it never unlocks or grants the paid Devil. */
   { id:"dam-devil-jackpot", label:"DAM DEVIL", fallback:"😈", iconClass:null, imageUrl: (CHARACTERS.find(c => c.id === "devil") || {}).img || null }
@@ -6370,9 +6373,10 @@ DAM_MACHINE_SYMBOLS.forEach(s => { DAM_SYMBOL_BY_ID[s.id] = s; });
 
 /* Reel odds (per reel, weights sum to 100 = %). The 6,660 jackpot is deliberately rare. */
 const DAM_REEL_WEIGHTS = {
-  "water":19, "dam":16, "millpond":12, "sluice":12, "wheel":12, "factory":8,
+  "water":17, "dam":14, "millpond":10, "sluice":10, "wheel":10, "factory":7,
   "fl-111":6, "fl-666":4, "fl-6660":1, "song":3, "character":3, "pun":3,
-  "dam-devil-jackpot":1          // V2.1.87: as rare as the 6,660 jackpot; taken from "water" (20→19) so the weights still sum to 100
+  "paper":4, "oil":4, "sugar":3,
+  "dam-devil-jackpot":1
 };
 
 const DAM_REEL_MS = [1800, 2400, 3000];            // staggered stops: reel 1 → 2 → 3
@@ -6435,13 +6439,16 @@ function selectDamMachineResult({ forcedResult = null, rng = Math.random } = {})
 const DAM_PAIR_PRIZES = {
   "water":   { amount:111,  title:"DOUBLE WATER!",       label:"💧 water drops" },
   "dam":     { amount:222,  title:"DOUBLE DAM!",         label:"🧱 dams" },
-  "millpond":{ amount:333,  title:"DOUBLE MILLPOND!",    label:"millponds" },
-  "sluice":  { amount:444,  title:"DOUBLE SLUICE!",      label:"sluice gates" },
+  "millpond":{ amount:333,  title:"DOUBLE MOUNTAIN!",    label:"⛰️ mountains" },
+  "sluice":  { amount:444,  title:"DOUBLE 666!",         label:"6️⃣ 666s" },
   "wheel":   { amount:555,  title:"DOUBLE WATERWHEEL!",  label:"waterwheels" },
-  "factory": { amount:666,  title:"DOUBLE FACTORY!",     label:"factories" },
+  "factory": { amount:666,  title:"DOUBLE MILL!",        label:"🏭 mills" },
   "fl-111":  { amount:777,  title:"LUCKY 111 PAIR!",     label:"111s" },
   "fl-666":  { amount:1110, title:"666 PAIR!",           label:"666s" },
-  "fl-6660": { amount:2220, title:"ALMOST JACKPOT!",     label:"6,660s" }
+  "fl-6660": { amount:2220, title:"ALMOST JACKPOT!",     label:"6,660s" },
+  "paper":   { amount:222,  title:"DOUBLE PAPER!",       label:"📜 paper rolls" },
+  "oil":     { amount:333,  title:"DOUBLE OIL!",         label:"🛢️ oil drums" },
+  "sugar":   { amount:222,  title:"DOUBLE SUGAR!",       label:"🍬 sugar bags" }
 };
 function evaluateDamCombination(ids){
   if(!Array.isArray(ids) || ids.length !== 3 || !ids.every(id => DAM_SYMBOL_BY_ID[id])) return null;
@@ -6449,22 +6456,26 @@ function evaluateDamCombination(ids){
   const oz = n => ({ kind:"flOz", amount:n, jackpot:false });
   if(a === "dam"    && b === "water" && c === "dam")     return { ...oz(DAY_REWARD_FL_OZ),   title:"THE DAM IS HOLDING!",            humorKey:"machineWin",  special:true, detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — pressure contained.` };
   if(a === "water"  && b === "wheel" && c === "water")   return { ...oz(LEVEL_REWARD_FL_OZ), title:"NOW THAT'S FLOW!",               humorKey:"machineWin",  special:true, detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the wheel barely got wet.` };
-  if(a === "dam"    && b === "wheel" && c === "factory") return { kind:"play",               title:"THE WHOLE SYSTEM IS RUNNING!",   humorKey:"machineWin",  special:true, detail:"+1 free Dam Machine play — the whole flow, end to end." };
-  if(a === "sluice" && b === "water" && c === "millpond")return { ...oz(DAY_REWARD_FL_OZ),   title:"FLOW ACHIEVED.",                 humorKey:"machineWin",  special:true, detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — gate to pond, no leaks.` };
+  if(a === "dam"    && b === "wheel" && c === "factory") return { kind:"play",               title:"THE WHOLE SYSTEM IS RUNNING!",   humorKey:"machineWin",  special:true, detail:"+1 free Dam Machine play — dam to wheel to mill." };
+  if(a === "sluice" && b === "water" && c === "millpond")return { ...oz(DAY_REWARD_FL_OZ),   title:"MOUNTAIN TO OCEAN!",            humorKey:"machineWin",  special:true, detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ — the full hydraulic journey.` };
   if(a === b && b === c){
     switch(a){
       case "water":    return { ...oz(333),                title:"WATER TRIPLE!",     humorKey:"machineWin", detail:"+333 FL OZ" };
       case "dam":      return { ...oz(LEVEL_REWARD_FL_OZ), title:"DAM TRIPLE!",       humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ` };
-      case "millpond": return { ...oz(LEVEL_REWARD_FL_OZ), title:"MILLPOND TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the pond is brimming.` };
-      case "sluice":   return { ...oz(777),                title:"SLUICE TRIPLE!",    humorKey:"machineWin", detail:"+777 FL OZ — every gate wide open." };
+      case "millpond": return { ...oz(LEVEL_REWARD_FL_OZ), title:"MOUNTAIN TRIPLE!",  humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — the summit is reached.` };
+      case "sluice":   return { ...oz(777),                title:"666 TRIPLE!",       humorKey:"machineWin", detail:"+777 FL OZ — the number of the flow." };
       case "wheel":    return { ...oz(LEVEL_REWARD_FL_OZ), title:"WHEEL TRIPLE!",     humorKey:"machineWin", detail:`+${fmt(LEVEL_REWARD_FL_OZ)} FL OZ — round and round she goes.` };
-      case "factory":  return { ...oz(1110),               title:"FACTORY TRIPLE!",   humorKey:"machineWin", detail:"+1,110 FL OZ — the mill is roaring." };
-      case "fl-111":   return { ...oz(1110),               title:"111 TRIPLE!",       humorKey:"machineWin", detail:"+1,110 FL OZ" };
-      case "fl-666":   return { ...oz(2220),               title:"666 TRIPLE!",       humorKey:"machineWin", detail:"+2,220 FL OZ" };
+      case "factory":  return { ...oz(1110),               title:"MILL TRIPLE!",      humorKey:"machineWin", detail:"+1,110 FL OZ — the mill is roaring." };
+      case "fl-111":   return { ...oz(1110),               title:"FLOUR TRIPLE!",     humorKey:"machineWin", detail:"+1,110 FL OZ — the grindstone delivers." };
+      case "fl-666":   return { ...oz(2220),               title:"RICE TRIPLE!",      humorKey:"machineWin", detail:"+2,220 FL OZ — the husks are flying." };
       case "fl-6660":  return { ...oz(UNLOCK_COST_FL_OZ),  title:"DAM JACKPOT",       humorKey:"machineJackpot", jackpot:true, detail:`+${fmt(UNLOCK_COST_FL_OZ)} FL OZ` };
       case "dam-devil-jackpot": return { ...oz(DAM_DEVIL_JACKPOT.rewardFlOz), title:"DAM DEVIL JACKPOT", humorKey:"machineJackpot", jackpot:true, devil:true, detail:`+${fmt(DAM_DEVIL_JACKPOT.rewardFlOz)} FL OZ` };   // existing flOz reward path; never touches character ownership
-      case "song":     return { kind:"song",     title:"🎵 FREE SONG!",         humorKey:"machineSong",     detail:"The next locked song joins the radio. No FL OZ spent." };
-      case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };      case "pun":      return { kind:"pun",      title:"😂 DAM PUN!",           humorKey:"machinePun",      detail:"The machine has jokes." };
+      case "song":     return { kind:"song",     title:"🪵 LUMBER JACKPOT!",    humorKey:"machineSong",     detail:"The sawmill delivers — a free song joins the radio. No FL OZ spent." };
+      case "character":return { kind:"character",title:"👤 CHARACTER UNLOCK!",  humorKey:"machineCharacter",detail:"The next locked operator joins the crew. No FL OZ spent." };
+      case "pun":      return { kind:"pun",      title:"☕ COFFEE BREAK!",       humorKey:"machinePun",      detail:"The mill takes a break — enjoy a dam pun." };
+      case "paper":    return { ...oz(444),                title:"PAPER TRIPLE!",     humorKey:"machineWin", detail:"+444 FL OZ — the press is rolling." };
+      case "oil":      return { ...oz(555),                title:"OIL TRIPLE!",       humorKey:"machineWin", detail:"+555 FL OZ — liquid gold from the press." };
+      case "sugar":    return { ...oz(333),                title:"SUGAR TRIPLE!",     humorKey:"machineWin", detail:"+333 FL OZ — sweet as can be." };
       default:         return { ...oz(DAY_REWARD_FL_OZ),   title:"TRIPLE FLOW!",      humorKey:"machineWin", detail:`+${fmt(DAY_REWARD_FL_OZ)} FL OZ` };
     }
   }
@@ -12663,6 +12674,15 @@ function restoreVisualProgress(){
   <script src="/beaver-voice-guide-v2182.js" defer></script>
   <script src="/gei-day-connections-v2185.js" defer></script>
   <script src="/customer-purchase-experience.js" defer></script>
+
+  <!-- GEI 666 v3000 Upgrade Modules -->
+  <script src="/gei666-visual-unity-v3000.js" defer></script>
+  <script src="/gei666-branding-v3000.js" defer></script>
+  <script src="/industrial-mills-v3000.js" defer></script>
+  <script src="/dam-machine-overhaul-v3000.js" defer></script>
+  <script src="/progression-locks-v3000.js" defer></script>
+  <script src="/gei666-audio-v3000.js" defer></script>
+
   <script>
 /* V2.1.36 — SAFE HYBRID API ROUTING
    Never monkey-patch window.fetch. Gameplay owns the browser event loop.
